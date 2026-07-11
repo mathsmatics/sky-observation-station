@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta content="dark" name="color-scheme"/>
+<title>真实星空观测台 4.8 本地版 · Real Sky Observatory</title>
+<link href="assets/vendor/d3-celestial/celestial.css" rel="stylesheet"/>
+<link href="assets/css/app.css" rel="stylesheet"/>
+</head>
+<body class="panel-open">
+<div id="sky-stage">
+<div id="celestial-frame"><div id="celestial-map"></div></div>
+</div><div aria-live="polite" id="sky-meta">—</div>
+<div aria-hidden="true" class="cardinal-layer">
+<div class="cardinal n" id="cardinal-n">N</div>
+<div class="cardinal e" id="cardinal-e">E</div>
+<div class="cardinal s" id="cardinal-s">S</div>
+<div class="cardinal w" id="cardinal-w">W</div>
+</div>
+<header class="topbar">
+<div class="brand glass">
+<div class="brand-main"><i class="signal"></i><span>REAL SKY OBSERVATORY 4.8</span></div>
+<div class="brand-sub" data-i18n="brandSub">真实地点 × 真实时间 × 真实星表 × 双天文文化</div>
+</div>
+<div class="top-actions">
+<div class="selector-card glass">
+<label class="top-select-block"><b data-i18n="language">语言</b>
+<select aria-label="Language" id="language-select">
+<option value="zh">中文</option>
+<option value="en">English</option>
+</select>
+</label>
+<label class="top-select-block"><b data-i18n="skyCulture">星空体系</b>
+<select aria-label="Sky culture" id="culture-select">
+<option data-i18n="western" value="western">西方星座</option>
+<option data-i18n="chineseCulture" value="chinese">中国星官</option>
+<option data-i18n="bothCultures" value="both">两者同时显示</option>
+</select>
+</label>
+</div>
+<div class="hud glass">
+<div id="hud-time">--</div>
+<div id="hud-location">--</div>
+</div>
+</div>
+</header>
+<aside class="glass" id="control-panel">
+<section class="section">
+<div class="section-title"><span data-i18n="observer">观测地点</span><span data-i18n="wgs">WGS84 经纬度</span></div>
+<div class="city-search-wrap">
+<div class="field"><label data-i18n="citySearch" for="city-search">搜索城市</label><input autocomplete="off" data-i18n-placeholder="citySearchPlaceholder" id="city-search" placeholder="输入中文或英文城市名" type="text"/></div>
+<div class="city-suggestions" id="city-suggestions" role="listbox"></div>
+</div>
+<div class="grid2">
+<div class="field"><label data-i18n="latitude" for="observer-lat">纬度 Latitude</label><input id="observer-lat" max="90" min="-90" step="0.0001" type="number" value="35.6812"/></div>
+<div class="field"><label data-i18n="longitude" for="observer-lon">经度 Longitude</label><input id="observer-lon" max="180" min="-180" step="0.0001" type="number" value="139.7671"/></div>
+</div>
+<div class="field" style="margin-top:8px">
+<label for="observer-timezone"><span data-i18n="timezone">观测时区</span> <span style="color:#6f849b">IANA</span></label>
+<input aria-readonly="true" id="observer-timezone" readonly="" type="text" value="Asia/Tokyo"/>
+<div class="data-note" data-i18n="zoneAutoNote">时区由经纬度自动匹配；修改地点后会自动更新。</div>
+</div>
+<div class="grid2" style="margin-top:8px">
+<button class="primary" data-i18n="applyLocation" id="apply-location">应用坐标并匹配时区</button>
+<button data-i18n="useMyLocation" id="geolocate">使用我的位置</button>
+</div>
+<div class="data-note" data-i18n="geoFileNote" id="geo-mode-note" style="display:none;color:#ffc477;margin-top:7px">当前为直接打开模式：星图可正常使用；浏览器定位若定位受限，请在项目目录运行 python -m http.server 8000。</div>
+<div class="preset-row" style="display:none">
+<button data-city-en="Tokyo" data-city-zh="东京" data-lat="35.6812" data-lon="139.7671" data-zone="Asia/Tokyo">东京</button>
+<button data-city-en="Beijing" data-city-zh="北京" data-lat="39.9042" data-lon="116.4074" data-zone="Asia/Shanghai">北京</button>
+<button data-city-en="Shanghai" data-city-zh="上海" data-lat="31.2304" data-lon="121.4737" data-zone="Asia/Shanghai">上海</button>
+<button data-city-en="Guangzhou" data-city-zh="广州" data-lat="23.1291" data-lon="113.2644" data-zone="Asia/Shanghai">广州</button>
+<button data-city-en="Lhasa" data-city-zh="拉萨" data-lat="29.6520" data-lon="91.1721" data-zone="Asia/Shanghai">拉萨</button>
+</div>
+</section>
+<section class="section">
+<div class="section-title"><span data-i18n="observationTime">观测时间</span><span id="speed-label">暂停</span></div>
+<div class="time-row">
+<input id="observer-datetime" step="60" type="datetime-local"/>
+<button class="gold" data-i18n="now" id="observer-now">回到现在</button>
+</div>
+<div class="calendar-shifts">
+<button data-i18n="minusMonth" data-shift-unit="months" data-shift-value="-1">−1 月</button>
+<button data-i18n="minusDay" data-shift-unit="days" data-shift-value="-1">−1 天</button>
+<button data-i18n="minusHour" data-shift-unit="hours" data-shift-value="-1">−1 时</button>
+<button data-i18n="plusHour" data-shift-unit="hours" data-shift-value="1">+1 时</button>
+<button data-i18n="plusDay" data-shift-unit="days" data-shift-value="1">+1 天</button>
+<button data-i18n="plusMonth" data-shift-unit="months" data-shift-value="1">+1 月</button>
+</div>
+<div class="play-row"><button class="primary" data-i18n="play" id="play">▶ 播放</button></div>
+<div class="field" style="margin-top:9px">
+<label data-i18n="timeSpeed" for="speed">时间流速</label>
+<select id="speed">
+<option data-i18n="speed1" value="1">×1 实时</option>
+<option data-i18n="speed60" value="60">×60：1 秒 = 1 分钟</option>
+<option data-i18n="speed600" value="600">×600：1 秒 = 10 分钟</option>
+<option data-i18n="speed3600" selected="" value="3600">×3600：1 秒 = 1 小时</option>
+<option data-i18n="speed86400" value="86400">×86400：1 秒 = 1 天</option>
+</select>
+</div>
+</section>
+<section class="section">
+<div class="section-title"><span data-i18n="viewProjection">视图与投影</span><span data-i18n="viewPreserved">独立保存视角</span></div>
+<div class="field">
+<label data-i18n="projection" for="projection-select">天球投影</label>
+<select id="projection-select">
+<optgroup label="观测视图 / Observing views">
+<option data-desc-en="Local all-sky horizon view" data-desc-zh="当地地平全天图：适合模拟抬头观察天空" value="airy">当地地平全天图 / Airy</option>
+<option data-desc-en="Orthographic globe-like view" data-desc-zh="正射投影：类似从远处观察天球" value="orthographic">正射投影 / Orthographic</option>
+<option data-desc-en="Conformal stereographic view" data-desc-zh="立体投影：保角，适合局部认星" value="stereographic">立体投影 / Stereographic</option>
+<option data-desc-en="Azimuthal equidistant" data-desc-zh="方位等距：保持中心到各点的距离比例" value="azimuthalEquidistant">方位等距 / Azimuthal Equidistant</option>
+<option data-desc-en="Azimuthal equal-area" data-desc-zh="方位等积：保持面积关系" value="azimuthalEqualArea">方位等积 / Azimuthal Equal Area</option>
+</optgroup>
+<optgroup label="全天赤道图 / Equatorial all-sky">
+<option data-desc-en="Classic elliptical all-sky map" data-desc-zh="Aitoff：经典椭圆全天图" value="aitoff">Aitoff</option>
+<option data-desc-en="Equal-area all-sky map" data-desc-zh="Hammer：等积全天图" value="hammer">Hammer</option>
+<option data-desc-en="Equal-area distribution map" data-desc-zh="Mollweide：适合全天分布比较" value="mollweide">Mollweide</option>
+<option data-desc-en="Compromise all-sky projection" data-desc-zh="Winkel Tripel：兼顾面积、方向与距离变形" value="winkel3">Winkel Tripel</option>
+<option data-desc-en="Simple longitude-latitude grid" data-desc-zh="等距圆柱：经纬网直观" value="equirectangular">等距圆柱 / Equirectangular</option>
+</optgroup>
+<optgroup label="高级投影 / Advanced">
+<option data-desc-en="Scientific all-sky tessellation" data-desc-zh="HEALPix：适合全天区科学分区" value="healpix">HEALPix</option>
+<option data-desc-en="Conformal cylindrical projection" data-desc-zh="墨卡托：保角但高纬拉伸明显" value="mercator">Mercator</option>
+<option data-desc-en="Balanced compromise projection" data-desc-zh="Robinson：视觉均衡的折衷投影" value="robinson">Robinson</option>
+<option data-desc-en="Equal-area pseudocylindrical" data-desc-zh="正弦投影：等积伪圆柱投影" value="sinusoidal">Sinusoidal</option>
+</optgroup>
+</select>
+<div class="projection-help" id="projection-help"></div>
+</div>
+<div class="field" style="margin-top:8px">
+<label data-i18n="coordinateSystem" for="coordinate-select">坐标系统</label>
+<select id="coordinate-select">
+<option data-i18n="horizontalCoordinates" value="horizontal">地平坐标（当地天空）</option>
+<option data-i18n="equatorialCoordinates" value="equatorial">赤道坐标</option>
+<option data-i18n="eclipticCoordinates" value="ecliptic">黄道坐标</option>
+<option data-i18n="galacticCoordinates" value="galactic">银河坐标</option>
+</select>
+</div>
+<div class="field" style="margin-top:8px">
+<label data-i18n="traditionalRegions" for="traditional-detail">中国传统天区层级</label>
+<select id="traditional-detail">
+<option data-i18n="majorRegions" value="major">三垣 / 四象 / 近南极星区</option>
+<option data-i18n="withBattlefields" value="battlefields">三垣四象 + 三大战场</option>
+<option data-i18n="withMansions" value="mansions">三垣四象 + 三大战场 + 二十八宿细分</option>
+</select>
+<div class="data-note" data-i18n="traditionalRegionCaveat">三大战场为基于相关星官位置生成的文化主题示意范围；三垣与四象也属于现代数字化复原，不等同于 IAU 法定边界。</div>
+</div>
+</section>
+<section class="section">
+<div class="section-title"><span data-i18n="displaySettings">显示参数</span><span data-i18n="liveApply">实时应用</span></div>
+<div class="range-row">
+<label data-i18n="magnitudeThreshold" for="magnitude">恒星显示星等阈值</label>
+<input id="magnitude" max="6.0" min="2.5" step="0.1" type="range" value="5.5"/>
+<span class="range-value" id="magnitude-value">5.5</span>
+</div>
+<div class="range-row" style="margin-top:9px">
+<label data-i18n="starSize" for="star-size">恒星大小</label>
+<input id="star-size" max="12" min="4" step="1" type="range" value="7"/>
+<span class="range-value" id="star-size-value">7 px</span>
+</div>
+<div class="toggles">
+<label class="toggle"><span data-i18n="starNames">重要恒星名称</span><input checked="" id="star-names" type="checkbox"/></label>
+<label class="toggle"><span data-i18n="cultureLines">星座/星官连线</span><input checked="" id="culture-lines" type="checkbox"/></label>
+<label class="toggle"><span data-i18n="cultureNames">星座/星官名称</span><input checked="" id="culture-names" type="checkbox"/></label>
+<label class="toggle"><span data-i18n="planets">太阳、月球与行星</span><input checked="" id="planets" type="checkbox"/></label>
+<label class="toggle"><span data-i18n="milkyWay">银河轮廓</span><input checked="" id="milky-way" type="checkbox"/></label>
+<label class="toggle"><span data-i18n="grid">赤道坐标网</span><input checked="" id="grid" type="checkbox"/></label>
+<label class="toggle"><span data-i18n="ecliptic">黄道</span><input checked="" id="ecliptic" type="checkbox"/></label>
+<label class="toggle"><span data-i18n="equator">天球赤道</span><input id="equator" type="checkbox"/></label>
+<label class="toggle"><span data-i18n="horizon">地平线</span><input checked="" id="horizon" type="checkbox"/></label>
+<label class="toggle"><span data-i18n="daylight">日光背景</span><input checked="" id="daylight" type="checkbox"/></label>
+<label class="toggle"><span data-i18n="nightVision">夜视红光</span><input id="night-vision" type="checkbox"/></label>
+<label class="toggle"><span data-i18n="deepSky">亮深空天体</span><input id="deep-sky" type="checkbox"/></label>
+<label class="toggle"><span data-i18n="regionBoundaries">区域边界 / 传统天区</span><input id="region-boundaries" type="checkbox"/></label>
+</div>
+<div class="culture-note" id="culture-note">“语言”控制界面与重要恒星名称；“星官”控制天区划分、连线和名称体系。两者互相独立。</div>
+</section>
+<section id="view-tools-section"><div class="section-title"><span data-i18n="viewTools">视图控制</span><span data-i18n="viewToolsHint">不改变地点与时间</span></div><div class="view-tools-grid"><button id="zoom-out" title="Zoom out">−</button><button id="zoom-in" title="Zoom in">＋</button><button data-i18n="resetView" id="reset-view">重置视图</button><button data-i18n="fullscreen" id="fullscreen">全屏</button></div></section><section class="section" id="object-info-section">
+<div class="section-title"><span data-i18n="selectedObject">选中天体</span><span data-i18n="clickSkyHint">单击星体或空白天区</span></div>
+<div class="info-card-rso" id="object-info">
+<div class="info-head"><div class="info-title" id="object-info-title">—</div><div class="info-actions"><button data-i18n="copy" id="copy-object">复制</button><button data-i18n="clear" id="close-object">清除</button></div></div>
+<dl class="info-grid" id="object-info-grid"></dl>
+</div>
+<div class="data-note" data-i18n="objectInfoEmpty" id="object-info-empty">单击恒星、太阳系天体、深空天体、星座、星官或空白天区，查看名称、坐标和当前地平位置。</div>
+<div class="region-legend" id="region-legend"></div>
+</section>
+<section class="section">
+<div class="section-title"><span data-i18n="currentState">当前状态</span><span data-i18n="utcInternal">内部统一 UTC</span></div>
+<div class="status-card">
+<div class="status-title" id="status-title">东京 · 西方星座</div>
+<div class="status-lines">
+<div><b data-i18n="localTime">当地时间：</b><span id="status-local">--</span></div>
+<div><b>UTC：</b><span id="status-utc">--</span></div>
+<div><b data-i18n="zoneOffset">时区偏移：</b><span id="status-offset">--</span></div>
+<div><b data-i18n="mapMode">星图体系：</b><span id="status-culture">--</span></div>
+<div><b data-i18n="coordinateNote">坐标说明：</b><span data-i18n="coordinateValue">恒星数据为赤道坐标；视图按地点和时刻旋转到本地地平天空。</span></div>
+<div><b data-i18n="projectionLabel">天球投影：</b><span id="status-projection">--</span></div><div><b data-i18n="coordinateSystemLabel">坐标系统：</b><span id="status-coordinate">--</span></div></div>
+</div>
+</section>
+</aside>
+<button class="panel-toggle-button" id="panel-toggle" title="Toggle panel">☰</button><button data-i18n="technicalGuide" id="explain-btn">代码与计算说明</button>
+<div class="loading" id="loading">
+<div class="loader-box">
+<div class="orbit"></div>
+<h1 data-i18n="loadingTitle">正在载入真实星空与星官数据</h1>
+<p data-i18n="loadingText" id="loading-text">加载恒星目录、太阳系天体、银河轮廓以及中西两套天文文化数据。所有核心资源均已本地打包。</p>
+</div>
+</div>
+<div class="toast" id="toast"></div>
+<div aria-labelledby="tech-title" aria-modal="true" class="modal" id="tech-modal" role="dialog">
+<div class="modal-card">
+<div class="modal-head">
+<h2 data-i18n="technicalGuideTitle" id="tech-title">代码、天文计算与数据来源说明</h2>
+<div class="modal-head-actions">
+<button data-i18n="copyGuide" id="copy-guide">复制说明</button>
+<button data-i18n="close" id="close-modal">关闭</button>
+</div>
+</div>
+<div class="modal-body">
+<article class="doc" data-doc-lang="zh">
+<h3>1. 项目目标、适用范围与总体架构</h3>
+<p>真实星空观测台 4.8 是一个完全本地化的浏览器天文馆。它不是随机星点动画，而是读取真实恒星目录、现代西方星座、中国传统星官、银河轮廓和太阳系天体数据，以观测者的经纬度、IANA 时区和 UTC 时刻为输入，计算并绘制当前天空。适合肉眼认星、天文文化比较、天球坐标教学和一般观测规划；不替代专业天体测量、精密历表、赤道仪自动指向或天文摄影规划软件。</p>
+<p><b>中文显示说明：</b>部分中国星官、星名和传统天区的上游资料采用繁体字。本版本已将面向用户显示的中文统一转换为简体字；仅转换文字，不修改恒星坐标、星官连线、目录编号或区域几何。</p>
+<table><thead><tr><th>层次</th><th>职责</th><th>当前实现</th></tr></thead><tbody>
+<tr><td>界面与布局</td><td>左侧 Panel、星图区、状态信息、搜索、设置和说明窗口</td><td>CSS Grid + 可折叠侧栏；<code>ResizeObserver</code> 监听星图区尺寸</td></tr>
+<tr><td>应用状态</td><td>地点、UTC 时刻、语言、文化体系、投影、坐标系、图层和每种投影的视角</td><td>单一 <code>state</code> 对象；经校验后写入 <code>localStorage</code></td></tr>
+<tr><td>天球引擎</td><td>投影、缩放、拖动、恒星/星座/银河绘制，以及太阳系历表框架</td><td>D3 3.5.17 + d3-geo-projection + D3-Celestial 0.7.35；太阳系符号和拾取由项目自定义图层完成</td></tr>
+<tr><td>时间与时区</td><td>当地民用时间、UTC、夏令时、日历加减</td><td>Luxon 3.7.2 + tz-lookup；内部只保存 UTC 瞬时</td></tr>
+<tr><td>文化图层</td><td>西方星座、中国星官、IAU 边界、中国传统上层天区</td><td>西方层由 D3-Celestial 原生绘制；中国层和传统天区用 <code>Celestial.add()</code> 叠加</td></tr>
+<tr><td>离线数据</td><td>在 <code>file://</code> 和 localhost 下提供相同星图</td><td>原始 JSON 保留在 <code>assets/data/</code>，运行版同时内置为 JavaScript 数据对象，不依赖 CDN 或网络请求</td></tr>
+</tbody></table>
+<p>启动顺序为：打开 <code>index.html</code> → 加载本地 D3、投影库、内置天文数据、D3-Celestial、Luxon 和时区库 → <code>safeLoad()</code> 读取并校验设置 → <code>initializeIntegratedLayout()</code> 建立侧栏与星图区 → <code>syncControls()</code> 同步界面 → <code>registerChineseOverlay()</code> 依次注册中国星官、传统天区和自定义太阳系图层 → <code>Celestial.display(buildSkyConfig())</code> 创建天球 → <code>waitForCanvas()</code> 等待真实恒星层并绑定 Canvas → 绑定缩放、拖动、点击、触摸和控件事件 → 进入时间动画循环。</p>
+<h3>2. 地点、城市搜索、IANA 时区与时间</h3>
+<p>城市表 <code>CITIES</code> 保存中文名、英文名、WGS84 纬度、经度、IANA 时区和地区分组。搜索框同时匹配中文、英文和地区；选中城市后调用 <code>setObserver()</code>，同步经纬度、时区、状态栏和星图。手动输入经纬度时，<code>resolveZone()</code> 依次尝试显式时区、<code>tzlookup(lat, lon)</code> 和按经度估算的 <code>Etc/GMT</code> 回退。时区边界附近、海洋和少数复杂行政区域可能误判，因此界面将结果标为自动估计。</p>
+<p>内部状态 <code>state.instant</code> 始终是 UTC ISO-8601 瞬时。日期输入框表示观测地点的当地民用时间，<code>parseObserverLocalTime()</code> 将年月日时分与当前 IANA 时区组合后转换为 UTC，并拒绝不存在的日期或夏令时跳变造成的无效当地时刻。切换地点只改变地点和显示时区，不改变 UTC 瞬时，因此表现为“同一时刻从另一个地点看天空”。<code>shiftObserverTime()</code> 在观测地时区内执行月、日、小时的日历运算，再转回 UTC；所以“+1 月”按目标月份实际天数处理，而不是固定加 30 天。</p>
+<p>时间播放每帧只更新内部 UTC，HUD 与天球绘制分别节流；流速为 ×1、×60、×600、×3600 或 ×86400。当地时间、UTC、当前偏移量和 IANA 时区同时显示，夏令时由 Luxon 的 IANA 规则处理。</p>
+<h3>3. 天文坐标与本地天空计算</h3>
+<p>恒星目录以 J2000 赤道坐标为基础。赤经 <em>α</em> 沿天赤道向东计量，通常以时表示，<span class="formula">1 h = 15°</span>；赤纬 <em>δ</em> 类似地理纬度。观测时刻先转换为儒略日，再由地球自转得到格林尼治恒星时（GMST）；加上观测经度得到本地恒星时（LST），进而计算时角：</p>
+<div class="formula">H = LST − α</div>
+<p>由观测纬度 <em>φ</em>、赤纬 <em>δ</em> 和时角 <em>H</em> 得到高度角 <em>h</em>：</p>
+<div class="formula">sin h = sin φ · sin δ + cos φ · cos δ · cos H</div>
+<p>方位角由同一球面三角关系求得。本项目在天体信息框中调用 <code>Celestial.horizontal(date, [RA, Dec], [lat, lon])</code> 获取当前高度角和方位角；显示约定为高度角 −90°～+90°，方位角 0° 为北、向东增加。地平视图由 <code>Celestial.skyview()</code> 按当前 UTC、经纬度和时区偏移旋转到当地天顶。赤经显示函数 <code>formatRA()</code> 把度转换为时、分、秒；赤纬使用带正负号的角度。代码不再根据数值大小猜测角度或弧度。</p>
+<p>坐标系统与投影是两个独立概念。坐标系统决定数据使用地平、赤道、黄道或银河基准；投影决定球面如何压到平面。地平模式的底层目录仍以赤道坐标载入，再根据地点和时刻旋转；切换到赤道、黄道或银河坐标时，D3-Celestial 需要重新转换 GeoJSON 坐标。为避免离线数据被重复原地变换，内置数据加载器每次返回独立深拷贝；重建期间用当前 Canvas 快照遮罩，完成后恢复视角。</p>
+<h3>4. 投影、视角、缩放、拖动与响应式布局</h3>
+<p>项目提供 Airy 当地全天图、Orthographic、Stereographic、Azimuthal Equidistant、Azimuthal Equal Area、Aitoff、Hammer、Mollweide、Winkel Tripel、Equirectangular、HEALPix、Mercator、Robinson 和 Sinusoidal。方位类投影适合当地天空或局部视野；Aitoff/Hammer/Mollweide/Winkel Tripel 适合全天分布；圆柱和高级投影用于坐标教学或特定比较。非地平模式自动隐藏 E/S/W/N，避免把屏幕边缘误解为当地地平方位。</p>
+<p>D3-Celestial 的 <code>d3.geo.zoom()</code> 负责 Canvas 内的滚轮定点缩放、鼠标左键拖动和触摸手势。项目另外把整个右侧星图区作为交互面：当投影因天然宽高比出现上下或左右留白时，<code>forwardMarginWheel()</code> 会把滚轮事件转发到实际投影画布的最近有效位置，<code>beginPaneMarginDrag()</code> / <code>movePaneMarginDrag()</code> 则允许在留白处继续拖动视野。<code>attachCanvasInfo()</code> 记录按下位置和移动距离：小于 6 px 视为点击选取，大于阈值视为拖动，不触发选取。拖动与缩放只改变投影中心和比例，不修改地点、时间或天体数据。<code>captureView()</code>、<code>saveCurrentProjectionView()</code> 和 <code>restoreView()</code> 为每个“坐标系统:投影”组合保存中心与缩放；语言、文化体系、图层开关和时间更新不重置视角。地平视图的 <code>E/S/W/N</code> 只在首次完整视图和点击“重置视图”后显示；第一次拖动或缩放后立即隐藏，避免用户改变观察中心后仍把初始方位标识误认为当前方向。</p>
+<p>每种投影使用自身的天然宽高比，而不是被浏览器窗口强制拉伸。<code>projectionNaturalRatio()</code> 读取 D3-Celestial 的投影元数据，未声明比例的全天投影按 2:1 处理；<code>projectionFitMetrics()</code> 计算能够完整放入星图区的最大画布尺寸，因此圆形方位投影居中显示，Aitoff、Hammer、Mollweide 等全天投影完整展开。<code>updateCardinalGeometry()</code> 把 E/S/W/N 绑定到实际 Canvas 边缘，而不是浏览器边缘。侧栏与星图区使用共享 Grid 布局；<code>setPanel()</code> 只切换列宽，<code>ResizeObserver</code> 触发 <code>scheduleSkyResize()</code>，用 <code>Celestial.resize()</code> 原位调整画布，不重载星表。真正需要重新转换坐标的数据重建由互斥标志和代数编号保护，避免 ResizeObserver 重入造成空图。</p>
+<p><b>投影与坐标系统必须分开理解：</b>投影是“怎么画到屏幕上”；坐标系统是“用哪一套经纬网描述天体”。重置视图不会擅自切回赤道坐标：地平坐标会按当前地点和当前时刻重新计算本地天空中心，并只把缩放恢复为默认值；赤道、黄道和银河坐标则读取 <code>config.js</code> 中各自的默认中心与缩放。4.8 保留 v4.0 的 Canvas 尺寸、天然投影比例和初始完整视图逻辑；菜单变化只触发原有 v4.0 重排，不引入后续版本的强制铺满或横向拉伸。</p>
+<table><thead><tr><th>投影</th><th>直观外观</th><th>主要优点</th><th>主要限制</th><th>推荐用途</th></tr></thead><tbody>
+<tr><td>Airy</td><td>圆形全天视图</td><td>中心附近自然，适合本地观星</td><td>边缘变形增加</td><td>默认抬头观星</td></tr>
+<tr><td>Orthographic</td><td>像从远处看半个球</td><td>球体感强</td><td>一次只能看到一个半球</td><td>理解天球朝向</td></tr>
+<tr><td>Stereographic</td><td>圆形、边缘逐渐放大</td><td>局部角度关系较好</td><td>远离中心面积膨胀</td><td>局部认星</td></tr>
+<tr><td>Azimuthal Equidistant</td><td>以中心向外展开</td><td>中心到各点的距离比例较直观</td><td>边缘形状变形</td><td>比较角距离</td></tr>
+<tr><td>Azimuthal Equal Area</td><td>圆形等积图</td><td>面积比例较可靠</td><td>形状和角度会变形</td><td>比较天区面积</td></tr>
+<tr><td>Aitoff</td><td>椭圆全天图</td><td>结构直观</td><td>不是等积</td><td>一般全天浏览</td></tr>
+<tr><td>Hammer</td><td>椭圆全天图</td><td>保持面积</td><td>边缘形状拉伸</td><td>比较全天密度</td></tr>
+<tr><td>Mollweide</td><td>标准 2:1 椭圆</td><td>等积、常用于全天数据</td><td>边缘方向变形</td><td>银河和大尺度分布</td></tr>
+<tr><td>Winkel Tripel</td><td>圆角矩形/椭圆折衷</td><td>综合减小面积、方向和距离误差</td><td>没有单项严格保持</td><td>视觉均衡的全天图</td></tr>
+<tr><td>Equirectangular</td><td>经纬线为直线矩形</td><td>坐标最容易读</td><td>高纬严重横向拉伸</td><td>坐标教学</td></tr>
+<tr><td>HEALPix</td><td>分区式全天图</td><td>适合等面积科学像素化</td><td>外观不如普通星图自然</td><td>巡天数据和分区</td></tr>
+<tr><td>Mercator</td><td>矩形圆柱图</td><td>局部角度关系较好</td><td>极区无限放大，不能完整表示两极</td><td>中低纬局部观察</td></tr>
+<tr><td>Robinson</td><td>折衷世界地图式外观</td><td>整体视觉平衡</td><td>不严格等积或保角</td><td>展示型全天图</td></tr>
+<tr><td>Sinusoidal</td><td>中间宽、两端收尖</td><td>等积</td><td>远离中央经线形状扭曲</td><td>全天面积比较</td></tr>
+</tbody></table>
+<p>天球是球面，屏幕是平面，所以不存在“完全不变形”的全天图。投影只决定球面如何铺到屏幕上，不改变恒星的真实坐标。可以先按外观理解：Airy、正射、立体、方位等距和方位等积属于圆形或方位类视图，适合把某个方向放在中心观察；Aitoff、Hammer、Mollweide、Winkel Tripel 和等距圆柱属于全天展开图，适合比较整个天球的分布；HEALPix、Mercator、Robinson 和 Sinusoidal 更偏科学分区、局部保角或折衷展示。</p>
+<h3>4A. 初学者如何理解 14 种投影</h3><h3>5. 恒星、名称、星座、星官和区域图层</h3>
+<p>恒星图层使用约 6 等以内的目录。恒星显示条件是 <span class="formula">m ≤ m<sub>limit</sub></span>；它只是目录过滤器，不模拟光污染、天空背景、大气消光、月光或云。恒星半径由 D3-Celestial 按视星等、用户设定的大小和指数映射，B−V 色指数用于近似颜色。重要恒星名称是独立开关：西方模式下中文界面优先使用规范中文译名、英文界面使用英文专名；中国模式使用中国传统名称；双体系模式只保留中国名称，避免两套标签重复。</p>
+<p>西方模式使用现代星座连线、名称和 IAU 88 星座边界。星座连线只是认星图案，不是法定边界；边界单独以低透明度虚线显示。中国模式使用独立的传统星官线和名称，不是把西方星座翻译成中文。双体系模式同时绘制蓝色西方连线与橙色中国星官线，但自动关闭区域边界，以避免画面过载。</p>
+<p>中国传统天区采用分层表达：三垣（紫微垣、太微垣、天市垣）/ 四象（东方青龙、北方玄武、西方白虎、南方朱雀）/ 二十八宿细分 / 近南极星区。三垣边界依据相关垣墙星官的数字化几何生成；四象和二十八宿宿域依据各宿中心经度的中点构造；近南极星区表示明清时期吸收并整理的南天星官区域。这些都是为网页比较而制作的现代数字化复原，不是像 IAU 边界那样唯一、法定的历史边界。</p>
+<p>“南方战场、北方战场、西北战场”作为传统星官叙事中的军事主题区域单独显示：北方战场参考垒壁阵、羽林军、北落师门、天纲、天垒城、八魁等星官；西北战场参考昴、毕、天街、天大将军、军南门、五车等；南方战场参考翼、轸、角、亢、氐、房、心以及青丘、库楼、骑官、阵车等。代码用这些星官的已知位置生成低透明度凸包，只表示“主题星官分布范围”，不宣称存在统一古代边界。每个 GeoJSON 要素都带有 <code>approximate</code>、<code>source</code> 和 <code>note</code> 字段。</p>
+<p>中国古代还存在其他上层组织方案，例如《史记·天官书》的中宫、东宫、南宫、西宫、北宫“五官”框架，以及后世整理中出现的“四兽加中官、外官”“五兽加中官、外官”“九野加中外官”等分类。这些体系的名称、时代、覆盖范围和边界定义并不统一，当前也缺少可直接用于现代天球坐标的标准化公开多边形，因此本版把它们收入说明而不伪造几何边界。未来若引入明确版本的古星图或学术复原数据，应作为可选择的独立历史图层，而不是与三垣四象混为一套。</p>
+<h3>6. 图层绘制、标签管理与天体选取</h3>
+<p><code>buildSkyConfig()</code> 根据状态生成恒星、深空天体、西方星座、银河、网格、黄道、天赤道、地平线和日光配置，并启用 D3-Celestial 的本地太阳系历表数据但关闭其不完整的原生符号绘制。<code>registerPlanetOverlay()</code> 通过本地兼容补丁暴露的历表对象，调用 <code>currentPlanetPositions()</code> 以当前 UTC 和地球位置计算太阳、月球及七大行星的赤道坐标，再按当前坐标系统转换、投影并绘制符号和名称；同一组动态坐标也用于点击拾取和信息框。普通开关通过 <code>Celestial.apply()</code> 原位更新；投影通过 <code>Celestial.reproject()</code> 更新；只有坐标系统变化需要重新转换目录。中国星官和传统天区使用 <code>Celestial.add()</code> 注册自定义 GeoJSON 图层，在每次 <code>redraw</code> 中依据文化模式、边界开关和细分层级决定是否绘制。</p>
+<p>中国星官名称和传统天区标签使用屏幕距离避让：绘制前把天球坐标投影为像素点，若与已占用标签距离过近则跳过低优先级标签。恒星专名由引擎按星等限制；未来仍可加入统一的跨图层碰撞管理器，目前不能保证极高密度视野中所有标签都完全不重叠。</p>
+<p>点击选取由 <code>selectAtEvent()</code> 完成。<code>nearestCatalogObject()</code> 在动态太阳系对象、恒星、深空天体、西方星座名和中国星官名中计算屏幕距离并使用不同命中半径；未命中时通过当前公开投影对象的 <code>invert()</code> 把鼠标像素反投影为天球坐标。由于 D3-Celestial 0.7.35 在 <code>reproject()</code> 后会替换内部投影对象却不更新公开的 <code>mapProjection</code> 引用，本项目对本地固定版本加入一行兼容补丁，使自定义星官、行星和点击拾取始终使用当前投影。信息框显示当前体系和语言下的名称、类型、视星等、目录编号、B−V、RA/Dec、当前 Alt/Az、地点和时间；月球额外显示照明比例、月龄和距离，行星可显示历表提供的星等和距离。点击复制可导出当前信息；切换地点或时间后，<code>updateSelectedObject()</code> 重新计算动态坐标。</p>
+<h3>7. 数据文件、来源与开源组件</h3>
+<table><thead><tr><th>数据/组件</th><th>用途</th><th>说明</th></tr></thead><tbody>
+<tr><td><code>stars.6.json</code> / <code>starnames.json</code></td><td>恒星坐标、视星等、B−V、标识和名称</td><td>D3-Celestial 数据包，源于 Hipparcos/XHIP 生态，坐标按 J2000 整理</td></tr>
+<tr><td><code>constellations*.json</code></td><td>现代星座名称、连线和边界</td><td>IAU 星座体系的数字化几何；连线与边界是独立概念</td></tr>
+<tr><td><code>constellations.cn.json</code> / <code>constellations.lines.cn.json</code></td><td>中国星官名称与连线</td><td>D3-Celestial 中国文化数据；上游参考 Stellarium sky cultures</td></tr>
+<tr><td><code>traditional.regions.cn.json</code> / labels</td><td>三垣、四象、二十八宿、近南极星区和三大战场</td><td>本项目根据现有星官几何生成的可视化复原；要素中明确标记近似性质</td></tr>
+<tr><td><code>mw.json</code></td><td>银河轮廓</td><td>轮廓矢量，不是摄影巡天影像</td></tr>
+<tr><td><code>planets.json</code></td><td>太阳、月球和行星轨道参数</td><td>D3-Celestial 内置低阶历表；本项目自定义绘制、拾取和信息框，适合一般天文馆显示</td></tr>
+<tr><td>D3 3.5.17 / d3-geo-projection</td><td>数据绑定、地理投影、缩放与拖动</td><td>BSD 类许可，随包本地保存</td></tr>
+<tr><td>D3-Celestial 0.7.35</td><td>天球渲染、坐标变换、太阳系与图层框架</td><td>BSD-3-Clause，随包附许可证</td></tr>
+<tr><td>Luxon 3.7.2</td><td>IANA 时区、当地时间、UTC 和日历运算</td><td>MIT</td></tr>
+<tr><td>tz-lookup</td><td>经纬度到 IANA 时区的离线估计</td><td>CC0-1.0；压缩边界模型存在边界误差</td></tr>
+</tbody></table>
+<p>运行时 <code>preloaded-data.js</code> 把上述 JSON 注册为本地数据对象，并接管 <code>d3.json()</code>。每次请求返回独立深拷贝，因为 D3-Celestial 的 <code>getData()</code> 会原地转换 GeoJSON 坐标；这一处理保证坐标系统可以反复切换而不累积坐标误差。原始 JSON 仍保留，便于追溯和二次开发。</p>
+<h3>8. 关键函数与状态流</h3>
+<table><thead><tr><th>函数</th><th>输入/输出与副作用</th></tr></thead><tbody>
+<tr><td><code>safeLoad()</code> / <code>save()</code></td><td>读取、迁移、校验和保存状态；无效旧配置回退默认值</td></tr>
+<tr><td><code>setupCitySearch()</code> / <code>setObserver()</code></td><td>搜索城市并更新经纬度、时区和城市名；保持 UTC 瞬时</td></tr>
+<tr><td><code>parseObserverLocalTime()</code> / <code>shiftObserverTime()</code></td><td>当地时间 ↔ UTC；按当地日历执行月/日/小时加减</td></tr>
+<tr><td><code>buildSkyConfig()</code></td><td>读取 <code>state</code>，输出当前投影、坐标、星表和图层配置</td></tr>
+<tr><td><code>initialDisplay()</code> / <code>waitForCanvas()</code></td><td>初始化引擎，等待真实恒星节点，绑定点击并关闭加载遮罩</td></tr>
+<tr><td><code>applyVisualConfig()</code> / <code>applyCultureMode()</code></td><td>原位更新普通显示参数和中西文化可见性，不重载目录</td></tr>
+<tr><td><code>projectionNaturalRatio()</code> / <code>projectionFitMetrics()</code> / <code>switchProjection()</code></td><td>按投影天然比例计算完整画布、保存旧视角、切换投影并恢复该投影的独立视角</td></tr>
+<tr><td><code>switchCoordinateSystem()</code> / <code>rebuildSkyPreservingPixels()</code></td><td>为新坐标系重新转换本地目录；使用快照、互斥锁和独立数据副本避免闪空与重入</td></tr>
+<tr><td><code>scheduleSkyResize()</code> / <code>updateCardinalGeometry()</code></td><td>防抖响应布局变化，用原位 resize 调整画布，并把 E/S/W/N 对齐实际投影边缘，不重载星表</td></tr>
+<tr><td><code>attachCanvasInfo()</code> / <code>forwardMarginWheel()</code> / <code>movePaneMarginDrag()</code> / <code>selectAtEvent()</code></td><td>区分点击与拖动，让整个星图区支持缩放和拖动，反投影鼠标位置并更新信息框</td></tr>
+<tr><td><code>registerChineseOverlay()</code> / <code>registerTraditionalRegionsOverlay()</code> / <code>registerPlanetOverlay()</code></td><td>注册中国星官、传统天区、标签和动态太阳系对象的自定义绘制回调</td></tr>
+</tbody></table>
+<h3>9. 离线运行、性能与限制</h3>
+<p>单文件 <code>index.html</code> 已内置 CSS、JavaScript 和天文数据，可直接双击使用。原始模块和数据也保留在压缩包中。浏览器定位 API 在 <code>file://</code> 下可能被安全策略阻止，因此定位按钮会立即提示使用 <code>启动观星台.bat</code>、<code>start_observatory.sh</code> 或 <code>python -m http.server 8000</code>；手动地点、时间、星图、文化和投影不依赖定位权限。</p>
+<p>性能策略包括：普通开关原位重绘 / 布局变化防抖 / 按投影天然比例原位 resize / 时间与 HUD 分别节流 / 坐标重建互斥 / 视角按投影保存 / 自定义标签局部避让 / 动态太阳系坐标按重绘即时计算 / 所有数据本地化。数据层去重用于防止第三方引擎重复回调造成重复节点。</p>
+<div class="warn"><strong>科学限制：</strong>当前恒星目录按 J2000 展示，不是针对任意年代进行高精度自行、视差、岁差、章动、光行差和相对论修正的完整天体测量模型；太阳系位置适合一般天文馆展示，不等同于 JPL DE 高精度历表；未模拟大气折射、大气消光、光污染、月光天空增亮、云量、天气、海拔、地形遮挡和真实地平线；银河是轮廓矢量；中国传统天区和三大战场是明确标注的现代可视化复原，不能当作唯一历史疆界。</div>
+<p>后续可扩展：天体搜索 / 升起、过中天和落下时间 / 月相与照明比例 / 天文晨昏蒙影 / 行星冲合与流星雨 / 可见性曲线 / 高精度岁差章动与自行 / Astronomy Engine 或 JPL 历表 / 天气、光污染和地形图层 / 手机陀螺仪与 AR 指向 / 多套历史中国星图版本对照。</p>
+</article>
+<article class="doc" data-doc-lang="en">
+<h3>1. Purpose, scope and architecture</h3>
+<p>Real Sky Observatory 4.8 is a fully local browser planetarium. It is not a random star field: it reads real stellar, constellation, Chinese asterism, Milky Way and Solar System datasets, combines them with the observer's coordinates, IANA time zone and UTC instant, and renders the resulting sky. It is intended for naked-eye orientation, sky-culture comparison, coordinate teaching and general observing preparation, not precision astrometry, telescope control or professional ephemeris work.</p>
+<table><thead><tr><th>Layer</th><th>Responsibility</th><th>Implementation</th></tr></thead><tbody>
+<tr><td>UI/layout</td><td>Collapsible sidebar, sky pane, search, controls, status and guide</td><td>CSS Grid and <code>ResizeObserver</code></td></tr>
+<tr><td>State</td><td>Observer, UTC instant, language, culture, projection, coordinate system, layers and per-projection view</td><td>Single validated <code>state</code> object persisted in <code>localStorage</code></td></tr>
+<tr><td>Sky engine</td><td>Projection, pan/zoom, stars, constellations, Milky Way and Solar System rendering</td><td>D3 3.5.17, d3-geo-projection and D3-Celestial 0.7.35</td></tr>
+<tr><td>Time/zones</td><td>Local civil time, UTC, DST and calendar arithmetic</td><td>Luxon 3.7.2 and tz-lookup</td></tr>
+<tr><td>Culture layers</td><td>Western constellations, Chinese asterisms, IAU boundaries and reconstructed Chinese regions</td><td>Native Celestial layers plus custom <code>Celestial.add()</code> overlays</td></tr>
+<tr><td>Offline data</td><td>Identical operation under <code>file://</code> and localhost</td><td>Source JSON is retained and the runtime catalog is embedded as local JavaScript data</td></tr>
+</tbody></table>
+<p>Startup flow: open <code>index.html</code> → load local D3, projection library, embedded catalogs, D3-Celestial, Luxon and zone lookup → validate stored settings with <code>safeLoad()</code> → construct the integrated layout → synchronize controls → register Chinese, traditional-region and custom Solar System overlays → create the sky with <code>Celestial.display(buildSkyConfig())</code> → wait for the actual stellar layer and bind the Canvas → bind controls, pan/zoom, touch and picking → enter the time loop.</p>
+<h3>2. Observer, city search, time zones and time</h3>
+<p><code>CITIES</code> stores Chinese/English names, WGS84 coordinates, IANA zones and regional groups. Search matches either language and selecting a city calls <code>setObserver()</code>. Manual coordinates are resolved by explicit zone, <code>tzlookup(lat, lon)</code>, then a longitude-based <code>Etc/GMT</code> fallback. Compressed lookup boundaries can be wrong near borders or at sea, so the UI identifies the result as an estimate.</p>
+<p><code>state.instant</code> is always a UTC ISO-8601 instant. The input field represents local civil time at the observer. <code>parseObserverLocalTime()</code> combines the entered fields with the current IANA zone, converts to UTC and rejects impossible dates or DST-gap normalization. Changing location preserves the UTC instant. Month/day/hour controls operate in the observer's calendar zone and then return to UTC, so a month is not approximated as 30 fixed days.</p>
+<h3>3. Astronomy and coordinate conversion</h3>
+<p>The stellar catalog is based on J2000 equatorial coordinates. Right ascension α is commonly expressed in hours, with <span class="formula">1 h = 15°</span>; declination δ is analogous to latitude. The local hour angle is:</p>
+<div class="formula">H = LST − α</div>
+<p>For observer latitude φ, the altitude h follows:</p>
+<div class="formula">sin h = sin φ · sin δ + cos φ · cos δ · cos H</div>
+<p>The information panel uses <code>Celestial.horizontal(date, [RA, Dec], [lat, lon])</code> to calculate current altitude and azimuth. Azimuth is displayed from north through east. <code>Celestial.skyview()</code> rotates the local horizon view for the current UTC instant and observer. The code uses the documented degree convention and never guesses radians from numeric range.</p>
+<p>Coordinate system and map projection are separate. Horizontal mode loads equatorial catalog coordinates and rotates them to the local sky; equatorial, ecliptic and galactic modes transform the catalog geometry. D3-Celestial transforms GeoJSON in place, so the bundled loader returns a fresh deep copy on every coordinate rebuild. A canvas snapshot masks the brief conversion and the previous view is restored.</p>
+<h3>4. Projections, view state and interaction</h3>
+<p>Available projections are Airy, Orthographic, Stereographic, Azimuthal Equidistant, Azimuthal Equal Area, Aitoff, Hammer, Mollweide, Winkel Tripel, Equirectangular, HEALPix, Mercator, Robinson and Sinusoidal. E/S/W/N are shown only for local horizon-compatible views. The whole sky pane is the interaction surface: D3's geographic zoom handles cursor-centred wheel zoom, left-button panning and touch gestures inside the Canvas, while letterboxed margins forward wheel events to the nearest valid Canvas point and use the same saved view state for pointer dragging. A 6-pixel movement threshold separates clicking from dragging.</p>
+<p>Each projection keeps its natural aspect ratio instead of being stretched to the browser. <code>projectionNaturalRatio()</code> reads engine metadata and <code>projectionFitMetrics()</code> fits the largest complete Canvas into the pane; undeclared global projections use the conventional 2:1 ratio. E/S/W/N are attached to the actual Canvas boundary. Each coordinate-system/projection pair has its own saved centre and zoom. Projection changes use <code>Celestial.reproject()</code>; ordinary display changes use <code>Celestial.apply()</code>; layout resizing uses <code>Celestial.resize()</code> without catalog reload. Coordinate transforms are the only operation requiring catalog conversion, protected by a rebuild lock and generation token.</p>
+<p>A celestial sphere is curved while the screen is flat, so every all-sky projection has distortion. Projection changes only how coordinates are drawn, not the underlying star positions. Airy, Orthographic, Stereographic and the two azimuthal projections are centre-oriented views; Aitoff, Hammer, Mollweide, Winkel Tripel and Equirectangular are all-sky layouts; HEALPix, Mercator, Robinson and Sinusoidal serve scientific partitioning, local conformality or balanced presentation. Reset never changes the selected coordinate system: horizontal mode recalculates the local sky centre from the current observer and instant, while equatorial, ecliptic and galactic modes use their own configured defaults. E/S/W/N are intentionally shown only on the initial complete horizontal view and after reset; the first pan or zoom hides them. Version 4.8 deliberately retains the v4.0 canvas sizing, natural projection ratio and complete initial-view logic.</p><h3>4A. A beginner’s guide to the 14 projections</h3><h3>5. Stars, names and sky cultures</h3>
+<p>The stellar limit is a catalog filter, <span class="formula">m ≤ m<sub>limit</sub></span>, not a light-pollution model. Symbol size is mapped from magnitude, while B−V supplies an approximate colour. Name logic follows the selected sky culture: Western mode uses standard Western names (Chinese translations in the Chinese UI, proper English names in English); Chinese mode uses traditional Chinese names; combined mode keeps Chinese star names only.</p>
+<p>Western constellation figures, labels and IAU boundaries are independent layers. Chinese asterisms use separate geometry and names, not translated Western constellations. Combined mode overlays blue Western and orange Chinese figures but disables regional boundaries.</p>
+<p><b>Overlapping Western/Chinese segments:</b> in combined mode, ordinary segments stay in their original positions. Segments with matching endpoints are rendered as two slightly separated screen-space tracks, with the Western line shifted to one side and the Chinese line to the other. The offset is visual only and never changes catalog coordinates or source geometry. Very short shared segments use phase-shifted short dashes; edge-clipped segments fall back to centered rendering when a stable offset cannot be calculated.</p>
+<p><b>Cultural notes for important stars:</b> when a bright important star is selected, the information card reads short explanations of its Western constellation and Chinese asterism from the separate <code>assets/data/culture-notes.js</code> file. These are learning-oriented summaries rather than primary-source quotations; mythic and historical interpretations can vary.</p>
+<p>The Chinese region layer contains the Three Enclosures, Four Symbols, optional Twenty-Eight Mansion subdivisions and a near-south-polar zone. Their polygons are documented modern digital reconstructions, not IAU-like legal boundaries. The Northern, Northwestern and Southern Battlefields are thematic envelopes derived from the positions of related military asterisms. They are intentionally labelled approximate and must not be interpreted as a unique historical boundary system. Other historical organizing schemes—including the Five Offices of the <em>Shiji</em>, later Four-Beasts-plus-central/outer, Five-Beasts-plus-central/outer, and Nine-Fields classifications—are documented but not drawn because their versions and boundaries are not standardized into a reliable modern celestial polygon dataset.</p>
+<h3>6. Rendering, labels and object information</h3>
+<p><code>buildSkyConfig()</code> assembles native star, DSO, Western constellation, Milky Way, grid, ecliptic, equator, horizon and daylight layers, while the bundled Solar System ephemeris is exposed to <code>registerPlanetOverlay()</code>. <code>currentPlanetPositions()</code> computes the Sun, Moon and seven planets for the current UTC instant and Earth origin, then transforms, projects, draws and exposes the same positions for picking. <code>registerChineseOverlay()</code> and <code>registerTraditionalRegionsOverlay()</code> add custom GeoJSON. Chinese labels use simple screen-distance suppression; this is not yet a global collision solver.</p>
+<p><code>nearestCatalogObject()</code> tests dynamic Solar System objects, stars, DSOs, Western labels and Chinese labels with type-specific pixel radii. Empty-sky clicks are inverted through the current projection. A local compatibility patch updates D3-Celestial 0.7.35's public <code>mapProjection</code> reference after <code>reproject()</code>, keeping custom overlays and picking aligned with the visible map. The sidebar card displays culture-aware names, type, magnitude, identifiers, B−V where present, RA/Dec, current Alt/Az, observer and time; the Moon additionally exposes illumination, age and distance. Dynamic coordinates are recalculated after time or location changes.</p>
+<h3>7. Data and dependencies</h3>
+<table><thead><tr><th>Resource</th><th>Use</th><th>Notes</th></tr></thead><tbody>
+<tr><td><code>stars.6.json</code>, <code>starnames.json</code></td><td>Stars, magnitude, B−V and names</td><td>D3-Celestial catalog derived from the Hipparcos/XHIP ecosystem, organized at J2000</td></tr>
+<tr><td><code>constellations*.json</code></td><td>Western labels, figures and boundaries</td><td>Modern IAU constellation system; figure lines are not boundaries</td></tr>
+<tr><td>Chinese constellation files</td><td>Traditional asterism figures and labels</td><td>D3-Celestial sky-culture data with Stellarium sky cultures as an upstream source</td></tr>
+<tr><td>Traditional-region files</td><td>Enclosures, Symbols, Mansions, near-south-polar zone and battlefields</td><td>Project-generated, explicitly approximate visualization geometry</td></tr>
+<tr><td><code>mw.json</code></td><td>Milky Way outline</td><td>Vector outline, not survey imagery</td></tr>
+<tr><td><code>planets.json</code></td><td>Solar System ephemeris</td><td>Custom drawing, picking and information use D3-Celestial's general planetarium model, not JPL-grade prediction</td></tr>
+<tr><td>D3 3.5.17 / d3-geo-projection</td><td>Projection, data binding, zoom and pan</td><td>Bundled locally</td></tr>
+<tr><td>D3-Celestial 0.7.35</td><td>Celestial rendering and coordinate framework</td><td>BSD-3-Clause</td></tr>
+<tr><td>Luxon 3.7.2</td><td>IANA time zones and calendar arithmetic</td><td>MIT</td></tr>
+<tr><td>tz-lookup</td><td>Offline coordinate-to-zone estimate</td><td>CC0-1.0; boundary estimates are imperfect</td></tr>
+</tbody></table>
+<h3>8. Code map and runtime flow</h3>
+<p><code>safeLoad()/save()</code> validate persistence; <code>setupCitySearch()/setObserver()</code> manage location; <code>parseObserverLocalTime()/shiftObserverTime()</code> manage local time and UTC; <code>buildSkyConfig()</code> converts state to engine configuration; <code>projectionNaturalRatio()/projectionFitMetrics()</code> fit the complete projection; <code>initialDisplay()/waitForCanvas()</code> initialize and verify the real star layer; <code>applyVisualConfig()</code> updates ordinary layers; <code>switchProjection()</code> reprojects without catalog reload; <code>switchCoordinateSystem()/rebuildSkyPreservingPixels()</code> rebuild transformed geometry with a snapshot and lock; <code>scheduleSkyResize()</code> performs in-place responsive resizing; <code>attachCanvasInfo()/forwardMarginWheel()/movePaneMarginDrag()/selectAtEvent()</code> provide full-pane interaction and picking; custom overlay functions render Chinese regions and dynamic Solar System objects.</p>
+<h3>9. Offline behavior, performance and scientific limitations</h3>
+<p>The standalone <code>index.html</code> embeds scripts, styles and catalogs. Source JSON and modular files are also retained. Geolocation may be blocked under <code>file://</code>; the included launchers or <code>python -m http.server 8000</code> provide a localhost context. Manual coordinates and all sky functions remain offline.</p>
+<div class="warn"><strong>Limitations:</strong> this is not a full high-precision astrometric propagation pipeline. It does not model arbitrary-epoch stellar proper motion, parallax, full precession/nutation, aberration and relativistic terms to research-grade precision. It does not model atmospheric refraction/extinction, sky brightness, light pollution, moonlight, clouds, weather, altitude, terrain or a measured horizon. Solar System positions are intended for general planetarium display. The Milky Way is an outline. Chinese region and battlefield polygons are documented reconstructions, not unique historical legal boundaries.</div>
+<p>Possible extensions include object search, rise/transit/set, lunar phase, twilight, visibility curves, higher-precision ephemerides, proper-motion propagation, weather/light-pollution/terrain layers, mobile sensors and multiple historical Chinese sky reconstructions.</p>
+</article>
+</div>
+</div>
+</div>
+<script src="assets/vendor/d3/d3.min.js"></script>
+<script src="assets/vendor/d3/d3.geo.projection.min.js"></script>
+<script src="assets/data/preloaded-data.js"></script>
+<script src="assets/vendor/d3-celestial/celestial.min.js"></script>
+<script src="assets/vendor/luxon/luxon.min.js"></script>
+<script src="assets/vendor/tz-lookup/tz.js"></script>
+<script src="config.js"></script>
+<script src="assets/data/culture-notes.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
