@@ -37,11 +37,10 @@ button {
   color: var(--text);
 }
 #sky-stage {
-  position: fixed;
+  position: absolute;
   inset: 0;
   z-index: 0;
-  display: grid;
-  place-items: center;
+  display: block;
   background: radial-gradient(
     circle at 50% 50%,
     #081128 0,
@@ -51,23 +50,29 @@ button {
   overflow: hidden;
 }
 #celestial-frame {
-  position: relative;
-  width: min(100vw, 100vh);
-  height: min(100vw, 100vh);
-  min-width: 420px;
-  min-height: 420px;
-}
-#celestial-map {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
 }
-#celestial-map canvas {
+#celestial-map {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  right: auto;
+  bottom: auto;
+  transform: translate(-50%, -50%);
+  width: auto;
+  height: auto;
+}
+#celestial-map canvas,
+#celestial-map svg {
   display: block !important;
-  margin: auto !important;
-  max-width: 100% !important;
-  max-height: 100% !important;
+  margin: 0 !important;
+  max-width: none !important;
+  max-height: none !important;
 }
 #sky-stage::after {
   content: "";
@@ -92,13 +97,13 @@ button {
     0 0 18px rgba(255, 0, 0, 0.95);
 }
 .cardinal-layer {
-  position: fixed;
+  position: absolute;
   z-index: 3;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  width: min(100vw, 100vh);
-  height: min(100vw, 100vh);
+  left: 0;
+  top: 0;
+  transform: none;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
 .cardinal {
@@ -846,10 +851,10 @@ body.lang-en [data-doc-lang="en"] {
     opacity: 0.18;
   }
   #celestial-frame {
-    min-width: 100vw;
-    min-height: 100vw;
-    width: min(100vw, 100vh);
-    height: min(100vw, 100vh);
+    min-width: 0;
+    min-height: 0;
+    width: 100%;
+    height: 100%;
   }
   .modal {
     padding: 8px;
@@ -878,6 +883,7 @@ body.lang-en [data-doc-lang="en"] {
 /* ===== RSO 4.0 整合布局与交互层 ===== */
 :root {
   --sidebar-w: 360px;
+  --mobile-sidebar-w: 350px;
 }
 #app-shell {
   position: fixed;
@@ -1024,7 +1030,8 @@ body.panel-collapsed #sidebar {
 #celestial-map.dragging {
   cursor: grabbing;
 }
-#celestial-map canvas {
+#celestial-map canvas,
+#celestial-map svg {
   display: block !important;
   margin: 0 !important;
   max-width: none !important;
@@ -1246,16 +1253,174 @@ select optgroup {
 }
 @media (max-width: 800px) {
   :root {
-    --sidebar-w: min(90vw, 350px);
+    --mobile-sidebar-w: min(92vw, 370px);
   }
   #app-shell {
-    grid-template-columns: var(--sidebar-w) minmax(0, 1fr);
+    display: block;
+    grid-template-columns: none;
+  }
+  body.panel-collapsed #app-shell {
+    grid-template-columns: none;
+  }
+  #sky-pane {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100dvh;
+  }
+  #sidebar {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: min(92vw, var(--mobile-sidebar-w));
+    max-width: calc(100vw - 12px);
+    height: 100dvh;
+    transform: translateX(0);
+    transition:
+      transform 0.22s ease,
+      box-shadow 0.22s ease;
+  }
+  body.panel-collapsed #sidebar {
+    visibility: visible;
+    transform: translateX(calc(-100% - 16px));
+    pointer-events: none;
+  }
+  #sidebar-head {
+    padding: max(52px, calc(env(safe-area-inset-top) + 48px)) 10px 0;
   }
   #sidebar-head .selector-card {
     grid-template-columns: 1fr;
   }
+  #control-panel {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+  #sidebar-footer {
+    padding-bottom: max(10px, calc(env(safe-area-inset-bottom) + 10px));
+  }
+  #panel-toggle.panel-toggle-button {
+    left: max(8px, env(safe-area-inset-left));
+    top: max(8px, env(safe-area-inset-top));
+    width: 42px;
+    height: 42px;
+  }
+  #debug-toggle {
+    left: calc(max(8px, env(safe-area-inset-left)) + 50px);
+    top: max(8px, env(safe-area-inset-top));
+    width: 46px;
+    height: 42px;
+  }
+  #debug-overlay {
+    max-width: min(390px, calc(100% - 12px));
+    max-height: min(68dvh, calc(100% - 12px));
+    font-size: 9px;
+  }
+  input[type="number"],
+  input[type="datetime-local"],
+  input[type="text"],
+  select {
+    min-height: 42px;
+    font-size: 16px;
+  }
+  button {
+    min-height: 42px;
+    font-size: 12px;
+    white-space: normal;
+  }
+  .section {
+    padding: 14px 13px;
+  }
+  .section-title {
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.35;
+  }
   .calendar-shifts {
     grid-template-columns: repeat(3, 1fr);
+  }
+  .toggles {
+    grid-template-columns: 1fr;
+  }
+  .toggle {
+    min-height: 44px;
+    font-size: 12px;
+  }
+  .toggle input {
+    width: 36px;
+    height: 20px;
+  }
+  .toggle input::after {
+    width: 16px;
+    height: 16px;
+  }
+  .toggle input:checked::after {
+    left: 18px;
+  }
+  .range-row {
+    grid-template-columns: 1fr 48px;
+  }
+  .range-row label {
+    grid-column: 1 / -1;
+  }
+  .range-value {
+    font-size: 12px;
+  }
+  input[type="range"] {
+    min-height: 32px;
+  }
+  .info-head {
+    flex-direction: column;
+  }
+  .info-actions {
+    width: 100%;
+  }
+  .info-actions button {
+    flex: 1 1 0;
+  }
+  .info-grid {
+    grid-template-columns: minmax(86px, auto) 1fr;
+    font-size: 11px;
+  }
+  .city-suggestions {
+    max-height: min(320px, 55dvh);
+  }
+  .city-option {
+    min-height: 44px;
+  }
+}
+@media (max-width: 430px) {
+  .grid2,
+  .time-row {
+    grid-template-columns: 1fr;
+  }
+  .brand-main {
+    align-items: flex-start;
+    font-size: 12px;
+    line-height: 1.35;
+  }
+  .brand-main span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  #sidebar-head .selector-card {
+    padding: 8px;
+  }
+  .view-tools-grid {
+    grid-template-columns: 44px 44px 1fr;
+  }
+  #fullscreen {
+    grid-column: 1 / -1;
+  }
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  .info-grid dt {
+    font-weight: 750;
+  }
+}
+@media (pointer: coarse) {
+  button:hover,
+  .city-option:hover {
+    transform: none;
   }
 }
 
@@ -1287,6 +1452,59 @@ select optgroup {
   border-radius: 10px;
   background: var(--panel-toggle-bg, rgba(8, 19, 36, 0.94));
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
+}
+#debug-toggle {
+  position: absolute;
+  z-index: 31;
+  left: calc(
+    var(--panel-toggle-left, 8px) + var(--panel-toggle-size, 36px) + 8px
+  );
+  top: var(--panel-toggle-top, 8px);
+  width: 46px;
+  height: var(--panel-toggle-size, 36px);
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 1px solid rgba(119, 220, 255, 0.28);
+  border-radius: 10px;
+  background: rgba(8, 19, 36, 0.82);
+  color: rgba(228, 241, 255, 0.82);
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
+  pointer-events: auto;
+}
+#debug-toggle.active {
+  border-color: rgba(119, 220, 255, 0.72);
+  background: rgba(14, 48, 74, 0.94);
+  color: #fff;
+}
+#debug-overlay {
+  position: absolute;
+  z-index: 26;
+  display: none;
+  left: var(--panel-toggle-left, 8px);
+  top: var(--panel-toggle-top, 8px);
+  max-width: min(560px, calc(100% - 12px));
+  max-height: min(70dvh, calc(100% - 16px));
+  margin: 0;
+  padding: calc(var(--panel-toggle-size, 36px) + 18px) 9px 8px;
+  overflow: auto;
+  overscroll-behavior: contain;
+  border: 1px solid rgba(119, 220, 255, 0.35);
+  border-radius: 8px;
+  background: rgba(2, 7, 16, 0.82);
+  color: rgba(229, 244, 255, 0.95);
+  font:
+    10px/1.45 Consolas,
+    "Cascadia Mono",
+    monospace;
+  white-space: pre-wrap;
+  pointer-events: auto;
+  touch-action: pan-y;
+  user-select: text;
+  text-shadow: 0 1px 2px #000;
 }
 #sidebar-head {
   padding-top: 52px;
@@ -1327,6 +1545,20 @@ select optgroup {
     max-width: calc(100% - 58px);
     overflow: hidden;
     text-overflow: ellipsis;
+  }
+  #debug-toggle {
+    left: calc(max(8px, env(safe-area-inset-left)) + 50px);
+    top: max(8px, env(safe-area-inset-top));
+    width: 46px;
+    height: 42px;
+  }
+  #debug-overlay {
+    left: max(8px, env(safe-area-inset-left));
+    top: max(8px, env(safe-area-inset-top));
+    max-width: min(390px, calc(100% - 12px));
+    max-height: min(68dvh, calc(100% - 12px));
+    padding-top: 60px;
+    font-size: 9px;
   }
   .view-tools-grid {
     grid-template-columns: 40px 40px 1fr 1fr;

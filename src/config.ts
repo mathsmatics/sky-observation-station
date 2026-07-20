@@ -45,6 +45,20 @@ window.RSO_CONFIG = {
     skyMetaColor: "rgba(228,241,255,.88)", // 星图上的“地点 · 日期时间”颜色
   },
 
+  /** 调试面板：开发时打开，完成后可把 enabled 改为 false 隐藏开关 */
+  debug: {
+    enabled: true, // 是否显示左上角 DBG 开关
+    defaultOpen: false, // 页面打开时是否默认展开调试信息
+    refreshMs: 350, // 调试信息刷新间隔
+  },
+
+  /** 应用层星图画布缩放：缩放会改变 #celestial-map / canvas 的 CSS 尺寸 */
+  mapScale: {
+    min: 1,
+    max: 12,
+    buttonFactor: 1.25,
+  },
+
   /** E / S / W / N 方位标识 */
   cardinal: {
     color: "#ff4040",
@@ -104,6 +118,7 @@ window.RSO_CONFIG = {
     coordinateSystem: "horizontal", // horizontal / equatorial / ecliptic / galactic
     showRegionBoundaries: false,
     traditionalDetail: "battlefields", // major / battlefields / mansions
+    mapScale: 1, // 初始星图画布缩放；1 表示画布短边等于 sky-pane 短边
   },
 
   /** 星图基础绘制 */
@@ -290,15 +305,15 @@ window.RSO_CONFIG = {
   },
 
   /**
-   * “重置视图”使用的默认中心与缩放。
+   * “重置视图”使用的默认中心与应用层画布缩放。
    * center = [经向中心, 纬向中心, 旋转角]，单位为度。
    * horizontal 的中心会优先由当前地点和时间的天顶动态计算；这里是回退值。
    */
   resetViews: {
-    horizontal: { center: [0, 0, 0], zoom: 1 },
-    equatorial: { center: [0, 0, 0], zoom: 1 },
-    ecliptic: { center: [0, 0, 0], zoom: 1 },
-    galactic: { center: [0, 0, 0], zoom: 1 },
+    horizontal: { center: [0, 0, 0], mapScale: 1 },
+    equatorial: { center: [0, 0, 0], mapScale: 1 },
+    ecliptic: { center: [0, 0, 0], mapScale: 1 },
+    galactic: { center: [0, 0, 0], mapScale: 1 },
   },
 
   /** 说明：下面列出各投影初始缩放，可单独微调 */

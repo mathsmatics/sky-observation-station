@@ -54,6 +54,21 @@
       skyMetaColor: "rgba(228,241,255,.88)"
       // 星图上的“地点 · 日期时间”颜色
     },
+    /** 调试面板：开发时打开，完成后可把 enabled 改为 false 隐藏开关 */
+    debug: {
+      enabled: true,
+      // 是否显示左上角 DBG 开关
+      defaultOpen: false,
+      // 页面打开时是否默认展开调试信息
+      refreshMs: 350
+      // 调试信息刷新间隔
+    },
+    /** 应用层星图画布缩放：缩放会改变 #celestial-map / canvas 的 CSS 尺寸 */
+    mapScale: {
+      min: 1,
+      max: 12,
+      buttonFactor: 1.25
+    },
     /** E / S / W / N 方位标识 */
     cardinal: {
       color: "#ff4040",
@@ -124,8 +139,10 @@
       coordinateSystem: "horizontal",
       // horizontal / equatorial / ecliptic / galactic
       showRegionBoundaries: false,
-      traditionalDetail: "battlefields"
+      traditionalDetail: "battlefields",
       // major / battlefields / mansions
+      mapScale: 1
+      // 初始星图画布缩放；1 表示画布短边等于 sky-pane 短边
     },
     /** 星图基础绘制 */
     sky: {
@@ -318,15 +335,15 @@
       nep: { symbol: "\u2646", color: "#799dff", size: 18 }
     },
     /**
-     * “重置视图”使用的默认中心与缩放。
+     * “重置视图”使用的默认中心与应用层画布缩放。
      * center = [经向中心, 纬向中心, 旋转角]，单位为度。
      * horizontal 的中心会优先由当前地点和时间的天顶动态计算；这里是回退值。
      */
     resetViews: {
-      horizontal: { center: [0, 0, 0], zoom: 1 },
-      equatorial: { center: [0, 0, 0], zoom: 1 },
-      ecliptic: { center: [0, 0, 0], zoom: 1 },
-      galactic: { center: [0, 0, 0], zoom: 1 }
+      horizontal: { center: [0, 0, 0], mapScale: 1 },
+      equatorial: { center: [0, 0, 0], mapScale: 1 },
+      ecliptic: { center: [0, 0, 0], mapScale: 1 },
+      galactic: { center: [0, 0, 0], mapScale: 1 }
     },
     /** 说明：下面列出各投影初始缩放，可单独微调 */
     projectionZoom: {
@@ -720,6 +737,7 @@
         "--danger": cfg("theme.danger", "#ff8b8b"),
         "--shadow": cfg("theme.shadow", "0 22px 75px rgba(0,0,0,.52)"),
         "--sidebar-w": `${cfg("layout.sidebarWidth", 360)}px`,
+        "--mobile-sidebar-w": `${cfg("layout.mobileSidebarWidth", 350)}px`,
         "--sky-meta-top": `${cfg("layout.skyMetaTop", 10)}px`,
         "--sky-meta-right": `${cfg("layout.skyMetaRight", 12)}px`,
         "--sky-meta-font": `${cfg("layout.skyMetaFontSize", 12)}px`,
@@ -1068,6 +1086,7 @@
       coordinateSystem: cfg("defaults.coordinateSystem", "horizontal"),
       regionBoundaries: !!cfg("defaults.showRegionBoundaries", false),
       traditionalDetail: cfg("defaults.traditionalDetail", "battlefields"),
+      mapScale: Number(cfg("defaults.mapScale", 1)),
       projectionViews: {},
       selectedObject: null
     };
@@ -1101,7 +1120,7 @@
     let traditionalRegionsReady = false, traditionalLabelsReady = false;
     let rebuildInProgress = false, suppressResizeUntil = 0, rebuildGeneration = 0;
     let resizeObserver = null, clickStart = null, pointerMoved = false, paneDrag = null, cardinalsVisible = true, poleCustomDrag = null;
-    let currentSelected = null, customViewRestoreTimer = null, lastRenderedSize = null, layoutResizeGeneration = 0;
+    let currentSelected = null, customViewRestoreTimer = null, lastRenderedSize = null, debugVisible = !!cfg("debug.enabled", false) && !!cfg("debug.defaultOpen", false), lastDebugUpdate = 0, debugFramePending = false, layoutResizeGeneration = 0;
     const STAR_NAMES = window.__RSO_LOCAL_DATA__ && window.__RSO_LOCAL_DATA__["starnames.json"] || {};
     const DSO_NAMES = window.__RSO_LOCAL_DATA__ && window.__RSO_LOCAL_DATA__["dsonames.json"] || {};
     const ORIGINAL_STARS = window.__RSO_LOCAL_DATA__ && window.__RSO_LOCAL_DATA__["stars.6.json"] && window.__RSO_LOCAL_DATA__["stars.6.json"].features || [];
@@ -1135,6 +1154,32 @@
     }
     function t(key) {
       return I18N[state.lang] && I18N[state.lang][key] || key;
+    }
+    function mapScaleMin() {
+      return Number(cfg("mapScale.min", cfg("interaction.minZoom", 1))) || 1;
+    }
+    function mapScaleMax() {
+      return Number(cfg("mapScale.max", cfg("interaction.maxZoom", 12))) || 12;
+    }
+    function mapScaleButtonFactor() {
+      return Number(
+        cfg("mapScale.buttonFactor", cfg("interaction.zoomButtonFactor", 1.25))
+      ) || 1.25;
+    }
+    function clampMapScale(value) {
+      const min = mapScaleMin(), max = Math.max(min, mapScaleMax()), number = Number(value);
+      return Math.max(min, Math.min(max, Number.isFinite(number) ? number : min));
+    }
+    function getMapScale() {
+      state.mapScale = clampMapScale(state.mapScale);
+      return state.mapScale;
+    }
+    function viewMapScale(view, fallback = state.mapScale) {
+      if (view && Object.prototype.hasOwnProperty.call(view, "mapScale"))
+        return clampMapScale(view.mapScale);
+      if (view && Object.prototype.hasOwnProperty.call(view, "zoom"))
+        return clampMapScale(view.zoom);
+      return clampMapScale(fallback);
     }
     function isValidZone(zone) {
       if (!zone || typeof zone !== "string") return false;
@@ -1209,6 +1254,16 @@
         state.traditionalDetail = "battlefields";
       if (!state.projectionViews || typeof state.projectionViews !== "object")
         state.projectionViews = {};
+      state.mapScale = viewMapScale(
+        { mapScale: state.mapScale, zoom: state.zoom },
+        defaults.mapScale
+      );
+      delete state.zoom;
+      Object.values(state.projectionViews).forEach((view) => {
+        if (!view || typeof view !== "object") return;
+        view.mapScale = viewMapScale(view, state.mapScale);
+        delete view.zoom;
+      });
       state.regionBoundaries = !!state.regionBoundaries;
       state.zone = safeZoneForCoordinates(state.lat, state.lon, state.zone);
     }
@@ -1298,6 +1353,8 @@
       updateBoundaryUI();
       updateHUD(true);
       updateSelectedObject();
+      updateDebugToggleTitle();
+      updateDebugOverlay(true);
     }
     function syncControls() {
       $("observer-lat").value = Number(state.lat).toFixed(4);
@@ -1691,20 +1748,20 @@
       "azimuthalEqualArea"
     ]);
     const PROJECTION_DEFAULTS = {
-      airy: { center: [0, 0, 0], zoom: 1 },
-      orthographic: { center: [0, 0, 0], zoom: 1 },
-      stereographic: { center: [0, 0, 0], zoom: 1 },
-      azimuthalEquidistant: { center: [0, 0, 0], zoom: 1 },
-      azimuthalEqualArea: { center: [0, 0, 0], zoom: 1 },
-      aitoff: { center: [0, 0, 0], zoom: 1 },
-      hammer: { center: [0, 0, 0], zoom: 1 },
-      mollweide: { center: [0, 0, 0], zoom: 1 },
-      winkel3: { center: [0, 0, 0], zoom: 1 },
-      equirectangular: { center: [0, 0, 0], zoom: 1 },
-      healpix: { center: [0, 0, 0], zoom: 1 },
-      mercator: { center: [0, 0, 0], zoom: 1 },
-      robinson: { center: [0, 0, 0], zoom: 1 },
-      sinusoidal: { center: [0, 0, 0], zoom: 1 }
+      airy: { center: [0, 0, 0], mapScale: 1 },
+      orthographic: { center: [0, 0, 0], mapScale: 1 },
+      stereographic: { center: [0, 0, 0], mapScale: 1 },
+      azimuthalEquidistant: { center: [0, 0, 0], mapScale: 1 },
+      azimuthalEqualArea: { center: [0, 0, 0], mapScale: 1 },
+      aitoff: { center: [0, 0, 0], mapScale: 1 },
+      hammer: { center: [0, 0, 0], mapScale: 1 },
+      mollweide: { center: [0, 0, 0], mapScale: 1 },
+      winkel3: { center: [0, 0, 0], mapScale: 1 },
+      equirectangular: { center: [0, 0, 0], mapScale: 1 },
+      healpix: { center: [0, 0, 0], mapScale: 1 },
+      mercator: { center: [0, 0, 0], mapScale: 1 },
+      robinson: { center: [0, 0, 0], mapScale: 1 },
+      sinusoidal: { center: [0, 0, 0], mapScale: 1 }
     };
     function initializeIntegratedLayout() {
       if ($("app-shell")) return;
@@ -1743,6 +1800,340 @@
         resizeObserver.observe(pane);
       }
     }
+    function isMobileLayout() {
+      return window.matchMedia && window.matchMedia("(max-width: 800px)").matches || window.innerWidth <= 800;
+    }
+    function applyInitialResponsivePanelState() {
+      if (isMobileLayout()) state.panelOpen = false;
+    }
+    function formatRect(rect) {
+      if (!rect) return "-";
+      return `${Math.round(rect.width)}x${Math.round(rect.height)} @ ${Math.round(
+        rect.left
+      )},${Math.round(rect.top)}`;
+    }
+    function elementRect(selector) {
+      const el = document.querySelector(selector);
+      return el ? el.getBoundingClientRect() : null;
+    }
+    function updateDebugToggleTitle() {
+      const button = $("debug-toggle");
+      if (!button) return;
+      const title = state.lang === "en" ? "Show layout debug information" : "\u663E\u793A\u5E03\u5C40\u8C03\u8BD5\u4FE1\u606F";
+      button.title = title;
+      button.setAttribute("aria-label", title);
+    }
+    function formatAngle(value) {
+      const number = Number(value);
+      return Number.isFinite(number) ? `${number.toFixed(2)}\xB0` : "-";
+    }
+    function formatPoint(x, y) {
+      return `${Math.round(Number(x) || 0)},${Math.round(Number(y) || 0)}`;
+    }
+    function formatSigned(value) {
+      const number = Number(value);
+      if (!Number.isFinite(number)) return "-";
+      return `${number >= 0 ? "+" : ""}${number.toFixed(1)}`;
+    }
+    function getInternalZoom() {
+      try {
+        return Number(Celestial.zoomBy()) || 1;
+      } catch (_) {
+        return 1;
+      }
+    }
+    function resetInternalZoom() {
+      try {
+        const current = getInternalZoom();
+        if (Math.abs(current - 1) > 2e-3) Celestial.zoomBy(1 / current);
+      } catch (_) {
+      }
+    }
+    function debugCurrentView() {
+      try {
+        const center = Celestial.rotate();
+        return {
+          center: Array.isArray(center) ? center : null,
+          mapScale: getMapScale(),
+          internalZoom: getInternalZoom()
+        };
+      } catch (_) {
+        return { center: null, mapScale: getMapScale(), internalZoom: 1 };
+      }
+    }
+    function debugDragMode(zh) {
+      const map = $("celestial-map"), dragging = !!(map && map.classList.contains("dragging"));
+      if (paneDrag) return zh ? "\u661F\u56FE\u7559\u767D\u62D6\u52A8" : "pane-margin drag";
+      if (poleCustomDrag) return zh ? "\u6781\u533A\u4FDD\u62A4\u62D6\u52A8" : "polar-guard drag";
+      if (dragging) return zh ? "Canvas \u539F\u751F\u62D6\u52A8" : "native canvas drag";
+      if (clickStart) return zh ? "\u7B49\u5F85\u533A\u5206\u70B9\u51FB/\u62D6\u52A8" : "click-or-drag pending";
+      return zh ? "\u7A7A\u95F2" : "idle";
+    }
+    function updateDebugOverlay(force = false) {
+      if (!debugVisible && !force) return;
+      const overlay = $("debug-overlay");
+      if (!overlay) return;
+      const zh = state.lang !== "en", bool = (value) => zh ? value ? "\u5F00" : "\u5173" : value ? "on" : "off";
+      const coordName = {
+        horizontal: zh ? "\u5730\u5E73\u5750\u6807" : "horizontal",
+        equatorial: zh ? "\u8D64\u9053\u5750\u6807" : "equatorial",
+        ecliptic: zh ? "\u9EC4\u9053\u5750\u6807" : "ecliptic",
+        galactic: zh ? "\u94F6\u6CB3\u5750\u6807" : "galactic"
+      }[state.coordinateSystem] || state.coordinateSystem, cultureLabel = {
+        western: zh ? "\u897F\u65B9\u661F\u5EA7" : "western",
+        chinese: zh ? "\u4E2D\u56FD\u661F\u5B98" : "chinese",
+        both: zh ? "\u4E24\u8005\u540C\u65F6\u663E\u793A" : "both"
+      }[state.cultureMode] || state.cultureMode, languageName = state.lang === "zh" ? "\u4E2D\u6587" : "English", view = debugCurrentView(), viewCenter = view.center ? [
+        zh ? "\u7ECF\u5411\u4E2D\u5FC3" : "longitude center",
+        formatAngle(view.center[0]),
+        zh ? "\u7EAC\u5411\u4E2D\u5FC3" : "latitude center",
+        formatAngle(view.center[1]),
+        zh ? "\u65CB\u8F6C\u89D2" : "roll",
+        formatAngle(view.center[2] || 0)
+      ].join(" ") : "-", detailName = {
+        major: zh ? "\u4E3B\u8981\u5929\u533A" : "major",
+        battlefields: zh ? "\u4E3B\u9898\u6218\u573A" : "battlefields",
+        mansions: zh ? "\u4E8C\u5341\u516B\u5BBF" : "mansions"
+      }[state.traditionalDetail] || state.traditionalDetail, label = zh ? {
+        viewportGroup: "\u3010\u6D4F\u89C8\u5668\u89C6\u53E3 / \u661F\u56FE\u533A\u3011",
+        canvasGroup: "\u3010\u661F\u56FE\u753B\u5E03\u5C3A\u5BF8\u6A21\u578B\u3011",
+        viewGroup: "\u3010\u89C6\u89D2\u4E0E\u6295\u5F71\u72B6\u6001\u3011",
+        interactionGroup: "\u3010\u5929\u7403\u4EA4\u4E92\u53C2\u6570\u3011",
+        layerGroup: "\u3010\u56FE\u5C42\u4E0E\u663E\u793A\u9009\u9879\u3011",
+        viewport: "\u6D4F\u89C8\u5668\u89C6\u53E3 window",
+        pane: "\u661F\u56FE\u533A\u53EF\u7528\u533A\u57DF #sky-pane",
+        stage: "\u661F\u56FE\u80CC\u666F\u5C42 #sky-stage",
+        frame: "\u661F\u56FE\u5BB9\u5668\u5916\u6846 #celestial-frame",
+        map: "D3-Celestial \u5730\u56FE\u5BB9\u5668 #celestial-map",
+        canvasCss: "\u771F\u5B9E\u661F\u56FE\u753B\u5E03 CSS \u5C3A\u5BF8",
+        canvasAttr: "\u771F\u5B9E\u661F\u56FE\u753B\u5E03\u50CF\u7D20\u5206\u8FA8\u7387",
+        dpr: "\u8BBE\u5907\u50CF\u7D20\u6BD4 DPR",
+        paneCenter: "\u80CC\u666F\u4E2D\u5FC3",
+        targetMap: "\u76EE\u6807\u5730\u56FE\u5C3A\u5BF8",
+        baseShortSide: "\u57FA\u51C6\u77ED\u8FB9",
+        projectionRatio: "\u6295\u5F71\u81EA\u7136\u5BBD\u9AD8\u6BD4",
+        mapScale: "\u5E94\u7528\u5C42\u753B\u5E03\u7F29\u653E",
+        internalZoom: "D3 \u5185\u90E8\u7F29\u653E",
+        overflow: "\u53EF\u88AB\u88C1\u526A\u7684\u8D85\u51FA\u8303\u56F4",
+        mapCenter: "\u5730\u56FE\u4E2D\u5FC3",
+        centerDelta: "\u5730\u56FE\u4E2D\u5FC3\u76F8\u5BF9\u80CC\u666F\u4E2D\u5FC3\u504F\u5DEE",
+        celestial: "Celestial \u5185\u90E8\u5C3A\u5BF8",
+        projection: "\u5F53\u524D\u6295\u5F71",
+        coords: "\u5F53\u524D\u5750\u6807\u7CFB\u7EDF",
+        culture: "\u5F53\u524D\u661F\u7A7A\u4F53\u7CFB",
+        language: "\u8BED\u8A00",
+        viewKey: "\u89C6\u89D2\u4FDD\u5B58\u952E",
+        viewCenter: "\u5F53\u524D\u89C6\u56FE\u4E2D\u5FC3",
+        interaction: "\u62D6\u52A8/\u70B9\u51FB\u72B6\u6001",
+        dragMoved: "\u5DF2\u8D85\u8FC7\u62D6\u52A8\u9608\u503C",
+        clickPending: "\u70B9\u51FB\u5224\u5B9A\u4E2D",
+        dragThreshold: "\u70B9\u51FB/\u62D6\u52A8\u9608\u503C",
+        dragSensitivity: "Canvas \u62D6\u52A8\u7075\u654F\u5EA6",
+        maxDragStep: "\u5355\u5E27\u6700\u5927\u62D6\u52A8\u6B65\u957F",
+        poleGuard: "\u6781\u533A\u4FDD\u62A4\u8D77\u70B9",
+        poleClamp: "\u7EAC\u5EA6\u5939\u53D6\u4E0A\u9650",
+        displayOptions: "\u663E\u793A\u9009\u9879",
+        starLimit: "\u6052\u661F\u6700\u6697\u661F\u7B49",
+        starSize: "\u6052\u661F\u5927\u5C0F",
+        starNames: "\u91CD\u8981\u6052\u661F\u540D\u79F0",
+        cultureLines: "\u661F\u5EA7/\u661F\u5B98\u8FDE\u7EBF",
+        cultureNames: "\u661F\u5EA7/\u661F\u5B98\u540D\u79F0",
+        planets: "\u592A\u9633\u3001\u6708\u7403\u4E0E\u884C\u661F",
+        milkyWay: "\u94F6\u6CB3\u8F6E\u5ED3",
+        grid: "\u8D64\u9053\u5750\u6807\u7F51",
+        ecliptic: "\u9EC4\u9053",
+        equator: "\u5929\u7403\u8D64\u9053",
+        horizon: "\u5730\u5E73\u7EBF",
+        daylight: "\u65E5\u5149\u80CC\u666F",
+        nightVision: "\u591C\u89C6\u7EA2\u5149",
+        deepSky: "\u4EAE\u6DF1\u7A7A\u5929\u4F53",
+        regionBoundaries: "\u4E2D\u56FD\u4F20\u7EDF\u5929\u533A\u8FB9\u754C",
+        detail: "\u4F20\u7EDF\u5929\u533A\u5C42\u7EA7",
+        time: "\u65F6\u95F4\u63A8\u8FDB",
+        speed: "\u65F6\u95F4\u6D41\u901F",
+        playing: "\u64AD\u653E\u72B6\u6001",
+        panelOpen: "\u5DE6\u4FA7\u83DC\u5355\u5C55\u5F00",
+        skyReady: "\u661F\u56FE\u5C31\u7EEA",
+        rebuild: "\u91CD\u5EFA\u4E2D"
+      } : {
+        viewportGroup: "\u3010Viewport / Pane\u3011",
+        canvasGroup: "\u3010Canvas Layout Model\u3011",
+        viewGroup: "\u3010View & Projection State\u3011",
+        interactionGroup: "\u3010Celestial Interaction\u3011",
+        layerGroup: "\u3010Layers & Display Options\u3011",
+        viewport: "browser viewport window",
+        pane: "sky pane #sky-pane",
+        stage: "stage #sky-stage",
+        frame: "frame #celestial-frame",
+        map: "D3-Celestial map #celestial-map",
+        canvasCss: "real sky canvas CSS size",
+        canvasAttr: "real sky canvas pixel size",
+        dpr: "device pixel ratio DPR",
+        paneCenter: "pane center",
+        targetMap: "target map size",
+        baseShortSide: "base short side",
+        projectionRatio: "projection natural ratio",
+        mapScale: "app map scale",
+        internalZoom: "D3 internal zoom",
+        overflow: "croppable overflow",
+        mapCenter: "map center",
+        centerDelta: "map center delta from pane",
+        celestial: "celestial metrics",
+        projection: "current projection",
+        coords: "current coordinate system",
+        culture: "current sky culture",
+        language: "language",
+        viewKey: "saved view key",
+        viewCenter: "current view center",
+        interaction: "drag/click mode",
+        dragMoved: "drag threshold crossed",
+        clickPending: "click pending",
+        dragThreshold: "click/drag threshold",
+        dragSensitivity: "canvas drag sensitivity",
+        maxDragStep: "max drag step",
+        poleGuard: "polar guard start",
+        poleClamp: "latitude clamp",
+        displayOptions: "display options",
+        starLimit: "stellar magnitude limit",
+        starSize: "star size",
+        starNames: "important star names",
+        cultureLines: "constellation/asterism lines",
+        cultureNames: "constellation/asterism names",
+        planets: "Sun, Moon and planets",
+        milkyWay: "Milky Way outline",
+        grid: "equatorial grid",
+        ecliptic: "ecliptic",
+        equator: "celestial equator",
+        horizon: "horizon",
+        daylight: "daylight",
+        nightVision: "red night vision",
+        deepSky: "bright deep-sky objects",
+        regionBoundaries: "Chinese traditional region boundaries",
+        detail: "detail",
+        time: "time advance",
+        speed: "speed",
+        playing: "playback",
+        panelOpen: "panelOpen",
+        skyReady: "skyReady",
+        rebuild: "rebuild"
+      };
+      const pane = $("sky-pane"), canvas = document.querySelector("#celestial-map canvas"), metrics = projectionCanvasMetrics(), celestialMetrics = window.Celestial && typeof Celestial.metrics === "function" ? Celestial.metrics() : null;
+      const paneRect = pane ? pane.getBoundingClientRect() : null, stageRect = elementRect("#sky-stage"), frameRect = elementRect("#celestial-frame"), mapRect = elementRect("#celestial-map"), canvasRect2 = canvas ? canvas.getBoundingClientRect() : null, paneCenter = paneRect ? {
+        x: paneRect.left + paneRect.width / 2,
+        y: paneRect.top + paneRect.height / 2
+      } : null, mapCenter = mapRect ? {
+        x: mapRect.left + mapRect.width / 2,
+        y: mapRect.top + mapRect.height / 2
+      } : null, centerDelta = paneCenter && mapCenter ? { x: mapCenter.x - paneCenter.x, y: mapCenter.y - paneCenter.y } : null;
+      overlay.style.display = debugVisible ? "block" : "none";
+      overlay.textContent = [
+        label.viewportGroup,
+        `${label.viewport}: ${window.innerWidth}x${window.innerHeight}`,
+        `${label.dpr}: ${Number(window.devicePixelRatio || 1).toFixed(2)}`,
+        `${label.pane}: ${formatRect(paneRect)}`,
+        `${label.stage}: ${formatRect(stageRect)}`,
+        `${label.frame}: ${formatRect(frameRect)}`,
+        "",
+        label.canvasGroup,
+        `${label.targetMap}: ${metrics.width}x${metrics.height}`,
+        `${label.baseShortSide}: ${metrics.baseShortSide}px`,
+        `${label.projectionRatio}: ${Number(metrics.ratio || 0).toFixed(3)}`,
+        `${label.mapScale}: ${Number(metrics.scale || 1).toFixed(3)}x`,
+        `${label.overflow}: X=${Math.round(metrics.overflowX)}px Y=${Math.round(metrics.overflowY)}px`,
+        `${label.paneCenter}: ${paneCenter ? formatPoint(paneCenter.x, paneCenter.y) : "-"}`,
+        `${label.mapCenter}: ${mapCenter ? formatPoint(mapCenter.x, mapCenter.y) : "-"}`,
+        `${label.centerDelta}: ${centerDelta ? `X=${formatSigned(centerDelta.x)}px Y=${formatSigned(centerDelta.y)}px` : "-"}`,
+        `${label.map}: ${formatRect(mapRect)}`,
+        `${label.canvasCss}: ${formatRect(canvasRect2)}`,
+        `${label.canvasAttr}: ${canvas ? `${canvas.width}x${canvas.height}` : "-"}`,
+        `${label.celestial}: ${celestialMetrics ? `${Math.round(celestialMetrics.width)}x${Math.round(
+          celestialMetrics.height
+        )} scale=${Number(celestialMetrics.scale || 0).toFixed(2)}` : "-"}`,
+        "",
+        label.viewGroup,
+        `${label.projection}: ${state.projection}`,
+        `${label.coords}: ${coordName}`,
+        `${label.culture}: ${cultureLabel}`,
+        `${label.language}: ${languageName}`,
+        `${label.viewKey}: ${viewKey()}`,
+        `${label.viewCenter}: ${viewCenter}`,
+        `${label.mapScale}: ${view.mapScale.toFixed(3)}x`,
+        `${label.internalZoom}: ${view.internalZoom.toFixed(3)}x`,
+        "",
+        label.interactionGroup,
+        `${label.interaction}: ${debugDragMode(zh)}`,
+        `${label.dragMoved}: ${bool(pointerMoved)} ${label.clickPending}: ${bool(!!clickStart)}`,
+        `${label.dragThreshold}: ${cfg("interaction.dragThreshold", 5)}px`,
+        `${label.dragSensitivity}: ${cfg("interaction.dragSensitivity", 1)}`,
+        `${label.maxDragStep}: ${cfg("interaction.maxDragStepPixels", 28)}px`,
+        `${label.poleGuard}: ${formatAngle(cfg("interaction.poleLockStart", 82))} ${label.poleClamp}: ${formatAngle(cfg("interaction.poleLatitudeClamp", 89.2))}`,
+        "",
+        label.layerGroup,
+        `  ${label.starLimit}: ${state.magnitude}`,
+        `  ${label.starSize}: ${state.starSize}px`,
+        `  ${label.starNames}: ${bool(state.starNames)}`,
+        `  ${label.cultureLines}: ${bool(state.cultureLines)}`,
+        `  ${label.cultureNames}: ${bool(state.cultureNames)}`,
+        `  ${label.planets}: ${bool(state.planets)}`,
+        `  ${label.milkyWay}: ${bool(state.milkyWay)}`,
+        `  ${label.grid}: ${bool(state.grid)}`,
+        `  ${label.ecliptic}: ${bool(state.ecliptic)}`,
+        `  ${label.equator}: ${bool(state.equator)}`,
+        `  ${label.horizon}: ${bool(state.horizon)}`,
+        `  ${label.daylight}: ${bool(state.daylight)}`,
+        `  ${label.nightVision}: ${bool(state.nightVision)}`,
+        `  ${label.deepSky}: ${bool(state.deepSky)}`,
+        `  ${label.regionBoundaries}: ${bool(state.regionBoundaries)}`,
+        `  ${label.detail}: ${detailName}`,
+        `${label.time}: ${label.playing}=${bool(playing)} ${label.speed}=${state.speed}x`,
+        `${label.panelOpen}: ${bool(state.panelOpen)}`,
+        `${label.skyReady}: ${bool(skyReady)}`,
+        `${label.rebuild}: ${bool(rebuildInProgress)}`
+      ].join("\n");
+    }
+    function queueDebugOverlayUpdate() {
+      if (!debugVisible || debugFramePending) return;
+      debugFramePending = true;
+      requestAnimationFrame(() => {
+        debugFramePending = false;
+        updateDebugOverlay();
+      });
+    }
+    function setDebugVisible(open) {
+      debugVisible = !!open;
+      document.body.classList.toggle("debug-open", debugVisible);
+      const button = $("debug-toggle"), overlay = $("debug-overlay");
+      if (button) button.classList.toggle("active", debugVisible);
+      if (overlay) {
+        overlay.style.display = debugVisible ? "block" : "none";
+        overlay.setAttribute("aria-hidden", String(!debugVisible));
+      }
+      updateDebugOverlay(true);
+    }
+    function initializeDebugTools() {
+      if (!cfg("debug.enabled", false)) return;
+      const pane = $("sky-pane") || document.body;
+      if (!$("debug-toggle")) {
+        const button = document.createElement("button");
+        button.id = "debug-toggle";
+        button.type = "button";
+        button.textContent = "DBG";
+        button.addEventListener("click", () => setDebugVisible(!debugVisible));
+        pane.appendChild(button);
+      } else if ($("debug-toggle").parentElement !== pane) {
+        pane.appendChild($("debug-toggle"));
+      }
+      updateDebugToggleTitle();
+      if (!$("debug-overlay")) {
+        const overlay = document.createElement("pre");
+        overlay.id = "debug-overlay";
+        overlay.setAttribute("aria-hidden", "true");
+        pane.appendChild(overlay);
+      } else if ($("debug-overlay").parentElement !== pane) {
+        pane.appendChild($("debug-overlay"));
+      }
+      setDebugVisible(debugVisible);
+    }
     function skyPaneSize() {
       const pane = $("sky-pane");
       if (!pane)
@@ -1759,31 +2150,71 @@
       try {
         const meta = window.Celestial && Celestial.projections ? Celestial.projections()[name] : null;
         const ratio = meta && Number(meta.ratio);
-        return Number.isFinite(ratio) && ratio > 0 ? ratio : 2;
+        return Number.isFinite(ratio) && ratio > 0 ? ratio : 1;
       } catch (_) {
-        return 2;
+        return 1;
       }
     }
-    function projectionFitMetrics(name = state.projection) {
-      const pane = skyPaneSize(), ratio = projectionNaturalRatio(name);
-      const width = Math.max(
-        1,
-        Math.floor(Math.min(pane.width, pane.height * ratio))
-      );
-      const height = Math.max(1, Math.round(width / ratio));
+    function projectionCanvasMetrics(name = state.projection, scale = getMapScale()) {
+      const pane = skyPaneSize(), ratio = projectionNaturalRatio(name), baseShortSide = Math.max(1, Math.min(pane.width, pane.height)), mapScale = clampMapScale(scale);
+      let width, height;
+      if (ratio >= 1) {
+        height = baseShortSide * mapScale;
+        width = height * ratio;
+      } else {
+        width = baseShortSide * mapScale;
+        height = width / ratio;
+      }
+      width = Math.max(1, Math.round(width));
+      height = Math.max(1, Math.round(height));
       return {
         paneWidth: pane.width,
         paneHeight: pane.height,
+        paneCenterX: pane.width / 2,
+        paneCenterY: pane.height / 2,
+        baseShortSide,
+        ratio,
+        scale: mapScale,
         width,
         height,
-        ratio
+        overflowX: Math.max(0, (width - pane.width) / 2),
+        overflowY: Math.max(0, (height - pane.height) / 2)
       };
     }
-    function prepareMapBox(metrics = projectionFitMetrics()) {
+    function applyMapBoxMetrics(metrics = projectionCanvasMetrics()) {
       const map = $("celestial-map");
       if (!map) return metrics;
       map.style.width = `${metrics.width}px`;
       map.style.height = `${metrics.height}px`;
+      map.style.maxWidth = "none";
+      map.style.maxHeight = "none";
+      map.querySelectorAll("canvas, svg").forEach((node) => {
+        node.style.width = `${metrics.width}px`;
+        node.style.height = `${metrics.height}px`;
+        node.style.maxWidth = "none";
+        node.style.maxHeight = "none";
+      });
+      return metrics;
+    }
+    function syncRenderedMapBox(fallback = projectionCanvasMetrics()) {
+      const metrics = applyMapBoxMetrics(fallback);
+      updateDebugOverlay(true);
+      return metrics;
+    }
+    function resizeCelestialCanvas(metrics = projectionCanvasMetrics()) {
+      applyMapBoxMetrics(metrics);
+      try {
+        if (skyReady && window.Celestial) {
+          Celestial.resize(metrics.width);
+          resetInternalZoom();
+          applyMapBoxMetrics(metrics);
+          Celestial.redraw();
+        }
+      } catch (err) {
+        console.warn("Canvas resize failed", err);
+      }
+      updateCardinalGeometry();
+      updateDebugOverlay(true);
       return metrics;
     }
     function viewKey(projection = state.projection, coord = state.coordinateSystem) {
@@ -1794,12 +2225,31 @@
       const v = captureView();
       state.projectionViews = state.projectionViews || {};
       state.projectionViews[viewKey()] = {
-        zoom: v.zoom,
+        mapScale: v.mapScale,
         center: Array.isArray(v.center) ? v.center.slice() : v.center
       };
     }
     function desiredView() {
-      return state.projectionViews && state.projectionViews[viewKey()] || PROJECTION_DEFAULTS[state.projection] || { center: [0, 0, 0], zoom: 1 };
+      return state.projectionViews && state.projectionViews[viewKey()] || PROJECTION_DEFAULTS[state.projection] || {
+        center: [0, 0, 0],
+        mapScale: 1
+      };
+    }
+    function setMapScale(value, options = {}) {
+      const next = clampMapScale(value);
+      state.mapScale = next;
+      const metrics = projectionCanvasMetrics(state.projection, next);
+      resizeCelestialCanvas(metrics);
+      if (options.saveView) {
+        saveCurrentProjectionView();
+        save();
+      }
+      return metrics;
+    }
+    function scaleMapByFactor(factor) {
+      const next = getMapScale() * Number(factor || 1);
+      hideCardinalsAfterViewInteraction();
+      setMapScale(next, { saveView: true });
     }
     function restoreView(view = desiredView(), attempt = 0) {
       if (!skyReady || !view) return;
@@ -1814,10 +2264,8 @@
             }
             if (Array.isArray(view.center))
               Celestial.rotate({ center: view.center.slice() });
-            const current = Number(Celestial.zoomBy()) || 1;
-            const target = Math.max(1, Math.min(8, Number(view.zoom) || 1));
-            if (Math.abs(target - current) > 2e-3)
-              Celestial.zoomBy(target / current);
+            setMapScale(viewMapScale(view, state.mapScale));
+            resetInternalZoom();
             Celestial.redraw();
             updateCardinalGeometry();
           } catch (err) {
@@ -1832,8 +2280,8 @@
       const pane = $("sky-pane"), layer = document.querySelector(".cardinal-layer"), canvas = document.querySelector("#celestial-map canvas");
       if (!pane || !layer || !canvas) return;
       const pr = pane.getBoundingClientRect(), cr = canvas.getBoundingClientRect();
-      layer.style.left = `${Math.max(0, cr.left - pr.left)}px`;
-      layer.style.top = `${Math.max(0, cr.top - pr.top)}px`;
+      layer.style.left = `${cr.left - pr.left}px`;
+      layer.style.top = `${cr.top - pr.top}px`;
       layer.style.width = `${Math.max(1, cr.width)}px`;
       layer.style.height = `${Math.max(1, cr.height)}px`;
     }
@@ -1861,27 +2309,32 @@
     }
     function scheduleSkyResize() {
       clearTimeout(resizeTimer);
-      resizeTimer = setTimeout(() => {
-        if (!skyReady || !window.Celestial || rebuildInProgress || performance.now() < suppressResizeUntil)
-          return;
-        const pane = skyPaneSize();
-        if (lastRenderedSize && Math.abs(pane.width - lastRenderedSize.width) < 2 && Math.abs(pane.height - lastRenderedSize.height) < 2)
-          return;
-        const view = captureView(), generation = ++layoutResizeGeneration, metrics = prepareMapBox(projectionFitMetrics());
-        try {
-          suppressResizeUntil = performance.now() + 420;
-          Celestial.resize(metrics.width);
-          lastRenderedSize = { width: pane.width, height: pane.height };
-          setTimeout(() => {
-            if (generation !== layoutResizeGeneration || !skyReady) return;
-            restoreView(view);
-            updateCardinalVisibility();
-            updateCardinalGeometry();
-          }, 50);
-        } catch (err) {
-          console.warn("Responsive resize failed", err);
-        }
-      }, 160);
+      resizeTimer = setTimeout(
+        () => {
+          if (!skyReady || !window.Celestial || rebuildInProgress || performance.now() < suppressResizeUntil)
+            return;
+          const pane = skyPaneSize();
+          if (lastRenderedSize && Math.abs(pane.width - lastRenderedSize.width) < 2 && Math.abs(pane.height - lastRenderedSize.height) < 2)
+            return;
+          const view = captureView(), generation = ++layoutResizeGeneration, metrics = projectionCanvasMetrics();
+          try {
+            suppressResizeUntil = performance.now() + 420;
+            resizeCelestialCanvas(metrics);
+            lastRenderedSize = { width: pane.width, height: pane.height };
+            setTimeout(() => {
+              if (generation !== layoutResizeGeneration || !skyReady) return;
+              syncRenderedMapBox(projectionCanvasMetrics());
+              restoreView(view);
+              updateCardinalVisibility();
+              updateCardinalGeometry();
+              updateDebugOverlay(true);
+            }, 50);
+          } catch (err) {
+            console.warn("Responsive resize failed", err);
+          }
+        },
+        Number(cfg("interaction.resizeDebounceMs", 140)) || 140
+      );
     }
     function setupCitySearch() {
       const input = $("city-search"), box = $("city-suggestions");
@@ -2449,11 +2902,11 @@
       Celestial.context.stroke();
     }
     function dualCultureOffset() {
-      const zoom = Math.max(1, Number(Celestial.zoomBy()) || 1);
+      const scale = Math.max(1, getMapScale());
       const base = Number(cfg("dualCultureLines.baseOffset", 1.15));
       const gain = Number(cfg("dualCultureLines.zoomOffsetGain", 0.14));
       const max = Number(cfg("dualCultureLines.maxOffset", 2.1));
-      return Math.min(max, base + Math.max(0, zoom - 1) * gain);
+      return Math.min(max, base + Math.max(0, scale - 1) * gain);
     }
     function drawPhasedShortCultureSegment(p1, p2, style, direction) {
       const ctx = Celestial.context, haloWidth = Number(style.width || 1) + Number(cfg("dualCultureLines.haloExtraWidth", 1.3));
@@ -2725,7 +3178,7 @@
       }
     }
     function buildSkyConfig() {
-      const zh = state.lang === "zh", showWestern = showWesternCulture(), size = skyPaneSize(), metrics = prepareMapBox(projectionFitMetrics());
+      const zh = state.lang === "zh", showWestern = showWesternCulture(), size = skyPaneSize(), metrics = applyMapBoxMetrics(projectionCanvasMetrics());
       lastRenderedSize = { width: size.width, height: size.height };
       const horizontal = isHorizontalView(), properType = state.cultureMode === "western" ? zh ? "zh" : "name" : "zh";
       return {
@@ -2739,7 +3192,7 @@
         geopos: [state.lat, state.lon],
         follow: horizontal ? "zenith" : "center",
         zoomlevel: 1,
-        zoomextend: 12,
+        zoomextend: mapScaleMax(),
         adaptable: true,
         interactive: true,
         form: false,
@@ -3062,10 +3515,12 @@
         const starsLoaded = dataLayerCount(".star") > 0;
         if (canvas && starsLoaded) {
           skyReady = true;
+          syncRenderedMapBox();
           stabilizeDataSelections();
           [60, 220, 600].forEach(
             (ms) => setTimeout(() => {
               if (generation !== rebuildGeneration) return;
+              syncRenderedMapBox();
               stabilizeDataSelections();
               try {
                 Celestial.redraw();
@@ -3114,6 +3569,7 @@
         rebuildInProgress = true;
         suppressResizeUntil = performance.now() + 1200;
         const generation = ++rebuildGeneration;
+        state.mapScale = viewMapScale(viewState || desiredView(), state.mapScale);
         $("celestial-map").innerHTML = "";
         skyReady = false;
         registerChineseOverlay();
@@ -3324,8 +3780,8 @@
               pointerMoved = true;
               hideCardinalsAfterViewInteraction();
             }
-            const rect = canvas.getBoundingClientRect(), zoom = Math.max(1, Number(Celestial.zoomBy()) || 1);
-            const degPerPx = 180 / Math.max(180, Math.min(rect.width, rect.height)) / zoom * Number(cfg("interaction.dragSensitivity", 1));
+            const rect = canvas.getBoundingClientRect(), shortSide = Math.max(180, Math.min(rect.width, rect.height));
+            const degPerPx = 180 / shortSide * Number(cfg("interaction.dragSensitivity", 1));
             const lat = Number(poleCustomDrag.center[1]) || 0;
             const longitudeFactor = Math.min(
               4,
@@ -3350,6 +3806,7 @@
               poleCustomDrag.center = next;
               poleCustomDrag.lastX = event.clientX;
               poleCustomDrag.lastY = event.clientY;
+              queueDebugOverlayUpdate();
             } catch (_) {
             }
             event.preventDefault();
@@ -3363,6 +3820,7 @@
             pointerMoved = true;
             hideCardinalsAfterViewInteraction();
           }
+          queueDebugOverlayUpdate();
         },
         { capture: true }
       );
@@ -3398,14 +3856,10 @@
         },
         { capture: true }
       );
-      canvas.addEventListener(
-        "wheel",
-        () => {
-          hideCardinalsAfterViewInteraction();
-          persistViewSoon();
-        },
-        { passive: true }
-      );
+      canvas.addEventListener("wheel", handleMapScaleWheel, {
+        capture: true,
+        passive: false
+      });
       canvas.addEventListener("touchend", persistViewSoon, { passive: true });
       canvas.addEventListener(
         "mouseleave",
@@ -3417,16 +3871,18 @@
       document.body.classList.toggle("panel-open", state.panelOpen);
       document.body.classList.toggle("panel-collapsed", !state.panelOpen);
       if (persist) save();
+      updateDebugOverlay(true);
       setTimeout(scheduleSkyResize, 230);
     }
     function captureView() {
       try {
         return {
-          zoom: Number(Celestial.zoomBy()) || 1,
+          mapScale: getMapScale(),
+          internalZoom: getInternalZoom(),
           center: Celestial.rotate()
         };
       } catch (_) {
-        return { zoom: 1, center: null };
+        return { mapScale: getMapScale(), internalZoom: 1, center: null };
       }
     }
     function clearCelestialDataSelections() {
@@ -3501,18 +3957,23 @@
       save();
       updateProjectionHelp();
       updateHUD(false);
-      const target = desiredView(), metrics = prepareMapBox(projectionFitMetrics(next));
+      const target = desiredView();
+      state.mapScale = viewMapScale(target, state.mapScale);
+      applyMapBoxMetrics(projectionCanvasMetrics(next));
       try {
-        const current = Number(Celestial.zoomBy()) || 1;
-        if (current > 1.001) Celestial.zoomBy(1 / current);
+        resetInternalZoom();
         suppressResizeUntil = performance.now() + 520;
         Celestial.reproject({ projection: next, projectionRatio: null });
         setTimeout(() => {
           try {
-            Celestial.resize(metrics.width);
+            const nextMetrics = projectionCanvasMetrics(next);
+            Celestial.resize(nextMetrics.width);
+            resetInternalZoom();
+            syncRenderedMapBox(nextMetrics);
             restoreView(target);
             updateCardinalVisibility();
             updateCardinalGeometry();
+            updateDebugOverlay(true);
           } catch (err) {
             console.warn("Projection resize failed", err);
           }
@@ -3531,6 +3992,7 @@
       updateProjectionHelp();
       updateHUD(false);
       const target = desiredView();
+      state.mapScale = viewMapScale(target, state.mapScale);
       try {
         rebuildSkyPreservingPixels(target);
       } catch (err) {
@@ -3545,28 +4007,23 @@
       const c = document.querySelector("#celestial-map canvas");
       return c ? c.getBoundingClientRect() : null;
     }
-    function forwardMarginWheel(event) {
-      const canvas = document.querySelector("#celestial-map canvas"), rect = canvasRect();
-      if (!canvas || !rect) return;
-      const x = clamp(event.clientX, rect.left + 2, rect.right - 2), y = clamp(event.clientY, rect.top + 2, rect.bottom - 2);
-      const forwarded = new WheelEvent("wheel", {
-        deltaX: event.deltaX,
-        deltaY: event.deltaY,
-        deltaMode: event.deltaMode,
-        clientX: x,
-        clientY: y,
-        ctrlKey: event.ctrlKey,
-        shiftKey: event.shiftKey,
-        altKey: event.altKey,
-        metaKey: event.metaKey,
-        bubbles: true,
-        cancelable: true
-      });
-      canvas.dispatchEvent(forwarded);
+    function handleMapScaleWheel(event) {
+      if (event.target.closest && event.target.closest("#debug-overlay"))
+        return false;
+      if (!skyReady || !window.Celestial) return false;
+      const unit = event.deltaMode === 1 ? 36 : event.deltaMode === 2 ? window.innerHeight : 1, delta = Number(event.deltaY || 0) * unit, steps = -delta / 240, factor = Math.pow(mapScaleButtonFactor(), steps);
+      if (!Number.isFinite(factor) || Math.abs(factor - 1) < 1e-4) return false;
+      event.preventDefault();
+      event.stopPropagation();
+      if (typeof event.stopImmediatePropagation === "function")
+        event.stopImmediatePropagation();
+      scaleMapByFactor(factor);
+      queueDebugOverlayUpdate();
+      return true;
     }
     function beginPaneMarginDrag(event) {
       if (event.button !== 0 || event.target.closest(
-        "canvas,button,input,select,textarea,.info-card-rso,.fixed-tools"
+        "canvas,button,input,select,textarea,#debug-overlay,.info-card-rso,.fixed-tools"
       ))
         return;
       if (!skyReady || !window.Celestial) return;
@@ -3595,8 +4052,7 @@
       }
       const rect = canvasRect();
       if (!rect) return;
-      const zoom = Math.max(1, Number(Celestial.zoomBy()) || 1);
-      const degPerPx = 180 / Math.max(180, Math.min(rect.width, rect.height)) / zoom;
+      const degPerPx = 180 / Math.max(180, Math.min(rect.width, rect.height));
       const next = [
         paneDrag.center[0] - dx * degPerPx,
         clamp(paneDrag.center[1] + dy * degPerPx, -89.5, 89.5),
@@ -3606,6 +4062,7 @@
         Celestial.rotate({ center: next });
         Celestial.redraw();
         updateCardinalGeometry();
+        queueDebugOverlayUpdate();
       } catch (_) {
       }
       event.preventDefault();
@@ -3791,19 +4248,15 @@
       );
       $("zoom-in").addEventListener("click", () => {
         try {
-          hideCardinalsAfterViewInteraction();
-          Celestial.zoomBy(Number(cfg("interaction.zoomButtonFactor", 1.25)));
-          saveCurrentProjectionView();
-          save();
+          scaleMapByFactor(mapScaleButtonFactor());
+          updateDebugOverlay();
         } catch (_) {
         }
       });
       $("zoom-out").addEventListener("click", () => {
         try {
-          hideCardinalsAfterViewInteraction();
-          Celestial.zoomBy(1 / Number(cfg("interaction.zoomButtonFactor", 1.25)));
-          saveCurrentProjectionView();
-          save();
+          scaleMapByFactor(1 / mapScaleButtonFactor());
+          updateDebugOverlay();
         } catch (_) {
         }
       });
@@ -3811,25 +4264,21 @@
         try {
           const configured = cfg(`resetViews.${state.coordinateSystem}`, {
             center: [0, 0, 0],
-            zoom: 1
+            mapScale: 1
           });
-          const targetZoom = Math.max(
-            1,
-            Math.min(8, Number(configured.zoom) || 1)
-          );
+          const targetScale = viewMapScale(configured, defaults.mapScale);
           if (state.coordinateSystem === "horizontal") {
             updateSkyView(true);
             clearTimeout(customViewRestoreTimer);
             customViewRestoreTimer = setTimeout(() => {
               try {
-                const current = Number(Celestial.zoomBy()) || 1;
-                if (Math.abs(targetZoom - current) > 2e-3)
-                  Celestial.zoomBy(targetZoom / current);
+                setMapScale(targetScale);
+                resetInternalZoom();
                 Celestial.redraw();
                 const centre = Celestial.rotate();
                 state.projectionViews[viewKey()] = {
                   center: Array.isArray(centre) ? centre.slice() : [0, 0, 0],
-                  zoom: targetZoom
+                  mapScale: targetScale
                 };
                 updateCardinalGeometry();
                 showCardinalsForReset();
@@ -3841,11 +4290,11 @@
           } else {
             const v = {
               center: Array.isArray(configured.center) ? configured.center.slice() : [0, 0, 0],
-              zoom: targetZoom
+              mapScale: targetScale
             };
             state.projectionViews[viewKey()] = {
               center: v.center.slice(),
-              zoom: v.zoom
+              mapScale: v.mapScale
             };
             restoreView(v);
             showCardinalsForReset();
@@ -3906,9 +4355,7 @@
         "wheel",
         (e) => {
           if (!document.querySelector("#celestial-map canvas")) return;
-          e.preventDefault();
-          hideCardinalsAfterViewInteraction();
-          if (e.target.tagName !== "CANVAS") forwardMarginWheel(e);
+          handleMapScaleWheel(e);
         },
         { passive: false }
       );
@@ -3942,11 +4389,18 @@
           lastHudUpdate = now;
         }
       }
+      if (debugVisible && now - lastDebugUpdate > Number(cfg("debug.refreshMs", 350))) {
+        lastDebugUpdate = now;
+        updateDebugOverlay();
+      }
       requestAnimationFrame(animationLoop);
     }
     function init() {
       initializeIntegratedLayout();
+      initializeDebugTools();
       safeLoad();
+      applyInitialResponsivePanelState();
+      setPanel(state.panelOpen, false);
       if (!DateTime) {
         setLoading(true, t("loadFail"));
         return;
