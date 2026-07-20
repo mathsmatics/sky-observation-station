@@ -696,7 +696,27 @@ input[type="range"] {
 }
 .modal-head-actions {
   display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 7px;
+}
+.doc-pager {
+  display: inline-grid;
+  grid-template-columns: minmax(180px, 280px) auto;
+  align-items: center;
+  gap: 7px;
+}
+.doc-pager select {
+  width: 100%;
+  min-width: 0;
+}
+.doc-pager button {
+  min-width: 64px;
+}
+.doc-pager button:disabled {
+  cursor: default;
+  opacity: 0.42;
 }
 .modal-body {
   overflow: auto;
@@ -710,6 +730,9 @@ input[type="range"] {
   color: #d5e3f0;
   font-size: 12px;
   line-height: 1.83;
+}
+.doc-page[hidden] {
+  display: none;
 }
 .doc h3 {
   margin: 26px 0 8px;
@@ -874,10 +897,24 @@ body.lang-en [data-doc-lang="en"] {
     padding: 16px 14px 28px;
   }
   .modal-head {
+    align-items: flex-start;
+    flex-direction: column;
     padding: 12px;
   }
   .modal-head h2 {
     font-size: 13px;
+  }
+  .modal-head-actions {
+    justify-content: flex-start;
+    width: 100%;
+  }
+  .doc-pager {
+    grid-template-columns: minmax(0, 1fr) auto;
+    order: 3;
+    width: 100%;
+  }
+  .doc-pager button {
+    min-width: 0;
   }
   .doc {
     font-size: 11px;

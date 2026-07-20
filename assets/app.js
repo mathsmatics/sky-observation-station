@@ -830,6 +830,8 @@
         technicalGuideTitle: "\u4EE3\u7801\u3001\u5929\u6587\u8BA1\u7B97\u4E0E\u6570\u636E\u6765\u6E90\u8BF4\u660E",
         copyGuide: "\u590D\u5236\u8BF4\u660E",
         close: "\u5173\u95ED",
+        guideNextPage: "\u4E0B\u4E00\u7AE0",
+        guideSelectLabel: "\u9009\u62E9\u8BF4\u660E\u7AE0\u8282",
         chinese: "\u4E2D\u6587",
         english: "English",
         western: "\u897F\u65B9\u661F\u5EA7",
@@ -918,6 +920,8 @@
         technicalGuideTitle: "Code, astronomical calculations and data sources",
         copyGuide: "Copy guide",
         close: "Close",
+        guideNextPage: "Next",
+        guideSelectLabel: "Choose guide section",
         chinese: "\u4E2D\u6587",
         english: "English",
         western: "Western constellations",
@@ -1110,6 +1114,7 @@
     let resizeTimer = null;
     let applyTimer = null;
     let loadTimer = null;
+    const guidePageByLang = { zh: 0, en: 0 };
     let chineseLinesReady = false;
     let chineseNamesReady = false;
     let westernDualLinesReady = false;
@@ -1327,6 +1332,118 @@
       if (message) $("loading-text").textContent = message;
       el.classList.toggle("hidden", !on);
     }
+    function guideLang() {
+      return state.lang === "en" ? "en" : "zh";
+    }
+    function currentGuideArticle() {
+      return document.querySelector(`[data-doc-lang="${guideLang()}"]`);
+    }
+    function guidePages(article) {
+      return Array.from(article.children).filter(
+        (el) => el.classList.contains("doc-page")
+      );
+    }
+    function guidePageHasBody(elements) {
+      return elements.some(
+        (el) => el.tagName !== "H3" && String(el.textContent || "").trim().length > 0
+      );
+    }
+    function paginateGuideArticle(article) {
+      if (!article || article.dataset.paginated === "true") return;
+      const originalChildren = Array.from(article.children);
+      article.dataset.copyText = originalChildren.map((el) => String(el.innerText || el.textContent || "").trim()).filter(Boolean).join("\n\n");
+      const rawGroups = [];
+      let currentGroup = [];
+      originalChildren.forEach((el) => {
+        if (el.tagName === "H3" && currentGroup.length) {
+          rawGroups.push(currentGroup);
+          currentGroup = [];
+        }
+        currentGroup.push(el);
+      });
+      if (currentGroup.length) rawGroups.push(currentGroup);
+      const groups = [];
+      let pendingHeadings = [];
+      rawGroups.forEach((group) => {
+        if (!guidePageHasBody(group)) {
+          pendingHeadings = pendingHeadings.concat(group);
+          return;
+        }
+        groups.push(pendingHeadings.concat(group));
+        pendingHeadings = [];
+      });
+      if (pendingHeadings.length) {
+        if (groups.length) groups[groups.length - 1].push(...pendingHeadings);
+        else groups.push(pendingHeadings);
+      }
+      article.textContent = "";
+      groups.forEach((group, index) => {
+        const page = document.createElement("section");
+        page.className = "doc-page";
+        page.dataset.docPage = String(index);
+        group.forEach((el) => page.appendChild(el));
+        article.appendChild(page);
+      });
+      article.dataset.paginated = "true";
+    }
+    function initializeGuidePagination() {
+      document.querySelectorAll(".doc[data-doc-lang]").forEach((article) => paginateGuideArticle(article));
+    }
+    function guidePageTitle(page) {
+      const headings = Array.from(page.querySelectorAll("h3")).map((el) => String(el.textContent || "").trim()).filter(Boolean);
+      return headings[0] || (state.lang === "zh" ? "\u8BF4\u660E" : "Guide");
+    }
+    function updateGuidePaginationUI(scrollToTop = false) {
+      initializeGuidePagination();
+      const article = currentGuideArticle();
+      if (!article) return;
+      const pages = guidePages(article);
+      const total = pages.length || 1;
+      const lang = guideLang();
+      const index = Math.max(0, Math.min(guidePageByLang[lang], total - 1));
+      guidePageByLang[lang] = index;
+      pages.forEach((page, pageIndex) => {
+        page.hidden = pageIndex !== index;
+      });
+      const select = $("guide-page-select");
+      select.setAttribute("aria-label", t("guideSelectLabel"));
+      select.textContent = "";
+      pages.forEach((page, pageIndex) => {
+        const option = document.createElement("option");
+        option.value = String(pageIndex);
+        option.textContent = `${pageIndex + 1}. ${guidePageTitle(page)}`;
+        select.appendChild(option);
+      });
+      select.value = String(index);
+      $("guide-next-page").disabled = index >= total - 1;
+      if (scrollToTop) $("tech-modal").querySelector(".modal-body").scrollTop = 0;
+    }
+    function selectGuidePage(index) {
+      const article = currentGuideArticle();
+      if (!article) return;
+      const pages = guidePages(article);
+      const lang = guideLang();
+      guidePageByLang[lang] = Math.max(
+        0,
+        Math.min(index, Math.max(0, pages.length - 1))
+      );
+      updateGuidePaginationUI(true);
+    }
+    function setGuidePage(offset) {
+      const article = currentGuideArticle();
+      if (!article) return;
+      const pages = guidePages(article);
+      const lang = guideLang();
+      guidePageByLang[lang] = Math.max(
+        0,
+        Math.min(guidePageByLang[lang] + offset, Math.max(0, pages.length - 1))
+      );
+      updateGuidePaginationUI(true);
+    }
+    function openTechnicalGuide() {
+      $("tech-modal").classList.add("open");
+      updateGuidePaginationUI(true);
+    }
     function applyI18n() {
       document.documentElement.lang = state.lang === "zh" ? "zh-CN" : "en";
       document.body.classList.toggle("lang-en", state.lang === "en");
@@ -1355,6 +1472,7 @@
       updateSelectedObject();
       updateDebugToggleTitle();
       updateDebugOverlay(true);
+      updateGuidePaginationUI(false);
     }
     function syncControls() {
       $("observer-lat").value = Number(state.lat).toFixed(4);
@@ -4575,10 +4693,12 @@
         } catch (_) {
         }
       });
-      $("explain-btn").addEventListener(
-        "click",
-        () => $("tech-modal").classList.add("open")
+      $("explain-btn").addEventListener("click", openTechnicalGuide);
+      $("guide-page-select").addEventListener(
+        "change",
+        (e) => selectGuidePage(Number(e.target.value))
       );
+      $("guide-next-page").addEventListener("click", () => setGuidePage(1));
       $("close-modal").addEventListener(
         "click",
         () => $("tech-modal").classList.remove("open")
@@ -4598,7 +4718,9 @@
           state.lang === "zh" ? '[data-doc-lang="zh"]' : '[data-doc-lang="en"]'
         );
         try {
-          await navigator.clipboard.writeText(active.innerText);
+          await navigator.clipboard.writeText(
+            active.dataset.copyText || active.innerText
+          );
           showToast(t("copied"));
         } catch (_) {
           showToast(t("copyFail"), true);

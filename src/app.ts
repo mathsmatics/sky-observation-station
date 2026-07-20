@@ -138,6 +138,8 @@
       technicalGuideTitle: "代码、天文计算与数据来源说明",
       copyGuide: "复制说明",
       close: "关闭",
+      guideNextPage: "下一章",
+      guideSelectLabel: "选择说明章节",
       chinese: "中文",
       english: "English",
       western: "西方星座",
@@ -232,6 +234,8 @@
       technicalGuideTitle: "Code, astronomical calculations and data sources",
       copyGuide: "Copy guide",
       close: "Close",
+      guideNextPage: "Next",
+      guideSelectLabel: "Choose guide section",
       chinese: "中文",
       english: "English",
       western: "Western constellations",
@@ -443,6 +447,7 @@
   let resizeTimer = null;
   let applyTimer = null;
   let loadTimer = null;
+  const guidePageByLang = { zh: 0, en: 0 };
   let chineseLinesReady = false;
   let chineseNamesReady = false;
   let westernDualLinesReady = false;
@@ -732,6 +737,152 @@
     el.classList.toggle("hidden", !on);
   }
 
+  function guideLang() {
+    return state.lang === "en" ? "en" : "zh";
+  }
+
+  function currentGuideArticle() {
+    return document.querySelector(`[data-doc-lang="${guideLang()}"]`);
+  }
+
+  function guidePages(article) {
+    return Array.from(article.children).filter((el) =>
+      el.classList.contains("doc-page"),
+    );
+  }
+
+  function guidePageHasBody(elements) {
+    return elements.some(
+      (el) =>
+        el.tagName !== "H3" && String(el.textContent || "").trim().length > 0,
+    );
+  }
+
+  /**
+   * 将说明页正文按 h3 章节拆成页面。
+   *
+   * 输入是 index.html 中当前语言的 article，输出是在 article 内生成的
+   * section.doc-page。正文仍来自原始 HTML；这里不改写内容，只改变显示结构。
+   * 如果遇到没有正文的空章节标题，会并入后一个有内容的章节，避免翻到空页。
+   */
+  function paginateGuideArticle(article) {
+    if (!article || article.dataset.paginated === "true") return;
+
+    const originalChildren = Array.from(article.children);
+    article.dataset.copyText = originalChildren
+      .map((el) => String(el.innerText || el.textContent || "").trim())
+      .filter(Boolean)
+      .join("\n\n");
+
+    const rawGroups = [];
+    let currentGroup = [];
+    originalChildren.forEach((el) => {
+      if (el.tagName === "H3" && currentGroup.length) {
+        rawGroups.push(currentGroup);
+        currentGroup = [];
+      }
+      currentGroup.push(el);
+    });
+    if (currentGroup.length) rawGroups.push(currentGroup);
+
+    const groups = [];
+    let pendingHeadings = [];
+    rawGroups.forEach((group) => {
+      if (!guidePageHasBody(group)) {
+        pendingHeadings = pendingHeadings.concat(group);
+        return;
+      }
+      groups.push(pendingHeadings.concat(group));
+      pendingHeadings = [];
+    });
+    if (pendingHeadings.length) {
+      if (groups.length) groups[groups.length - 1].push(...pendingHeadings);
+      else groups.push(pendingHeadings);
+    }
+
+    article.textContent = "";
+    groups.forEach((group, index) => {
+      const page = document.createElement("section");
+      page.className = "doc-page";
+      page.dataset.docPage = String(index);
+      group.forEach((el) => page.appendChild(el));
+      article.appendChild(page);
+    });
+    article.dataset.paginated = "true";
+  }
+
+  function initializeGuidePagination() {
+    document
+      .querySelectorAll(".doc[data-doc-lang]")
+      .forEach((article) => paginateGuideArticle(article));
+  }
+
+  function guidePageTitle(page) {
+    const headings = Array.from(page.querySelectorAll("h3"))
+      .map((el) => String(el.textContent || "").trim())
+      .filter(Boolean);
+    return headings[0] || (state.lang === "zh" ? "说明" : "Guide");
+  }
+
+  function updateGuidePaginationUI(scrollToTop = false) {
+    initializeGuidePagination();
+    const article = currentGuideArticle();
+    if (!article) return;
+
+    const pages = guidePages(article);
+    const total = pages.length || 1;
+    const lang = guideLang();
+    const index = Math.max(0, Math.min(guidePageByLang[lang], total - 1));
+    guidePageByLang[lang] = index;
+
+    pages.forEach((page, pageIndex) => {
+      page.hidden = pageIndex !== index;
+    });
+
+    const select = $("guide-page-select");
+    select.setAttribute("aria-label", t("guideSelectLabel"));
+    select.textContent = "";
+    pages.forEach((page, pageIndex) => {
+      const option = document.createElement("option");
+      option.value = String(pageIndex);
+      option.textContent = `${pageIndex + 1}. ${guidePageTitle(page)}`;
+      select.appendChild(option);
+    });
+    select.value = String(index);
+    $("guide-next-page").disabled = index >= total - 1;
+
+    if (scrollToTop) $("tech-modal").querySelector(".modal-body").scrollTop = 0;
+  }
+
+  function selectGuidePage(index) {
+    const article = currentGuideArticle();
+    if (!article) return;
+    const pages = guidePages(article);
+    const lang = guideLang();
+    guidePageByLang[lang] = Math.max(
+      0,
+      Math.min(index, Math.max(0, pages.length - 1)),
+    );
+    updateGuidePaginationUI(true);
+  }
+
+  function setGuidePage(offset) {
+    const article = currentGuideArticle();
+    if (!article) return;
+    const pages = guidePages(article);
+    const lang = guideLang();
+    guidePageByLang[lang] = Math.max(
+      0,
+      Math.min(guidePageByLang[lang] + offset, Math.max(0, pages.length - 1)),
+    );
+    updateGuidePaginationUI(true);
+  }
+
+  function openTechnicalGuide() {
+    $("tech-modal").classList.add("open");
+    updateGuidePaginationUI(true);
+  }
+
   function applyI18n() {
     document.documentElement.lang = state.lang === "zh" ? "zh-CN" : "en";
     document.body.classList.toggle("lang-en", state.lang === "en");
@@ -767,6 +918,7 @@
     updateSelectedObject();
     updateDebugToggleTitle();
     updateDebugOverlay(true);
+    updateGuidePaginationUI(false);
   }
 
   function syncControls() {
@@ -4534,9 +4686,11 @@
         else await document.exitFullscreen();
       } catch (_) {}
     });
-    $("explain-btn").addEventListener("click", () =>
-      $("tech-modal").classList.add("open"),
+    $("explain-btn").addEventListener("click", openTechnicalGuide);
+    $("guide-page-select").addEventListener("change", (e) =>
+      selectGuidePage(Number(e.target.value)),
     );
+    $("guide-next-page").addEventListener("click", () => setGuidePage(1));
     $("close-modal").addEventListener("click", () =>
       $("tech-modal").classList.remove("open"),
     );
@@ -4555,7 +4709,9 @@
         state.lang === "zh" ? '[data-doc-lang="zh"]' : '[data-doc-lang="en"]',
       );
       try {
-        await navigator.clipboard.writeText(active.innerText);
+        await navigator.clipboard.writeText(
+          active.dataset.copyText || active.innerText,
+        );
         showToast(t("copied"));
       } catch (_) {
         showToast(t("copyFail"), true);

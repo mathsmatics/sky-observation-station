@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <meta content="dark" name="color-scheme" />
-    <title>真实星空观测台 4.8 本地版 · Real Sky Observatory</title>
+    <title>真实星空观测台 5.1.4 本地版 · Real Sky Observatory</title>
     <link href="vendor/d3-celestial/celestial.css" rel="stylesheet" />
     <link href="assets/app.css" rel="stylesheet" />
   </head>
@@ -23,7 +23,7 @@
     <header class="topbar">
       <div class="brand glass">
         <div class="brand-main">
-          <i class="signal"></i><span>REAL SKY OBSERVATORY 4.8</span>
+          <i class="signal"></i><span>REAL SKY OBSERVATORY 5.1.4</span>
         </div>
         <div class="brand-sub" data-i18n="brandSub">
           真实地点 × 真实时间 × 真实星表 × 双天文文化
@@ -604,6 +604,12 @@
             代码、天文计算与数据来源说明
           </h2>
           <div class="modal-head-actions">
+            <div class="doc-pager" aria-label="说明页章节翻页">
+              <select id="guide-page-select" aria-label="选择说明章节"></select>
+              <button data-i18n="guideNextPage" id="guide-next-page">
+                下一章
+              </button>
+            </div>
             <button data-i18n="copyGuide" id="copy-guide">复制说明</button>
             <button data-i18n="close" id="close-modal">关闭</button>
           </div>
@@ -612,7 +618,7 @@
           <article class="doc" data-doc-lang="zh">
             <h3>1. 项目目标、适用范围与总体架构</h3>
             <p>
-              真实星空观测台 4.8
+              真实星空观测台 5.1.4
               是一个完全本地化的浏览器天文馆。它不是随机星点动画，而是读取真实恒星目录、现代西方星座、中国传统星官、银河轮廓和太阳系天体数据，以观测者的经纬度、IANA
               时区和 UTC
               时刻为输入，计算并绘制当前天空。适合肉眼认星、天文文化比较、天球坐标教学和一般观测规划；不替代专业天体测量、精密历表、赤道仪自动指向或天文摄影规划软件。
@@ -621,6 +627,7 @@
               <b>中文显示说明：</b
               >部分中国星官、星名和传统天区的上游资料采用繁体字。本版本已将面向用户显示的中文统一转换为简体字；仅转换文字，不修改恒星坐标、星官连线、目录编号或区域几何。
             </p>
+            <h3>4A. 初学者如何理解 14 种投影</h3>
             <table>
               <thead>
                 <tr>
@@ -934,7 +941,6 @@
               和等距圆柱属于全天展开图，适合比较整个天球的分布；HEALPix、Mercator、Robinson
               和 Sinusoidal 更偏科学分区、局部保角或折衷展示。
             </p>
-            <h3>4A. 初学者如何理解 14 种投影</h3>
             <h3>5. 恒星、名称、星座、星官和区域图层</h3>
             <p>
               恒星图层使用约 6 等以内的目录。恒星显示条件是
@@ -1210,11 +1216,12 @@
               天气、光污染和地形图层 / 手机陀螺仪与 AR 指向 /
               多套历史中国星图版本对照。
             </p>
+            <p><strong>说明页版本号：</strong>5.1.4</p>
           </article>
           <article class="doc" data-doc-lang="en">
             <h3>1. Purpose, scope and architecture</h3>
             <p>
-              Real Sky Observatory 4.8 is a fully local browser planetarium. It
+              Real Sky Observatory 5.1.4 is a fully local browser planetarium. It
               is not a random star field: it reads real stellar, constellation,
               Chinese asterism, Milky Way and Solar System datasets, combines
               them with the observer's coordinates, IANA time zone and UTC
@@ -1378,6 +1385,7 @@
               transforms are the only operation requiring catalog conversion,
               protected by a rebuild lock and generation token.
             </p>
+            <h3>4A. A beginner’s guide to the 14 projections</h3>
             <p>
               A celestial sphere is curved while the screen is flat, so every
               all-sky projection has distortion. Projection changes only how
@@ -1395,7 +1403,6 @@
               hides them. Version 4.8 deliberately retains the v4.0 canvas
               sizing, natural projection ratio and complete initial-view logic.
             </p>
-            <h3>4A. A beginner’s guide to the 14 projections</h3>
             <h3>5. Stars, names and sky cultures</h3>
             <p>
               The stellar limit is a catalog filter,
@@ -1613,6 +1620,7 @@
               mobile sensors and multiple historical Chinese sky
               reconstructions.
             </p>
+            <p><strong>Guide version:</strong> 5.1.4</p>
           </article>
         </div>
       </div>
