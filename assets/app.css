@@ -66,13 +66,21 @@ button {
   transform: translate(-50%, -50%);
   width: auto;
   height: auto;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: none !important;
+  max-height: none !important;
+  box-sizing: border-box;
 }
 #celestial-map canvas,
 #celestial-map svg {
   display: block !important;
   margin: 0 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
   max-width: none !important;
   max-height: none !important;
+  box-sizing: border-box;
 }
 #sky-stage::after {
   content: "";
@@ -1023,6 +1031,11 @@ body.panel-collapsed #sidebar {
   transform: translate(-50%, -50%);
   width: auto;
   height: auto;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: none !important;
+  max-height: none !important;
+  box-sizing: border-box;
   cursor: grab;
   touch-action: none;
   user-select: none;
@@ -1034,8 +1047,11 @@ body.panel-collapsed #sidebar {
 #celestial-map svg {
   display: block !important;
   margin: 0 !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
   max-width: none !important;
   max-height: none !important;
+  box-sizing: border-box;
   touch-action: none;
   user-select: none;
 }
@@ -1303,17 +1319,6 @@ select optgroup {
     width: 42px;
     height: 42px;
   }
-  #debug-toggle {
-    left: calc(max(8px, env(safe-area-inset-left)) + 50px);
-    top: max(8px, env(safe-area-inset-top));
-    width: 46px;
-    height: 42px;
-  }
-  #debug-overlay {
-    max-width: min(390px, calc(100% - 12px));
-    max-height: min(68dvh, calc(100% - 12px));
-    font-size: 9px;
-  }
   input[type="number"],
   input[type="datetime-local"],
   input[type="text"],
@@ -1442,7 +1447,7 @@ select optgroup {
 }
 #panel-toggle.panel-toggle-button {
   position: fixed;
-  z-index: 30;
+  z-index: 80;
   left: var(--panel-toggle-left, 8px);
   top: var(--panel-toggle-top, 8px);
   width: var(--panel-toggle-size, 36px);
@@ -1454,14 +1459,12 @@ select optgroup {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
 }
 #debug-toggle {
-  position: absolute;
-  z-index: 31;
-  left: calc(
-    var(--panel-toggle-left, 8px) + var(--panel-toggle-size, 36px) + 8px
-  );
-  top: var(--panel-toggle-top, 8px);
-  width: 46px;
-  height: var(--panel-toggle-size, 36px);
+  position: fixed;
+  z-index: 80;
+  left: var(--debug-toggle-left, 56px);
+  top: var(--debug-toggle-top, 8px);
+  width: var(--debug-toggle-width, 46px);
+  height: var(--debug-toggle-height, 36px);
   min-width: 0;
   min-height: 0;
   padding: 0;
@@ -1484,12 +1487,12 @@ select optgroup {
   position: absolute;
   z-index: 26;
   display: none;
-  left: var(--panel-toggle-left, 8px);
-  top: var(--panel-toggle-top, 8px);
-  max-width: min(560px, calc(100% - 12px));
-  max-height: min(70dvh, calc(100% - 16px));
+  left: var(--debug-overlay-left, 8px);
+  top: var(--debug-overlay-top, 8px);
+  max-width: min(var(--debug-overlay-width, 560px), calc(100% - 12px));
+  max-height: min(var(--debug-overlay-max-height, 70dvh), calc(100% - 16px));
   margin: 0;
-  padding: calc(var(--panel-toggle-size, 36px) + 18px) 9px 8px;
+  padding: var(--debug-overlay-padding, 8px 9px);
   overflow: auto;
   overscroll-behavior: contain;
   border: 1px solid rgba(119, 220, 255, 0.35);
@@ -1500,11 +1503,66 @@ select optgroup {
     10px/1.45 Consolas,
     "Cascadia Mono",
     monospace;
-  white-space: pre-wrap;
+  white-space: normal;
   pointer-events: auto;
   touch-action: pan-y;
   user-select: text;
   text-shadow: 0 1px 2px #000;
+}
+.debug-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  justify-content: flex-end;
+  padding-bottom: 4px;
+}
+#debug-copy {
+  min-width: 0;
+  min-height: 0;
+  height: 24px;
+  padding: 0 8px;
+  border: 1px solid rgba(119, 220, 255, 0.3);
+  border-radius: 7px;
+  background: rgba(8, 19, 36, 0.9);
+  color: rgba(229, 244, 255, 0.94);
+  font-size: 10px;
+  font-weight: 750;
+  line-height: 1;
+  white-space: nowrap;
+}
+.debug-group {
+  margin: 7px 0 2px;
+  color: rgba(119, 220, 255, 0.96);
+  font-weight: 850;
+}
+.debug-group:first-child {
+  margin-top: 0;
+}
+.debug-line {
+  white-space: pre-wrap;
+}
+.debug-key {
+  color: #61d394;
+  font-weight: 750;
+}
+.debug-value {
+  color: rgba(229, 244, 255, 0.96);
+}
+.debug-sep,
+.debug-unit {
+  color: rgba(150, 170, 190, 0.82);
+}
+.debug-ok {
+  color: #70e1ac;
+  font-weight: 850;
+}
+.debug-warn {
+  color: #ffd477;
+  font-weight: 850;
+}
+.debug-blank {
+  height: 6px;
 }
 #sidebar-head {
   padding-top: 52px;
@@ -1547,17 +1605,23 @@ select optgroup {
     text-overflow: ellipsis;
   }
   #debug-toggle {
-    left: calc(max(8px, env(safe-area-inset-left)) + 50px);
-    top: max(8px, env(safe-area-inset-top));
-    width: 46px;
-    height: 42px;
+    left: var(
+      --debug-touch-toggle-left,
+      calc(max(8px, env(safe-area-inset-left)) + 50px)
+    );
+    top: var(--debug-touch-toggle-top, max(8px, env(safe-area-inset-top)));
+    width: var(--debug-touch-toggle-width, 46px);
+    height: var(--debug-touch-toggle-height, 42px);
   }
   #debug-overlay {
-    left: max(8px, env(safe-area-inset-left));
-    top: max(8px, env(safe-area-inset-top));
-    max-width: min(390px, calc(100% - 12px));
-    max-height: min(68dvh, calc(100% - 12px));
-    padding-top: 60px;
+    left: var(--debug-touch-overlay-left, max(8px, env(safe-area-inset-left)));
+    top: var(--debug-touch-overlay-top, max(8px, env(safe-area-inset-top)));
+    max-width: min(var(--debug-touch-overlay-width, 390px), calc(100% - 12px));
+    max-height: min(
+      var(--debug-touch-overlay-max-height, 68dvh),
+      calc(100% - 12px)
+    );
+    padding-top: var(--debug-touch-overlay-padding-top, 8px);
     font-size: 9px;
   }
   .view-tools-grid {

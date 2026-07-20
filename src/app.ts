@@ -467,6 +467,9 @@
     debugVisible =
       !!cfg("debug.enabled", false) && !!cfg("debug.defaultOpen", false),
     lastDebugUpdate = 0,
+    lastDebugPlainText = "",
+    debugCopyStatus = "idle",
+    debugCopyTimer = null,
     debugFramePending = false,
     layoutResizeGeneration = 0;
   const STAR_NAMES =
@@ -1232,13 +1235,6 @@
     if (isMobileLayout()) state.panelOpen = false;
   }
 
-  function formatRect(rect) {
-    if (!rect) return "-";
-    return `${Math.round(rect.width)}x${Math.round(rect.height)} @ ${Math.round(
-      rect.left,
-    )},${Math.round(rect.top)}`;
-  }
-
   function elementRect(selector) {
     const el = document.querySelector(selector);
     return el ? el.getBoundingClientRect() : null;
@@ -1260,14 +1256,202 @@
     return Number.isFinite(number) ? `${number.toFixed(2)}°` : "-";
   }
 
-  function formatPoint(x, y) {
-    return `${Math.round(Number(x) || 0)},${Math.round(Number(y) || 0)}`;
-  }
-
   function formatSigned(value) {
     const number = Number(value);
     if (!Number.isFinite(number)) return "-";
     return `${number >= 0 ? "+" : ""}${number.toFixed(1)}`;
+  }
+
+  function debugResponsiveMode() {
+    const coarse =
+        window.matchMedia && window.matchMedia("(pointer: coarse)").matches,
+      hover = window.matchMedia && window.matchMedia("(hover: hover)").matches,
+      narrow = window.innerWidth <= 800,
+      veryNarrow = window.innerWidth <= 520;
+    if (coarse && !hover && narrow) return "touch-overlay";
+    if (veryNarrow || narrow) return "desktop-compact";
+    return "desktop-docked";
+  }
+
+  function debugPointerInfo(zh) {
+    const coarse =
+        window.matchMedia && window.matchMedia("(pointer: coarse)").matches,
+      fine = window.matchMedia && window.matchMedia("(pointer: fine)").matches,
+      hover = window.matchMedia && window.matchMedia("(hover: hover)").matches;
+    return {
+      pointer: coarse
+        ? zh
+          ? "coarse 触摸"
+          : "coarse"
+        : fine
+          ? zh
+            ? "fine 鼠标/触控板"
+            : "fine"
+          : zh
+            ? "未知"
+            : "unknown",
+      hover: hover ? (zh ? "hover 支持" : "hover") : zh ? "无 hover" : "none",
+    };
+  }
+
+  function debugSpan(text, className) {
+    const span = document.createElement("span");
+    span.className = className;
+    span.textContent = String(text);
+    return span;
+  }
+
+  function debugValue(text) {
+    return debugSpan(text, "debug-value");
+  }
+
+  function debugSep(text) {
+    return debugSpan(text, "debug-sep");
+  }
+
+  function debugUnit(text) {
+    return debugSpan(text, "debug-unit");
+  }
+
+  function debugGroup(title) {
+    const el = document.createElement("div");
+    el.className = "debug-group";
+    el.textContent = title;
+    return el;
+  }
+
+  function debugLine(label, parts = []) {
+    const el = document.createElement("div");
+    el.className = "debug-line";
+    el.append(
+      debugSpan(label, "debug-key"),
+      debugSep(": "),
+      ...(Array.isArray(parts) ? parts : [debugValue(parts)]),
+    );
+    return el;
+  }
+
+  function debugBlankLine() {
+    const el = document.createElement("div");
+    el.className = "debug-blank";
+    return el;
+  }
+
+  function debugSizeParts(width, height) {
+    return [
+      debugValue(Math.round(Number(width) || 0)),
+      debugSep("x"),
+      debugValue(Math.round(Number(height) || 0)),
+    ];
+  }
+
+  function debugRectParts(rect) {
+    if (!rect) return [debugValue("-")];
+    return [
+      ...debugSizeParts(rect.width, rect.height),
+      debugSep(" @ "),
+      debugValue(Math.round(rect.left)),
+      debugSep(","),
+      debugValue(Math.round(rect.top)),
+    ];
+  }
+
+  function debugPointParts(point) {
+    if (!point) return [debugValue("-")];
+    return [
+      debugValue(Math.round(point.x)),
+      debugSep(","),
+      debugValue(Math.round(point.y)),
+    ];
+  }
+
+  function debugCenterDeltaParts(delta) {
+    if (!delta) return [debugValue("-")];
+    return [
+      debugSep("X="),
+      debugValue(formatSigned(delta.x)),
+      debugUnit("px"),
+      debugSep(" Y="),
+      debugValue(formatSigned(delta.y)),
+      debugUnit("px"),
+    ];
+  }
+
+  function debugScaleParts(value) {
+    return [debugValue(Number(value || 0).toFixed(3)), debugUnit("x")];
+  }
+
+  function debugMetricStatus(ok, zh) {
+    return debugSpan(
+      ok ? "OK" : zh ? "MISMATCH 尺寸不一致" : "MISMATCH",
+      ok ? "debug-ok" : "debug-warn",
+    );
+  }
+
+  function debugCopyText(status = "idle") {
+    const zh = state.lang !== "en";
+    if (status === "copied") return zh ? "已复制" : "Copied";
+    if (status === "failed") return zh ? "复制失败" : "Copy failed";
+    return zh ? "复制" : "Copy";
+  }
+
+  function setDebugCopyButtonStatus(status = "idle") {
+    debugCopyStatus = status;
+    const button = $("debug-copy");
+    if (!button) return;
+    button.textContent = debugCopyText(status);
+  }
+
+  async function copyDebugPlainText() {
+    const button = $("debug-copy"),
+      text = lastDebugPlainText || "";
+    clearTimeout(debugCopyTimer);
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.left = "-9999px";
+        textarea.style.top = "0";
+        document.body.appendChild(textarea);
+        textarea.select();
+        const copied = document.execCommand("copy");
+        textarea.remove();
+        if (!copied) throw new Error("execCommand copy returned false");
+      }
+      if (button) setDebugCopyButtonStatus("copied");
+    } catch (_) {
+      if (button) setDebugCopyButtonStatus("failed");
+    }
+    debugCopyTimer = setTimeout(() => setDebugCopyButtonStatus("idle"), 1300);
+  }
+
+  function ensureDebugOverlayStructure(overlay) {
+    let toolbar = overlay.querySelector(".debug-toolbar"),
+      copy = $("debug-copy"),
+      content = overlay.querySelector(".debug-content");
+    if (!toolbar) {
+      toolbar = document.createElement("div");
+      toolbar.className = "debug-toolbar";
+      overlay.appendChild(toolbar);
+    }
+    if (!copy) {
+      copy = document.createElement("button");
+      copy.id = "debug-copy";
+      copy.type = "button";
+      copy.addEventListener("click", copyDebugPlainText);
+    }
+    if (copy.parentElement !== toolbar) toolbar.appendChild(copy);
+    if (!content) {
+      content = document.createElement("div");
+      content.className = "debug-content";
+      overlay.appendChild(content);
+    }
+    copy.textContent = debugCopyText(debugCopyStatus);
+    return content;
   }
 
   function getInternalZoom() {
@@ -1316,6 +1500,7 @@
     if (!debugVisible && !force) return;
     const overlay = $("debug-overlay");
     if (!overlay) return;
+    const content = ensureDebugOverlayStructure(overlay);
     const zh = state.lang !== "en",
       bool = (value) => (zh ? (value ? "开" : "关") : value ? "on" : "off");
     const coordName =
@@ -1357,12 +1542,23 @@
             interactionGroup: "【天球交互参数】",
             layerGroup: "【图层与显示选项】",
             viewport: "浏览器视口 window",
+            layoutMode: "当前响应式布局模式",
+            pointer: "指针类型",
+            hover: "hover 能力",
+            sidebar: "左侧菜单 #sidebar",
+            panelToggle: "菜单按钮 #panel-toggle",
+            debugOverlay: "调试面板 #debug-overlay",
             pane: "星图区可用区域 #sky-pane",
             stage: "星图背景层 #sky-stage",
             frame: "星图容器外框 #celestial-frame",
             map: "D3-Celestial 地图容器 #celestial-map",
+            mapComputedMinWidth: "#celestial-map 计算后 min-width",
             canvasCss: "真实星图画布 CSS 尺寸",
+            canvasCenter: "Canvas 中心",
+            canvasCenterDelta: "Canvas 中心相对背景中心偏差",
             canvasAttr: "真实星图画布像素分辨率",
+            svgCss: "SVG 图层 CSS 尺寸",
+            sizeConsistency: "map / canvas / svg 尺寸一致性",
             dpr: "设备像素比 DPR",
             paneCenter: "背景中心",
             targetMap: "目标地图尺寸",
@@ -1419,12 +1615,23 @@
             interactionGroup: "【Celestial Interaction】",
             layerGroup: "【Layers & Display Options】",
             viewport: "browser viewport window",
+            layoutMode: "responsive layout mode",
+            pointer: "pointer type",
+            hover: "hover capability",
+            sidebar: "sidebar #sidebar",
+            panelToggle: "panel toggle #panel-toggle",
+            debugOverlay: "debug overlay #debug-overlay",
             pane: "sky pane #sky-pane",
             stage: "stage #sky-stage",
             frame: "frame #celestial-frame",
             map: "D3-Celestial map #celestial-map",
+            mapComputedMinWidth: "#celestial-map computed min-width",
             canvasCss: "real sky canvas CSS size",
+            canvasCenter: "canvas center",
+            canvasCenterDelta: "canvas center delta from pane",
             canvasAttr: "real sky canvas pixel size",
+            svgCss: "SVG layer CSS size",
+            sizeConsistency: "map / canvas / svg size consistency",
             dpr: "device pixel ratio DPR",
             paneCenter: "pane center",
             targetMap: "target map size",
@@ -1476,16 +1683,21 @@
           };
     const pane = $("sky-pane"),
       canvas = document.querySelector("#celestial-map canvas"),
+      svg = document.querySelector("#celestial-map svg"),
       metrics = projectionCanvasMetrics(),
       celestialMetrics =
         window.Celestial && typeof Celestial.metrics === "function"
           ? Celestial.metrics()
           : null;
     const paneRect = pane ? pane.getBoundingClientRect() : null,
+      sidebarRect = elementRect("#sidebar"),
+      panelToggleRect = elementRect("#panel-toggle"),
+      overlayRect = overlay.getBoundingClientRect(),
       stageRect = elementRect("#sky-stage"),
       frameRect = elementRect("#celestial-frame"),
       mapRect = elementRect("#celestial-map"),
       canvasRect = canvas ? canvas.getBoundingClientRect() : null,
+      svgRect = svg ? svg.getBoundingClientRect() : null,
       paneCenter = paneRect
         ? {
             x: paneRect.left + paneRect.width / 2,
@@ -1498,87 +1710,180 @@
             y: mapRect.top + mapRect.height / 2,
           }
         : null,
+      canvasCenter = canvasRect
+        ? {
+            x: canvasRect.left + canvasRect.width / 2,
+            y: canvasRect.top + canvasRect.height / 2,
+          }
+        : null,
       centerDelta =
         paneCenter && mapCenter
           ? { x: mapCenter.x - paneCenter.x, y: mapCenter.y - paneCenter.y }
+          : null,
+      canvasCenterDelta =
+        paneCenter && canvasCenter
+          ? {
+              x: canvasCenter.x - paneCenter.x,
+              y: canvasCenter.y - paneCenter.y,
+            }
           : null;
+    const pointerInfo = debugPointerInfo(zh),
+      mapStyle = mapRect ? getComputedStyle($("celestial-map")) : null,
+      sameSize = (a, b) =>
+        !a ||
+        !b ||
+        (Math.abs(a.width - b.width) <= 1 &&
+          Math.abs(a.height - b.height) <= 1),
+      matchesTarget = (rect) =>
+        !rect ||
+        (Math.abs(rect.width - metrics.width) <= 1 &&
+          Math.abs(rect.height - metrics.height) <= 1),
+      sizesOk =
+        matchesTarget(mapRect) &&
+        matchesTarget(canvasRect) &&
+        matchesTarget(svgRect) &&
+        sameSize(mapRect, canvasRect) &&
+        sameSize(canvasRect, svgRect);
     overlay.style.display = debugVisible ? "block" : "none";
-    overlay.textContent = [
-      label.viewportGroup,
-      `${label.viewport}: ${window.innerWidth}x${window.innerHeight}`,
-      `${label.dpr}: ${Number(window.devicePixelRatio || 1).toFixed(2)}`,
-      `${label.pane}: ${formatRect(paneRect)}`,
-      `${label.stage}: ${formatRect(stageRect)}`,
-      `${label.frame}: ${formatRect(frameRect)}`,
-      "",
-      label.canvasGroup,
-      `${label.targetMap}: ${metrics.width}x${metrics.height}`,
-      `${label.baseShortSide}: ${metrics.baseShortSide}px`,
-      `${label.projectionRatio}: ${Number(metrics.ratio || 0).toFixed(3)}`,
-      `${label.mapScale}: ${Number(metrics.scale || 1).toFixed(3)}x`,
-      `${label.overflow}: X=${Math.round(metrics.overflowX)}px Y=${Math.round(metrics.overflowY)}px`,
-      `${label.paneCenter}: ${
-        paneCenter ? formatPoint(paneCenter.x, paneCenter.y) : "-"
-      }`,
-      `${label.mapCenter}: ${
-        mapCenter ? formatPoint(mapCenter.x, mapCenter.y) : "-"
-      }`,
-      `${label.centerDelta}: ${
-        centerDelta
-          ? `X=${formatSigned(centerDelta.x)}px Y=${formatSigned(centerDelta.y)}px`
-          : "-"
-      }`,
-      `${label.map}: ${formatRect(mapRect)}`,
-      `${label.canvasCss}: ${formatRect(canvasRect)}`,
-      `${label.canvasAttr}: ${canvas ? `${canvas.width}x${canvas.height}` : "-"}`,
-      `${label.celestial}: ${
+    content.replaceChildren(
+      debugGroup(label.viewportGroup),
+      debugLine(
+        label.viewport,
+        debugSizeParts(window.innerWidth, window.innerHeight),
+      ),
+      debugLine(label.dpr, [
+        debugValue(Number(window.devicePixelRatio || 1).toFixed(2)),
+      ]),
+      debugLine(label.layoutMode, [debugValue(debugResponsiveMode())]),
+      debugLine(label.pointer, [debugValue(pointerInfo.pointer)]),
+      debugLine(label.hover, [debugValue(pointerInfo.hover)]),
+      debugLine(label.sidebar, debugRectParts(sidebarRect)),
+      debugLine(label.panelToggle, debugRectParts(panelToggleRect)),
+      debugLine(label.debugOverlay, debugRectParts(overlayRect)),
+      debugLine(label.pane, debugRectParts(paneRect)),
+      debugLine(label.stage, debugRectParts(stageRect)),
+      debugLine(label.frame, debugRectParts(frameRect)),
+      debugBlankLine(),
+      debugGroup(label.canvasGroup),
+      debugLine(label.targetMap, debugSizeParts(metrics.width, metrics.height)),
+      debugLine(label.baseShortSide, [
+        debugValue(metrics.baseShortSide),
+        debugUnit("px"),
+      ]),
+      debugLine(label.projectionRatio, [
+        debugValue(Number(metrics.ratio || 0).toFixed(3)),
+      ]),
+      debugLine(label.mapScale, debugScaleParts(metrics.scale)),
+      debugLine(label.overflow, [
+        debugSep("X="),
+        debugValue(Math.round(metrics.overflowX)),
+        debugUnit("px"),
+        debugSep(" Y="),
+        debugValue(Math.round(metrics.overflowY)),
+        debugUnit("px"),
+      ]),
+      debugLine(label.paneCenter, debugPointParts(paneCenter)),
+      debugLine(label.mapCenter, debugPointParts(mapCenter)),
+      debugLine(label.centerDelta, debugCenterDeltaParts(centerDelta)),
+      debugLine(label.canvasCenter, debugPointParts(canvasCenter)),
+      debugLine(
+        label.canvasCenterDelta,
+        debugCenterDeltaParts(canvasCenterDelta),
+      ),
+      debugLine(label.map, debugRectParts(mapRect)),
+      debugLine(label.mapComputedMinWidth, [
+        debugValue(mapStyle ? mapStyle.minWidth : "-"),
+      ]),
+      debugLine(label.canvasCss, debugRectParts(canvasRect)),
+      debugLine(
+        label.canvasAttr,
+        canvas
+          ? debugSizeParts(canvas.width, canvas.height)
+          : [debugValue("-")],
+      ),
+      debugLine(label.svgCss, debugRectParts(svgRect)),
+      debugLine(label.sizeConsistency, [debugMetricStatus(sizesOk, zh)]),
+      debugLine(
+        label.celestial,
         celestialMetrics
-          ? `${Math.round(celestialMetrics.width)}x${Math.round(
-              celestialMetrics.height,
-            )} scale=${Number(celestialMetrics.scale || 0).toFixed(2)}`
-          : "-"
-      }`,
-      "",
-      label.viewGroup,
-      `${label.projection}: ${state.projection}`,
-      `${label.coords}: ${coordName}`,
-      `${label.culture}: ${cultureLabel}`,
-      `${label.language}: ${languageName}`,
-      `${label.viewKey}: ${viewKey()}`,
-      `${label.viewCenter}: ${viewCenter}`,
-      `${label.mapScale}: ${view.mapScale.toFixed(3)}x`,
-      `${label.internalZoom}: ${view.internalZoom.toFixed(3)}x`,
-      "",
-      label.interactionGroup,
-      `${label.interaction}: ${debugDragMode(zh)}`,
-      `${label.dragMoved}: ${bool(pointerMoved)} ${label.clickPending}: ${bool(!!clickStart)}`,
-      `${label.dragThreshold}: ${cfg("interaction.dragThreshold", 5)}px`,
-      `${label.dragSensitivity}: ${cfg("interaction.dragSensitivity", 1)}`,
-      `${label.maxDragStep}: ${cfg("interaction.maxDragStepPixels", 28)}px`,
-      `${label.poleGuard}: ${formatAngle(cfg("interaction.poleLockStart", 82))} ${label.poleClamp}: ${formatAngle(cfg("interaction.poleLatitudeClamp", 89.2))}`,
-      "",
-      label.layerGroup,
-      `  ${label.starLimit}: ${state.magnitude}`,
-      `  ${label.starSize}: ${state.starSize}px`,
-      `  ${label.starNames}: ${bool(state.starNames)}`,
-      `  ${label.cultureLines}: ${bool(state.cultureLines)}`,
-      `  ${label.cultureNames}: ${bool(state.cultureNames)}`,
-      `  ${label.planets}: ${bool(state.planets)}`,
-      `  ${label.milkyWay}: ${bool(state.milkyWay)}`,
-      `  ${label.grid}: ${bool(state.grid)}`,
-      `  ${label.ecliptic}: ${bool(state.ecliptic)}`,
-      `  ${label.equator}: ${bool(state.equator)}`,
-      `  ${label.horizon}: ${bool(state.horizon)}`,
-      `  ${label.daylight}: ${bool(state.daylight)}`,
-      `  ${label.nightVision}: ${bool(state.nightVision)}`,
-      `  ${label.deepSky}: ${bool(state.deepSky)}`,
-      `  ${label.regionBoundaries}: ${bool(state.regionBoundaries)}`,
-      `  ${label.detail}: ${detailName}`,
-      `${label.time}: ${label.playing}=${bool(playing)} ${label.speed}=${state.speed}x`,
-      `${label.panelOpen}: ${bool(state.panelOpen)}`,
-      `${label.skyReady}: ${bool(skyReady)}`,
-      `${label.rebuild}: ${bool(rebuildInProgress)}`,
-    ].join("\n");
+          ? [
+              ...debugSizeParts(
+                celestialMetrics.width,
+                celestialMetrics.height,
+              ),
+              debugSep(" scale="),
+              debugValue(Number(celestialMetrics.scale || 0).toFixed(2)),
+            ]
+          : [debugValue("-")],
+      ),
+      debugBlankLine(),
+      debugGroup(label.viewGroup),
+      debugLine(label.projection, [debugValue(state.projection)]),
+      debugLine(label.coords, [debugValue(coordName)]),
+      debugLine(label.culture, [debugValue(cultureLabel)]),
+      debugLine(label.language, [debugValue(languageName)]),
+      debugLine(label.viewKey, [debugValue(viewKey())]),
+      debugLine(label.viewCenter, [debugValue(viewCenter)]),
+      debugLine(label.mapScale, debugScaleParts(view.mapScale)),
+      debugLine(label.internalZoom, debugScaleParts(view.internalZoom)),
+      debugBlankLine(),
+      debugGroup(label.interactionGroup),
+      debugLine(label.interaction, [debugValue(debugDragMode(zh))]),
+      debugLine(label.dragMoved, [
+        debugValue(bool(pointerMoved)),
+        debugSep(` ${label.clickPending}=`),
+        debugValue(bool(!!clickStart)),
+      ]),
+      debugLine(label.dragThreshold, [
+        debugValue(cfg("interaction.dragThreshold", 5)),
+        debugUnit("px"),
+      ]),
+      debugLine(label.dragSensitivity, [
+        debugValue(cfg("interaction.dragSensitivity", 1)),
+      ]),
+      debugLine(label.maxDragStep, [
+        debugValue(cfg("interaction.maxDragStepPixels", 28)),
+        debugUnit("px"),
+      ]),
+      debugLine(label.poleGuard, [
+        debugValue(formatAngle(cfg("interaction.poleLockStart", 82))),
+        debugSep(` ${label.poleClamp}=`),
+        debugValue(formatAngle(cfg("interaction.poleLatitudeClamp", 89.2))),
+      ]),
+      debugBlankLine(),
+      debugGroup(label.layerGroup),
+      debugLine(label.starLimit, [debugValue(state.magnitude)]),
+      debugLine(label.starSize, [debugValue(state.starSize), debugUnit("px")]),
+      debugLine(label.starNames, [debugValue(bool(state.starNames))]),
+      debugLine(label.cultureLines, [debugValue(bool(state.cultureLines))]),
+      debugLine(label.cultureNames, [debugValue(bool(state.cultureNames))]),
+      debugLine(label.planets, [debugValue(bool(state.planets))]),
+      debugLine(label.milkyWay, [debugValue(bool(state.milkyWay))]),
+      debugLine(label.grid, [debugValue(bool(state.grid))]),
+      debugLine(label.ecliptic, [debugValue(bool(state.ecliptic))]),
+      debugLine(label.equator, [debugValue(bool(state.equator))]),
+      debugLine(label.horizon, [debugValue(bool(state.horizon))]),
+      debugLine(label.daylight, [debugValue(bool(state.daylight))]),
+      debugLine(label.nightVision, [debugValue(bool(state.nightVision))]),
+      debugLine(label.deepSky, [debugValue(bool(state.deepSky))]),
+      debugLine(label.regionBoundaries, [
+        debugValue(bool(state.regionBoundaries)),
+      ]),
+      debugLine(label.detail, [debugValue(detailName)]),
+      debugLine(label.time, [
+        debugSep(`${label.playing}=`),
+        debugValue(bool(playing)),
+        debugSep(` ${label.speed}=`),
+        debugValue(state.speed),
+        debugUnit("x"),
+      ]),
+      debugLine(label.panelOpen, [debugValue(bool(state.panelOpen))]),
+      debugLine(label.skyReady, [debugValue(bool(skyReady))]),
+      debugLine(label.rebuild, [debugValue(bool(rebuildInProgress))]),
+    );
+    lastDebugPlainText = Array.from(content.children)
+      .map((node) => node.textContent || "")
+      .join("\n");
   }
 
   function queueDebugOverlayUpdate() {
@@ -1612,18 +1917,22 @@
       button.type = "button";
       button.textContent = "DBG";
       button.addEventListener("click", () => setDebugVisible(!debugVisible));
-      pane.appendChild(button);
-    } else if ($("debug-toggle").parentElement !== pane) {
-      pane.appendChild($("debug-toggle"));
+      document.body.appendChild(button);
+    } else if ($("debug-toggle").parentElement !== document.body) {
+      document.body.appendChild($("debug-toggle"));
     }
     updateDebugToggleTitle();
     if (!$("debug-overlay")) {
-      const overlay = document.createElement("pre");
+      const overlay = document.createElement("div");
       overlay.id = "debug-overlay";
       overlay.setAttribute("aria-hidden", "true");
       pane.appendChild(overlay);
+      ensureDebugOverlayStructure(overlay);
     } else if ($("debug-overlay").parentElement !== pane) {
       pane.appendChild($("debug-overlay"));
+      ensureDebugOverlayStructure($("debug-overlay"));
+    } else {
+      ensureDebugOverlayStructure($("debug-overlay"));
     }
     setDebugVisible(debugVisible);
   }
@@ -1695,15 +2004,18 @@
   function applyMapBoxMetrics(metrics = projectionCanvasMetrics()) {
     const map = $("celestial-map");
     if (!map) return metrics;
-    map.style.width = `${metrics.width}px`;
-    map.style.height = `${metrics.height}px`;
-    map.style.maxWidth = "none";
-    map.style.maxHeight = "none";
+    const forceSize = (node) => {
+      node.style.setProperty("width", `${metrics.width}px`, "important");
+      node.style.setProperty("height", `${metrics.height}px`, "important");
+      node.style.setProperty("min-width", "0px", "important");
+      node.style.setProperty("min-height", "0px", "important");
+      node.style.setProperty("max-width", "none", "important");
+      node.style.setProperty("max-height", "none", "important");
+      node.style.setProperty("box-sizing", "border-box");
+    };
+    forceSize(map);
     map.querySelectorAll("canvas, svg").forEach((node) => {
-      node.style.width = `${metrics.width}px`;
-      node.style.height = `${metrics.height}px`;
-      node.style.maxWidth = "none";
-      node.style.maxHeight = "none";
+      forceSize(node);
     });
     return metrics;
   }
@@ -1719,20 +2031,44 @@
     return metrics;
   }
 
+  function syncMapBoxAfterRedraw(metrics = projectionCanvasMetrics()) {
+    applyMapBoxMetrics(metrics);
+    updateCardinalGeometry();
+    updateDebugOverlay(true);
+    requestAnimationFrame(() => {
+      const latest = projectionCanvasMetrics();
+      applyMapBoxMetrics(latest);
+      updateCardinalGeometry();
+      updateDebugOverlay(true);
+    });
+  }
+
+  function redrawAndSyncMapBox(
+    reason = "redraw",
+    metrics = projectionCanvasMetrics(),
+  ) {
+    try {
+      Celestial.redraw();
+    } catch (err) {
+      console.warn("Celestial redraw failed", reason, err);
+    }
+    syncMapBoxAfterRedraw(metrics);
+  }
+
   function resizeCelestialCanvas(metrics = projectionCanvasMetrics()) {
     applyMapBoxMetrics(metrics);
+    let redrew = false;
     try {
       if (skyReady && window.Celestial) {
         Celestial.resize(metrics.width);
         resetInternalZoom();
-        applyMapBoxMetrics(metrics);
-        Celestial.redraw();
+        redrawAndSyncMapBox("resize", metrics);
+        redrew = true;
       }
     } catch (err) {
       console.warn("Canvas resize failed", err);
     }
-    updateCardinalGeometry();
-    updateDebugOverlay(true);
+    if (!redrew) syncMapBoxAfterRedraw(metrics);
     return metrics;
   }
   function viewKey(
@@ -1791,8 +2127,7 @@
             Celestial.rotate({ center: view.center.slice() });
           setMapScale(viewMapScale(view, state.mapScale));
           resetInternalZoom();
-          Celestial.redraw();
-          updateCardinalGeometry();
+          redrawAndSyncMapBox("restore view");
         } catch (err) {
           if (attempt < 4) restoreView(view, attempt + 1);
           else console.warn("Restore view failed", err);
@@ -1981,7 +2316,7 @@
           .append("path")
           .attr("class", "rso-traditional-region");
         traditionalRegionsReady = true;
-        Celestial.redraw();
+        redrawAndSyncMapBox("traditional regions loaded");
       },
       redraw: function () {
         Celestial.container
@@ -2031,7 +2366,7 @@
           .append("path")
           .attr("class", "rso-traditional-label");
         traditionalLabelsReady = true;
-        Celestial.redraw();
+        redrawAndSyncMapBox("traditional labels loaded");
       },
       redraw: function () {
         const occupied = [];
@@ -3083,7 +3418,7 @@
           .attr("class", "rso-western-dual-line");
         westernDualLinesReady = true;
         rebuildSharedCultureSegments();
-        Celestial.redraw();
+        redrawAndSyncMapBox("western dual culture lines loaded");
       },
       redraw: function () {
         if (state.cultureMode !== "both" || !state.cultureLines) return;
@@ -3119,7 +3454,7 @@
           .attr("class", "rso-cn-line");
         chineseLinesReady = true;
         rebuildSharedCultureSegments();
-        Celestial.redraw();
+        redrawAndSyncMapBox("chinese asterism lines loaded");
       },
       redraw: function () {
         if (!showChineseCulture() || !state.cultureLines) return;
@@ -3160,7 +3495,7 @@
           .append("path")
           .attr("class", "rso-cn-name");
         chineseNamesReady = true;
-        Celestial.redraw();
+        redrawAndSyncMapBox("chinese asterism names loaded");
       },
       redraw: function () {
         if (!showChineseCulture() || !state.cultureNames) return;
@@ -3281,11 +3616,8 @@
         [60, 220, 600].forEach((ms) =>
           setTimeout(() => {
             if (generation !== rebuildGeneration) return;
-            syncRenderedMapBox();
             stabilizeDataSelections();
-            try {
-              Celestial.redraw();
-            } catch (_) {}
+            redrawAndSyncMapBox(`canvas stabilization ${ms}ms`);
           }, ms),
         );
         attachCanvasInfo(canvas);
@@ -3370,7 +3702,7 @@
           lang: cfg.lang,
         });
         updateSkyView(true);
-        Celestial.redraw();
+        redrawAndSyncMapBox("visual config");
       } catch (err) {
         console.warn("Incremental apply failed", err);
         showToast(t("loadFail"), true);
@@ -3403,13 +3735,14 @@
     if (!skyReady || !window.Celestial || !DateTime) return;
     try {
       const dt = observerDT();
-      if (isHorizontalView())
+      if (isHorizontalView()) {
         Celestial.skyview({
           date: new Date(state.instant),
           location: [Number(state.lat), Number(state.lon)],
           timezone: dt.offset,
         });
-      else if (force) Celestial.redraw();
+        syncMapBoxAfterRedraw(projectionCanvasMetrics());
+      } else if (force) redrawAndSyncMapBox("sky view");
       updateSelectedObject();
     } catch (err) {
       console.warn("Sky view update failed", err);
@@ -3645,7 +3978,7 @@
           ];
           try {
             Celestial.rotate({ center: next });
-            Celestial.redraw();
+            redrawAndSyncMapBox("polar drag");
             poleCustomDrag.center = next;
             poleCustomDrag.lastX = event.clientX;
             poleCustomDrag.lastY = event.clientY;
@@ -3942,8 +4275,7 @@
     ];
     try {
       Celestial.rotate({ center: next });
-      Celestial.redraw();
-      updateCardinalGeometry();
+      redrawAndSyncMapBox("pane margin drag");
       queueDebugOverlayUpdate();
     } catch (_) {}
     event.preventDefault();
@@ -3992,7 +4324,7 @@
         : "battlefields";
       save();
       updateRegionLegend();
-      Celestial.redraw();
+      redrawAndSyncMapBox("traditional detail");
     });
     $("apply-location").addEventListener("click", () => {
       const lat = Number($("observer-lat").value),
@@ -4125,7 +4457,7 @@
       save();
       updateRegionLegend();
       applyVisualConfig(true);
-      Celestial.redraw();
+      redrawAndSyncMapBox("region boundaries");
     });
     $("night-vision").addEventListener("change", (e) => {
       state.nightVision = e.target.checked;
@@ -4165,7 +4497,7 @@
             try {
               setMapScale(targetScale);
               resetInternalZoom();
-              Celestial.redraw();
+              redrawAndSyncMapBox("horizontal reset");
               const centre = Celestial.rotate();
               state.projectionViews[viewKey()] = {
                 center: Array.isArray(centre) ? centre.slice() : [0, 0, 0],
