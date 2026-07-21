@@ -1921,18 +1921,29 @@
       inputStatus: "valid",
       activeField: "year",
       fields: "-",
+      activeDisplay: "-",
+      activeUtc: state.instant || "-",
+      activeJsDateYear: "-",
       candidate: "-",
+      candidateUtc: "-",
+      candidateJsDateYear: "-",
+      lastFailedCandidate: "-",
       internalUtc: state.instant || "-",
       jsDateYear: "-",
       julianDate: "-",
       updateSource: "startup",
+      errorStage: "-",
       skyviewStatus: "skipped",
+      fallbackStatus: "unused",
       redrawStatus: "skipped",
       redrawReason: "startup",
       redrawAt: "-",
+      rollbackStatus: "unused",
       planetStatus: "skipped",
       planetCount: "-",
       precision: "normal",
+      originalError: "-",
+      errorStack: "-",
       lastError: "-"
     };
     let objectSearchIndex = null, searchHighlight = null, searchHighlightTimer = null, floatingObjectInfoDismissed = false;
@@ -2152,6 +2163,43 @@
       if (err && err.message) return String(err.message);
       return String(err);
     }
+    function debugStackText(err) {
+      if (!err || !err.stack) return "-";
+      return String(err.stack).split("\n").slice(0, 3).join(" | ");
+    }
+    function renderDebugFromDateTime(dt, date = null) {
+      if (!dt || !dt.isValid) {
+        return {
+          display: "-",
+          utc: "-",
+          jsDateYear: "-",
+          julianDate: "-",
+          precision: "unknown"
+        };
+      }
+      const utc = dt.toUTC(), jsDate = date || renderableDateForDateTime(utc), local = utc.setZone(safeZoneForCoordinates()), jd = jsDate ? julianDateFromDate(jsDate) : null;
+      return {
+        display: formatCivilDateTime(local, false),
+        utc: utc.toISO() || "-",
+        jsDateYear: jsDate ? String(jsDate.getUTCFullYear()) : "-",
+        julianDate: jd == null ? "-" : jd.toFixed(5),
+        precision: precisionStatusForYear(local.year)
+      };
+    }
+    function updateActiveTimeDebug(extra = {}) {
+      const active = DateTime.fromISO(String(state.instant || ""), { zone: "utc" });
+      const data = renderDebugFromDateTime(active);
+      noteTimeRenderDebug({
+        activeDisplay: data.display,
+        activeUtc: data.utc,
+        activeJsDateYear: data.jsDateYear,
+        internalUtc: data.utc,
+        jsDateYear: data.jsDateYear,
+        julianDate: data.julianDate,
+        precision: data.precision,
+        ...extra
+      });
+    }
     function noteTimeRenderDebug(patch = {}) {
       Object.assign(timeRenderDebug, patch);
       if (debugVisible) updateDebugOverlay(true);
@@ -2243,10 +2291,12 @@
         if (field) field.dataset.replaceOnType = "1";
       });
       setTimeFieldWidths();
-      noteTimeRenderDebug({
+      updateActiveTimeDebug({
         inputStatus: "valid",
         fields: timeFieldDebugText(),
-        candidate: formatCivilDateTime(dt, false)
+        candidate: "-",
+        candidateUtc: "-",
+        candidateJsDateYear: "-"
       });
     }
     function reportInvalidTimeInput() {
@@ -2291,50 +2341,123 @@
       const date = dt.toUTC().toJSDate();
       return Number.isFinite(date.getTime()) ? date : null;
     }
+    function captureRenderSnapshot() {
+      const snapshot = {
+        instant: state.instant,
+        playing,
+        mapScale: state.mapScale,
+        center: null,
+        viewKey: viewKey()
+      };
+      try {
+        const center = window.Celestial && Celestial.rotate && Celestial.rotate();
+        if (Array.isArray(center)) snapshot.center = center.slice();
+      } catch (_) {
+      }
+      return snapshot;
+    }
+    function restoreRenderSnapshot(snapshot, source = "rollback") {
+      if (!snapshot) return false;
+      state.instant = snapshot.instant;
+      playing = snapshot.playing;
+      state.mapScale = viewMapScale({ mapScale: snapshot.mapScale }, state.mapScale);
+      let ok = true;
+      try {
+        if (window.Celestial && snapshot.center) {
+          Celestial.rotate({ center: snapshot.center.slice() });
+        }
+        setMapScale(state.mapScale);
+        updateHUD(true);
+        ok = redrawAndSyncMapBox(`${source} rollback`);
+        syncMapBoxAfterRedraw(projectionCanvasMetrics());
+      } catch (err) {
+        ok = false;
+        console.warn("Render snapshot rollback failed", err);
+        noteTimeRenderDebug({
+          rollbackStatus: "failed",
+          errorStage: "rollback",
+          originalError: debugErrorText(err),
+          errorStack: debugStackText(err),
+          lastError: `rollback failed: ${debugErrorText(err)}`
+        });
+      }
+      updateActiveTimeDebug({ rollbackStatus: ok ? "ok" : "failed" });
+      return ok;
+    }
+    function markTimeUpdateFailure({ source, stage, err, candidateData }) {
+      noteTimeRenderDebug({
+        inputStatus: stage === "input" ? "invalid" : "valid",
+        updateSource: source,
+        errorStage: stage,
+        lastFailedCandidate: candidateData ? candidateData.display : timeRenderDebug.candidate,
+        originalError: debugErrorText(err),
+        errorStack: debugStackText(err),
+        lastError: `${stage} failed: ${debugErrorText(err)}`
+      });
+    }
     function applyObserverDateTime(dt, syncInputs = true, source = "time input", options = {}) {
       const utc = dt && dt.isValid ? dt.toUTC() : null;
       const date = utc ? renderableDateForDateTime(utc) : null;
       const iso = utc && utc.isValid ? utc.toISO() : null;
+      const candidateData = utc ? renderDebugFromDateTime(utc, date) : null;
       if (!utc || !utc.isValid || !iso || !date) {
-        noteTimeRenderDebug({
-          inputStatus: "invalid",
-          updateSource: source,
-          lastError: "invalid or non-renderable time"
+        markTimeUpdateFailure({
+          source,
+          stage: "input",
+          err: "invalid or non-renderable time",
+          candidateData
         });
         reportInvalidTimeInput();
         if (syncInputs) syncTimeInputs();
         return false;
       }
-      const previousInstant = state.instant;
-      const previousPlaying = playing;
-      const jd = julianDateFromDate(date);
       noteTimeRenderDebug({
         inputStatus: "valid",
         fields: timeFieldDebugText(),
-        candidate: formatCivilDateTime(utc.setZone(safeZoneForCoordinates()), false),
-        internalUtc: iso,
-        jsDateYear: String(date.getUTCFullYear()),
-        julianDate: jd == null ? "-" : jd.toFixed(5),
+        candidate: candidateData.display,
+        candidateUtc: candidateData.utc,
+        candidateJsDateYear: candidateData.jsDateYear,
+        julianDate: candidateData.julianDate,
         updateSource: source,
-        precision: precisionStatusForYear(utc.setZone(safeZoneForCoordinates()).year),
+        precision: candidateData.precision,
+        rollbackStatus: "unused",
+        errorStage: "-",
+        originalError: "-",
+        errorStack: "-",
         lastError: "-"
       });
+      const snapshot = captureRenderSnapshot();
       state.instant = iso;
       if (!options.keepPlaying) playing = false;
       updateHUD(syncInputs);
       const ok = updateSkyView(true, source);
       if (!ok) {
-        state.instant = previousInstant;
-        playing = previousPlaying;
-        updateHUD(true);
-        noteTimeRenderDebug({
-          inputStatus: "invalid",
-          internalUtc: state.instant || "-",
-          lastError: `time update rolled back after ${source}`
+        markTimeUpdateFailure({
+          source,
+          stage: timeRenderDebug.errorStage === "-" ? "render" : timeRenderDebug.errorStage,
+          err: timeRenderDebug.originalError || timeRenderDebug.lastError || "render failed",
+          candidateData
         });
-        reportInvalidTimeInput();
+        restoreRenderSnapshot(snapshot, source);
+        if (syncInputs) syncTimeInputs();
+        showToast(
+          state.lang === "zh" ? "\u661F\u56FE\u5237\u65B0\u5931\u8D25\uFF0C\u5DF2\u6062\u590D\u4E0A\u4E00\u4E2A\u6709\u6548\u65F6\u95F4" : "Sky refresh failed; restored the previous valid time",
+          true
+        );
         return false;
       }
+      const usedFallback = timeRenderDebug.skyviewStatus === "failed" && timeRenderDebug.fallbackStatus === "ok";
+      updateActiveTimeDebug({
+        inputStatus: "valid",
+        activeField: timeRenderDebug.activeField,
+        fields: timeFieldDebugText(),
+        lastFailedCandidate: timeRenderDebug.lastFailedCandidate || "-",
+        rollbackStatus: "unused",
+        errorStage: usedFallback ? "skyview-fallback" : "-",
+        originalError: usedFallback ? timeRenderDebug.originalError : "-",
+        errorStack: usedFallback ? timeRenderDebug.errorStack : "-",
+        lastError: usedFallback ? timeRenderDebug.lastError : "-"
+      });
       save();
       return true;
     }
@@ -3161,14 +3284,26 @@
         debugLine(zh ? "\u8F93\u5165\u5B57\u6BB5" : "input fields", [
           debugValue(timeRenderDebug.fields || timeFieldDebugText())
         ]),
+        debugLine(zh ? "\u5F53\u524D\u6709\u6548\u65F6\u95F4" : "active time", [
+          debugValue(timeRenderDebug.activeDisplay || "-")
+        ]),
+        debugLine(zh ? "\u5F53\u524D\u6709\u6548 UTC" : "active UTC", [
+          debugValue(timeRenderDebug.activeUtc || state.instant || "-")
+        ]),
+        debugLine(zh ? "\u5F53\u524D\u6709\u6548 JS \u5E74\u4EFD" : "active JS Date year", [
+          debugValue(timeRenderDebug.activeJsDateYear || "-")
+        ]),
         debugLine(zh ? "\u5019\u9009\u65F6\u95F4" : "candidate time", [
           debugValue(timeRenderDebug.candidate || "-")
         ]),
-        debugLine(zh ? "\u5185\u90E8 UTC" : "internal UTC", [
-          debugValue(timeRenderDebug.internalUtc || state.instant || "-")
+        debugLine(zh ? "\u5019\u9009 UTC" : "candidate UTC", [
+          debugValue(timeRenderDebug.candidateUtc || "-")
         ]),
-        debugLine(zh ? "JS Date \u5E74\u4EFD" : "JS Date year", [
-          debugValue(timeRenderDebug.jsDateYear || "-")
+        debugLine(zh ? "\u5019\u9009 JS \u5E74\u4EFD" : "candidate JS Date year", [
+          debugValue(timeRenderDebug.candidateJsDateYear || "-")
+        ]),
+        debugLine(zh ? "\u6700\u8FD1\u5931\u8D25\u5019\u9009" : "last failed candidate", [
+          debugValue(timeRenderDebug.lastFailedCandidate || "-")
         ]),
         debugLine(zh ? "Julian Date" : "Julian Date", [
           debugValue(timeRenderDebug.julianDate || "-")
@@ -3176,8 +3311,14 @@
         debugLine(zh ? "\u66F4\u65B0\u65F6\u95F4\u6765\u6E90" : "time update source", [
           debugValue(timeRenderDebug.updateSource || "-")
         ]),
+        debugLine(zh ? "\u9519\u8BEF\u9636\u6BB5" : "error stage", [
+          debugValue(timeRenderDebug.errorStage || "-")
+        ]),
         debugLine(zh ? "skyview \u72B6\u6001" : "skyview status", [
           debugValue(timeRenderDebug.skyviewStatus || "-")
+        ]),
+        debugLine(zh ? "\u5730\u5E73 fallback" : "horizontal fallback", [
+          debugValue(timeRenderDebug.fallbackStatus || "-")
         ]),
         debugLine(zh ? "redraw \u72B6\u6001" : "redraw status", [
           debugValue(timeRenderDebug.redrawStatus || "-"),
@@ -3187,6 +3328,9 @@
         debugLine(zh ? "redraw \u65F6\u95F4" : "redraw at", [
           debugValue(timeRenderDebug.redrawAt || "-")
         ]),
+        debugLine(zh ? "rollback \u72B6\u6001" : "rollback status", [
+          debugValue(timeRenderDebug.rollbackStatus || "-")
+        ]),
         debugLine(zh ? "\u884C\u661F\u8BA1\u7B97" : "planet calculation", [
           debugValue(timeRenderDebug.planetStatus || "-"),
           debugSep(" count="),
@@ -3194,6 +3338,12 @@
         ]),
         debugLine(zh ? "\u8FDC\u65E5\u671F\u7CBE\u5EA6" : "date precision", [
           debugValue(timeRenderDebug.precision || "-")
+        ]),
+        debugLine(zh ? "\u6700\u540E\u539F\u59CB\u9519\u8BEF" : "last original error", [
+          debugValue(timeRenderDebug.originalError || "-")
+        ]),
+        debugLine(zh ? "\u9519\u8BEF\u5806\u6808\u6458\u8981" : "error stack summary", [
+          debugValue(timeRenderDebug.errorStack || "-")
         ]),
         debugLine(zh ? "\u6700\u540E\u9519\u8BEF" : "last error", [
           debugValue(timeRenderDebug.lastError || "-")
@@ -5469,40 +5619,84 @@
         );
       else showToast(t("cultureReady"));
     }
+    function applyHorizontalSkyViewFallback(reason = "horizontal fallback", originalError = null) {
+      try {
+        const date = currentInstantDate(), lst = localSiderealDegrees(date, state.lon), lat = Math.max(-89.9, Math.min(89.9, Number(state.lat) || 0)), center = [normalizeDegrees(lst), lat, 0];
+        Celestial.rotate({ center });
+        noteTimeRenderDebug({
+          fallbackStatus: "ok",
+          errorStage: originalError ? "skyview-fallback" : "-",
+          originalError: originalError ? debugErrorText(originalError) : timeRenderDebug.originalError || "-",
+          errorStack: originalError ? debugStackText(originalError) : timeRenderDebug.errorStack || "-",
+          lastError: originalError ? `skyview fallback used after: ${debugErrorText(originalError)}` : timeRenderDebug.lastError || "-"
+        });
+        return redrawAndSyncMapBox(reason || "horizontal skyview fallback");
+      } catch (fallbackErr) {
+        console.warn("Horizontal skyview fallback failed", fallbackErr);
+        noteTimeRenderDebug({
+          fallbackStatus: "failed",
+          errorStage: "skyview-fallback",
+          originalError: debugErrorText(fallbackErr),
+          errorStack: debugStackText(fallbackErr),
+          lastError: `horizontal fallback failed: ${debugErrorText(fallbackErr)}`
+        });
+        return false;
+      }
+    }
     function updateSkyView(force = false, reason = "sky view") {
       if (!skyReady || !window.Celestial || !DateTime) {
-        noteTimeRenderDebug({ skyviewStatus: "skipped" });
+        noteTimeRenderDebug({ skyviewStatus: "skipped", fallbackStatus: "unused" });
         return true;
       }
       try {
         const dt = observerDT();
         let redrawOk = true;
         if (isHorizontalView()) {
-          Celestial.skyview({
-            date: currentInstantDate(),
-            location: [Number(state.lat), Number(state.lon)],
-            timezone: dt.offset
-          });
-          noteTimeRenderDebug({ skyviewStatus: "ok" });
-          if (force) redrawOk = redrawAndSyncMapBox(reason || "horizontal sky view");
-          else syncMapBoxAfterRedraw(projectionCanvasMetrics());
+          try {
+            Celestial.skyview({
+              date: currentInstantDate(),
+              location: [Number(state.lat), Number(state.lon)],
+              timezone: dt.offset
+            });
+            noteTimeRenderDebug({ skyviewStatus: "ok", fallbackStatus: "unused" });
+            if (force) redrawOk = redrawAndSyncMapBox(reason || "horizontal sky view");
+            else syncMapBoxAfterRedraw(projectionCanvasMetrics());
+          } catch (skyviewErr) {
+            console.warn("Celestial skyview failed; trying local sidereal fallback", skyviewErr);
+            noteTimeRenderDebug({
+              skyviewStatus: "failed",
+              fallbackStatus: "pending",
+              errorStage: "skyview",
+              originalError: debugErrorText(skyviewErr),
+              errorStack: debugStackText(skyviewErr),
+              lastError: `skyview failed: ${debugErrorText(skyviewErr)}`
+            });
+            redrawOk = applyHorizontalSkyViewFallback(reason || "horizontal skyview fallback", skyviewErr);
+          }
         } else {
-          noteTimeRenderDebug({ skyviewStatus: "skipped" });
+          noteTimeRenderDebug({ skyviewStatus: "skipped", fallbackStatus: "unused" });
           if (force) redrawOk = redrawAndSyncMapBox(reason || "sky view");
         }
         try {
           updateSelectedObject();
         } catch (err) {
           noteTimeRenderDebug({
+            errorStage: "selected-object",
+            originalError: debugErrorText(err),
+            errorStack: debugStackText(err),
             lastError: `selected object update failed: ${debugErrorText(err)}`
           });
         }
-        return redrawOk;
+        return !!redrawOk;
       } catch (err) {
         console.warn("Sky view update failed", err);
         noteTimeRenderDebug({
-          skyviewStatus: "failed",
-          lastError: `skyview failed: ${debugErrorText(err)}`
+          skyviewStatus: isHorizontalView() ? "failed" : "skipped",
+          fallbackStatus: isHorizontalView() ? "failed" : "unused",
+          errorStage: "sky-view-update",
+          originalError: debugErrorText(err),
+          errorStack: debugStackText(err),
+          lastError: `sky view update failed: ${debugErrorText(err)}`
         });
         return false;
       }
@@ -5602,6 +5796,13 @@
         return false;
       }
       const resolved = resolveZone(lat, lon, zone);
+      const snapshot = captureRenderSnapshot(), previousLocation = {
+        lat: state.lat,
+        lon: state.lon,
+        zone: state.zone,
+        cityZh: state.cityZh,
+        cityEn: state.cityEn
+      };
       state.lat = lat;
       state.lon = lon;
       state.zone = resolved;
@@ -5609,8 +5810,21 @@
       state.cityEn = cityEn;
       syncControls();
       updateHUD(true);
+      noteTimeRenderDebug({ updateSource: "location update", rollbackStatus: "unused" });
+      const ok = updateSkyView(true, "location update");
+      if (!ok) {
+        Object.assign(state, previousLocation);
+        restoreRenderSnapshot(snapshot, "location update");
+        syncControls();
+        updateHUD(true);
+        showToast(
+          state.lang === "zh" ? "\u5730\u70B9\u5237\u65B0\u5931\u8D25\uFF0C\u5DF2\u6062\u590D\u4E0A\u4E00\u4E2A\u6709\u6548\u5730\u70B9" : "Location refresh failed; restored the previous valid location",
+          true
+        );
+        return false;
+      }
+      updateActiveTimeDebug({ updateSource: "location update", rollbackStatus: "unused" });
       save();
-      updateSkyView(true, "location update");
       if (notice)
         showToast(`${t("locationApplied")} \xB7 ${resolved} \xB7 ${t("sameInstant")}`);
       return true;
