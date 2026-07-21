@@ -455,9 +455,9 @@
     grid: !!cfg("defaults.showGrid", true),
     horizontalGrid: !!cfg("defaults.showHorizontalGrid", false),
     ecliptic: !!cfg("defaults.showEcliptic", true),
-    equator: !!cfg("defaults.showCelestialEquator", false),
+    equator: !!cfg("defaults.showCelestialEquator", true),
     horizon: !!cfg("defaults.showHorizon", true),
-    floatingObjectInfo: !!cfg("defaults.showFloatingObjectInfo", false),
+    floatingObjectInfo: !!cfg("defaults.showFloatingObjectInfo", true),
     fontScale: Number(cfg("defaults.fontScale", 1)),
     nightVision: !!cfg("defaults.nightVision", false),
     deepSky: !!cfg("defaults.showDeepSky", false),
@@ -468,11 +468,11 @@
     menuCollapsed: Array.isArray(cfg("defaults.menuCollapsed", []))
       ? cfg("defaults.menuCollapsed", []).slice()
       : [],
-    regionBoundaries: !!cfg("defaults.showRegionBoundaries", false),
+    regionBoundaries: !!cfg("defaults.showRegionBoundaries", true),
     traditionalDetail: cfg("defaults.traditionalDetail", "battlefields"),
     mapScale: Number(cfg("defaults.mapScale", 1)),
     projectionViews: {},
-    coordinateViewSemantics: 3,
+    coordinateViewSemantics: 4,
     selectedObject: null,
   };
 
@@ -528,7 +528,8 @@
     layoutResizeGeneration = 0;
   let objectSearchIndex = null,
     searchHighlight = null,
-    searchHighlightTimer = null;
+    searchHighlightTimer = null,
+    floatingObjectInfoDismissed = false;
   const STAR_NAMES =
     (window.__RSO_LOCAL_DATA__ &&
       window.__RSO_LOCAL_DATA__["starnames.json"]) ||
@@ -2245,6 +2246,7 @@
     if (!$("debug-toggle")) {
       const button = document.createElement("button");
       button.id = "debug-toggle";
+      button.className = "top-control-button";
       button.type = "button";
       button.textContent = "DBG";
       button.addEventListener("click", () => setDebugVisible(!debugVisible));
@@ -2894,7 +2896,7 @@
       cfg("sky.horizon.labelAltitudeFallbackDegrees", []),
     )
       ? cfg("sky.horizon.labelAltitudeFallbackDegrees", [])
-      : [8, 6, 10, 12, 15];
+      : [2, 3, 4, 6, 8, 10];
     labels.forEach(([label, az]) => {
       const point = labelAltitudes
         .map((alt) => projectHorizontalCoordinate(az, Number(alt)))
@@ -3569,6 +3571,7 @@
   }
 
   function selectObjectSearchResult(entry) {
+    floatingObjectInfoDismissed = false;
     const obj =
       entry.type === "planet"
         ? {
@@ -3991,6 +3994,7 @@
   }
   function clearObjectInfo() {
     currentSelected = null;
+    floatingObjectInfoDismissed = false;
     $("object-info").classList.remove("open");
     $("object-info-empty").style.display = "";
     updateFloatingObjectInfo();
@@ -4018,13 +4022,16 @@
     panel = document.createElement("div");
     panel.id = "floating-object-info-card";
     panel.className = "floating-object-info-card";
-    panel.innerHTML = `<div class="floating-info-head"><strong id="floating-object-title">—</strong><button id="floating-object-close" type="button">×</button></div><dl id="floating-object-grid"></dl>`;
+    panel.innerHTML = `
+      <div class="floating-info-head">
+        <strong id="floating-object-title">—</strong>
+        <button id="floating-object-close" type="button">×</button>
+      </div>
+      <dl id="floating-object-grid"></dl>
+    `;
     $("sky-pane").appendChild(panel);
     $("floating-object-close").addEventListener("click", () => {
-      state.floatingObjectInfo = false;
-      const toggle = $("floating-object-info");
-      if (toggle) toggle.checked = false;
-      save();
+      floatingObjectInfoDismissed = true;
       updateFloatingObjectInfo();
     });
     return panel;
@@ -4032,7 +4039,10 @@
 
   function updateFloatingObjectInfo() {
     const panel = ensureFloatingObjectInfo();
-    const visible = !!state.floatingObjectInfo && !!currentSelected;
+    const visible =
+      !!state.floatingObjectInfo &&
+      !!currentSelected &&
+      !floatingObjectInfoDismissed;
     panel.classList.toggle("open", visible);
     if (!visible) return;
     $("floating-object-title").textContent = $("object-info-title").textContent;
@@ -4050,12 +4060,14 @@
       const [x, y] = skyEventPoint(canvas, event);
       const found = nearestCatalogObject(x, y);
       if (found) {
+        floatingObjectInfoDismissed = false;
         found.label = objectLabel(found.type, found.d);
         showObjectInfo(found);
         return;
       }
       const p = Celestial.mapProjection.invert([x, y]);
       if (!p || !Number.isFinite(p[0])) return;
+      floatingObjectInfoDismissed = false;
       showObjectInfo({
         type: "skyPosition",
         d: { properties: {} },
@@ -4504,7 +4516,9 @@
         // 可能访问到 D3-Celestial 尚未初始化完成的内部中心。
         const savedView =
           state.projectionViews && state.projectionViews[viewKey()];
-        if (viewState) restoreView(viewState);
+        const shouldRestoreViewState =
+          viewState && !(isHorizontalView() && !savedView);
+        if (shouldRestoreViewState) restoreView(viewState);
         else if (savedView) restoreView(savedView);
         updateSelectedObject();
         setTimeout(() => {
@@ -5403,8 +5417,10 @@
       $(id).addEventListener("change", (e) => {
         state[key] = e.target.checked;
         save();
-        if (key === "floatingObjectInfo") updateFloatingObjectInfo();
-        else applyVisualConfig(true);
+        if (key === "floatingObjectInfo") {
+          floatingObjectInfoDismissed = false;
+          updateFloatingObjectInfo();
+        } else applyVisualConfig(true);
       }),
     );
     $("region-boundaries").addEventListener("change", (e) => {

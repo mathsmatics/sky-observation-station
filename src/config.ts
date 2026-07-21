@@ -1,5 +1,5 @@
 /**
- * 真实星空观测台 5.1.8 —— 用户可配置文件
+ * 真实星空观测台 5.1.9 —— 用户可配置文件
  * ------------------------------------------------------------
  * 修改本文件后，运行 npm run build 并刷新 index.html 即可生效。
  * 建议每次只修改一个参数，并保留原值，便于出现问题时恢复。
@@ -114,10 +114,10 @@ window.RSO_CONFIG = {
     showMilkyWay: true,
     showGrid: true,
     showEcliptic: true,
-    showCelestialEquator: false,
+    showCelestialEquator: true,
     showHorizon: true,
     showHorizontalGrid: false,
-    showFloatingObjectInfo: false,
+    showFloatingObjectInfo: true,
     fontScale: 1,
     nightVision: false,
     showDeepSky: false,
@@ -126,7 +126,7 @@ window.RSO_CONFIG = {
     menuCollapsed: ["observer", "time", "viewProjection", "display"],
     projection: "airy",
     coordinateSystem: "horizontal", // 坐标视角：horizontal / equatorial / ecliptic / galactic
-    showRegionBoundaries: false,
+    showRegionBoundaries: true,
     traditionalDetail: "battlefields", // major / battlefields / mansions
     mapScale: 1, // 初始星图画布缩放；1 表示画布短边等于 sky-pane 短边
   },
@@ -193,7 +193,7 @@ window.RSO_CONFIG = {
       opacity: 0.68,
       labelColor: "#ff5656",
       labelFont: "900 15px Inter, Microsoft YaHei, sans-serif",
-      labelAltitudeFallbackDegrees: [8, 6, 10, 12, 15],
+      labelAltitudeFallbackDegrees: [2, 3, 4, 6, 8, 10],
     },
     horizontalGrid: {
       stroke: "#6fa78f",
@@ -350,8 +350,8 @@ window.RSO_CONFIG = {
   resetViews: {
     horizontal: { center: [0, 0, 0], mapScale: 1 },
     equatorial: { center: [0, 0, 0], mapScale: 1 },
-    ecliptic: { center: [0, -23.44, 0], mapScale: 1 },
-    galactic: { center: [-93.6, -28.94, 0], mapScale: 1 },
+    ecliptic: { center: [0, 0, 0], mapScale: 1 },
+    galactic: { center: [0, 0, 0], mapScale: 1 },
   },
 
   /** 说明：下面列出各投影初始缩放，可单独微调 */

@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <meta content="dark" name="color-scheme" />
-    <title>真实星空观测台 5.1.8 本地版 · Real Sky Observatory</title>
+    <title>真实星空观测台 5.1.9 本地版 · Real Sky Observatory</title>
     <link href="vendor/d3-celestial/celestial.css" rel="stylesheet" />
     <link href="assets/app.css" rel="stylesheet" />
   </head>
@@ -17,7 +17,7 @@
     <header class="topbar">
       <div class="brand glass">
         <div class="brand-main">
-          <i class="signal"></i><span>REAL SKY OBSERVATORY 5.1.8</span>
+          <i class="signal"></i><span>REAL SKY OBSERVATORY 5.1.9</span>
         </div>
         <div class="brand-sub" data-i18n="brandSub">
           真实地点 × 真实时间 × 真实星表 × 双天文文化
@@ -54,22 +54,24 @@
     <aside class="glass" id="control-panel">
       <section class="section" data-menu-id="viewTools" id="view-tools-section">
         <div class="section-title">
-          <span data-i18n="viewTools">视图控制</span
-          ><span data-i18n="viewToolsHint">不改变地点与时间</span>
+          <span data-i18n="viewTools">视图控制</span>
+          <span data-i18n="viewToolsHint">不改变地点与时间</span>
         </div>
         <div class="view-tools-grid">
-          <button id="zoom-out" title="Zoom out">−</button
-          ><button id="zoom-in" title="Zoom in">＋</button
-          ><button data-i18n="resetView" id="reset-view">重置视图</button
-          ><button data-i18n="fullscreen" id="fullscreen">全屏</button
-          ><button id="font-decrease" title="A−">A−</button
-          ><button id="font-increase" title="A+">A+</button>
+          <button id="zoom-out" title="Zoom out">−</button>
+          <button id="zoom-in" title="Zoom in">＋</button>
+          <button data-i18n="resetView" id="reset-view">重置视图</button>
+          <button data-i18n="fullscreen" id="fullscreen">全屏</button>
+          <button id="font-decrease" title="A−">A−</button>
+          <button id="font-increase" title="A+">A+</button>
         </div>
       </section>
       <section class="section" data-menu-id="search" id="object-search-section">
         <div class="section-title">
-          <span data-i18n="objectSearch">天体搜索</span
-          ><span data-i18n="objectSearchHint">恒星 / 行星 / 星座 / 星官 / 深空</span>
+          <span data-i18n="objectSearch">天体搜索</span>
+          <span data-i18n="objectSearchHint">
+            恒星 / 行星 / 星座 / 星官 / 深空
+          </span>
         </div>
         <div class="object-search-wrap">
           <div class="field">
@@ -91,13 +93,13 @@
       </section>
       <section class="section" data-menu-id="observer" id="observer-section">
         <div class="section-title">
-          <span data-i18n="observer">观测地点</span
-          ><span data-i18n="wgs">WGS84 经纬度</span>
+          <span data-i18n="observer">观测地点</span>
+          <span data-i18n="wgs">WGS84 经纬度</span>
         </div>
         <div class="city-search-wrap">
           <div class="field">
-            <label data-i18n="citySearch" for="city-search">搜索城市</label
-            ><input
+            <label data-i18n="citySearch" for="city-search">搜索城市</label>
+            <input
               autocomplete="off"
               data-i18n-placeholder="citySearchPlaceholder"
               id="city-search"
@@ -113,8 +115,8 @@
         </div>
         <div class="grid2">
           <div class="field">
-            <label data-i18n="latitude" for="observer-lat">纬度 Latitude</label
-            ><input
+            <label data-i18n="latitude" for="observer-lat">纬度 Latitude</label>
+            <input
               id="observer-lat"
               max="90"
               min="-90"
@@ -124,9 +126,10 @@
             />
           </div>
           <div class="field">
-            <label data-i18n="longitude" for="observer-lon"
-              >经度 Longitude</label
-            ><input
+            <label data-i18n="longitude" for="observer-lon">
+              经度 Longitude
+            </label>
+            <input
               id="observer-lon"
               max="180"
               min="-180"
@@ -137,10 +140,10 @@
           </div>
         </div>
         <div class="field" style="margin-top: 8px">
-          <label for="observer-timezone"
-            ><span data-i18n="timezone">观测时区</span>
-            <span style="color: #6f849b">IANA</span></label
-          >
+          <label for="observer-timezone">
+            <span data-i18n="timezone">观测时区</span>
+            <span style="color: #6f849b">IANA</span>
+          </label>
           <input
             aria-readonly="true"
             id="observer-timezone"
@@ -217,8 +220,8 @@
       </section>
       <section class="section" data-menu-id="time" id="time-section">
         <div class="section-title">
-          <span data-i18n="observationTime">观测时间</span
-          ><span id="speed-label">暂停</span>
+          <span data-i18n="observationTime">观测时间</span>
+          <span id="speed-label">暂停</span>
         </div>
         <div class="time-row">
           <input
@@ -295,10 +298,14 @@
           </select>
         </div>
       </section>
-      <section class="section" data-menu-id="viewProjection" id="view-projection-section">
+      <section
+        class="section"
+        data-menu-id="viewProjection"
+        id="view-projection-section"
+      >
         <div class="section-title">
-          <span data-i18n="viewProjection">视图与投影</span
-          ><span data-i18n="viewPreserved">独立保存视角</span>
+          <span data-i18n="viewProjection">视图与投影</span>
+          <span data-i18n="viewPreserved">独立保存视角</span>
         </div>
         <div class="field">
           <label data-i18n="projection" for="projection-select">天球投影</label>
@@ -432,45 +439,45 @@
       </section>
       <section class="section" data-menu-id="display" id="display-section">
         <div class="section-title">
-          <span data-i18n="displaySettings">显示参数</span
-          ><span data-i18n="liveApply">实时应用</span>
+          <span data-i18n="displaySettings">显示参数</span>
+          <span data-i18n="liveApply">实时应用</span>
         </div>
         <div class="display-subgroup">
           <h3 data-i18n="displayObjects">对象显示</h3>
           <div class="toggles">
-            <label class="toggle"
-              ><span data-i18n="planets">太阳、月球与行星</span
-              ><input checked="" id="planets" type="checkbox"
-            /></label>
-            <label class="toggle"
-              ><span data-i18n="starNames">重要恒星名称</span
-              ><input checked="" id="star-names" type="checkbox"
-            /></label>
-            <label class="toggle"
-              ><span data-i18n="deepSky">亮深空天体</span
-              ><input id="deep-sky" type="checkbox"
-            /></label>
-            <label class="toggle"
-              ><span data-i18n="milkyWay">银河轮廓</span
-              ><input checked="" id="milky-way" type="checkbox"
-            /></label>
+            <label class="toggle">
+              <span data-i18n="planets">太阳、月球与行星</span>
+              <input checked="" id="planets" type="checkbox" />
+            </label>
+            <label class="toggle">
+              <span data-i18n="starNames">重要恒星名称</span>
+              <input checked="" id="star-names" type="checkbox" />
+            </label>
+            <label class="toggle">
+              <span data-i18n="deepSky">亮深空天体</span>
+              <input id="deep-sky" type="checkbox" />
+            </label>
+            <label class="toggle">
+              <span data-i18n="milkyWay">银河轮廓</span>
+              <input checked="" id="milky-way" type="checkbox" />
+            </label>
           </div>
         </div>
         <div class="display-subgroup">
           <h3 data-i18n="displayCultureLayers">文化图层</h3>
           <div class="toggles">
-            <label class="toggle"
-              ><span data-i18n="cultureLines">星座/星官连线</span
-              ><input checked="" id="culture-lines" type="checkbox"
-            /></label>
-            <label class="toggle"
-              ><span data-i18n="cultureNames">星座/星官名称</span
-              ><input checked="" id="culture-names" type="checkbox"
-            /></label>
-            <label class="toggle"
-              ><span data-i18n="regionBoundaries">区域边界</span
-              ><input id="region-boundaries" type="checkbox"
-            /></label>
+            <label class="toggle">
+              <span data-i18n="cultureLines">星座/星官连线</span>
+              <input checked="" id="culture-lines" type="checkbox" />
+            </label>
+            <label class="toggle">
+              <span data-i18n="cultureNames">星座/星官名称</span>
+              <input checked="" id="culture-names" type="checkbox" />
+            </label>
+            <label class="toggle">
+              <span data-i18n="regionBoundaries">区域边界</span>
+              <input id="region-boundaries" type="checkbox" />
+            </label>
           </div>
           <div class="field" style="margin-top: 8px">
             <label data-i18n="traditionalRegions" for="traditional-detail"
@@ -496,26 +503,26 @@
         <div class="display-subgroup">
           <h3 data-i18n="displayReferenceLines">参考线</h3>
           <div class="toggles">
-            <label class="toggle"
-              ><span data-i18n="grid">赤道坐标网</span
-              ><input checked="" id="grid" type="checkbox"
-            /></label>
-            <label class="toggle"
-              ><span data-i18n="ecliptic">黄道</span
-              ><input checked="" id="ecliptic" type="checkbox"
-            /></label>
-            <label class="toggle"
-              ><span data-i18n="equator">天球赤道</span
-              ><input id="equator" type="checkbox"
-            /></label>
-            <label class="toggle"
-              ><span data-i18n="horizon">地平线</span
-              ><input checked="" id="horizon" type="checkbox"
-            /></label>
-            <label class="toggle"
-              ><span data-i18n="horizontalGrid">地平坐标网</span
-              ><input id="horizontal-grid" type="checkbox"
-            /></label>
+            <label class="toggle">
+              <span data-i18n="grid">赤道坐标网</span>
+              <input checked="" id="grid" type="checkbox" />
+            </label>
+            <label class="toggle">
+              <span data-i18n="ecliptic">黄道</span>
+              <input checked="" id="ecliptic" type="checkbox" />
+            </label>
+            <label class="toggle">
+              <span data-i18n="equator">天球赤道</span>
+              <input checked="" id="equator" type="checkbox" />
+            </label>
+            <label class="toggle">
+              <span data-i18n="horizon">地平线</span>
+              <input checked="" id="horizon" type="checkbox" />
+            </label>
+            <label class="toggle">
+              <span data-i18n="horizontalGrid">地平坐标网</span>
+              <input id="horizontal-grid" type="checkbox" />
+            </label>
           </div>
         </div>
         <div class="display-subgroup">
@@ -547,31 +554,35 @@
             <span class="range-value" id="star-size-value">7 px</span>
           </div>
           <div class="toggles" style="margin-top: 9px">
-            <label class="toggle"
-              ><span data-i18n="nightVision">夜视红光</span
-              ><input id="night-vision" type="checkbox"
-            /></label>
-            <label class="toggle"
-              ><span data-i18n="floatingObjectInfo">星体信息浮窗</span
-              ><input id="floating-object-info" type="checkbox"
-            /></label>
+            <label class="toggle">
+              <span data-i18n="nightVision">夜视红光</span>
+              <input id="night-vision" type="checkbox" />
+            </label>
+            <label class="toggle">
+              <span data-i18n="floatingObjectInfo">星体信息浮窗</span>
+              <input checked="" id="floating-object-info" type="checkbox" />
+            </label>
           </div>
         </div>
         <div class="culture-note" id="culture-note">
           “语言”控制界面与重要恒星名称；“星官”控制天区划分、连线和名称体系。两者互相独立。
         </div>
       </section>
-      <section class="section" data-menu-id="objectInfo" id="object-info-section">
+      <section
+        class="section"
+        data-menu-id="objectInfo"
+        id="object-info-section"
+      >
         <div class="section-title">
-          <span data-i18n="selectedObject">选中天体</span
-          ><span data-i18n="clickSkyHint">单击星体或空白天区</span>
+          <span data-i18n="selectedObject">选中天体</span>
+          <span data-i18n="clickSkyHint">单击星体或空白天区</span>
         </div>
         <div class="info-card-rso" id="object-info">
           <div class="info-head">
             <div class="info-title" id="object-info-title">—</div>
             <div class="info-actions">
-              <button data-i18n="copy" id="copy-object">复制</button
-              ><button data-i18n="clear" id="close-object">清除</button>
+              <button data-i18n="copy" id="copy-object">复制</button>
+              <button data-i18n="clear" id="close-object">清除</button>
             </div>
           </div>
           <dl class="info-grid" id="object-info-grid"></dl>
@@ -587,49 +598,66 @@
       </section>
       <section class="section" data-menu-id="status" id="status-section">
         <div class="section-title">
-          <span data-i18n="currentState">当前状态</span
-          ><span data-i18n="utcInternal">内部统一 UTC</span>
+          <span data-i18n="currentState">当前状态</span>
+          <span data-i18n="utcInternal">内部统一 UTC</span>
         </div>
         <div class="status-card">
           <div class="status-title" id="status-title">北京 · 西方星座</div>
           <div class="status-lines">
             <div>
-              <b data-i18n="localTime">当地时间：</b
-              ><span id="status-local">--</span>
+              <b data-i18n="localTime">当地时间：</b>
+              <span id="status-local">--</span>
             </div>
             <div><b>UTC：</b><span id="status-utc">--</span></div>
             <div>
-              <b data-i18n="zoneOffset">时区偏移：</b
-              ><span id="status-offset">--</span>
+              <b data-i18n="zoneOffset">时区偏移：</b>
+              <span id="status-offset">--</span>
             </div>
             <div>
-              <b data-i18n="mapMode">星图体系：</b
-              ><span id="status-culture">--</span>
+              <b data-i18n="mapMode">星图体系：</b>
+              <span id="status-culture">--</span>
             </div>
             <div>
-              <b data-i18n="coordinateNote">坐标说明：</b
-              ><span data-i18n="coordinateValue"
-                >恒星数据为赤道坐标；视图按地点和时刻旋转到本地地平天空。</span
-              >
+              <b data-i18n="coordinateNote">坐标说明：</b>
+              <span data-i18n="coordinateValue">
+                恒星数据为赤道坐标；视图按地点和时刻旋转到本地地平天空。
+              </span>
             </div>
             <div>
-              <b data-i18n="projectionLabel">天球投影：</b
-              ><span id="status-projection">--</span>
+              <b data-i18n="projectionLabel">天球投影：</b>
+              <span id="status-projection">--</span>
             </div>
             <div>
-              <b data-i18n="coordinateSystemLabel">坐标视角：</b
-              ><span id="status-coordinate">--</span>
+              <b data-i18n="coordinateSystemLabel">坐标视角：</b>
+              <span id="status-coordinate">--</span>
             </div>
           </div>
         </div>
       </section>
     </aside>
-    <button class="panel-toggle-button" id="panel-toggle" title="Toggle panel">
-      ☰</button
-    ><button id="explain-btn" title="代码与计算说明" aria-label="代码与计算说明">
+    <button
+      class="top-control-button panel-toggle-button"
+      id="panel-toggle"
+      title="Toggle panel"
+    >
+      ☰
+    </button>
+    <button
+      class="top-control-button"
+      id="explain-btn"
+      title="代码与计算说明"
+      aria-label="代码与计算说明"
+    >
       <b>?</b>
     </button>
-    <button id="reset-defaults-btn" title="恢复默认配置" aria-label="恢复默认配置">↺</button>
+    <button
+      class="top-control-button"
+      id="reset-defaults-btn"
+      title="恢复默认配置"
+      aria-label="恢复默认配置"
+    >
+      ↺
+    </button>
     <div class="loading" id="loading">
       <div class="loader-box">
         <div class="orbit"></div>
@@ -667,7 +695,7 @@
           <article class="doc" data-doc-lang="zh">
             <h3>1. 项目目标、适用范围与总体架构</h3>
             <p>
-              真实星空观测台 5.1.8
+              真实星空观测台 5.1.9
               是一个完全本地化的浏览器天文馆。它不是随机星点动画，而是读取真实恒星目录、现代西方星座、中国传统星官、银河轮廓和太阳系天体数据，以观测者的经纬度、IANA
               时区和 UTC
               时刻为输入，计算并绘制当前天空。适合肉眼认星、天文文化比较、天球坐标教学和一般观测规划；不替代专业天体测量、精密历表、赤道仪自动指向或天文摄影规划软件。
@@ -813,9 +841,9 @@
               坐标视角与投影是两个独立概念。投影决定球面如何压到平面；坐标视角由“坐标渲染基准
               transform”和“视角朝向 orientation”共同组成。地平坐标视角使用赤道
               transform，再按当前地点和时间转到当地天空朝向；赤道坐标视角使用赤道
-              transform 和赤道默认朝向；黄道与银河坐标视角分别使用
-              ecliptic / galactic transform 和对应默认朝向。这里的 transform
-              是 D3-Celestial 的底层坐标变换，不是屏幕投影。
+              transform 和赤道默认朝向；黄道与银河坐标视角分别使用 ecliptic /
+              galactic transform 和对应默认朝向。这里的 transform 是
+              D3-Celestial 的底层坐标变换，不是屏幕投影。
             </p>
             <h3>4. 投影、视角、缩放、拖动与响应式布局</h3>
             <p>
@@ -855,7 +883,8 @@
               >
               读取 D3-Celestial 的投影元数据，未声明比例的全天投影按 2:1
               处理；<code>projectionCanvasMetrics()</code>
-              根据星图区真实尺寸、天然投影比例和 <code>mapScale</code>
+              根据星图区真实尺寸、天然投影比例和
+              <code>mapScale</code>
               计算目标画布尺寸，因此圆形方位投影居中显示，Aitoff、Hammer、Mollweide
               等全天投影完整展开。侧栏与星图区使用共享 Grid 布局；<code
                 >setPanel()</code
@@ -866,7 +895,8 @@
               原位调整画布，不重载星表。地平与赤道坐标视角同属赤道
               transform，切换时只恢复对应视角；黄道和银河坐标视角会切换
               D3-Celestial transform，因此走安全重建路径，并由
-              <code>preloaded-data.js</code> 为每次数据请求提供深拷贝，避免重复转换污染目录几何。
+              <code>preloaded-data.js</code>
+              为每次数据请求提供深拷贝，避免重复转换污染目录几何。
             </p>
             <p>
               <b>投影与坐标视角必须分开理解：</b
@@ -1027,11 +1057,13 @@
               >
               通过本地兼容补丁暴露的历表对象，调用
               <code>currentPlanetPositions()</code> 以当前 UTC
-              和地球位置计算太阳、月球及七大行星的赤道坐标，再按当前 D3-Celestial
-              transform 转换、投影并绘制符号和名称；同一组动态坐标也用于点击拾取和信息框。普通开关通过
+              和地球位置计算太阳、月球及七大行星的赤道坐标，再按当前
+              D3-Celestial transform
+              转换、投影并绘制符号和名称；同一组动态坐标也用于点击拾取和信息框。普通开关通过
               <code>Celestial.apply()</code> 原位更新；投影通过
               <code>Celestial.reproject()</code>
-              更新；坐标视角如果切换了 D3-Celestial transform，会从深拷贝目录数据安全重建。中国星官和传统天区使用
+              更新；坐标视角如果切换了 D3-Celestial
+              transform，会从深拷贝目录数据安全重建。中国星官和传统天区使用
               <code>Celestial.add()</code> 注册自定义 GeoJSON 图层，在每次
               <code>redraw</code>
               中依据文化模式、边界开关和细分层级决定是否绘制。
@@ -1210,7 +1242,8 @@
                     <code>syncRenderedMapBox()</code>
                   </td>
                   <td>
-                    防抖响应布局变化，用原位 resize 调整 #celestial-map、canvas 和 svg，不重载星表
+                    防抖响应布局变化，用原位 resize 调整 #celestial-map、canvas
+                    和 svg，不重载星表
                   </td>
                 </tr>
                 <tr>
@@ -1267,19 +1300,20 @@
               天气、光污染和地形图层 / 手机陀螺仪与 AR 指向 /
               多套历史中国星图版本对照。
             </p>
-            <p><strong>说明页版本号：</strong>5.1.8</p>
+            <p><strong>说明页版本号：</strong>5.1.9</p>
           </article>
           <article class="doc" data-doc-lang="en">
             <h3>1. Purpose, scope and architecture</h3>
             <p>
-              Real Sky Observatory 5.1.8 is a fully local browser planetarium. It
-              is not a random star field: it reads real stellar, constellation,
-              Chinese asterism, Milky Way and Solar System datasets, combines
-              them with the observer's coordinates, IANA time zone and UTC
-              instant, and renders the resulting sky. It is intended for
-              naked-eye orientation, sky-culture comparison, coordinate teaching
-              and general observing preparation, not precision astrometry,
-              telescope control or professional ephemeris work.
+              Real Sky Observatory 5.1.9 is a fully local browser planetarium.
+              It is not a random star field: it reads real stellar,
+              constellation, Chinese asterism, Milky Way and Solar System
+              datasets, combines them with the observer's coordinates, IANA time
+              zone and UTC instant, and renders the resulting sky. It is
+              intended for naked-eye orientation, sky-culture comparison,
+              coordinate teaching and general observing preparation, not
+              precision astrometry, telescope control or professional ephemeris
+              work.
             </p>
             <table>
               <thead>
@@ -1399,8 +1433,8 @@
               radians from numeric range.
             </p>
             <p>
-              Coordinate view and map projection are separate. A coordinate
-              view combines a D3-Celestial transform with a viewing orientation:
+              Coordinate view and map projection are separate. A coordinate view
+              combines a D3-Celestial transform with a viewing orientation:
               horizontal uses the equatorial transform with the local-sky
               orientation, equatorial uses the equatorial transform with its
               default orientation, and ecliptic/galactic use their matching
@@ -1512,9 +1546,9 @@
             <h3>6. Rendering, labels and object information</h3>
             <p>
               <code>buildSkyConfig()</code> assembles native star, DSO, Western
-              constellation, Milky Way, grid, ecliptic and equator layers,
-              while custom reference layers draw the horizon and horizontal
-              grid. The bundled Solar System ephemeris is exposed to
+              constellation, Milky Way, grid, ecliptic and equator layers, while
+              custom reference layers draw the horizon and horizontal grid. The
+              bundled Solar System ephemeris is exposed to
               <code>registerPlanetOverlay()</code>.
               <code>currentPlanetPositions()</code> computes the Sun, Moon and
               seven planets for the current UTC instant and Earth origin, then
@@ -1626,8 +1660,8 @@
               <code>parseObserverLocalTime()/shiftObserverTime()</code> manage
               local time and UTC; <code>buildSkyConfig()</code> converts state
               to engine configuration;
-              <code>projectionNaturalRatio()/projectionCanvasMetrics()</code> fit
-              the complete projection;
+              <code>projectionNaturalRatio()/projectionCanvasMetrics()</code>
+              fit the complete projection;
               <code>initialDisplay()/waitForCanvas()</code> initialize and
               verify the real star layer;
               <code>applyVisualConfig()</code> updates ordinary layers;
@@ -1674,7 +1708,7 @@
               mobile sensors and multiple historical Chinese sky
               reconstructions.
             </p>
-            <p><strong>Guide version:</strong> 5.1.8</p>
+            <p><strong>Guide version:</strong> 5.1.9</p>
           </article>
         </div>
       </div>

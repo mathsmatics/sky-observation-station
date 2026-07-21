@@ -133,10 +133,10 @@
       showMilkyWay: true,
       showGrid: true,
       showEcliptic: true,
-      showCelestialEquator: false,
+      showCelestialEquator: true,
       showHorizon: true,
       showHorizontalGrid: false,
-      showFloatingObjectInfo: false,
+      showFloatingObjectInfo: true,
       fontScale: 1,
       nightVision: false,
       showDeepSky: false,
@@ -146,7 +146,7 @@
       projection: "airy",
       coordinateSystem: "horizontal",
       // 坐标视角：horizontal / equatorial / ecliptic / galactic
-      showRegionBoundaries: false,
+      showRegionBoundaries: true,
       traditionalDetail: "battlefields",
       // major / battlefields / mansions
       mapScale: 1
@@ -215,7 +215,7 @@
         opacity: 0.68,
         labelColor: "#ff5656",
         labelFont: "900 15px Inter, Microsoft YaHei, sans-serif",
-        labelAltitudeFallbackDegrees: [8, 6, 10, 12, 15]
+        labelAltitudeFallbackDegrees: [2, 3, 4, 6, 8, 10]
       },
       horizontalGrid: {
         stroke: "#6fa78f",
@@ -377,8 +377,8 @@
     resetViews: {
       horizontal: { center: [0, 0, 0], mapScale: 1 },
       equatorial: { center: [0, 0, 0], mapScale: 1 },
-      ecliptic: { center: [0, -23.44, 0], mapScale: 1 },
-      galactic: { center: [-93.6, -28.94, 0], mapScale: 1 }
+      ecliptic: { center: [0, 0, 0], mapScale: 1 },
+      galactic: { center: [0, 0, 0], mapScale: 1 }
     },
     /** 说明：下面列出各投影初始缩放，可单独微调 */
     projectionZoom: {
@@ -1155,9 +1155,9 @@
       grid: !!cfg("defaults.showGrid", true),
       horizontalGrid: !!cfg("defaults.showHorizontalGrid", false),
       ecliptic: !!cfg("defaults.showEcliptic", true),
-      equator: !!cfg("defaults.showCelestialEquator", false),
+      equator: !!cfg("defaults.showCelestialEquator", true),
       horizon: !!cfg("defaults.showHorizon", true),
-      floatingObjectInfo: !!cfg("defaults.showFloatingObjectInfo", false),
+      floatingObjectInfo: !!cfg("defaults.showFloatingObjectInfo", true),
       fontScale: Number(cfg("defaults.fontScale", 1)),
       nightVision: !!cfg("defaults.nightVision", false),
       deepSky: !!cfg("defaults.showDeepSky", false),
@@ -1166,11 +1166,11 @@
       projection: cfg("defaults.projection", "airy"),
       coordinateSystem: cfg("defaults.coordinateSystem", "horizontal"),
       menuCollapsed: Array.isArray(cfg("defaults.menuCollapsed", [])) ? cfg("defaults.menuCollapsed", []).slice() : [],
-      regionBoundaries: !!cfg("defaults.showRegionBoundaries", false),
+      regionBoundaries: !!cfg("defaults.showRegionBoundaries", true),
       traditionalDetail: cfg("defaults.traditionalDetail", "battlefields"),
       mapScale: Number(cfg("defaults.mapScale", 1)),
       projectionViews: {},
-      coordinateViewSemantics: 3,
+      coordinateViewSemantics: 4,
       selectedObject: null
     };
     const ZONE_ALIASES = {
@@ -1205,7 +1205,7 @@
     let rebuildInProgress = false, suppressResizeUntil = 0, rebuildGeneration = 0;
     let resizeObserver = null, clickStart = null, pointerMoved = false, paneDrag = null, poleCustomDrag = null;
     let currentSelected = null, customViewRestoreTimer = null, lastRenderedSize = null, debugVisible = !!cfg("debug.enabled", false) && !!cfg("debug.defaultOpen", false), lastDebugUpdate = 0, lastDebugPlainText = "", debugCopyStatus = "idle", debugCopyTimer = null, debugFramePending = false, layoutResizeGeneration = 0;
-    let objectSearchIndex = null, searchHighlight = null, searchHighlightTimer = null;
+    let objectSearchIndex = null, searchHighlight = null, searchHighlightTimer = null, floatingObjectInfoDismissed = false;
     const STAR_NAMES = window.__RSO_LOCAL_DATA__ && window.__RSO_LOCAL_DATA__["starnames.json"] || {};
     const DSO_NAMES = window.__RSO_LOCAL_DATA__ && window.__RSO_LOCAL_DATA__["dsonames.json"] || {};
     function pointFeatureCoordinateMap(file) {
@@ -2653,6 +2653,7 @@
       if (!$("debug-toggle")) {
         const button = document.createElement("button");
         button.id = "debug-toggle";
+        button.className = "top-control-button";
         button.type = "button";
         button.textContent = "DBG";
         button.addEventListener("click", () => setDebugVisible(!debugVisible));
@@ -3161,7 +3162,7 @@
       ];
       const labelAltitudes = Array.isArray(
         cfg("sky.horizon.labelAltitudeFallbackDegrees", [])
-      ) ? cfg("sky.horizon.labelAltitudeFallbackDegrees", []) : [8, 6, 10, 12, 15];
+      ) ? cfg("sky.horizon.labelAltitudeFallbackDegrees", []) : [2, 3, 4, 6, 8, 10];
       labels.forEach(([label, az]) => {
         const point = labelAltitudes.map((alt) => projectHorizontalCoordinate(az, Number(alt))).find(Boolean);
         if (!point) return;
@@ -3744,6 +3745,7 @@
       redrawAndSyncMapBox("search highlight");
     }
     function selectObjectSearchResult(entry) {
+      floatingObjectInfoDismissed = false;
       const obj = entry.type === "planet" ? {
         type: "planet",
         d: entry.d,
@@ -4094,6 +4096,7 @@
     }
     function clearObjectInfo() {
       currentSelected = null;
+      floatingObjectInfoDismissed = false;
       $("object-info").classList.remove("open");
       $("object-info-empty").style.display = "";
       updateFloatingObjectInfo();
@@ -4120,20 +4123,23 @@
       panel = document.createElement("div");
       panel.id = "floating-object-info-card";
       panel.className = "floating-object-info-card";
-      panel.innerHTML = `<div class="floating-info-head"><strong id="floating-object-title">\u2014</strong><button id="floating-object-close" type="button">\xD7</button></div><dl id="floating-object-grid"></dl>`;
+      panel.innerHTML = `
+      <div class="floating-info-head">
+        <strong id="floating-object-title">\u2014</strong>
+        <button id="floating-object-close" type="button">\xD7</button>
+      </div>
+      <dl id="floating-object-grid"></dl>
+    `;
       $("sky-pane").appendChild(panel);
       $("floating-object-close").addEventListener("click", () => {
-        state.floatingObjectInfo = false;
-        const toggle = $("floating-object-info");
-        if (toggle) toggle.checked = false;
-        save();
+        floatingObjectInfoDismissed = true;
         updateFloatingObjectInfo();
       });
       return panel;
     }
     function updateFloatingObjectInfo() {
       const panel = ensureFloatingObjectInfo();
-      const visible = !!state.floatingObjectInfo && !!currentSelected;
+      const visible = !!state.floatingObjectInfo && !!currentSelected && !floatingObjectInfoDismissed;
       panel.classList.toggle("open", visible);
       if (!visible) return;
       $("floating-object-title").textContent = $("object-info-title").textContent;
@@ -4148,12 +4154,14 @@
         const [x, y] = skyEventPoint(canvas, event);
         const found = nearestCatalogObject(x, y);
         if (found) {
+          floatingObjectInfoDismissed = false;
           found.label = objectLabel(found.type, found.d);
           showObjectInfo(found);
           return;
         }
         const p = Celestial.mapProjection.invert([x, y]);
         if (!p || !Number.isFinite(p[0])) return;
+        floatingObjectInfoDismissed = false;
         showObjectInfo({
           type: "skyPosition",
           d: { properties: {} },
@@ -4529,7 +4537,8 @@
           attachCanvasInfo(canvas);
           updateSkyView(true);
           const savedView = state.projectionViews && state.projectionViews[viewKey()];
-          if (viewState) restoreView(viewState);
+          const shouldRestoreViewState = viewState && !(isHorizontalView() && !savedView);
+          if (shouldRestoreViewState) restoreView(viewState);
           else if (savedView) restoreView(savedView);
           updateSelectedObject();
           setTimeout(() => {
@@ -5286,8 +5295,10 @@
         ([id, key]) => $(id).addEventListener("change", (e) => {
           state[key] = e.target.checked;
           save();
-          if (key === "floatingObjectInfo") updateFloatingObjectInfo();
-          else applyVisualConfig(true);
+          if (key === "floatingObjectInfo") {
+            floatingObjectInfoDismissed = false;
+            updateFloatingObjectInfo();
+          } else applyVisualConfig(true);
         })
       );
       $("region-boundaries").addEventListener("change", (e) => {
