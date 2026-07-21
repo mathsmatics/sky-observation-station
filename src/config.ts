@@ -1,5 +1,5 @@
 /**
- * 真实星空观测台 5.2.4 —— 用户可配置文件
+ * 真实星空观测台 5.2.6 —— 用户可配置文件
  * ------------------------------------------------------------
  * 修改本文件后，运行 npm run build 并刷新 index.html 即可生效。
  * 建议每次只修改一个参数，并保留原值，便于出现问题时恢复。
@@ -60,6 +60,12 @@ window.RSO_CONFIG = {
     collapsible: ["observer", "time", "viewProjection", "display"],
     alwaysExpanded: ["viewTools", "search", "objectInfo", "status"],
     defaultCollapsed: ["observer", "time", "viewProjection", "display"],
+  },
+
+
+  /** 搜索候选项数量等轻量交互参数 */
+  search: {
+    cityMaxResults: 60, // 城市下拉最多显示的候选数量；避免 app.ts 内硬编码
   },
 
   /** 调试面板：开发时打开，完成后可把 enabled 改为 false 隐藏开关 */

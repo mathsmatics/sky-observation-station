@@ -532,6 +532,7 @@ import {
   let lastSkyUpdate = 0;
   let lastHudUpdate = 0;
   let toastTimer = null;
+  let timeStatusTimer = null;
   let resizeTimer = null;
   let applyTimer = null;
   let loadTimer = null;
@@ -801,26 +802,150 @@ import {
   function astronomicalYearToDisplay(year) {
     const n = Number(year);
     if (!Number.isFinite(n)) return "";
-    if (n <= 0) return `BC ${String(1 - Math.trunc(n)).padStart(1, "0")}`;
-    return String(Math.trunc(n)).padStart(4, "0");
+    const whole = Math.trunc(n);
+    if (whole <= 0) return `BC ${String(1 - whole).padStart(1, "0")}`;
+    return `AD ${String(whole).padStart(4, "0")}`;
   }
-  function displayYearToAstronomical(prefix, value) {
-    const y = Math.trunc(Number(value));
-    if (!Number.isFinite(y) || y === 0) return null;
-    return String(prefix || "").trim().toUpperCase() === "BC" ? 1 - Math.abs(y) : y;
+
+  function astronomicalYearToInput(year) {
+    const n = Number(year);
+    if (!Number.isFinite(n)) return "";
+    const whole = Math.trunc(n);
+    return whole <= 0 ? `-${1 - whole}` : String(whole);
   }
   function currentInstantDate() {
     const dt = DateTime.fromISO(String(state.instant || ""), { zone: "utc" });
     return (dt.isValid ? dt : DateTime.fromISO(defaults.instant, { zone: "utc" })).toJSDate();
   }
-  function formatLocalInput() {
-    const dt = observerDT();
-    return formatCivilDateTime(dt, false);
-  }
   function formatCivilDateTime(dt, includeSeconds = false) {
     const y = astronomicalYearToDisplay(dt.year);
     const base = `${y}/${String(dt.month).padStart(2, "0")}/${String(dt.day).padStart(2, "0")} ${String(dt.hour).padStart(2, "0")}:${String(dt.minute).padStart(2, "0")}`;
     return includeSeconds ? `${base}:${String(dt.second).padStart(2, "0")}` : base;
+  }
+
+  const TIME_FIELD_IDS = [
+    "time-year",
+    "time-month",
+    "time-day",
+    "time-hour",
+    "time-minute",
+  ];
+
+  function displayTimeParts(dt = observerDT()) {
+    return {
+      year: astronomicalYearToInput(dt.year),
+      month: String(dt.month).padStart(2, "0"),
+      day: String(dt.day).padStart(2, "0"),
+      hour: String(dt.hour).padStart(2, "0"),
+      minute: String(dt.minute).padStart(2, "0"),
+    };
+  }
+
+  function setTimeFieldWidths() {
+    TIME_FIELD_IDS.forEach((id) => {
+      const el = $(id);
+      if (!el) return;
+      if (id === "time-year") {
+        const len = Math.max(3, String(el.value || "").length || 4);
+        el.style.width = `${len + 0.8}ch`;
+      }
+    });
+  }
+
+  function syncTimeInputs(dt = observerDT()) {
+    const parts = displayTimeParts(dt);
+    if ($("time-year")) $("time-year").value = parts.year;
+    if ($("time-month")) $("time-month").value = parts.month;
+    if ($("time-day")) $("time-day").value = parts.day;
+    if ($("time-hour")) $("time-hour").value = parts.hour;
+    if ($("time-minute")) $("time-minute").value = parts.minute;
+    setTimeFieldWidths();
+  }
+
+  function reportInvalidTimeInput() {
+    showToast(t("invalidDateTime"), true);
+    const title = $("status-title");
+    if (title) {
+      title.textContent = t("invalidDateTime");
+      title.classList.add("status-error");
+      clearTimeout(timeStatusTimer);
+      timeStatusTimer = setTimeout(() => {
+        title.classList.remove("status-error");
+        updateHUD(false);
+      }, 1800);
+    }
+  }
+
+  function readIntegerField(id) {
+    const value = String($(id)?.value || "").trim();
+    if (!/^[+-]?\d+$/.test(value)) return null;
+    const n = Number(value);
+    return Number.isSafeInteger(n) ? n : null;
+  }
+
+  function parseObserverTimeFields() {
+    const y = readIntegerField("time-year"),
+      month = readIntegerField("time-month"),
+      day = readIntegerField("time-day"),
+      hour = readIntegerField("time-hour"),
+      minute = readIntegerField("time-minute");
+    if (
+      y === null ||
+      y === 0 ||
+      month === null ||
+      day === null ||
+      hour === null ||
+      minute === null ||
+      month < 1 ||
+      month > 12 ||
+      day < 1 ||
+      day > 31 ||
+      hour < 0 ||
+      hour > 23 ||
+      minute < 0 ||
+      minute > 59
+    )
+      return null;
+    const parts = {
+      year: y < 0 ? 1 - Math.abs(y) : y,
+      month,
+      day,
+      hour,
+      minute,
+      second: 0,
+    };
+    const dt = DateTime.fromObject(parts, { zone: safeZoneForCoordinates() });
+    if (!dt.isValid) return null;
+    if (
+      dt.year !== parts.year ||
+      dt.month !== parts.month ||
+      dt.day !== parts.day ||
+      dt.hour !== parts.hour ||
+      dt.minute !== parts.minute
+    )
+      return null;
+    return dt.toUTC();
+  }
+
+  function renderableDateForDateTime(dt) {
+    if (!dt || !dt.isValid) return null;
+    const date = dt.toUTC().toJSDate();
+    return Number.isFinite(date.getTime()) ? date : null;
+  }
+
+  function applyObserverDateTime(dt, syncInputs = true) {
+    const utc = dt && dt.isValid ? dt.toUTC() : null;
+    if (!utc || !utc.isValid || !utc.toISO() || !renderableDateForDateTime(utc)) {
+      reportInvalidTimeInput();
+      if (syncInputs) syncTimeInputs();
+      return false;
+    }
+    state.instant = utc.toISO();
+    playing = false;
+    save();
+    updateHUD(syncInputs);
+    updateSkyView(true);
+    return true;
   }
   function formatLocalLong() {
     const dt = observerDT();
@@ -1045,7 +1170,7 @@ import {
     $("observer-lat").value = Number(state.lat).toFixed(4);
     $("observer-lon").value = Number(state.lon).toFixed(4);
     $("observer-timezone").value = state.zone;
-    $("observer-datetime").value = formatLocalInput();
+    syncTimeInputs();
     $("speed").value = String(state.speed);
     $("language-select").value = state.lang;
     $("culture-select").value = state.cultureMode;
@@ -1824,6 +1949,24 @@ import {
       debugLine(label.mapScale, debugScaleParts(view.mapScale)),
       debugLine(label.internalZoom, debugScaleParts(view.internalZoom)),
       debugBlankLine(),
+      debugGroup(zh ? "数据与时间" : "Data & time"),
+      debugLine(zh ? "数据模式" : "data mode", [
+        debugValue(window.__RSO_DATA_MODE__ || "unknown"),
+      ]),
+      debugLine(zh ? "注册数据集" : "registered datasets", [
+        debugValue(
+          Object.keys(window.__RSO_LOCAL_DATA__ || {}).filter(
+            (key) => key.includes("/") && key.endsWith(".json") && !key.startsWith("src/data/"),
+          ).length,
+        ),
+      ]),
+      debugLine(zh ? "时间输入" : "time input", [
+        debugValue(parseObserverTimeFields() ? "valid" : "draft/invalid"),
+      ]),
+      debugLine(zh ? "内部 UTC" : "internal UTC", [
+        debugValue(state.instant || "-"),
+      ]),
+      debugBlankLine(),
       debugGroup(label.interactionGroup),
       debugLine(label.interaction, [debugValue(debugDragMode(zh))]),
       debugLine(label.dragMoved, [
@@ -2231,7 +2374,11 @@ import {
     };
     const render = (query = "") => {
       const q = String(query).trim().toLowerCase();
-      found = CITIES.filter((c) => !q || citySearchText(c).includes(q)).slice(0, 40);
+      const cityMaxResults = Math.max(1, Math.floor(Number(cfg("search.cityMaxResults", 60)) || 60));
+      found = CITIES.filter((c) => !q || citySearchText(c).includes(q)).slice(
+        0,
+        cityMaxResults,
+      );
       box.innerHTML = "";
       found.forEach((c, index) => {
         const b = document.createElement("button");
@@ -2239,7 +2386,7 @@ import {
         b.className = "city-option";
         b.setAttribute("role", "option");
         b.title = `${c.zh} / ${c.en} · ${c.zone}`;
-        b.innerHTML = `<span class="city-option-name">${state.lang === "zh" ? c.zh : c.en}</span><small>${c.zone}</small>`;
+        b.innerHTML = `<span class="city-option-name">${state.lang === "zh" ? c.zh : c.en}</span><small class="city-option-zone">${c.zone}</small>`;
         b.addEventListener("mouseenter", () => setActive(index));
         b.addEventListener("mousedown", (e) => {
           e.preventDefault();
@@ -4476,7 +4623,8 @@ import {
           location: [Number(state.lat), Number(state.lon)],
           timezone: dt.offset,
         });
-        syncMapBoxAfterRedraw(projectionCanvasMetrics());
+        if (force) redrawAndSyncMapBox("horizontal sky view");
+        else syncMapBoxAfterRedraw(projectionCanvasMetrics());
       } else if (force) redrawAndSyncMapBox("sky view");
       updateSelectedObject();
     } catch (err) {
@@ -4521,90 +4669,42 @@ import {
       $("sky-meta").textContent =
         `${cityName()} · ${formatCivilDateTime(local, false)}`;
     $("observer-timezone").value = state.zone;
-    if (syncInput) $("observer-datetime").value = formatLocalInput();
-  }
-
-  /**
-   * 按观测者时区解析本地日期时间输入，并返回 UTC。
-   * 不存在的日期和夏令时跳变造成的自动归一化会被拒绝，
-   * 避免静默改变用户输入的民用时间。
-   */
-  function parseObserverLocalTime(value) {
-    const text = String(value || "").trim().replace(/\s+/g, " ");
-    const match = /^(?:(BC|BCE)\s*)?([+-]?\d+)\/(\d{1,2})\/(\d{1,2})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/i.exec(text);
-    if (!match) return null;
-    const year = displayYearToAstronomical(match[1], match[2]);
-    if (year === null) return null;
-    const zone = safeZoneForCoordinates();
-    const parts = {
-      year,
-      month: Number(match[3]),
-      day: Number(match[4]),
-      hour: Number(match[5]),
-      minute: Number(match[6]),
-      second: Number(match[7] || 0),
-    };
-    const dt = DateTime.fromObject(parts, { zone });
-    if (!dt.isValid) return null;
-    if (
-      dt.year !== parts.year ||
-      dt.month !== parts.month ||
-      dt.day !== parts.day ||
-      dt.hour !== parts.hour ||
-      dt.minute !== parts.minute
-    )
-      return null;
-    return dt.toUTC();
+    if (syncInput) syncTimeInputs(local);
   }
 
   function commitObserverDateTimeInput() {
-    const input = $("observer-datetime");
-    const previous = formatLocalInput();
-    const dt = parseObserverLocalTime(input.value);
+    const dt = parseObserverTimeFields();
     if (!dt) {
-      showToast(t("invalidDateTime"), true);
-      if (input) input.value = previous;
+      reportInvalidTimeInput();
+      syncTimeInputs();
       return false;
     }
-    state.instant = dt.toISO();
-    playing = false;
-    save();
-    updateHUD(true);
-    updateSkyView(true);
-    return true;
+    return applyObserverDateTime(dt, true);
   }
 
-  function adjustInputYear(delta) {
-    const input = $("observer-datetime");
-    if (!input) return;
-    const dt = parseObserverLocalTime(input.value) || observerDT();
-    const shifted = dt.setZone(safeZoneForCoordinates()).plus({ years: delta });
-    if (!shifted.isValid) {
-      showToast(t("invalidDateTime"), true);
-      input.value = formatLocalInput();
-      return;
-    }
-    state.instant = shifted.toUTC().toISO();
-    playing = false;
-    save();
-    updateHUD(true);
-    updateSkyView(true);
+  function adjustTimeField(field, delta) {
+    const parsed = parseObserverTimeFields();
+    const base = (parsed && parsed.isValid ? parsed : observerDT()).setZone(
+      safeZoneForCoordinates(),
+    );
+    const units = {
+      year: "years",
+      month: "months",
+      day: "days",
+      hour: "hours",
+      minute: "minutes",
+    };
+    const unit = units[field];
+    if (!unit) return;
+    const change = {};
+    change[unit] = delta;
+    applyObserverDateTime(base.plus(change), true);
   }
 
   function shiftObserverTime(unit, amount) {
-    const dt = observerDT();
     const delta = {};
     delta[unit] = Number(amount);
-    const shifted = dt.plus(delta);
-    if (!shifted.isValid) {
-      showToast(t("invalidDateTime"), true);
-      return;
-    }
-    state.instant = shifted.toUTC().toISO();
-    playing = false;
-    save();
-    updateHUD(true);
-    updateSkyView(true);
+    applyObserverDateTime(observerDT().plus(delta), true);
   }
 
   function readTimeStepValue() {
@@ -4887,7 +4987,7 @@ import {
   /**
    * 完整重载星图渲染器。
    * 只用于启动、回退路径，以及坐标视角改变 D3-Celestial transform 时；
-   * 每次重建都从 preloaded-data.js 的深拷贝数据开始，避免污染原始目录。
+   * 每次重建都从 src/data JS 分片经 loader 返回的深拷贝数据开始，避免污染原始目录。
    */
   function rebuildSkyPreservingPixels(view) {
     if (rebuildInProgress) return;
@@ -5277,16 +5377,28 @@ import {
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 },
       );
     });
-    $("observer-datetime").addEventListener("change", commitObserverDateTimeInput);
-    $("observer-datetime").addEventListener("keydown", (e) => {
-      if (e.isComposing) return;
-      if (e.key === "Enter") {
-        e.preventDefault();
-        if (commitObserverDateTimeInput()) $("observer-datetime").blur();
-      } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-        e.preventDefault();
-        adjustInputYear(e.key === "ArrowUp" ? 1 : -1);
-      }
+    TIME_FIELD_IDS.forEach((id) => {
+      const field = $(id);
+      if (!field) return;
+      field.addEventListener("input", setTimeFieldWidths);
+      field.addEventListener("blur", () => syncTimeInputs());
+      field.addEventListener("keydown", (e) => {
+        if (e.isComposing) return;
+        if (e.key === "Enter") {
+          e.preventDefault();
+          if (commitObserverDateTimeInput()) field.blur();
+        } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+          e.preventDefault();
+          const map = {
+            "time-year": "year",
+            "time-month": "month",
+            "time-day": "day",
+            "time-hour": "hour",
+            "time-minute": "minute",
+          };
+          adjustTimeField(map[id], e.key === "ArrowUp" ? 1 : -1);
+        }
+      });
     });
     $("time-step-minus").addEventListener("click", () => shiftObserverTimeByControl(-1));
     $("time-step-plus").addEventListener("click", () => shiftObserverTimeByControl(1));
@@ -5298,11 +5410,7 @@ import {
       }
     });
     $("observer-now").addEventListener("click", () => {
-      state.instant = new Date().toISOString();
-      playing = false;
-      save();
-      updateHUD(true);
-      updateSkyView(true);
+      applyObserverDateTime(DateTime.utc(), true);
       showToast(t("nowApplied"));
     });
     document

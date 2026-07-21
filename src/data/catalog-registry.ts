@@ -6,8 +6,8 @@ import type {
 
 /**
  * 数据入口集中在这里，app.ts 不再直接散写数据文件路径。
- * `CATALOG_DATA_PATH` 供 D3-Celestial 组合旧式文件名请求，实际数据由
- * `src/data/preloaded-data.js` 按文件名拦截并返回深拷贝。
+ * DATASET_PATHS 是 D3-Celestial 和项目代码使用的逻辑请求路径；
+ * 实际可编辑数据在 src/data 的分类 JS 分片中，loader.js 按路径或文件名映射并返回深拷贝。
  */
 export const CATALOG_DATA_PATH = "src/data/";
 

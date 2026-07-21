@@ -172,7 +172,8 @@ button {
 }
 .section {
   padding: 15px 16px;
-  border-bottom: 1px solid var(--line-soft);
+  border-bottom: 1px solid rgba(159, 211, 255, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
 }
 .section:last-child {
   border-bottom: 0;
@@ -181,7 +182,12 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 11px;
+  gap: 8px;
+  margin: -3px -4px 11px;
+  padding: 6px 8px 6px 10px;
+  border-left: 3px solid rgba(119, 220, 255, 0.48);
+  border-radius: 8px;
+  background: rgba(119, 220, 255, 0.055);
   font-size: calc(11px * var(--rso-font-scale));
   font-weight: 850;
   letter-spacing: 0.12em;
@@ -324,23 +330,85 @@ button.danger {
   padding: 6px 8px;
 }
 .time-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 7px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   margin-bottom: 8px;
+}
+.time-field-row {
+  flex-wrap: nowrap;
+}
+.datetime-shell {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 2.9em;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0.42em 0.58em;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 9px;
+  background: #0c1729;
+  color: #f5faff;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+.datetime-shell:focus-within {
+  border-color: rgba(119, 220, 255, 0.6);
+  box-shadow: 0 0 0 3px rgba(119, 220, 255, 0.08);
+}
+.datetime-shell .time-part {
+  width: 2.4ch;
+  min-width: 0;
+  min-height: 1.8em;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: #f5faff;
+  padding: 0 1px;
+  text-align: center;
+  font-size: calc(11px * var(--rso-font-scale));
+  font-variant-numeric: tabular-nums;
+  box-shadow: none;
+}
+.datetime-shell .time-year {
+  width: 4.8ch;
+  text-align: right;
+}
+.datetime-shell .time-part:focus {
+  background: #79bfff;
+  color: #05111d;
+  box-shadow: none;
+}
+.time-sep {
+  color: var(--muted);
+  font-weight: 800;
+  user-select: none;
+}
+.time-gap {
+  flex: 0 0 0.7em;
+}
+#observer-now {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding-left: 8px;
+  padding-right: 8px;
 }
 .calendar-shifts,
 .time-jump-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 5px;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
   margin: 7px 0 6px;
 }
 .calendar-shifts button,
 .time-jump-grid button {
+  flex: 1 1 0;
+  min-width: 0;
   padding-left: 2px;
   padding-right: 2px;
   font-size: calc(9px * var(--rso-font-scale));
+  white-space: nowrap;
 }
 .play-row {
   display: grid;
@@ -432,6 +500,9 @@ input[type="range"] {
 .status-title {
   font-size: calc(11px * var(--rso-font-scale));
   font-weight: 780;
+}
+.status-title.status-error {
+  color: var(--danger);
 }
 .status-lines {
   margin-top: 6px;
@@ -1001,8 +1072,9 @@ body.panel-collapsed #sidebar {
 }
 .city-option {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 3px;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
   width: 100%;
   padding: 8px 10px;
   border: 0;
@@ -1018,11 +1090,14 @@ body.panel-collapsed #sidebar {
 .city-option-name {
   min-width: 0;
   color: var(--text);
-  overflow-wrap: anywhere;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.city-option small {
+.city-option-zone {
   color: var(--muted);
-  overflow-wrap: anywhere;
+  font-size: calc(9px * var(--rso-font-scale));
+  white-space: nowrap;
 }
 .object-option {
   display: grid;
