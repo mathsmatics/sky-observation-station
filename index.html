@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <meta content="dark" name="color-scheme" />
-    <title>真实星空观测台 5.1.4 本地版 · Real Sky Observatory</title>
+    <title>真实星空观测台 5.1.5 本地版 · Real Sky Observatory</title>
     <link href="vendor/d3-celestial/celestial.css" rel="stylesheet" />
     <link href="assets/app.css" rel="stylesheet" />
   </head>
@@ -23,7 +23,7 @@
     <header class="topbar">
       <div class="brand glass">
         <div class="brand-main">
-          <i class="signal"></i><span>REAL SKY OBSERVATORY 5.1.4</span>
+          <i class="signal"></i><span>REAL SKY OBSERVATORY 5.1.5</span>
         </div>
         <div class="brand-sub" data-i18n="brandSub">
           真实地点 × 真实时间 × 真实星表 × 双天文文化
@@ -58,7 +58,7 @@
       </div>
     </header>
     <aside class="glass" id="control-panel">
-      <section class="section">
+      <section class="section" data-menu-id="observer" id="observer-section">
         <div class="section-title">
           <span data-i18n="observer">观测地点</span
           ><span data-i18n="wgs">WGS84 经纬度</span>
@@ -184,7 +184,7 @@
           </button>
         </div>
       </section>
-      <section class="section">
+      <section class="section" data-menu-id="time" id="time-section">
         <div class="section-title">
           <span data-i18n="observationTime">观测时间</span
           ><span id="speed-label">暂停</span>
@@ -259,7 +259,7 @@
           </select>
         </div>
       </section>
-      <section class="section">
+      <section class="section" data-menu-id="viewProjection" id="view-projection-section">
         <div class="section-title">
           <span data-i18n="viewProjection">视图与投影</span
           ><span data-i18n="viewPreserved">独立保存视角</span>
@@ -393,117 +393,139 @@
             </option>
           </select>
         </div>
-        <div class="field" style="margin-top: 8px">
-          <label data-i18n="traditionalRegions" for="traditional-detail"
-            >中国传统天区层级</label
-          >
-          <select id="traditional-detail">
-            <option data-i18n="majorRegions" value="major">
-              三垣 / 四象 / 近南极星区
-            </option>
-            <option data-i18n="withBattlefields" value="battlefields">
-              三垣四象 + 三大战场
-            </option>
-            <option data-i18n="withMansions" value="mansions">
-              三垣四象 + 三大战场 + 二十八宿细分
-            </option>
-          </select>
-          <div class="data-note" data-i18n="traditionalRegionCaveat">
-            三大战场为基于相关星官位置生成的文化主题示意范围；三垣与四象也属于现代数字化复原，不等同于
-            IAU 法定边界。
-          </div>
-        </div>
       </section>
-      <section class="section">
+      <section class="section" data-menu-id="display" id="display-section">
         <div class="section-title">
           <span data-i18n="displaySettings">显示参数</span
           ><span data-i18n="liveApply">实时应用</span>
         </div>
-        <div class="range-row">
-          <label data-i18n="magnitudeThreshold" for="magnitude"
-            >恒星显示星等阈值</label
-          >
-          <input
-            id="magnitude"
-            max="6.0"
-            min="2.5"
-            step="0.1"
-            type="range"
-            value="5.5"
-          />
-          <span class="range-value" id="magnitude-value">5.5</span>
-        </div>
-        <div class="range-row" style="margin-top: 9px">
-          <label data-i18n="starSize" for="star-size">恒星大小</label>
-          <input
-            id="star-size"
-            max="12"
-            min="4"
-            step="1"
-            type="range"
-            value="7"
-          />
-          <span class="range-value" id="star-size-value">7 px</span>
-        </div>
-        <div class="toggles">
-          <label class="toggle"
-            ><span data-i18n="starNames">重要恒星名称</span
-            ><input checked="" id="star-names" type="checkbox"
-          /></label>
-          <label class="toggle"
-            ><span data-i18n="cultureLines">星座/星官连线</span
-            ><input checked="" id="culture-lines" type="checkbox"
-          /></label>
-          <label class="toggle"
-            ><span data-i18n="cultureNames">星座/星官名称</span
-            ><input checked="" id="culture-names" type="checkbox"
-          /></label>
-          <label class="toggle"
-            ><span data-i18n="planets">太阳、月球与行星</span
-            ><input checked="" id="planets" type="checkbox"
-          /></label>
-          <label class="toggle"
-            ><span data-i18n="milkyWay">银河轮廓</span
-            ><input checked="" id="milky-way" type="checkbox"
-          /></label>
-          <label class="toggle"
-            ><span data-i18n="grid">赤道坐标网</span
-            ><input checked="" id="grid" type="checkbox"
-          /></label>
-          <label class="toggle"
-            ><span data-i18n="ecliptic">黄道</span
-            ><input checked="" id="ecliptic" type="checkbox"
-          /></label>
-          <label class="toggle"
-            ><span data-i18n="equator">天球赤道</span
-            ><input id="equator" type="checkbox"
-          /></label>
-          <label class="toggle"
-            ><span data-i18n="horizon">地平线</span
-            ><input checked="" id="horizon" type="checkbox"
-          /></label>
-          <label class="toggle"
-            ><span data-i18n="daylight">日光背景</span
-            ><input checked="" id="daylight" type="checkbox"
-          /></label>
-          <label class="toggle"
-            ><span data-i18n="nightVision">夜视红光</span
-            ><input id="night-vision" type="checkbox"
-          /></label>
-          <label class="toggle"
-            ><span data-i18n="deepSky">亮深空天体</span
-            ><input id="deep-sky" type="checkbox"
-          /></label>
-          <label class="toggle"
-            ><span data-i18n="regionBoundaries">区域边界 / 传统天区</span
-            ><input id="region-boundaries" type="checkbox"
-          /></label>
-        </div>
+        <details class="display-subgroup">
+          <summary data-i18n="displayObjects">对象显示</summary>
+          <div class="toggles">
+            <label class="toggle"
+              ><span data-i18n="planets">太阳、月球与行星</span
+              ><input checked="" id="planets" type="checkbox"
+            /></label>
+            <label class="toggle"
+              ><span data-i18n="starNames">重要恒星名称</span
+              ><input checked="" id="star-names" type="checkbox"
+            /></label>
+            <label class="toggle"
+              ><span data-i18n="deepSky">亮深空天体</span
+              ><input id="deep-sky" type="checkbox"
+            /></label>
+            <label class="toggle"
+              ><span data-i18n="milkyWay">银河轮廓</span
+              ><input checked="" id="milky-way" type="checkbox"
+            /></label>
+          </div>
+        </details>
+        <details class="display-subgroup">
+          <summary data-i18n="displayCultureLayers">文化图层</summary>
+          <div class="toggles">
+            <label class="toggle"
+              ><span data-i18n="cultureLines">星座/星官连线</span
+              ><input checked="" id="culture-lines" type="checkbox"
+            /></label>
+            <label class="toggle"
+              ><span data-i18n="cultureNames">星座/星官名称</span
+              ><input checked="" id="culture-names" type="checkbox"
+            /></label>
+            <label class="toggle"
+              ><span data-i18n="regionBoundaries">区域边界</span
+              ><input id="region-boundaries" type="checkbox"
+            /></label>
+          </div>
+          <div class="field" style="margin-top: 8px">
+            <label data-i18n="traditionalRegions" for="traditional-detail"
+              >中国传统天区层级</label
+            >
+            <select id="traditional-detail">
+              <option data-i18n="majorRegions" value="major">
+                三垣 / 四象 / 近南极星区
+              </option>
+              <option data-i18n="withBattlefields" value="battlefields">
+                三垣四象 + 三大战场
+              </option>
+              <option data-i18n="withMansions" value="mansions">
+                三垣四象 + 三大战场 + 二十八宿细分
+              </option>
+            </select>
+            <div class="data-note" data-i18n="traditionalRegionCaveat">
+              三大战场为基于相关星官位置生成的文化主题示意范围；三垣与四象也属于现代数字化复原，不等同于
+              IAU 法定边界。
+            </div>
+          </div>
+        </details>
+        <details class="display-subgroup">
+          <summary data-i18n="displayReferenceLines">参考线</summary>
+          <div class="toggles">
+            <label class="toggle"
+              ><span data-i18n="grid">赤道坐标网</span
+              ><input checked="" id="grid" type="checkbox"
+            /></label>
+            <label class="toggle"
+              ><span data-i18n="ecliptic">黄道</span
+              ><input checked="" id="ecliptic" type="checkbox"
+            /></label>
+            <label class="toggle"
+              ><span data-i18n="equator">天球赤道</span
+              ><input id="equator" type="checkbox"
+            /></label>
+            <label class="toggle"
+              ><span data-i18n="horizon">地平线</span
+              ><input checked="" id="horizon" type="checkbox"
+            /></label>
+            <label class="toggle"
+              ><span data-i18n="horizontalGrid">地平坐标网</span
+              ><input id="horizontal-grid" type="checkbox"
+            /></label>
+          </div>
+        </details>
+        <details class="display-subgroup">
+          <summary data-i18n="displayVisual">视觉</summary>
+          <div class="range-row">
+            <label data-i18n="magnitudeThreshold" for="magnitude"
+              >恒星显示星等阈值</label
+            >
+            <input
+              id="magnitude"
+              max="6.0"
+              min="2.5"
+              step="0.1"
+              type="range"
+              value="5.5"
+            />
+            <span class="range-value" id="magnitude-value">5.5</span>
+          </div>
+          <div class="range-row" style="margin-top: 9px">
+            <label data-i18n="starSize" for="star-size">恒星大小</label>
+            <input
+              id="star-size"
+              max="12"
+              min="4"
+              step="1"
+              type="range"
+              value="7"
+            />
+            <span class="range-value" id="star-size-value">7 px</span>
+          </div>
+          <div class="toggles" style="margin-top: 9px">
+            <label class="toggle"
+              ><span data-i18n="nightVision">夜视红光</span
+              ><input id="night-vision" type="checkbox"
+            /></label>
+            <label class="toggle"
+              ><span data-i18n="floatingObjectInfo">星体信息浮窗</span
+              ><input id="floating-object-info" type="checkbox"
+            /></label>
+          </div>
+        </details>
         <div class="culture-note" id="culture-note">
           “语言”控制界面与重要恒星名称；“星官”控制天区划分、连线和名称体系。两者互相独立。
         </div>
       </section>
-      <section id="view-tools-section">
+      <section class="section" data-menu-id="viewTools" id="view-tools-section">
         <div class="section-title">
           <span data-i18n="viewTools">视图控制</span
           ><span data-i18n="viewToolsHint">不改变地点与时间</span>
@@ -512,10 +534,35 @@
           <button id="zoom-out" title="Zoom out">−</button
           ><button id="zoom-in" title="Zoom in">＋</button
           ><button data-i18n="resetView" id="reset-view">重置视图</button
-          ><button data-i18n="fullscreen" id="fullscreen">全屏</button>
+          ><button data-i18n="fullscreen" id="fullscreen">全屏</button
+          ><button id="font-decrease" title="A−">A−</button
+          ><button id="font-increase" title="A+">A+</button>
         </div>
       </section>
-      <section class="section" id="object-info-section">
+      <section class="section" data-menu-id="search" id="object-search-section">
+        <div class="section-title">
+          <span data-i18n="objectSearch">天体搜索</span
+          ><span data-i18n="objectSearchHint">恒星 / 行星 / 星座 / 星官 / 深空</span>
+        </div>
+        <div class="object-search-wrap">
+          <div class="field">
+            <label data-i18n="objectSearch" for="object-search">天体搜索</label>
+            <input
+              autocomplete="off"
+              data-i18n-placeholder="objectSearchPlaceholder"
+              id="object-search"
+              placeholder="输入名称或 HIP 编号"
+              type="text"
+            />
+          </div>
+          <div
+            class="object-suggestions"
+            id="object-suggestions"
+            role="listbox"
+          ></div>
+        </div>
+      </section>
+      <section class="section" data-menu-id="objectInfo" id="object-info-section">
         <div class="section-title">
           <span data-i18n="selectedObject">选中天体</span
           ><span data-i18n="clickSkyHint">单击星体或空白天区</span>
@@ -539,7 +586,7 @@
         </div>
         <div class="region-legend" id="region-legend"></div>
       </section>
-      <section class="section">
+      <section class="section" data-menu-id="status" id="status-section">
         <div class="section-title">
           <span data-i18n="currentState">当前状态</span
           ><span data-i18n="utcInternal">内部统一 UTC</span>
@@ -580,7 +627,9 @@
     </aside>
     <button class="panel-toggle-button" id="panel-toggle" title="Toggle panel">
       ☰</button
-    ><button data-i18n="technicalGuide" id="explain-btn">代码与计算说明</button>
+    ><button id="explain-btn" title="代码与计算说明" aria-label="代码与计算说明">
+      <b>?</b>
+    </button>
     <div class="loading" id="loading">
       <div class="loader-box">
         <div class="orbit"></div>
@@ -618,7 +667,7 @@
           <article class="doc" data-doc-lang="zh">
             <h3>1. 项目目标、适用范围与总体架构</h3>
             <p>
-              真实星空观测台 5.1.4
+              真实星空观测台 5.1.5
               是一个完全本地化的浏览器天文馆。它不是随机星点动画，而是读取真实恒星目录、现代西方星座、中国传统星官、银河轮廓和太阳系天体数据，以观测者的经纬度、IANA
               时区和 UTC
               时刻为输入，计算并绘制当前天空。适合肉眼认星、天文文化比较、天球坐标教学和一般观测规划；不替代专业天体测量、精密历表、赤道仪自动指向或天文摄影规划软件。
@@ -970,7 +1019,7 @@
             <h3>6. 图层绘制、标签管理与天体选取</h3>
             <p>
               <code>buildSkyConfig()</code>
-              根据状态生成恒星、深空天体、西方星座、银河、网格、黄道、天赤道、地平线和日光配置，并启用
+              根据状态生成恒星、深空天体、西方星座、银河、网格、黄道、天赤道等原生配置，并启用项目自定义地平线和地平坐标网图层；
               D3-Celestial
               的本地太阳系历表数据但关闭其不完整的原生符号绘制。<code
                 >registerPlanetOverlay()</code
@@ -1216,12 +1265,12 @@
               天气、光污染和地形图层 / 手机陀螺仪与 AR 指向 /
               多套历史中国星图版本对照。
             </p>
-            <p><strong>说明页版本号：</strong>5.1.4</p>
+            <p><strong>说明页版本号：</strong>5.1.5</p>
           </article>
           <article class="doc" data-doc-lang="en">
             <h3>1. Purpose, scope and architecture</h3>
             <p>
-              Real Sky Observatory 5.1.4 is a fully local browser planetarium. It
+              Real Sky Observatory 5.1.5 is a fully local browser planetarium. It
               is not a random star field: it reads real stellar, constellation,
               Chinese asterism, Milky Way and Solar System datasets, combines
               them with the observer's coordinates, IANA time zone and UTC
@@ -1460,9 +1509,10 @@
             <h3>6. Rendering, labels and object information</h3>
             <p>
               <code>buildSkyConfig()</code> assembles native star, DSO, Western
-              constellation, Milky Way, grid, ecliptic, equator, horizon and
-              daylight layers, while the bundled Solar System ephemeris is
-              exposed to <code>registerPlanetOverlay()</code>.
+              constellation, Milky Way, grid, ecliptic and equator layers,
+              while custom reference layers draw the horizon and horizontal
+              grid. The bundled Solar System ephemeris is exposed to
+              <code>registerPlanetOverlay()</code>.
               <code>currentPlanetPositions()</code> computes the Sun, Moon and
               seven planets for the current UTC instant and Earth origin, then
               transforms, projects, draws and exposes the same positions for
@@ -1620,7 +1670,7 @@
               mobile sensors and multiple historical Chinese sky
               reconstructions.
             </p>
-            <p><strong>Guide version:</strong> 5.1.4</p>
+            <p><strong>Guide version:</strong> 5.1.5</p>
           </article>
         </div>
       </div>

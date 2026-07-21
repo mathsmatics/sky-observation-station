@@ -1,5 +1,5 @@
 /**
- * 真实星空观测台 4.8 —— 用户可配置文件
+ * 真实星空观测台 5.1.5 —— 用户可配置文件
  * ------------------------------------------------------------
  * 修改本文件后，运行 npm run build 并刷新 index.html 即可生效。
  * 建议每次只修改一个参数，并保留原值，便于出现问题时恢复。
@@ -43,6 +43,20 @@ window.RSO_CONFIG = {
     skyMetaRight: 12, // 星图文字信息距右侧
     skyMetaFontSize: 12, // 星图上的“地点 · 日期时间”字号
     skyMetaColor: "rgba(228,241,255,.88)", // 星图上的“地点 · 日期时间”颜色
+  },
+
+  /** 左侧菜单分组顺序；每个值对应一个稳定的 data-menu-id */
+  menu: {
+    order: [
+      "viewTools",
+      "search",
+      "observer",
+      "time",
+      "viewProjection",
+      "display",
+      "objectInfo",
+      "status",
+    ],
   },
 
   /** 调试面板：开发时打开，完成后可把 enabled 改为 false 隐藏开关 */
@@ -109,7 +123,9 @@ window.RSO_CONFIG = {
     showEcliptic: true,
     showCelestialEquator: false,
     showHorizon: true,
-    showDaylight: true,
+    showHorizontalGrid: false,
+    showFloatingObjectInfo: false,
+    fontScale: 1,
     nightVision: false,
     showDeepSky: false,
     timeSpeed: 3600,
@@ -169,6 +185,21 @@ window.RSO_CONFIG = {
       stroke: "#7f9bb6",
       width: 0.85,
       opacity: 0.68,
+      labelColor: "#ff5656",
+      labelFont: "900 15px Inter, Microsoft YaHei, sans-serif",
+      labelInsetPx: 18,
+    },
+    horizontalGrid: {
+      stroke: "#6fa78f",
+      width: 0.55,
+      opacity: 0.34,
+      labelColor: "#a8dbc8",
+      labelFont: "600 10px Inter, Microsoft YaHei, sans-serif",
+    },
+    gridLabels: {
+      color: "#a8bdd3",
+      font: "600 10px Inter, Microsoft YaHei, sans-serif",
+      opacity: 0.72,
     },
   },
 

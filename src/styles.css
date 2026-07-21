@@ -14,6 +14,7 @@
   --green: #70e1ac;
   --danger: #ff8b8b;
   --shadow: 0 22px 75px rgba(0, 0, 0, 0.52);
+  --rso-font-scale: 1;
 }
 * {
   box-sizing: border-box;
@@ -27,6 +28,7 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: Inter, "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+  font-size: calc(12px * var(--rso-font-scale));
 }
 button,
 input,
@@ -107,6 +109,7 @@ button {
 .cardinal-layer {
   position: absolute;
   z-index: 3;
+  display: none !important;
   left: 0;
   top: 0;
   transform: none;
@@ -580,10 +583,23 @@ input[type="range"] {
   font-size: 12px;
 }
 #explain-btn {
-  padding: 0 14px;
+  position: fixed;
+  z-index: 80;
+  left: calc(
+    var(--panel-toggle-left, 8px) + var(--panel-toggle-size, 36px) + 6px
+  );
+  top: var(--panel-toggle-top, 8px);
+  width: var(--panel-toggle-size, 36px);
+  height: var(--panel-toggle-size, 36px);
+  min-width: 0;
+  padding: 0;
   border-color: rgba(255, 212, 119, 0.38);
+  border-radius: 10px;
   color: #ffe4a5;
   background: rgba(45, 35, 19, 0.87);
+  font-size: calc(16px * var(--rso-font-scale));
+  font-weight: 900;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
 }
 .loading {
   position: fixed;
@@ -1153,19 +1169,12 @@ body.non-horizontal .cardinal-layer {
 body:not(.panel-collapsed) #panel-toggle {
   left: 10px;
 }
-#sidebar-footer {
-  padding: 10px 12px;
-  border-top: 1px solid var(--line-soft);
-  background: #07101f;
-}
-#sidebar-footer #explain-btn {
-  position: static;
-  width: 100%;
-  height: 36px;
-}
 .city-search-wrap {
   position: relative;
   margin-bottom: 9px;
+}
+.object-search-wrap {
+  position: relative;
 }
 .city-suggestions {
   display: none;
@@ -1182,6 +1191,23 @@ body:not(.panel-collapsed) #panel-toggle {
   box-shadow: 0 18px 45px rgba(0, 0, 0, 0.5);
 }
 .city-suggestions.open {
+  display: block;
+}
+.object-suggestions {
+  display: none;
+  position: absolute;
+  z-index: 40;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  max-height: 260px;
+  overflow: auto;
+  border: 1px solid rgba(119, 220, 255, 0.28);
+  border-radius: 10px;
+  background: #0a1729;
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.5);
+}
+.object-suggestions.open {
   display: block;
 }
 .city-option {
@@ -1202,6 +1228,46 @@ body:not(.panel-collapsed) #panel-toggle {
 }
 .city-option small {
   color: var(--muted);
+}
+.object-option {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  text-align: left;
+}
+.object-option:hover {
+  transform: none;
+  background: #18304d;
+}
+.object-option small,
+.object-search-empty {
+  color: var(--muted);
+}
+.object-search-empty {
+  padding: 9px 10px;
+}
+.display-subgroup {
+  margin-top: 9px;
+  border: 1px solid rgba(159, 211, 255, 0.13);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.022);
+}
+.display-subgroup summary {
+  cursor: pointer;
+  padding: 9px 10px;
+  color: #dceeff;
+  font-weight: 800;
+  user-select: none;
+}
+.display-subgroup > .toggles,
+.display-subgroup > .field,
+.display-subgroup > .range-row {
+  margin: 0 10px 10px;
 }
 .projection-help {
   margin-top: 6px;
@@ -1228,6 +1294,56 @@ select optgroup {
 }
 .info-card-rso.open {
   display: block;
+}
+.floating-object-info-card {
+  position: absolute;
+  z-index: 7;
+  right: 12px;
+  bottom: 12px;
+  display: none;
+  width: min(360px, calc(100% - 24px));
+  max-height: min(48vh, 420px);
+  overflow: auto;
+  padding: 11px;
+  border: 1px solid rgba(119, 220, 255, 0.24);
+  border-radius: 12px;
+  background: var(--info-card-bg);
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+  pointer-events: auto;
+}
+.floating-object-info-card.open {
+  display: block;
+}
+.floating-info-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.floating-info-head strong {
+  color: var(--info-title);
+  font-size: calc(13px * var(--rso-font-scale));
+  line-height: 1.35;
+}
+.floating-info-head button {
+  min-width: 28px;
+  padding: 2px 7px;
+}
+#floating-object-grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 8px;
+  margin: 9px 0 0;
+  font-size: calc(10px * var(--rso-font-scale));
+  line-height: 1.5;
+}
+#floating-object-grid dt {
+  color: var(--info-muted);
+}
+#floating-object-grid dd {
+  margin: 0;
+  color: var(--info-text);
+  word-break: break-word;
 }
 .info-head {
   display: flex;
@@ -1498,7 +1614,7 @@ select optgroup {
 #debug-toggle {
   position: fixed;
   z-index: 80;
-  left: var(--debug-toggle-left, 56px);
+  left: var(--debug-toggle-left, 98px);
   top: var(--debug-toggle-top, 8px);
   width: var(--debug-toggle-width, 46px);
   height: var(--debug-toggle-height, 36px);
@@ -1606,7 +1722,7 @@ select optgroup {
 }
 .view-tools-grid {
   display: grid;
-  grid-template-columns: 44px 44px minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: 44px 44px minmax(0, 1fr) minmax(0, 1fr) 44px 44px;
   gap: 7px;
 }
 .view-tools-grid button {
@@ -1644,7 +1760,7 @@ select optgroup {
   #debug-toggle {
     left: var(
       --debug-touch-toggle-left,
-      calc(max(8px, env(safe-area-inset-left)) + 50px)
+      calc(max(8px, env(safe-area-inset-left)) + 100px)
     );
     top: var(--debug-touch-toggle-top, max(8px, env(safe-area-inset-top)));
     width: var(--debug-touch-toggle-width, 46px);
@@ -1662,7 +1778,7 @@ select optgroup {
     font-size: 9px;
   }
   .view-tools-grid {
-    grid-template-columns: 40px 40px 1fr 1fr;
+    grid-template-columns: 40px 40px 1fr 1fr 40px 40px;
   }
 }
 /* 即使关闭 controls，D3-Celestial 仍可能生成内部表单。

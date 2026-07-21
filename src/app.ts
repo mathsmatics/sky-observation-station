@@ -72,6 +72,14 @@
     };
     Object.entries(vars).forEach(([k, v]) => root.setProperty(k, v));
   }
+
+  function applyFontScale() {
+    const scale = Number(state.fontScale);
+    document.documentElement.style.setProperty(
+      "--rso-font-scale",
+      Number.isFinite(scale) && scale > 0 ? String(scale) : "1",
+    );
+  }
   applyConfigCss();
   const DateTime = window.luxon && window.luxon.DateTime;
   const STORAGE_KEY = "real-sky-observatory-v48";
@@ -107,6 +115,10 @@
       speed86400: "×86400：1 秒 = 1 天",
       displaySettings: "显示参数",
       liveApply: "实时应用",
+      displayObjects: "对象显示",
+      displayCultureLayers: "文化图层",
+      displayReferenceLines: "参考线",
+      displayVisual: "视觉",
       magnitudeThreshold: "恒星显示星等阈值",
       starSize: "恒星大小",
       starNames: "重要恒星名称",
@@ -115,12 +127,22 @@
       planets: "太阳、月球与行星",
       milkyWay: "银河轮廓",
       grid: "赤道坐标网",
+      horizontalGrid: "地平坐标网",
       ecliptic: "黄道",
       equator: "天球赤道",
       horizon: "地平线",
-      daylight: "日光背景",
       nightVision: "夜视红光",
       deepSky: "亮深空天体",
+      floatingObjectInfo: "星体信息浮窗",
+      objectSearch: "天体搜索",
+      objectSearchHint: "恒星 / 行星 / 星座 / 星官 / 深空",
+      objectSearchPlaceholder: "输入名称或 HIP 编号",
+      noObjectSearchResult: "没有找到匹配的天体",
+      searchResultStar: "恒星",
+      searchResultPlanet: "行星",
+      searchResultConstellation: "星座",
+      searchResultAsterism: "星官",
+      searchResultDso: "深空",
       currentState: "当前状态",
       utcInternal: "内部统一 UTC",
       localTime: "当地时间：",
@@ -203,6 +225,10 @@
       speed86400: "×86400: 1 sec = 1 day",
       displaySettings: "Display settings",
       liveApply: "applied live",
+      displayObjects: "Objects",
+      displayCultureLayers: "Culture layers",
+      displayReferenceLines: "Reference lines",
+      displayVisual: "Visual",
       magnitudeThreshold: "Stellar magnitude display limit",
       starSize: "Star size",
       starNames: "Important star names",
@@ -211,12 +237,23 @@
       planets: "Sun, Moon & planets",
       milkyWay: "Milky Way outline",
       grid: "Equatorial grid",
+      horizontalGrid: "Horizontal grid",
       ecliptic: "Ecliptic",
       equator: "Celestial equator",
       horizon: "Horizon",
-      daylight: "Daylight background",
       nightVision: "Red night vision",
       deepSky: "Bright deep-sky objects",
+      floatingObjectInfo: "Floating object info",
+      objectSearch: "Object search",
+      objectSearchHint:
+        "Stars / planets / constellations / asterisms / deep sky",
+      objectSearchPlaceholder: "Enter a name or HIP number",
+      noObjectSearchResult: "No matching object found",
+      searchResultStar: "Star",
+      searchResultPlanet: "Planet",
+      searchResultConstellation: "Constellation",
+      searchResultAsterism: "Asterism",
+      searchResultDso: "Deep sky",
       currentState: "Current state",
       utcInternal: "UTC internally",
       localTime: "Local time: ",
@@ -409,10 +446,12 @@
     planets: !!cfg("defaults.showPlanets", true),
     milkyWay: !!cfg("defaults.showMilkyWay", true),
     grid: !!cfg("defaults.showGrid", true),
+    horizontalGrid: !!cfg("defaults.showHorizontalGrid", false),
     ecliptic: !!cfg("defaults.showEcliptic", true),
     equator: !!cfg("defaults.showCelestialEquator", false),
     horizon: !!cfg("defaults.showHorizon", true),
-    daylight: !!cfg("defaults.showDaylight", true),
+    floatingObjectInfo: !!cfg("defaults.showFloatingObjectInfo", false),
+    fontScale: Number(cfg("defaults.fontScale", 1)),
     nightVision: !!cfg("defaults.nightVision", false),
     deepSky: !!cfg("defaults.showDeepSky", false),
     speed: Number(cfg("defaults.timeSpeed", 3600)),
@@ -477,6 +516,9 @@
     debugCopyTimer = null,
     debugFramePending = false,
     layoutResizeGeneration = 0;
+  let objectSearchIndex = null,
+    searchHighlight = null,
+    searchHighlightTimer = null;
   const STAR_NAMES =
     (window.__RSO_LOCAL_DATA__ &&
       window.__RSO_LOCAL_DATA__["starnames.json"]) ||
@@ -651,6 +693,11 @@
       { mapScale: state.mapScale, zoom: state.zoom },
       defaults.mapScale,
     );
+    if (
+      !Number.isFinite(Number(state.fontScale)) ||
+      Number(state.fontScale) <= 0
+    )
+      state.fontScale = defaults.fontScale;
     delete state.zoom;
     Object.values(state.projectionViews).forEach((view) => {
       if (!view || typeof view !== "object") return;
@@ -896,6 +943,9 @@
     $("cardinal-e").textContent = "E";
     $("cardinal-s").textContent = "S";
     $("cardinal-w").textContent = "W";
+    $("explain-btn").innerHTML = "<b>?</b>";
+    $("explain-btn").title = t("technicalGuide");
+    $("explain-btn").setAttribute("aria-label", t("technicalGuide"));
     document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
       const key = el.dataset.i18nPlaceholder;
       if (I18N[state.lang][key]) el.placeholder = I18N[state.lang][key];
@@ -943,18 +993,21 @@
       planets: "planets",
       "milky-way": "milkyWay",
       grid: "grid",
+      "horizontal-grid": "horizontalGrid",
       ecliptic: "ecliptic",
       equator: "equator",
       horizon: "horizon",
-      daylight: "daylight",
       "night-vision": "nightVision",
       "deep-sky": "deepSky",
       "region-boundaries": "regionBoundaries",
+      "floating-object-info": "floatingObjectInfo",
     };
     Object.entries(checks).forEach(
       ([id, key]) => ($(id).checked = !!state[key]),
     );
     $("sky-stage").classList.toggle("night-vision", state.nightVision);
+    applyFontScale();
+    updateFloatingObjectInfo();
     setPanel(state.panelOpen, false);
     updateProjectionHelp();
     updateBoundaryUI();
@@ -1350,11 +1403,7 @@
     sidebar.appendChild(head);
     const panel = $("control-panel");
     sidebar.appendChild(panel);
-    const footer = document.createElement("div");
-    footer.id = "sidebar-footer";
-    const explain = $("explain-btn");
-    if (explain) footer.appendChild(explain);
-    sidebar.appendChild(footer);
+    applyMenuSectionOrder(panel);
     pane.appendChild($("sky-stage"));
     pane.appendChild(document.querySelector(".cardinal-layer"));
     const skyMeta = $("sky-meta");
@@ -1366,6 +1415,16 @@
       resizeObserver = new ResizeObserver(() => scheduleSkyResize());
       resizeObserver.observe(pane);
     }
+  }
+
+  function applyMenuSectionOrder(panel = $("control-panel")) {
+    if (!panel) return;
+    const configured = cfg("menu.order", []),
+      order = Array.isArray(configured) ? configured : [];
+    order
+      .map((id) => panel.querySelector(`[data-menu-id="${id}"]`))
+      .filter(Boolean)
+      .forEach((section) => panel.appendChild(section));
   }
 
   /**
@@ -1745,12 +1804,14 @@
             planets: "太阳、月球与行星",
             milkyWay: "银河轮廓",
             grid: "赤道坐标网",
+            horizontalGrid: "地平坐标网",
             ecliptic: "黄道",
             equator: "天球赤道",
             horizon: "地平线",
-            daylight: "日光背景",
             nightVision: "夜视红光",
             deepSky: "亮深空天体",
+            floatingInfo: "星体信息浮窗",
+            fontScale: "全局字体缩放",
             regionBoundaries: "中国传统天区边界",
             detail: "传统天区层级",
             time: "时间推进",
@@ -1818,12 +1879,14 @@
             planets: "Sun, Moon and planets",
             milkyWay: "Milky Way outline",
             grid: "equatorial grid",
+            horizontalGrid: "horizontal grid",
             ecliptic: "ecliptic",
             equator: "celestial equator",
             horizon: "horizon",
-            daylight: "daylight",
             nightVision: "red night vision",
             deepSky: "bright deep-sky objects",
+            floatingInfo: "floating object info",
+            fontScale: "global font scale",
             regionBoundaries: "Chinese traditional region boundaries",
             detail: "detail",
             time: "time advance",
@@ -2012,12 +2075,18 @@
       debugLine(label.planets, [debugValue(bool(state.planets))]),
       debugLine(label.milkyWay, [debugValue(bool(state.milkyWay))]),
       debugLine(label.grid, [debugValue(bool(state.grid))]),
+      debugLine(label.horizontalGrid, [debugValue(bool(state.horizontalGrid))]),
       debugLine(label.ecliptic, [debugValue(bool(state.ecliptic))]),
       debugLine(label.equator, [debugValue(bool(state.equator))]),
       debugLine(label.horizon, [debugValue(bool(state.horizon))]),
-      debugLine(label.daylight, [debugValue(bool(state.daylight))]),
       debugLine(label.nightVision, [debugValue(bool(state.nightVision))]),
       debugLine(label.deepSky, [debugValue(bool(state.deepSky))]),
+      debugLine(label.floatingInfo, [
+        debugValue(bool(state.floatingObjectInfo)),
+      ]),
+      debugLine(label.fontScale, [
+        debugValue(Number(state.fontScale).toFixed(3)),
+      ]),
       debugLine(label.regionBoundaries, [
         debugValue(bool(state.regionBoundaries)),
       ]),
@@ -2548,20 +2617,22 @@
                 : mansion
                   ? cfg("labels.traditionalMansionColor", "#dcc37c")
                   : cfg("labels.traditionalMajorColor", "#8fd4f4"),
-              font: battle
-                ? cfg(
-                    "labels.traditionalBattlefieldFont",
-                    "700 11px Inter, Microsoft YaHei, sans-serif",
-                  )
-                : mansion
+              font: scaleFont(
+                battle
                   ? cfg(
-                      "labels.traditionalMansionFont",
-                      "600 9px Inter, Microsoft YaHei, sans-serif",
-                    )
-                  : cfg(
-                      "labels.traditionalMajorFont",
+                      "labels.traditionalBattlefieldFont",
                       "700 11px Inter, Microsoft YaHei, sans-serif",
-                    ),
+                    )
+                  : mansion
+                    ? cfg(
+                        "labels.traditionalMansionFont",
+                        "600 9px Inter, Microsoft YaHei, sans-serif",
+                      )
+                    : cfg(
+                        "labels.traditionalMajorFont",
+                        "700 11px Inter, Microsoft YaHei, sans-serif",
+                      ),
+              ),
               align: "center",
               baseline: "middle",
             });
@@ -2600,6 +2671,252 @@
       return { alt: NaN, az: NaN };
     }
   }
+
+  function degToRad(value) {
+    return (Number(value) * Math.PI) / 180;
+  }
+
+  function radToDeg(value) {
+    return (Number(value) * 180) / Math.PI;
+  }
+
+  function normalizeDegrees(value) {
+    return ((Number(value) % 360) + 360) % 360;
+  }
+
+  function julianDate(date) {
+    return date.getTime() / 86400000 + 2440587.5;
+  }
+
+  function localSiderealDegrees(date, longitude) {
+    const jd = julianDate(date),
+      d = jd - 2451545.0,
+      gmst = 280.46061837 + 360.98564736629 * d;
+    return normalizeDegrees(gmst + Number(longitude));
+  }
+
+  function equatorialFromHorizontal(azimuth, altitude) {
+    const az = degToRad(azimuth),
+      alt = degToRad(altitude),
+      lat = degToRad(state.lat),
+      lst = degToRad(localSiderealDegrees(new Date(state.instant), state.lon));
+    const sinDec =
+        Math.sin(alt) * Math.sin(lat) +
+        Math.cos(alt) * Math.cos(lat) * Math.cos(az),
+      dec = Math.asin(Math.max(-1, Math.min(1, sinDec))),
+      hourAngle = Math.atan2(
+        -Math.sin(az) * Math.cos(alt),
+        Math.sin(alt) * Math.cos(lat) -
+          Math.cos(alt) * Math.sin(lat) * Math.cos(az),
+      ),
+      ra = normalizeDegrees(radToDeg(lst - hourAngle));
+    return [normalizeCelestialLongitude(ra), radToDeg(dec)];
+  }
+
+  function scaleFont(font) {
+    const scale = Number(state.fontScale) || 1;
+    return String(font).replace(/(\d+(?:\.\d+)?)px/g, (_, px) => {
+      return `${Number(px) * scale}px`;
+    });
+  }
+
+  function projectEquatorialCoordinate(coord) {
+    const display = displayCoordinateForEquatorial(coord);
+    if (!display || !Celestial.clip(display)) return null;
+    const pt = Celestial.mapProjection(display);
+    return pt && Number.isFinite(pt[0]) && Number.isFinite(pt[1]) ? pt : null;
+  }
+
+  function projectHorizontalCoordinate(azimuth, altitude) {
+    return projectEquatorialCoordinate(
+      equatorialFromHorizontal(azimuth, altitude),
+    );
+  }
+
+  function drawProjectedLine(points, style) {
+    const ctx = Celestial.context;
+    ctx.save();
+    ctx.beginPath();
+    ctx.strokeStyle = style.stroke;
+    ctx.globalAlpha = Number(style.opacity ?? 1);
+    ctx.lineWidth = Number(style.width ?? 1);
+    ctx.setLineDash(Array.isArray(style.dash) ? style.dash : []);
+    let previous = null,
+      drawing = false;
+    points.forEach((pt) => {
+      if (!pt) {
+        previous = null;
+        drawing = false;
+        return;
+      }
+      const jump =
+        previous && Math.hypot(pt[0] - previous[0], pt[1] - previous[1]) > 180;
+      if (!drawing || jump) {
+        ctx.moveTo(pt[0], pt[1]);
+        drawing = true;
+      } else ctx.lineTo(pt[0], pt[1]);
+      previous = pt;
+    });
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawReferenceText(text, point, style, align = "center") {
+    if (!point) return;
+    const ctx = Celestial.context;
+    ctx.save();
+    ctx.globalAlpha = Number(style.opacity ?? 1);
+    ctx.fillStyle = style.fill;
+    ctx.font = scaleFont(style.font);
+    ctx.textAlign = align;
+    ctx.textBaseline = style.baseline || "middle";
+    ctx.fillText(text, point[0], point[1]);
+    ctx.restore();
+  }
+
+  function drawHorizonLayer() {
+    if (!state.horizon) return;
+    const style = cfg("sky.horizon", {}),
+      lineStyle = {
+        stroke: style.stroke || "#7f9bb6",
+        width: Number(style.width ?? 0.85),
+        opacity: Number(style.opacity ?? 0.68),
+      };
+    const points = [];
+    for (let az = 0; az <= 360; az += 2)
+      points.push(projectHorizontalCoordinate(az, 0));
+    drawProjectedLine(points, lineStyle);
+
+    const labels = [
+      ["N", 0],
+      ["E", 90],
+      ["S", 180],
+      ["W", 270],
+    ];
+    const inset = Number(cfg("sky.horizon.labelInsetPx", 18));
+    labels.forEach(([label, az]) => {
+      const edge = projectHorizontalCoordinate(az, 0),
+        inner = projectHorizontalCoordinate(az, 8);
+      if (!edge || !inner) return;
+      const dx = inner[0] - edge[0],
+        dy = inner[1] - edge[1],
+        len = Math.hypot(dx, dy) || 1,
+        point = [edge[0] + (dx / len) * inset, edge[1] + (dy / len) * inset];
+      drawReferenceText(label, point, {
+        fill: cfg("sky.horizon.labelColor", "#ff5656"),
+        font: cfg(
+          "sky.horizon.labelFont",
+          "900 15px Inter, Microsoft YaHei, sans-serif",
+        ),
+        opacity: 0.95,
+      });
+    });
+  }
+
+  function drawHorizontalGridLayer() {
+    if (!state.horizontalGrid) return;
+    const style = cfg("sky.horizontalGrid", {}),
+      lineStyle = {
+        stroke: style.stroke || "#6fa78f",
+        width: Number(style.width ?? 0.55),
+        opacity: Number(style.opacity ?? 0.34),
+      },
+      textStyle = {
+        fill: style.labelColor || "#a8dbc8",
+        font: style.labelFont || "600 10px Inter, Microsoft YaHei, sans-serif",
+        opacity: 0.76,
+      };
+
+    for (let alt = 15; alt <= 75; alt += 15) {
+      const points = [];
+      for (let az = 0; az <= 360; az += 3)
+        points.push(projectHorizontalCoordinate(az, alt));
+      drawProjectedLine(points, lineStyle);
+      drawReferenceText(
+        `${alt}°`,
+        projectHorizontalCoordinate(8, alt),
+        textStyle,
+        "left",
+      );
+    }
+    for (let az = 0; az < 360; az += 30) {
+      const points = [];
+      for (let alt = 0; alt <= 90; alt += 2)
+        points.push(projectHorizontalCoordinate(az, alt));
+      drawProjectedLine(points, lineStyle);
+      drawReferenceText(
+        `${az}°`,
+        projectHorizontalCoordinate(az, 10),
+        textStyle,
+      );
+    }
+  }
+
+  function drawEquatorialGridLabels() {
+    if (!state.grid) return;
+    const style = {
+      fill: cfg("sky.gridLabels.color", "#a8bdd3"),
+      font: cfg(
+        "sky.gridLabels.font",
+        "600 10px Inter, Microsoft YaHei, sans-serif",
+      ),
+      opacity: Number(cfg("sky.gridLabels.opacity", 0.72)),
+    };
+    for (let lon = 0; lon < 360; lon += 30)
+      drawReferenceText(
+        `${lon}°`,
+        projectEquatorialCoordinate([normalizeCelestialLongitude(lon), 0]),
+        style,
+      );
+    for (let lat = -60; lat <= 60; lat += 30) {
+      if (lat === 0) continue;
+      drawReferenceText(
+        `${lat > 0 ? "+" : ""}${lat}°`,
+        projectEquatorialCoordinate([0, lat]),
+        style,
+        "left",
+      );
+    }
+  }
+
+  function drawSearchHighlight() {
+    if (!searchHighlight || !searchHighlight.coord) return;
+    const pt = projectEquatorialCoordinate(searchHighlight.coord);
+    if (!pt) return;
+    const ctx = Celestial.context;
+    ctx.save();
+    ctx.strokeStyle = "#ffe45c";
+    ctx.globalAlpha = 0.94;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(pt[0], pt[1], 16, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(pt[0] - 23, pt[1]);
+    ctx.lineTo(pt[0] - 8, pt[1]);
+    ctx.moveTo(pt[0] + 8, pt[1]);
+    ctx.lineTo(pt[0] + 23, pt[1]);
+    ctx.moveTo(pt[0], pt[1] - 23);
+    ctx.lineTo(pt[0], pt[1] - 8);
+    ctx.moveTo(pt[0], pt[1] + 8);
+    ctx.lineTo(pt[0], pt[1] + 23);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function registerReferenceOverlays() {
+    Celestial.add({
+      type: "raw",
+      callback: function () {},
+      redraw: function () {
+        drawHorizontalGridLayer();
+        drawHorizonLayer();
+        drawEquatorialGridLabels();
+        drawSearchHighlight();
+      },
+    });
+  }
+
   function selectionNodes(selector) {
     try {
       const sel = Celestial.container.selectAll(selector);
@@ -2881,7 +3198,7 @@
             occupied.push(pt);
             Celestial.setTextStyle({
               fill: "#ffe5a5",
-              font: "600 12px Inter, Microsoft YaHei, sans-serif",
+              font: scaleFont("600 12px Inter, Microsoft YaHei, sans-serif"),
               align: "left",
               baseline: "top",
             });
@@ -2928,6 +3245,256 @@
     if (d && d.geometry && d.geometry.type === "Point")
       return d.geometry.coordinates;
     return null;
+  }
+
+  function normalizeSearchText(value) {
+    return simplifyChinese(value || "")
+      .toLowerCase()
+      .replace(/^hip\s*/i, "hip")
+      .replace(/\s+/g, "");
+  }
+
+  function objectSearchTypeLabel(type) {
+    return t(
+      type === "star"
+        ? "searchResultStar"
+        : type === "planet"
+          ? "searchResultPlanet"
+          : type === "constellation"
+            ? "searchResultConstellation"
+            : type === "asterism"
+              ? "searchResultAsterism"
+              : "searchResultDso",
+    );
+  }
+
+  function addSearchEntry(entries, type, d, coord, names, extra = {}) {
+    const cleanNames = (names || [])
+      .map((name) => simplifyChinese(name || ""))
+      .filter(Boolean)
+      .filter((name, index, list) => list.indexOf(name) === index);
+    if (!coord || !cleanNames.length) return;
+    entries.push({
+      type,
+      d,
+      coord: coord.slice(),
+      names: cleanNames,
+      terms: cleanNames.map(normalizeSearchText),
+      ...extra,
+    });
+  }
+
+  function buildObjectSearchIndex() {
+    if (objectSearchIndex) return objectSearchIndex;
+    const entries = [],
+      data = window.__RSO_LOCAL_DATA__ || {};
+
+    ORIGINAL_STARS.forEach((feature) => {
+      const coord = candidateCoord(feature),
+        n = STAR_NAMES[String(feature.id)] || {},
+        names = [
+          objectLabel("star", feature),
+          n.name,
+          n.zh,
+          n.bayer,
+          n.flam,
+          n.hip,
+          n.hd,
+          feature.id ? `HIP ${feature.id}` : "",
+        ];
+      addSearchEntry(entries, "star", feature, coord, names);
+    });
+
+    (
+      (data["dsos.bright.json"] && data["dsos.bright.json"].features) ||
+      []
+    ).forEach((feature) => {
+      const coord = candidateCoord(feature),
+        names = DSO_NAMES[String(feature.id)] || {},
+        p = feature.properties || {};
+      addSearchEntry(entries, "dso", feature, coord, [
+        objectLabel("dso", feature),
+        names.name,
+        names.zh,
+        p.desig,
+        feature.id,
+      ]);
+    });
+
+    (
+      (data["constellations.json"] && data["constellations.json"].features) ||
+      []
+    ).forEach((feature) => {
+      const p = feature.properties || {};
+      addSearchEntry(
+        entries,
+        "constellation",
+        feature,
+        candidateCoord(feature),
+        [
+          objectLabel("constellation", feature),
+          p.zh,
+          p.en,
+          p.name,
+          p.desig,
+          feature.id,
+        ],
+      );
+    });
+
+    (
+      (data["constellations.cn.json"] &&
+        data["constellations.cn.json"].features) ||
+      []
+    ).forEach((feature) => {
+      const p = feature.properties || {};
+      addSearchEntry(entries, "asterism", feature, candidateCoord(feature), [
+        objectLabel("asterism", feature),
+        p.name,
+        p.en,
+        p.pinyin,
+        p.desig,
+        feature.id,
+      ]);
+    });
+
+    currentPlanetPositions().forEach((item) => {
+      addSearchEntry(
+        entries,
+        "planet",
+        item.body,
+        item.coord,
+        [
+          objectLabel("planet", item.body),
+          item.body.zh,
+          item.body.en,
+          item.body.name,
+          item.id,
+        ],
+        { planetId: item.id, displayCoord: item.displayCoord },
+      );
+    });
+
+    objectSearchIndex = entries;
+    return entries;
+  }
+
+  function searchObjects(query) {
+    const needle = normalizeSearchText(query);
+    if (!needle) return [];
+    objectSearchIndex = null;
+    return buildObjectSearchIndex()
+      .map((entry) => {
+        const exact = entry.terms.some((term) => term === needle),
+          starts = entry.terms.some((term) => term.startsWith(needle)),
+          includes = entry.terms.some((term) => term.includes(needle));
+        if (!exact && !starts && !includes) return null;
+        return { entry, score: exact ? 0 : starts ? 1 : 2 };
+      })
+      .filter(Boolean)
+      .sort(
+        (a, b) =>
+          a.score - b.score || a.entry.names[0].localeCompare(b.entry.names[0]),
+      )
+      .slice(0, 24)
+      .map((item) => item.entry);
+  }
+
+  function renderObjectSuggestions(results, empty = false) {
+    const box = $("object-suggestions");
+    box.innerHTML = "";
+    if (empty) {
+      const div = document.createElement("div");
+      div.className = "object-search-empty";
+      div.textContent = t("noObjectSearchResult");
+      box.appendChild(div);
+      box.classList.add("open");
+      return;
+    }
+    results.forEach((entry) => {
+      const button = document.createElement("button");
+      button.className = "object-option";
+      button.type = "button";
+      const title =
+        state.lang === "zh" ? entry.names[0] : entry.names[1] || entry.names[0];
+      const name = document.createElement("span"),
+        type = document.createElement("small");
+      name.textContent = title;
+      type.textContent = objectSearchTypeLabel(entry.type);
+      button.append(name, type);
+      button.addEventListener("click", () => selectObjectSearchResult(entry));
+      box.appendChild(button);
+    });
+    box.classList.toggle("open", results.length > 0);
+  }
+
+  function setupObjectSearch() {
+    const input = $("object-search"),
+      box = $("object-suggestions");
+    if (!input || !box) return;
+    input.addEventListener("input", () => {
+      const value = input.value.trim();
+      if (!value) {
+        box.classList.remove("open");
+        box.innerHTML = "";
+        return;
+      }
+      const results = searchObjects(value);
+      renderObjectSuggestions(results, results.length === 0);
+    });
+    document.addEventListener("click", (event) => {
+      if (!event.target.closest("#object-search-section"))
+        box.classList.remove("open");
+    });
+  }
+
+  function centerOnObject(obj) {
+    if (!skyReady || !window.Celestial || !obj || !obj.coord) return;
+    try {
+      const display =
+        obj.displayCoord || displayCoordinateForEquatorial(obj.coord);
+      if (!display) return;
+      Celestial.rotate({ center: display.slice() });
+      redrawAndSyncMapBox("object search center");
+      saveCurrentProjectionView();
+      save();
+    } catch (err) {
+      console.warn("Object search centering failed", err);
+    }
+  }
+
+  function highlightObject(obj) {
+    searchHighlight = obj && obj.coord ? { coord: obj.coord.slice() } : null;
+    clearTimeout(searchHighlightTimer);
+    if (searchHighlight)
+      searchHighlightTimer = setTimeout(() => {
+        searchHighlight = null;
+        redrawAndSyncMapBox("search highlight clear");
+      }, 3800);
+    redrawAndSyncMapBox("search highlight");
+  }
+
+  function selectObjectSearchResult(entry) {
+    const obj =
+      entry.type === "planet"
+        ? {
+            type: "planet",
+            d: entry.d,
+            coord: entry.coord,
+            displayCoord: entry.displayCoord,
+            planetId: entry.planetId,
+            label: objectLabel("planet", entry.d),
+          }
+        : {
+            type: entry.type,
+            d: entry.d,
+            coord: entry.coord,
+            label: objectLabel(entry.type, entry.d),
+          };
+    showObjectInfo(obj);
+    centerOnObject(obj);
+    highlightObject(obj);
+    $("object-suggestions").classList.remove("open");
   }
   /**
    * 在屏幕像素空间查找最近的可选天体或标签。
@@ -3305,11 +3872,13 @@
     grid.innerHTML = rows
       .map(([a, b]) => `<dt>${a}</dt><dd>${b}</dd>`)
       .join("");
+    updateFloatingObjectInfo();
   }
   function clearObjectInfo() {
     currentSelected = null;
     $("object-info").classList.remove("open");
     $("object-info-empty").style.display = "";
+    updateFloatingObjectInfo();
   }
   function updateSelectedObject() {
     if (!currentSelected) return;
@@ -3326,6 +3895,33 @@
         };
     }
     showObjectInfo(currentSelected);
+  }
+
+  function ensureFloatingObjectInfo() {
+    let panel = $("floating-object-info-card");
+    if (panel) return panel;
+    panel = document.createElement("div");
+    panel.id = "floating-object-info-card";
+    panel.className = "floating-object-info-card";
+    panel.innerHTML = `<div class="floating-info-head"><strong id="floating-object-title">—</strong><button id="floating-object-close" type="button">×</button></div><dl id="floating-object-grid"></dl>`;
+    $("sky-pane").appendChild(panel);
+    $("floating-object-close").addEventListener("click", () => {
+      state.floatingObjectInfo = false;
+      const toggle = $("floating-object-info");
+      if (toggle) toggle.checked = false;
+      save();
+      updateFloatingObjectInfo();
+    });
+    return panel;
+  }
+
+  function updateFloatingObjectInfo() {
+    const panel = ensureFloatingObjectInfo();
+    const visible = !!state.floatingObjectInfo && !!currentSelected;
+    panel.classList.toggle("open", visible);
+    if (!visible) return;
+    $("floating-object-title").textContent = $("object-info-title").textContent;
+    $("floating-object-grid").innerHTML = $("object-info-grid").innerHTML;
   }
   function skyEventPoint(canvas, event) {
     const rect = canvas.getBoundingClientRect();
@@ -3400,9 +3996,11 @@
         propernameType: properType,
         propernameStyle: {
           fill: cfg("sky.stars.properNameColor", "#f1e7c9"),
-          font: cfg(
-            "sky.stars.properNameFont",
-            "600 12px Inter, Microsoft YaHei, sans-serif",
+          font: scaleFont(
+            cfg(
+              "sky.stars.properNameFont",
+              "600 12px Inter, Microsoft YaHei, sans-serif",
+            ),
           ),
           align: "right",
           baseline: "bottom",
@@ -3418,6 +4016,17 @@
         names: state.deepSky,
         namesType: zh ? "zh" : "name",
         nameLimit: 4.8,
+        nameStyle: {
+          fill: cfg("sky.deepSky.nameColor", "#acd2ee"),
+          font: scaleFont(
+            cfg(
+              "sky.deepSky.nameFont",
+              "500 10px Inter, Microsoft YaHei, sans-serif",
+            ),
+          ),
+          align: "left",
+          baseline: "top",
+        },
         data: "dsos.bright.json",
       },
       planets: {
@@ -3458,9 +4067,9 @@
           align: "center",
           baseline: "middle",
           font: [
-            "600 14px Inter, Microsoft YaHei, sans-serif",
-            "600 12px Inter, Microsoft YaHei, sans-serif",
-            "600 10px Inter, Microsoft YaHei, sans-serif",
+            scaleFont("600 14px Inter, Microsoft YaHei, sans-serif"),
+            scaleFont("600 12px Inter, Microsoft YaHei, sans-serif"),
+            scaleFont("600 10px Inter, Microsoft YaHei, sans-serif"),
           ],
         },
         lines:
@@ -3527,13 +4136,12 @@
         width: 1.0,
       },
       horizon: {
-        show: horizontal && state.horizon,
+        show: false,
         stroke: "#ff5555",
         width: 1.0,
         fill: "#01030a",
         opacity: 0.72,
       },
-      daylight: { show: horizontal && state.daylight },
     };
   }
 
@@ -3551,6 +4159,7 @@
     westernDualLineFeatures = [];
     chineseLineFeatures = [];
     sharedCultureSegments = new Set();
+    registerReferenceOverlays();
 
     Celestial.add({
       type: "json",
@@ -3674,7 +4283,7 @@
               state.cultureMode === "both"
                 ? cfg("labels.chineseCombinedColor", "#ffc5a9")
                 : cfg("chinese.name.fill", "#ffd5bf"),
-            font:
+            font: scaleFont(
               rank <= 1
                 ? cfg(
                     "chinese.name.font",
@@ -3684,6 +4293,7 @@
                     "labels.chineseSecondaryFont",
                     "600 10px Inter, Microsoft YaHei, sans-serif",
                   ),
+            ),
             align: "center",
             baseline: "middle",
           });
@@ -3841,6 +4451,7 @@
     const run = () => {
       if (!skyReady || !window.Celestial) return;
       try {
+        const view = captureView();
         const cfg = buildSkyConfig();
         Celestial.apply({
           stars: cfg.stars,
@@ -3850,11 +4461,10 @@
           mw: cfg.mw,
           lines: cfg.lines,
           horizon: cfg.horizon,
-          daylight: cfg.daylight,
           lang: cfg.lang,
         });
-        updateSkyView(true);
         redrawAndSyncMapBox("visual config");
+        restoreView(view);
       } catch (err) {
         console.warn("Incremental apply failed", err);
         showToast(t("loadFail"), true);
@@ -4237,7 +4847,6 @@
       ".galactic",
       ".supergalactic",
       ".horizon",
-      ".daylight",
       ".outline",
       ".background",
       ".rso-cn-line",
@@ -4587,17 +5196,19 @@
       planets: "planets",
       "milky-way": "milkyWay",
       grid: "grid",
+      "horizontal-grid": "horizontalGrid",
       ecliptic: "ecliptic",
       equator: "equator",
       horizon: "horizon",
-      daylight: "daylight",
       "deep-sky": "deepSky",
+      "floating-object-info": "floatingObjectInfo",
     };
     Object.entries(checks).forEach(([id, key]) =>
       $(id).addEventListener("change", (e) => {
         state[key] = e.target.checked;
         save();
-        applyVisualConfig(true);
+        if (key === "floatingObjectInfo") updateFloatingObjectInfo();
+        else applyVisualConfig(true);
       }),
     );
     $("region-boundaries").addEventListener("change", (e) => {
@@ -4631,6 +5242,18 @@
         scaleMapByFactor(1 / mapScaleButtonFactor());
         updateDebugOverlay();
       } catch (_) {}
+    });
+    $("font-decrease").addEventListener("click", () => {
+      state.fontScale = (Number(state.fontScale) || 1) / 1.08;
+      applyFontScale();
+      save();
+      applyVisualConfig(true);
+    });
+    $("font-increase").addEventListener("click", () => {
+      state.fontScale = (Number(state.fontScale) || 1) * 1.08;
+      applyFontScale();
+      save();
+      applyVisualConfig(true);
     });
     $("reset-view").addEventListener("click", () => {
       try {
@@ -4803,6 +5426,7 @@
     syncControls();
     applyI18n();
     setupCitySearch();
+    setupObjectSearch();
     bind();
     const fileMode = location.protocol === "file:";
     $("geo-mode-note").style.display = fileMode ? "block" : "none";
