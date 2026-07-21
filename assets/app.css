@@ -100,64 +100,6 @@ button {
   filter: sepia(1) saturate(9) hue-rotate(300deg) brightness(0.68)
     contrast(1.17);
 }
-#sky-stage.night-vision + .cardinal-layer .cardinal {
-  color: #ff3434;
-  text-shadow:
-    0 0 7px #000,
-    0 0 18px rgba(255, 0, 0, 0.95);
-}
-.cardinal-layer {
-  position: absolute;
-  z-index: 3;
-  display: none !important;
-  left: 0;
-  top: 0;
-  transform: none;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-.cardinal {
-  position: absolute;
-  color: var(--red);
-  font-size: clamp(23px, 2.7vw, 42px);
-  font-weight: 950;
-  line-height: 1;
-  letter-spacing: 0.05em;
-  text-shadow:
-    0 0 4px #000,
-    0 0 10px #000,
-    0 0 23px rgba(255, 0, 0, 0.9);
-  user-select: none;
-}
-.cardinal small {
-  display: block;
-  margin-top: 5px;
-  font-size: 0.34em;
-  letter-spacing: 0.18em;
-  text-align: center;
-  color: #ff6b6b;
-}
-.cardinal.n {
-  left: 50%;
-  top: 3%;
-  transform: translateX(-50%);
-}
-.cardinal.s {
-  left: 50%;
-  bottom: 3%;
-  transform: translateX(-50%);
-}
-.cardinal.e {
-  left: 3%;
-  top: 50%;
-  transform: translateY(-50%);
-}
-.cardinal.w {
-  right: 3%;
-  top: 50%;
-  transform: translateY(-50%);
-}
 .topbar {
   position: fixed;
   z-index: 8;
@@ -186,7 +128,7 @@ button {
   display: flex;
   align-items: center;
   gap: 10px;
-  font-size: 14px;
+  font-size: calc(14px * var(--rso-font-scale));
   font-weight: 850;
   letter-spacing: 0.12em;
 }
@@ -207,7 +149,7 @@ button {
 .brand-sub {
   margin: 5px 0 0 19px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: calc(10px * var(--rso-font-scale));
   letter-spacing: 0.03em;
 }
 .top-actions {
@@ -233,7 +175,7 @@ button {
   min-width: 112px;
 }
 .top-select-block b {
-  font-size: 9px;
+  font-size: calc(9px * var(--rso-font-scale));
   color: var(--muted);
   font-weight: 700;
   letter-spacing: 0.05em;
@@ -245,7 +187,7 @@ button {
   border-color: rgba(119, 220, 255, 0.25);
   background: #0b172a;
   color: #fff;
-  font-size: 10px;
+  font-size: calc(10px * var(--rso-font-scale));
   font-weight: 700;
 }
 #culture-select {
@@ -306,18 +248,37 @@ button {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 11px;
-  font-size: 11px;
+  font-size: calc(11px * var(--rso-font-scale));
   font-weight: 850;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #e3f1ff;
 }
 .section-title span:last-child {
-  font-size: 9px;
+  font-size: calc(9px * var(--rso-font-scale));
   color: var(--muted);
   font-weight: 600;
   letter-spacing: 0.03em;
   text-transform: none;
+}
+.section-collapsible .section-title {
+  cursor: pointer;
+  user-select: none;
+}
+.section-collapsible .section-title::after {
+  content: "▾";
+  margin-left: 8px;
+  color: var(--cyan);
+  font-size: 1em;
+}
+.section-collapsible.section-collapsed .section-title {
+  margin-bottom: 0;
+}
+.section-collapsible.section-collapsed .section-title::after {
+  content: "▸";
+}
+.section-collapsible.section-collapsed > :not(.section-title) {
+  display: none;
 }
 .grid2 {
   display: grid;
@@ -335,7 +296,7 @@ button {
   gap: 5px;
 }
 .field label {
-  font-size: 10px;
+  font-size: calc(10px * var(--rso-font-scale));
   color: var(--muted);
 }
 input[type="number"],
@@ -343,13 +304,13 @@ input[type="datetime-local"],
 input[type="text"],
 select {
   width: 100%;
-  height: 35px;
+  min-height: 2.9em;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 9px;
   background: #0c1729;
   color: #f5faff;
-  padding: 7px 9px;
-  font-size: 11px;
+  padding: 0.62em 0.8em;
+  font-size: calc(11px * var(--rso-font-scale));
   outline: none;
 }
 select {
@@ -382,15 +343,16 @@ input[readonly] {
 .data-note {
   margin-top: 5px;
   color: #7f94ab;
-  font-size: 9px;
+  font-size: calc(9px * var(--rso-font-scale));
   line-height: 1.55;
 }
 button {
   border: 1px solid rgba(255, 255, 255, 0.13);
   border-radius: 9px;
   background: #111e32;
-  padding: 8px 8px;
-  font-size: 10px;
+  min-height: 2.5em;
+  padding: 0.72em 0.8em;
+  font-size: calc(10px * var(--rso-font-scale));
   cursor: pointer;
   transition: 0.16s ease;
   white-space: nowrap;
@@ -446,7 +408,7 @@ button.danger {
 .calendar-shifts button {
   padding-left: 2px;
   padding-right: 2px;
-  font-size: 9px;
+  font-size: calc(9px * var(--rso-font-scale));
 }
 .play-row {
   display: grid;
@@ -454,7 +416,7 @@ button.danger {
   gap: 6px;
 }
 .play-row button {
-  font-size: 11px;
+  font-size: calc(11px * var(--rso-font-scale));
 }
 .range-row {
   display: grid;
@@ -463,7 +425,7 @@ button.danger {
   gap: 8px;
 }
 .range-row label {
-  font-size: 10px;
+  font-size: calc(10px * var(--rso-font-scale));
   color: #c4d5e5;
   line-height: 1.35;
 }
@@ -474,7 +436,7 @@ input[type="range"] {
 .range-value {
   text-align: right;
   color: var(--cyan);
-  font-size: 10px;
+  font-size: calc(10px * var(--rso-font-scale));
   font-variant-numeric: tabular-nums;
 }
 .toggles {
@@ -492,7 +454,7 @@ input[type="range"] {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 9px;
   background: rgba(255, 255, 255, 0.025);
-  font-size: 10px;
+  font-size: calc(10px * var(--rso-font-scale));
   color: #d6e4f1;
   cursor: pointer;
 }
@@ -536,7 +498,7 @@ input[type="range"] {
   );
 }
 .status-title {
-  font-size: 11px;
+  font-size: calc(11px * var(--rso-font-scale));
   font-weight: 780;
 }
 .status-lines {
@@ -544,7 +506,7 @@ input[type="range"] {
   display: grid;
   gap: 4px;
   color: var(--muted);
-  font-size: 10px;
+  font-size: calc(10px * var(--rso-font-scale));
   line-height: 1.5;
   word-break: break-word;
 }
@@ -559,7 +521,7 @@ input[type="range"] {
   background: rgba(212, 80, 66, 0.08);
   border-radius: 0 8px 8px 0;
   color: #b8c9da;
-  font-size: 9px;
+  font-size: calc(9px * var(--rso-font-scale));
   line-height: 1.65;
 }
 .fixed-tools {
@@ -707,7 +669,7 @@ input[type="range"] {
 }
 .modal-head h2 {
   margin: 0;
-  font-size: 16px;
+  font-size: calc(16px * var(--rso-font-scale));
   letter-spacing: 0.05em;
 }
 .modal-head-actions {
@@ -744,7 +706,7 @@ input[type="range"] {
   max-width: 910px;
   margin: 0 auto;
   color: #d5e3f0;
-  font-size: 12px;
+  font-size: calc(12px * var(--rso-font-scale));
   line-height: 1.83;
 }
 .doc-page[hidden] {
@@ -753,7 +715,7 @@ input[type="range"] {
 .doc h3 {
   margin: 26px 0 8px;
   color: #f1f8ff;
-  font-size: 15px;
+  font-size: calc(15px * var(--rso-font-scale));
   border-bottom: 1px solid rgba(119, 220, 255, 0.12);
   padding-bottom: 6px;
 }
@@ -763,7 +725,7 @@ input[type="range"] {
 .doc h4 {
   margin: 17px 0 5px;
   color: #c8ebff;
-  font-size: 12px;
+  font-size: calc(12px * var(--rso-font-scale));
 }
 .doc p {
   margin: 7px 0;
@@ -893,9 +855,6 @@ body.lang-en [data-doc-lang="en"] {
   }
   .fixed-tools.right {
     right: 9px;
-  }
-  .panel-open .cardinal.e {
-    opacity: 0.18;
   }
   #celestial-frame {
     min-width: 0;
@@ -1108,44 +1067,6 @@ body.panel-collapsed #sidebar {
   touch-action: none;
   user-select: none;
 }
-.cardinal-layer {
-  position: absolute;
-  inset: 0;
-  left: 0;
-  top: 0;
-  transform: none;
-  width: 100%;
-  height: 100%;
-  z-index: 5;
-  pointer-events: none;
-}
-.cardinal {
-  font-size: clamp(12px, 1.1vw, 16px);
-  font-weight: 900;
-  letter-spacing: 0.08em;
-  color: #ff4040;
-  text-shadow:
-    0 1px 3px #000,
-    0 0 7px rgba(255, 0, 0, 0.7);
-}
-.cardinal small {
-  display: none;
-}
-.cardinal.n {
-  top: 8px;
-}
-.cardinal.s {
-  bottom: 8px;
-}
-.cardinal.e {
-  left: 9px;
-}
-.cardinal.w {
-  right: 9px;
-}
-body.non-horizontal .cardinal-layer {
-  display: none;
-}
 .fixed-tools {
   position: absolute;
   z-index: 14;
@@ -1257,12 +1178,12 @@ body:not(.panel-collapsed) #panel-toggle {
   border-radius: 10px;
   background: rgba(255, 255, 255, 0.022);
 }
-.display-subgroup summary {
-  cursor: pointer;
+.display-subgroup h3 {
+  margin: 0;
   padding: 9px 10px;
   color: #dceeff;
+  font-size: calc(11px * var(--rso-font-scale));
   font-weight: 800;
-  user-select: none;
 }
 .display-subgroup > .toggles,
 .display-subgroup > .field,
@@ -1272,7 +1193,7 @@ body:not(.panel-collapsed) #panel-toggle {
 .projection-help {
   margin-top: 6px;
   color: #89a2ba;
-  font-size: 9px;
+  font-size: calc(9px * var(--rso-font-scale));
   line-height: 1.55;
 }
 select optgroup {
@@ -1352,7 +1273,7 @@ select optgroup {
   gap: 8px;
 }
 .info-title {
-  font-size: 13px;
+  font-size: calc(13px * var(--rso-font-scale));
   font-weight: 850;
   color: #f4fbff;
   line-height: 1.35;
@@ -1370,7 +1291,7 @@ select optgroup {
   grid-template-columns: auto 1fr;
   gap: 4px 8px;
   margin-top: 9px;
-  font-size: 10px;
+  font-size: calc(10px * var(--rso-font-scale));
   line-height: 1.5;
 }
 .info-grid dt {
@@ -1477,11 +1398,11 @@ select optgroup {
   input[type="text"],
   select {
     min-height: 42px;
-    font-size: 16px;
+    font-size: calc(16px * var(--rso-font-scale));
   }
   button {
     min-height: 42px;
-    font-size: 12px;
+    font-size: calc(12px * var(--rso-font-scale));
     white-space: normal;
   }
   .section {
@@ -1500,7 +1421,7 @@ select optgroup {
   }
   .toggle {
     min-height: 44px;
-    font-size: 12px;
+    font-size: calc(12px * var(--rso-font-scale));
   }
   .toggle input {
     width: 36px;
@@ -1520,7 +1441,7 @@ select optgroup {
     grid-column: 1 / -1;
   }
   .range-value {
-    font-size: 12px;
+    font-size: calc(12px * var(--rso-font-scale));
   }
   input[type="range"] {
     min-height: 32px;
@@ -1536,7 +1457,7 @@ select optgroup {
   }
   .info-grid {
     grid-template-columns: minmax(86px, auto) 1fr;
-    font-size: 11px;
+    font-size: calc(11px * var(--rso-font-scale));
   }
   .city-suggestions {
     max-height: min(320px, 55dvh);
@@ -1582,7 +1503,7 @@ select optgroup {
   }
 }
 
-/* ===== 4.6 仅界面覆盖：刻意不改动 v4.0 星图 Canvas 几何 ===== */
+/* 星图区覆盖信息、调试按钮和主画布布局。 */
 #sky-meta {
   position: absolute;
   z-index: 12;
@@ -1625,7 +1546,7 @@ select optgroup {
   border-radius: 10px;
   background: rgba(8, 19, 36, 0.82);
   color: rgba(228, 241, 255, 0.82);
-  font-size: 11px;
+  font-size: calc(11px * var(--rso-font-scale));
   font-weight: 850;
   letter-spacing: 0;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
@@ -1653,7 +1574,7 @@ select optgroup {
   background: rgba(2, 7, 16, 0.82);
   color: rgba(229, 244, 255, 0.95);
   font:
-    10px/1.45 Consolas,
+    calc(10px * var(--rso-font-scale)) / 1.45 Consolas,
     "Cascadia Mono",
     monospace;
   white-space: normal;
@@ -1741,12 +1662,6 @@ select optgroup {
 }
 .info-grid dd {
   color: var(--info-text);
-}
-.cardinal-layer {
-  display: none;
-}
-.cardinals-visible:not(.non-horizontal) .cardinal-layer {
-  display: block;
 }
 .fixed-tools {
   display: none !important;

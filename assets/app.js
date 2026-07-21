@@ -65,7 +65,9 @@
         "display",
         "objectInfo",
         "status"
-      ]
+      ],
+      collapsible: ["observer", "time", "viewProjection", "display"],
+      alwaysExpanded: ["viewTools", "search", "objectInfo", "status"]
     },
     /** 调试面板：开发时打开，完成后可把 enabled 改为 false 隐藏开关 */
     debug: {
@@ -82,18 +84,6 @@
       max: 12,
       buttonFactor: 1.25
     },
-    /** E / S / W / N 方位标识 */
-    cardinal: {
-      color: "#ff4040",
-      fontSizeMin: 12,
-      fontSizeViewport: 1.1,
-      // CSS clamp 中间值，单位 vw
-      fontSizeMax: 16,
-      fontWeight: 900,
-      edgeOffset: 5,
-      // 距实际投影边缘的安全距离
-      textShadow: "0 1px 3px #000, 0 0 6px rgba(255,0,0,.58)"
-    },
     /** 鼠标、触摸和视图稳定性 */
     interaction: {
       dragThreshold: 5,
@@ -109,7 +99,7 @@
       poleLongitudeFactorMin: 0.08,
       // 正对极点时保留的最小经向灵敏度
       poleLockStart: 82,
-      // 超过该中心纬度后启用“只纠正异常跳变”的极区保护；正常拖动仍由 v4.0 原生逻辑处理
+      // 超过该中心纬度后启用“只纠正异常跳变”的极区保护；正常拖动仍由 D3-Celestial 原生交互处理
       poleJumpLimitDegrees: 8,
       // 单次事件允许的最大异常角度变化；超过时按最短角差限幅
       poleLatitudeJumpLimitDegrees: 5,
@@ -124,11 +114,12 @@
     },
     /** 程序首次运行时的默认状态；浏览器已保存的设置优先于这里 */
     defaults: {
-      latitude: 35.6812,
-      longitude: 139.7671,
-      timezone: "Asia/Tokyo",
-      cityZh: "\u4E1C\u4EAC",
-      cityEn: "Tokyo",
+      latitude: 39.9042,
+      longitude: 116.4074,
+      timezone: "Asia/Shanghai",
+      cityZh: "\u5317\u4EAC",
+      cityEn: "Beijing",
+      instant: "1949-10-01T14:00:00.000Z",
       language: "zh",
       cultureMode: "western",
       // western / chinese / both
@@ -162,9 +153,9 @@
     /** 星图基础绘制 */
     sky: {
       fillAvailablePane: false,
-      // 必须保持 false：沿用 v4.0 的投影画布适配逻辑，不把天球拉伸到容器比例
+      // 必须保持 false：画布尺寸由应用层 mapScale 模型控制，不把天球拉伸到容器比例
       removeEdgeVignette: false,
-      // 保留 v4.0 的星空画布视觉，不改变投影显示区域
+      // 保留星空画布边缘视觉，不改变投影显示区域
       background: {
         fill: "#02050d",
         stroke: "rgba(116,151,183,.65)",
@@ -1026,13 +1017,13 @@
       viewTools: "\u89C6\u56FE\u63A7\u5236",
       viewToolsHint: "\u4E0D\u6539\u53D8\u5730\u70B9\u4E0E\u65F6\u95F4",
       projectionLabel: "\u5929\u7403\u6295\u5F71\uFF1A",
-      coordinateSystemLabel: "\u5750\u6807\u7CFB\u7EDF\uFF1A",
+      coordinateSystemLabel: "\u5750\u6807\u89C6\u89D2\uFF1A",
       projection: "\u5929\u7403\u6295\u5F71",
-      coordinateSystem: "\u5750\u6807\u7CFB\u7EDF",
-      horizontalCoordinates: "\u5730\u5E73\u5750\u6807\uFF08\u5F53\u5730\u5929\u7A7A\uFF09",
-      equatorialCoordinates: "\u8D64\u9053\u5750\u6807",
-      eclipticCoordinates: "\u9EC4\u9053\u5750\u6807",
-      galacticCoordinates: "\u94F6\u6CB3\u5750\u6807",
+      coordinateSystem: "\u5750\u6807\u89C6\u89D2",
+      horizontalCoordinates: "\u5730\u5E73\u5750\u6807\u89C6\u89D2",
+      equatorialCoordinates: "\u8D64\u9053\u5750\u6807\u89C6\u89D2",
+      eclipticCoordinates: "\u9EC4\u9053\u5750\u6807\u89C6\u89D2",
+      galacticCoordinates: "\u94F6\u6CB3\u5750\u6807\u89C6\u89D2",
       traditionalRegions: "\u4E2D\u56FD\u4F20\u7EDF\u5929\u533A\u5C42\u7EA7",
       majorRegions: "\u4E09\u57A3 / \u56DB\u8C61 / \u8FD1\u5357\u6781\u661F\u533A",
       withBattlefields: "\u4E09\u57A3\u56DB\u8C61 + \u4E09\u5927\u6218\u573A",
@@ -1080,13 +1071,13 @@
       viewTools: "View controls",
       viewToolsHint: "location and time unchanged",
       projectionLabel: "Projection: ",
-      coordinateSystemLabel: "Coordinate system: ",
+      coordinateSystemLabel: "Coordinate view: ",
       projection: "Celestial projection",
-      coordinateSystem: "Coordinate system",
-      horizontalCoordinates: "Horizontal (local sky)",
-      equatorialCoordinates: "Equatorial",
-      eclipticCoordinates: "Ecliptic",
-      galacticCoordinates: "Galactic",
+      coordinateSystem: "Coordinate View",
+      horizontalCoordinates: "Horizontal Coordinate View",
+      equatorialCoordinates: "Equatorial Coordinate View",
+      eclipticCoordinates: "Ecliptic Coordinate View",
+      galacticCoordinates: "Galactic Coordinate View",
       traditionalRegions: "Chinese traditional region level",
       majorRegions: "Three Enclosures / Four Symbols / near-south-polar",
       withBattlefields: "Major regions + three battlefields",
@@ -1127,12 +1118,12 @@
       noReliableTraditionalBoundary: "Individual asterisms are not forced into fake closed polygons; only higher-level traditional regions and optional thematic zones are shown."
     });
     const defaults = {
-      lat: Number(cfg("defaults.latitude", 35.6812)),
-      lon: Number(cfg("defaults.longitude", 139.7671)),
-      zone: cfg("defaults.timezone", "Asia/Tokyo"),
-      cityZh: cfg("defaults.cityZh", "\u4E1C\u4EAC"),
-      cityEn: cfg("defaults.cityEn", "Tokyo"),
-      instant: (/* @__PURE__ */ new Date()).toISOString(),
+      lat: Number(cfg("defaults.latitude", 39.9042)),
+      lon: Number(cfg("defaults.longitude", 116.4074)),
+      zone: cfg("defaults.timezone", "Asia/Shanghai"),
+      cityZh: cfg("defaults.cityZh", "\u5317\u4EAC"),
+      cityEn: cfg("defaults.cityEn", "Beijing"),
+      instant: cfg("defaults.instant", "1949-10-01T14:00:00.000Z"),
       lang: cfg("defaults.language", "zh"),
       cultureMode: cfg("defaults.cultureMode", "western"),
       magnitude: Number(cfg("defaults.magnitudeLimit", 5.5)),
@@ -1191,7 +1182,7 @@
     let storageAvailable = null;
     let traditionalRegionsReady = false, traditionalLabelsReady = false;
     let rebuildInProgress = false, suppressResizeUntil = 0, rebuildGeneration = 0;
-    let resizeObserver = null, clickStart = null, pointerMoved = false, paneDrag = null, cardinalsVisible = true, poleCustomDrag = null;
+    let resizeObserver = null, clickStart = null, pointerMoved = false, paneDrag = null, poleCustomDrag = null;
     let currentSelected = null, customViewRestoreTimer = null, lastRenderedSize = null, debugVisible = !!cfg("debug.enabled", false) && !!cfg("debug.defaultOpen", false), lastDebugUpdate = 0, lastDebugPlainText = "", debugCopyStatus = "idle", debugCopyTimer = null, debugFramePending = false, layoutResizeGeneration = 0;
     let objectSearchIndex = null, searchHighlight = null, searchHighlightTimer = null;
     const STAR_NAMES = window.__RSO_LOCAL_DATA__ && window.__RSO_LOCAL_DATA__["starnames.json"] || {};
@@ -1310,7 +1301,13 @@
         }
       }
       if (!Number.isFinite(new Date(state.instant).getTime()))
-        state.instant = (/* @__PURE__ */ new Date()).toISOString();
+        state.instant = defaults.instant;
+      if (!Number.isFinite(Number(state.lat)) || Math.abs(Number(state.lat)) > 90)
+        state.lat = defaults.lat;
+      if (!Number.isFinite(Number(state.lon)) || Math.abs(Number(state.lon)) > 180)
+        state.lon = defaults.lon;
+      if (!state.zone || typeof state.zone !== "string")
+        state.zone = defaults.zone;
       if (!["zh", "en"].includes(state.lang)) state.lang = "zh";
       if (!["western", "chinese", "both"].includes(state.cultureMode))
         state.cultureMode = "western";
@@ -1523,10 +1520,6 @@
       });
       $("language-select").value = state.lang;
       $("culture-select").value = state.cultureMode;
-      $("cardinal-n").textContent = "N";
-      $("cardinal-e").textContent = "E";
-      $("cardinal-s").textContent = "S";
-      $("cardinal-w").textContent = "W";
       $("explain-btn").innerHTML = "<b>?</b>";
       $("explain-btn").title = t("technicalGuide");
       $("explain-btn").setAttribute("aria-label", t("technicalGuide"));
@@ -1978,8 +1971,8 @@
       const panel = $("control-panel");
       sidebar.appendChild(panel);
       applyMenuSectionOrder(panel);
+      initializeMenuSections(panel);
       pane.appendChild($("sky-stage"));
-      pane.appendChild(document.querySelector(".cardinal-layer"));
       const skyMeta = $("sky-meta");
       if (skyMeta) pane.appendChild(skyMeta);
       shell.append(sidebar, pane);
@@ -1991,9 +1984,41 @@
       }
     }
     function applyMenuSectionOrder(panel = $("control-panel")) {
-      if (!panel) return;
+      if (!panel || panel.dataset.menuOrdered === "true") return;
       const configured = cfg("menu.order", []), order = Array.isArray(configured) ? configured : [];
       order.map((id) => panel.querySelector(`[data-menu-id="${id}"]`)).filter(Boolean).forEach((section) => panel.appendChild(section));
+      panel.dataset.menuOrdered = "true";
+    }
+    function initializeMenuSections(panel = $("control-panel")) {
+      if (!panel || panel.dataset.menuSectionsReady === "true") return;
+      const collapsible = new Set(
+        Array.isArray(cfg("menu.collapsible", [])) ? cfg("menu.collapsible", []) : []
+      ), alwaysExpanded = new Set(
+        Array.isArray(cfg("menu.alwaysExpanded", [])) ? cfg("menu.alwaysExpanded", []) : []
+      );
+      panel.querySelectorAll("[data-menu-id]").forEach((section) => {
+        const id = section.dataset.menuId, title = section.querySelector(".section-title");
+        section.classList.toggle(
+          "section-always-expanded",
+          alwaysExpanded.has(id)
+        );
+        if (!collapsible.has(id) || !title) return;
+        section.classList.add("section-collapsible");
+        title.setAttribute("role", "button");
+        title.setAttribute("tabindex", "0");
+        title.setAttribute("aria-expanded", "true");
+        const toggle = () => {
+          const collapsed = section.classList.toggle("section-collapsed");
+          title.setAttribute("aria-expanded", String(!collapsed));
+        };
+        title.addEventListener("click", toggle);
+        title.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          toggle();
+        });
+      });
+      panel.dataset.menuSectionsReady = "true";
     }
     function isMobileLayout() {
       return window.matchMedia && window.matchMedia("(max-width: 800px)").matches || window.innerWidth <= 800;
@@ -2270,7 +2295,7 @@
         centerDelta: "\u5730\u56FE\u4E2D\u5FC3\u76F8\u5BF9\u80CC\u666F\u4E2D\u5FC3\u504F\u5DEE",
         celestial: "Celestial \u5185\u90E8\u5C3A\u5BF8",
         projection: "\u5F53\u524D\u6295\u5F71",
-        coords: "\u5F53\u524D\u5750\u6807\u7CFB\u7EDF",
+        coords: "\u5F53\u524D\u5750\u6807\u89C6\u89D2",
         culture: "\u5F53\u524D\u661F\u7A7A\u4F53\u7CFB",
         language: "\u8BED\u8A00",
         viewKey: "\u89C6\u89D2\u4FDD\u5B58\u952E",
@@ -2658,12 +2683,10 @@
     }
     function syncMapBoxAfterRedraw(metrics = projectionCanvasMetrics()) {
       applyMapBoxMetrics(metrics);
-      updateCardinalGeometry();
       updateDebugOverlay(true);
       requestAnimationFrame(() => {
         const latest = projectionCanvasMetrics();
         applyMapBoxMetrics(latest);
-        updateCardinalGeometry();
         updateDebugOverlay(true);
       });
     }
@@ -2722,7 +2745,6 @@
     }
     function scaleMapByFactor(factor) {
       const next = getMapScale() * Number(factor || 1);
-      hideCardinalsAfterViewInteraction();
       setMapScale(next, { saveView: true });
     }
     function restoreView(view = desiredView(), attempt = 0) {
@@ -2749,36 +2771,11 @@
         90 + attempt * 70
       );
     }
-    function updateCardinalGeometry() {
-      const pane = $("sky-pane"), layer = document.querySelector(".cardinal-layer"), canvas = document.querySelector("#celestial-map canvas");
-      if (!pane || !layer || !canvas) return;
-      const pr = pane.getBoundingClientRect(), cr = canvas.getBoundingClientRect();
-      layer.style.left = `${cr.left - pr.left}px`;
-      layer.style.top = `${cr.top - pr.top}px`;
-      layer.style.width = `${Math.max(1, cr.width)}px`;
-      layer.style.height = `${Math.max(1, cr.height)}px`;
-    }
-    function updateCardinalVisibility() {
-      const visible = cardinalsVisible && state.coordinateSystem === "horizontal" && HORIZON_PROJECTIONS.has(state.projection);
-      document.body.classList.toggle("non-horizontal", !visible);
-      document.body.classList.toggle("cardinals-visible", visible);
-      if (visible) requestAnimationFrame(updateCardinalGeometry);
-    }
-    function hideCardinalsAfterViewInteraction() {
-      if (!cardinalsVisible) return;
-      cardinalsVisible = false;
-      updateCardinalVisibility();
-    }
-    function showCardinalsForReset() {
-      cardinalsVisible = true;
-      updateCardinalVisibility();
-    }
     function updateProjectionHelp() {
       const select = $("projection-select");
       if (!select) return;
       const opt = select.options[select.selectedIndex];
       $("projection-help").textContent = state.lang === "zh" ? opt.dataset.descZh || "" : opt.dataset.descEn || "";
-      updateCardinalVisibility();
     }
     function scheduleSkyResize() {
       clearTimeout(resizeTimer);
@@ -2798,8 +2795,6 @@
               if (generation !== layoutResizeGeneration || !skyReady) return;
               syncRenderedMapBox(projectionCanvasMetrics());
               restoreView(view);
-              updateCardinalVisibility();
-              updateCardinalGeometry();
               updateDebugOverlay(true);
             }, 50);
           } catch (err) {
@@ -4441,8 +4436,6 @@
           );
           attachCanvasInfo(canvas);
           updateSkyView(true);
-          updateCardinalVisibility();
-          updateCardinalGeometry();
           const savedView = state.projectionViews && state.projectionViews[viewKey()];
           if (viewState) restoreView(viewState);
           else if (savedView) restoreView(savedView);
@@ -4690,7 +4683,6 @@
               event.clientY - clickStart.y
             ) > Number(cfg("interaction.dragThreshold", 6))) {
               pointerMoved = true;
-              hideCardinalsAfterViewInteraction();
             }
             const rect = canvas.getBoundingClientRect(), shortSide = Math.max(180, Math.min(rect.width, rect.height));
             const degPerPx = 180 / shortSide * Number(cfg("interaction.dragSensitivity", 1));
@@ -4730,7 +4722,6 @@
             event.clientY - clickStart.y
           ) > Number(cfg("interaction.dragThreshold", 6))) {
             pointerMoved = true;
-            hideCardinalsAfterViewInteraction();
           }
           queueDebugOverlayUpdate();
         },
@@ -4882,8 +4873,6 @@
             resetInternalZoom();
             syncRenderedMapBox(nextMetrics);
             restoreView(target);
-            updateCardinalVisibility();
-            updateCardinalGeometry();
             updateDebugOverlay(true);
           } catch (err) {
             console.warn("Projection resize failed", err);
@@ -4895,8 +4884,12 @@
       }
     }
     function switchCoordinateSystem(next) {
-      if (!["horizontal", "equatorial", "ecliptic", "galactic"].includes(next) || next === state.coordinateSystem)
+      if (!["horizontal", "equatorial", "ecliptic", "galactic"].includes(next))
         return;
+      if (next === state.coordinateSystem) {
+        resetCurrentCoordinateView();
+        return;
+      }
       saveCurrentProjectionView();
       state.coordinateSystem = next;
       save();
@@ -4959,7 +4952,6 @@
       const dx = event.clientX - paneDrag.x, dy = event.clientY - paneDrag.y;
       if (Math.hypot(dx, dy) > 4) {
         paneDrag.moved = true;
-        hideCardinalsAfterViewInteraction();
       }
       const rect = canvasRect();
       if (!rect) return;
@@ -4988,6 +4980,46 @@
       saveCurrentProjectionView();
       save();
     }
+    function resetCurrentCoordinateView() {
+      try {
+        const configured = cfg(`resetViews.${state.coordinateSystem}`, {
+          center: [0, 0, 0],
+          mapScale: 1
+        });
+        const targetScale = viewMapScale(configured, defaults.mapScale);
+        if (state.coordinateSystem === "horizontal") {
+          updateSkyView(true);
+          clearTimeout(customViewRestoreTimer);
+          customViewRestoreTimer = setTimeout(() => {
+            try {
+              setMapScale(targetScale);
+              resetInternalZoom();
+              redrawAndSyncMapBox("horizontal reset");
+              const centre = Celestial.rotate();
+              state.projectionViews[viewKey()] = {
+                center: Array.isArray(centre) ? centre.slice() : [0, 0, 0],
+                mapScale: targetScale
+              };
+              save();
+            } catch (err) {
+              console.warn("Horizontal reset failed", err);
+            }
+          }, 120);
+          return;
+        }
+        const v = {
+          center: Array.isArray(configured.center) ? configured.center.slice() : [0, 0, 0],
+          mapScale: targetScale
+        };
+        state.projectionViews[viewKey()] = {
+          center: v.center.slice(),
+          mapScale: v.mapScale
+        };
+        restoreView(v);
+        save();
+      } catch (_) {
+      }
+    }
     function bind() {
       $("language-select").addEventListener("change", (e) => {
         state.lang = e.target.value === "en" ? "en" : "zh";
@@ -5005,10 +5037,19 @@
         "change",
         (e) => switchProjection(e.target.value)
       );
-      $("coordinate-select").addEventListener(
+      const coordinateSelect = $("coordinate-select");
+      let coordinateSelectOpenedValue = coordinateSelect.value;
+      coordinateSelect.addEventListener("pointerdown", () => {
+        coordinateSelectOpenedValue = coordinateSelect.value;
+      });
+      coordinateSelect.addEventListener(
         "change",
         (e) => switchCoordinateSystem(e.target.value)
       );
+      coordinateSelect.addEventListener("blur", () => {
+        if (coordinateSelect.value === coordinateSelectOpenedValue && coordinateSelect.value === state.coordinateSystem)
+          resetCurrentCoordinateView();
+      });
       $("traditional-detail").addEventListener("change", (e) => {
         state.traditionalDetail = ["major", "battlefields", "mansions"].includes(
           e.target.value
@@ -5184,49 +5225,7 @@
         save();
         applyVisualConfig(true);
       });
-      $("reset-view").addEventListener("click", () => {
-        try {
-          const configured = cfg(`resetViews.${state.coordinateSystem}`, {
-            center: [0, 0, 0],
-            mapScale: 1
-          });
-          const targetScale = viewMapScale(configured, defaults.mapScale);
-          if (state.coordinateSystem === "horizontal") {
-            updateSkyView(true);
-            clearTimeout(customViewRestoreTimer);
-            customViewRestoreTimer = setTimeout(() => {
-              try {
-                setMapScale(targetScale);
-                resetInternalZoom();
-                redrawAndSyncMapBox("horizontal reset");
-                const centre = Celestial.rotate();
-                state.projectionViews[viewKey()] = {
-                  center: Array.isArray(centre) ? centre.slice() : [0, 0, 0],
-                  mapScale: targetScale
-                };
-                updateCardinalGeometry();
-                showCardinalsForReset();
-                save();
-              } catch (err) {
-                console.warn("Horizontal reset failed", err);
-              }
-            }, 120);
-          } else {
-            const v = {
-              center: Array.isArray(configured.center) ? configured.center.slice() : [0, 0, 0],
-              mapScale: targetScale
-            };
-            state.projectionViews[viewKey()] = {
-              center: v.center.slice(),
-              mapScale: v.mapScale
-            };
-            restoreView(v);
-            showCardinalsForReset();
-            save();
-          }
-        } catch (_) {
-        }
-      });
+      $("reset-view").addEventListener("click", resetCurrentCoordinateView);
       $("fullscreen").addEventListener("click", async () => {
         try {
           if (!document.fullscreenElement)
@@ -5340,7 +5339,6 @@
       bind();
       const fileMode = location.protocol === "file:";
       $("geo-mode-note").style.display = fileMode ? "block" : "none";
-      cardinalsVisible = true;
       initialDisplay(desiredView());
       requestAnimationFrame(animationLoop);
       if (fileMode) setTimeout(() => showToast(t("localServerHint")), 2200);

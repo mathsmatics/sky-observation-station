@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <meta content="dark" name="color-scheme" />
-    <title>真实星空观测台 5.1.5 本地版 · Real Sky Observatory</title>
+    <title>真实星空观测台 5.1.6 本地版 · Real Sky Observatory</title>
     <link href="vendor/d3-celestial/celestial.css" rel="stylesheet" />
     <link href="assets/app.css" rel="stylesheet" />
   </head>
@@ -14,16 +14,10 @@
       <div id="celestial-frame"><div id="celestial-map"></div></div>
     </div>
     <div aria-live="polite" id="sky-meta">—</div>
-    <div aria-hidden="true" class="cardinal-layer">
-      <div class="cardinal n" id="cardinal-n">N</div>
-      <div class="cardinal e" id="cardinal-e">E</div>
-      <div class="cardinal s" id="cardinal-s">S</div>
-      <div class="cardinal w" id="cardinal-w">W</div>
-    </div>
     <header class="topbar">
       <div class="brand glass">
         <div class="brand-main">
-          <i class="signal"></i><span>REAL SKY OBSERVATORY 5.1.5</span>
+          <i class="signal"></i><span>REAL SKY OBSERVATORY 5.1.6</span>
         </div>
         <div class="brand-sub" data-i18n="brandSub">
           真实地点 × 真实时间 × 真实星表 × 双天文文化
@@ -89,7 +83,7 @@
               min="-90"
               step="0.0001"
               type="number"
-              value="35.6812"
+              value="39.9042"
             />
           </div>
           <div class="field">
@@ -101,7 +95,7 @@
               min="-180"
               step="0.0001"
               type="number"
-              value="139.7671"
+              value="116.4074"
             />
           </div>
         </div>
@@ -115,7 +109,7 @@
             id="observer-timezone"
             readonly=""
             type="text"
-            value="Asia/Tokyo"
+            value="Asia/Shanghai"
           />
           <div class="data-note" data-i18n="zoneAutoNote">
             时区由经纬度自动匹配；修改地点后会自动更新。
@@ -190,7 +184,12 @@
           ><span id="speed-label">暂停</span>
         </div>
         <div class="time-row">
-          <input id="observer-datetime" step="60" type="datetime-local" />
+          <input
+            id="observer-datetime"
+            step="60"
+            type="datetime-local"
+            value="1949-10-01T22:00"
+          />
           <button class="gold" data-i18n="now" id="observer-now">
             回到现在
           </button>
@@ -376,20 +375,20 @@
         </div>
         <div class="field" style="margin-top: 8px">
           <label data-i18n="coordinateSystem" for="coordinate-select"
-            >坐标系统</label
+            >坐标视角</label
           >
           <select id="coordinate-select">
             <option data-i18n="horizontalCoordinates" value="horizontal">
-              地平坐标（当地天空）
+              地平坐标视角
             </option>
             <option data-i18n="equatorialCoordinates" value="equatorial">
-              赤道坐标
+              赤道坐标视角
             </option>
             <option data-i18n="eclipticCoordinates" value="ecliptic">
-              黄道坐标
+              黄道坐标视角
             </option>
             <option data-i18n="galacticCoordinates" value="galactic">
-              银河坐标
+              银河坐标视角
             </option>
           </select>
         </div>
@@ -399,8 +398,8 @@
           <span data-i18n="displaySettings">显示参数</span
           ><span data-i18n="liveApply">实时应用</span>
         </div>
-        <details class="display-subgroup">
-          <summary data-i18n="displayObjects">对象显示</summary>
+        <div class="display-subgroup">
+          <h3 data-i18n="displayObjects">对象显示</h3>
           <div class="toggles">
             <label class="toggle"
               ><span data-i18n="planets">太阳、月球与行星</span
@@ -419,9 +418,9 @@
               ><input checked="" id="milky-way" type="checkbox"
             /></label>
           </div>
-        </details>
-        <details class="display-subgroup">
-          <summary data-i18n="displayCultureLayers">文化图层</summary>
+        </div>
+        <div class="display-subgroup">
+          <h3 data-i18n="displayCultureLayers">文化图层</h3>
           <div class="toggles">
             <label class="toggle"
               ><span data-i18n="cultureLines">星座/星官连线</span
@@ -456,9 +455,9 @@
               IAU 法定边界。
             </div>
           </div>
-        </details>
-        <details class="display-subgroup">
-          <summary data-i18n="displayReferenceLines">参考线</summary>
+        </div>
+        <div class="display-subgroup">
+          <h3 data-i18n="displayReferenceLines">参考线</h3>
           <div class="toggles">
             <label class="toggle"
               ><span data-i18n="grid">赤道坐标网</span
@@ -481,9 +480,9 @@
               ><input id="horizontal-grid" type="checkbox"
             /></label>
           </div>
-        </details>
-        <details class="display-subgroup">
-          <summary data-i18n="displayVisual">视觉</summary>
+        </div>
+        <div class="display-subgroup">
+          <h3 data-i18n="displayVisual">视觉</h3>
           <div class="range-row">
             <label data-i18n="magnitudeThreshold" for="magnitude"
               >恒星显示星等阈值</label
@@ -520,7 +519,7 @@
               ><input id="floating-object-info" type="checkbox"
             /></label>
           </div>
-        </details>
+        </div>
         <div class="culture-note" id="culture-note">
           “语言”控制界面与重要恒星名称；“星官”控制天区划分、连线和名称体系。两者互相独立。
         </div>
@@ -592,7 +591,7 @@
           ><span data-i18n="utcInternal">内部统一 UTC</span>
         </div>
         <div class="status-card">
-          <div class="status-title" id="status-title">东京 · 西方星座</div>
+          <div class="status-title" id="status-title">北京 · 西方星座</div>
           <div class="status-lines">
             <div>
               <b data-i18n="localTime">当地时间：</b
@@ -618,7 +617,7 @@
               ><span id="status-projection">--</span>
             </div>
             <div>
-              <b data-i18n="coordinateSystemLabel">坐标系统：</b
+              <b data-i18n="coordinateSystemLabel">坐标视角：</b
               ><span id="status-coordinate">--</span>
             </div>
           </div>
@@ -667,7 +666,7 @@
           <article class="doc" data-doc-lang="zh">
             <h3>1. 项目目标、适用范围与总体架构</h3>
             <p>
-              真实星空观测台 5.1.5
+              真实星空观测台 5.1.6
               是一个完全本地化的浏览器天文馆。它不是随机星点动画，而是读取真实恒星目录、现代西方星座、中国传统星官、银河轮廓和太阳系天体数据，以观测者的经纬度、IANA
               时区和 UTC
               时刻为输入，计算并绘制当前天空。适合肉眼认星、天文文化比较、天球坐标教学和一般观测规划；不替代专业天体测量、精密历表、赤道仪自动指向或天文摄影规划软件。
@@ -810,7 +809,7 @@
               把度转换为时、分、秒；赤纬使用带正负号的角度。代码不再根据数值大小猜测角度或弧度。
             </p>
             <p>
-              坐标系统与投影是两个独立概念。坐标系统决定数据使用地平、赤道、黄道或银河基准；投影决定球面如何压到平面。地平模式的底层目录仍以赤道坐标载入，再根据地点和时刻旋转；切换到赤道、黄道或银河坐标时，D3-Celestial
+              坐标视角与投影是两个独立概念。坐标视角决定数据使用地平、赤道、黄道或银河基准；投影决定球面如何压到平面。地平模式的底层目录仍以赤道坐标载入，再根据地点和时刻旋转；切换到赤道、黄道或银河坐标时，D3-Celestial
               需要重新转换 GeoJSON
               坐标。为避免离线数据被重复原地变换，内置数据加载器每次返回独立深拷贝；重建期间用当前
               Canvas 快照遮罩，完成后恢复视角。
@@ -823,8 +822,8 @@
               Tripel、Equirectangular、HEALPix、Mercator、Robinson 和
               Sinusoidal。方位类投影适合当地天空或局部视野；Aitoff/Hammer/Mollweide/Winkel
               Tripel
-              适合全天分布；圆柱和高级投影用于坐标教学或特定比较。非地平模式自动隐藏
-              E/S/W/N，避免把屏幕边缘误解为当地地平方位。
+              适合全天分布；圆柱和高级投影用于坐标教学或特定比较。地平线图层中的
+              E/S/W/N 是星图内部绘制内容，会随投影、拖动和缩放一起移动。
             </p>
             <p>
               D3-Celestial 的 <code>d3.geo.zoom()</code> 负责 Canvas
@@ -843,20 +842,19 @@
               >
               和
               <code>restoreView()</code>
-              为每个“坐标系统:投影”组合保存中心与缩放；语言、文化体系、图层开关和时间更新不重置视角。地平视图的
+              为每个“坐标视角:投影”组合保存中心与缩放；语言、文化体系、图层开关和时间更新不重置视角。地平视图的
               <code>E/S/W/N</code>
-              只在首次完整视图和点击“重置视图”后显示；第一次拖动或缩放后立即隐藏，避免用户改变观察中心后仍把初始方位标识误认为当前方向。
+              由自定义地平线图层沿真实地平方向绘制，不使用固定屏幕覆盖层。
             </p>
             <p>
               每种投影使用自身的天然宽高比，而不是被浏览器窗口强制拉伸。<code
                 >projectionNaturalRatio()</code
               >
               读取 D3-Celestial 的投影元数据，未声明比例的全天投影按 2:1
-              处理；<code>projectionFitMetrics()</code>
-              计算能够完整放入星图区的最大画布尺寸，因此圆形方位投影居中显示，Aitoff、Hammer、Mollweide
-              等全天投影完整展开。<code>updateCardinalGeometry()</code> 把
-              E/S/W/N 绑定到实际 Canvas
-              边缘，而不是浏览器边缘。侧栏与星图区使用共享 Grid 布局；<code
+              处理；<code>projectionCanvasMetrics()</code>
+              根据星图区真实尺寸、天然投影比例和 <code>mapScale</code>
+              计算目标画布尺寸，因此圆形方位投影居中显示，Aitoff、Hammer、Mollweide
+              等全天投影完整展开。侧栏与星图区使用共享 Grid 布局；<code
                 >setPanel()</code
               >
               只切换列宽，<code>ResizeObserver</code> 触发
@@ -866,12 +864,10 @@
               ResizeObserver 重入造成空图。
             </p>
             <p>
-              <b>投影与坐标系统必须分开理解：</b
-              >投影是“怎么画到屏幕上”；坐标系统是“用哪一套经纬网描述天体”。重置视图不会擅自切回赤道坐标：地平坐标会按当前地点和当前时刻重新计算本地天空中心，并只把缩放恢复为默认值；赤道、黄道和银河坐标则读取
+              <b>投影与坐标视角必须分开理解：</b
+              >投影是“怎么画到屏幕上”；坐标视角是“用哪一套经纬网描述天体”。重置视图不会擅自切回赤道坐标：地平坐标会按当前地点和当前时刻重新计算本地天空中心，并只把缩放恢复为默认值；赤道、黄道和银河坐标则读取
               <code>src/config.ts</code>
-              中各自的默认中心与缩放。4.8 保留 v4.0 的 Canvas
-              尺寸、天然投影比例和初始完整视图逻辑；菜单变化只触发原有 v4.0
-              重排，不引入后续版本的强制铺满或横向拉伸。
+              中各自的默认中心与缩放。菜单变化只触发布局尺寸同步，不改写投影公式或强行拉伸天球。
             </p>
             <table>
               <thead>
@@ -1026,10 +1022,10 @@
               >
               通过本地兼容补丁暴露的历表对象，调用
               <code>currentPlanetPositions()</code> 以当前 UTC
-              和地球位置计算太阳、月球及七大行星的赤道坐标，再按当前坐标系统转换、投影并绘制符号和名称；同一组动态坐标也用于点击拾取和信息框。普通开关通过
+              和地球位置计算太阳、月球及七大行星的赤道坐标，再按当前坐标视角转换、投影并绘制符号和名称；同一组动态坐标也用于点击拾取和信息框。普通开关通过
               <code>Celestial.apply()</code> 原位更新；投影通过
               <code>Celestial.reproject()</code>
-              更新；只有坐标系统变化需要重新转换目录。中国星官和传统天区使用
+              更新；只有坐标视角变化需要重新转换目录。中国星官和传统天区使用
               <code>Celestial.add()</code> 注册自定义 GeoJSON 图层，在每次
               <code>redraw</code>
               中依据文化模式、边界开关和细分层级决定是否绘制。
@@ -1134,7 +1130,7 @@
               注册为本地数据对象，并接管
               <code>d3.json()</code>。每次请求返回独立深拷贝，因为 D3-Celestial
               的 <code>getData()</code> 会原地转换 GeoJSON
-              坐标；这一处理保证坐标系统可以反复切换而不累积坐标误差。源数据归档在
+              坐标；这一处理保证坐标视角可以反复切换而不累积坐标误差。源数据归档在
               <code>vendor/data/</code>，浏览器也直接从该目录读取。
             </p>
             <h3>8. 关键函数与状态流</h3>
@@ -1185,7 +1181,7 @@
                 <tr>
                   <td>
                     <code>projectionNaturalRatio()</code> /
-                    <code>projectionFitMetrics()</code> /
+                    <code>projectionCanvasMetrics()</code> /
                     <code>switchProjection()</code>
                   </td>
                   <td>
@@ -1204,11 +1200,10 @@
                 <tr>
                   <td>
                     <code>scheduleSkyResize()</code> /
-                    <code>updateCardinalGeometry()</code>
+                    <code>syncRenderedMapBox()</code>
                   </td>
                   <td>
-                    防抖响应布局变化，用原位 resize 调整画布，并把 E/S/W/N
-                    对齐实际投影边缘，不重载星表
+                    防抖响应布局变化，用原位 resize 调整 #celestial-map、canvas 和 svg，不重载星表
                   </td>
                 </tr>
                 <tr>
@@ -1265,12 +1260,12 @@
               天气、光污染和地形图层 / 手机陀螺仪与 AR 指向 /
               多套历史中国星图版本对照。
             </p>
-            <p><strong>说明页版本号：</strong>5.1.5</p>
+            <p><strong>说明页版本号：</strong>5.1.6</p>
           </article>
           <article class="doc" data-doc-lang="en">
             <h3>1. Purpose, scope and architecture</h3>
             <p>
-              Real Sky Observatory 5.1.5 is a fully local browser planetarium. It
+              Real Sky Observatory 5.1.6 is a fully local browser planetarium. It
               is not a random star field: it reads real stellar, constellation,
               Chinese asterism, Milky Way and Solar System datasets, combines
               them with the observer's coordinates, IANA time zone and UTC
@@ -1397,7 +1392,7 @@
               radians from numeric range.
             </p>
             <p>
-              Coordinate system and map projection are separate. Horizontal mode
+              Coordinate view and map projection are separate. Horizontal mode
               loads equatorial catalog coordinates and rotates them to the local
               sky; equatorial, ecliptic and galactic modes transform the catalog
               geometry. D3-Celestial transforms GeoJSON in place, so the bundled
@@ -1423,7 +1418,7 @@
               Each projection keeps its natural aspect ratio instead of being
               stretched to the browser.
               <code>projectionNaturalRatio()</code> reads engine metadata and
-              <code>projectionFitMetrics()</code> fits the largest complete
+              <code>projectionCanvasMetrics()</code> fits the largest complete
               Canvas into the pane; undeclared global projections use the
               conventional 2:1 ratio. E/S/W/N are attached to the actual Canvas
               boundary. Each coordinate-system/projection pair has its own saved
@@ -1444,13 +1439,12 @@
               and Equirectangular are all-sky layouts; HEALPix, Mercator,
               Robinson and Sinusoidal serve scientific partitioning, local
               conformality or balanced presentation. Reset never changes the
-              selected coordinate system: horizontal mode recalculates the local
+              selected coordinate view: horizontal mode recalculates the local
               sky centre from the current observer and instant, while
               equatorial, ecliptic and galactic modes use their own configured
-              defaults. E/S/W/N are intentionally shown only on the initial
-              complete horizontal view and after reset; the first pan or zoom
-              hides them. Version 4.8 deliberately retains the v4.0 canvas
-              sizing, natural projection ratio and complete initial-view logic.
+              defaults. E/S/W/N are drawn by the custom horizon layer, so they
+              move with the projected sky instead of staying fixed on the
+              browser edge.
             </p>
             <h3>5. Stars, names and sky cultures</h3>
             <p>
@@ -1623,7 +1617,7 @@
               <code>parseObserverLocalTime()/shiftObserverTime()</code> manage
               local time and UTC; <code>buildSkyConfig()</code> converts state
               to engine configuration;
-              <code>projectionNaturalRatio()/projectionFitMetrics()</code> fit
+              <code>projectionNaturalRatio()/projectionCanvasMetrics()</code> fit
               the complete projection;
               <code>initialDisplay()/waitForCanvas()</code> initialize and
               verify the real star layer;
@@ -1670,7 +1664,7 @@
               mobile sensors and multiple historical Chinese sky
               reconstructions.
             </p>
-            <p><strong>Guide version:</strong> 5.1.5</p>
+            <p><strong>Guide version:</strong> 5.1.6</p>
           </article>
         </div>
       </div>

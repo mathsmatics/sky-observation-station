@@ -321,13 +321,13 @@
     viewTools: "视图控制",
     viewToolsHint: "不改变地点与时间",
     projectionLabel: "天球投影：",
-    coordinateSystemLabel: "坐标系统：",
+    coordinateSystemLabel: "坐标视角：",
     projection: "天球投影",
-    coordinateSystem: "坐标系统",
-    horizontalCoordinates: "地平坐标（当地天空）",
-    equatorialCoordinates: "赤道坐标",
-    eclipticCoordinates: "黄道坐标",
-    galacticCoordinates: "银河坐标",
+    coordinateSystem: "坐标视角",
+    horizontalCoordinates: "地平坐标视角",
+    equatorialCoordinates: "赤道坐标视角",
+    eclipticCoordinates: "黄道坐标视角",
+    galacticCoordinates: "银河坐标视角",
     traditionalRegions: "中国传统天区层级",
     majorRegions: "三垣 / 四象 / 近南极星区",
     withBattlefields: "三垣四象 + 三大战场",
@@ -378,13 +378,13 @@
     viewTools: "View controls",
     viewToolsHint: "location and time unchanged",
     projectionLabel: "Projection: ",
-    coordinateSystemLabel: "Coordinate system: ",
+    coordinateSystemLabel: "Coordinate view: ",
     projection: "Celestial projection",
-    coordinateSystem: "Coordinate system",
-    horizontalCoordinates: "Horizontal (local sky)",
-    equatorialCoordinates: "Equatorial",
-    eclipticCoordinates: "Ecliptic",
-    galacticCoordinates: "Galactic",
+    coordinateSystem: "Coordinate View",
+    horizontalCoordinates: "Horizontal Coordinate View",
+    equatorialCoordinates: "Equatorial Coordinate View",
+    eclipticCoordinates: "Ecliptic Coordinate View",
+    galacticCoordinates: "Galactic Coordinate View",
     traditionalRegions: "Chinese traditional region level",
     majorRegions: "Three Enclosures / Four Symbols / near-south-polar",
     withBattlefields: "Major regions + three battlefields",
@@ -430,12 +430,12 @@
   });
 
   const defaults = {
-    lat: Number(cfg("defaults.latitude", 35.6812)),
-    lon: Number(cfg("defaults.longitude", 139.7671)),
-    zone: cfg("defaults.timezone", "Asia/Tokyo"),
-    cityZh: cfg("defaults.cityZh", "东京"),
-    cityEn: cfg("defaults.cityEn", "Tokyo"),
-    instant: new Date().toISOString(),
+    lat: Number(cfg("defaults.latitude", 39.9042)),
+    lon: Number(cfg("defaults.longitude", 116.4074)),
+    zone: cfg("defaults.timezone", "Asia/Shanghai"),
+    cityZh: cfg("defaults.cityZh", "北京"),
+    cityEn: cfg("defaults.cityEn", "Beijing"),
+    instant: cfg("defaults.instant", "1949-10-01T14:00:00.000Z"),
     lang: cfg("defaults.language", "zh"),
     cultureMode: cfg("defaults.cultureMode", "western"),
     magnitude: Number(cfg("defaults.magnitudeLimit", 5.5)),
@@ -503,7 +503,6 @@
     clickStart = null,
     pointerMoved = false,
     paneDrag = null,
-    cardinalsVisible = true,
     poleCustomDrag = null;
   let currentSelected = null,
     customViewRestoreTimer = null,
@@ -666,7 +665,16 @@
       }
     }
     if (!Number.isFinite(new Date(state.instant).getTime()))
-      state.instant = new Date().toISOString();
+      state.instant = defaults.instant;
+    if (!Number.isFinite(Number(state.lat)) || Math.abs(Number(state.lat)) > 90)
+      state.lat = defaults.lat;
+    if (
+      !Number.isFinite(Number(state.lon)) ||
+      Math.abs(Number(state.lon)) > 180
+    )
+      state.lon = defaults.lon;
+    if (!state.zone || typeof state.zone !== "string")
+      state.zone = defaults.zone;
     if (!["zh", "en"].includes(state.lang)) state.lang = "zh";
     if (!["western", "chinese", "both"].includes(state.cultureMode))
       state.cultureMode = "western";
@@ -939,10 +947,6 @@
     });
     $("language-select").value = state.lang;
     $("culture-select").value = state.cultureMode;
-    $("cardinal-n").textContent = "N";
-    $("cardinal-e").textContent = "E";
-    $("cardinal-s").textContent = "S";
-    $("cardinal-w").textContent = "W";
     $("explain-btn").innerHTML = "<b>?</b>";
     $("explain-btn").title = t("technicalGuide");
     $("explain-btn").setAttribute("aria-label", t("technicalGuide"));
@@ -1404,8 +1408,8 @@
     const panel = $("control-panel");
     sidebar.appendChild(panel);
     applyMenuSectionOrder(panel);
+    initializeMenuSections(panel);
     pane.appendChild($("sky-stage"));
-    pane.appendChild(document.querySelector(".cardinal-layer"));
     const skyMeta = $("sky-meta");
     if (skyMeta) pane.appendChild(skyMeta);
     shell.append(sidebar, pane);
@@ -1418,13 +1422,56 @@
   }
 
   function applyMenuSectionOrder(panel = $("control-panel")) {
-    if (!panel) return;
+    if (!panel || panel.dataset.menuOrdered === "true") return;
     const configured = cfg("menu.order", []),
       order = Array.isArray(configured) ? configured : [];
     order
       .map((id) => panel.querySelector(`[data-menu-id="${id}"]`))
       .filter(Boolean)
       .forEach((section) => panel.appendChild(section));
+    panel.dataset.menuOrdered = "true";
+  }
+
+  /**
+   * 菜单只在初始化时根据配置标记可折叠大分区。
+   * 小分组保持普通视觉分区，不参与折叠状态。
+   */
+  function initializeMenuSections(panel = $("control-panel")) {
+    if (!panel || panel.dataset.menuSectionsReady === "true") return;
+    const collapsible = new Set(
+        Array.isArray(cfg("menu.collapsible", []))
+          ? cfg("menu.collapsible", [])
+          : [],
+      ),
+      alwaysExpanded = new Set(
+        Array.isArray(cfg("menu.alwaysExpanded", []))
+          ? cfg("menu.alwaysExpanded", [])
+          : [],
+      );
+    panel.querySelectorAll("[data-menu-id]").forEach((section) => {
+      const id = section.dataset.menuId,
+        title = section.querySelector(".section-title");
+      section.classList.toggle(
+        "section-always-expanded",
+        alwaysExpanded.has(id),
+      );
+      if (!collapsible.has(id) || !title) return;
+      section.classList.add("section-collapsible");
+      title.setAttribute("role", "button");
+      title.setAttribute("tabindex", "0");
+      title.setAttribute("aria-expanded", "true");
+      const toggle = () => {
+        const collapsed = section.classList.toggle("section-collapsed");
+        title.setAttribute("aria-expanded", String(!collapsed));
+      };
+      title.addEventListener("click", toggle);
+      title.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        toggle();
+      });
+    });
+    panel.dataset.menuSectionsReady = "true";
   }
 
   /**
@@ -1782,7 +1829,7 @@
             centerDelta: "地图中心相对背景中心偏差",
             celestial: "Celestial 内部尺寸",
             projection: "当前投影",
-            coords: "当前坐标系统",
+            coords: "当前坐标视角",
             culture: "当前星空体系",
             language: "语言",
             viewKey: "视角保存键",
@@ -2254,12 +2301,10 @@
 
   function syncMapBoxAfterRedraw(metrics = projectionCanvasMetrics()) {
     applyMapBoxMetrics(metrics);
-    updateCardinalGeometry();
     updateDebugOverlay(true);
     requestAnimationFrame(() => {
       const latest = projectionCanvasMetrics();
       applyMapBoxMetrics(latest);
-      updateCardinalGeometry();
       updateDebugOverlay(true);
     });
   }
@@ -2330,7 +2375,6 @@
 
   function scaleMapByFactor(factor) {
     const next = getMapScale() * Number(factor || 1);
-    hideCardinalsAfterViewInteraction();
     setMapScale(next, { saveView: true });
   }
   function restoreView(view = desiredView(), attempt = 0) {
@@ -2357,43 +2401,12 @@
       90 + attempt * 70,
     );
   }
-  function updateCardinalGeometry() {
-    const pane = $("sky-pane"),
-      layer = document.querySelector(".cardinal-layer"),
-      canvas = document.querySelector("#celestial-map canvas");
-    if (!pane || !layer || !canvas) return;
-    const pr = pane.getBoundingClientRect(),
-      cr = canvas.getBoundingClientRect();
-    layer.style.left = `${cr.left - pr.left}px`;
-    layer.style.top = `${cr.top - pr.top}px`;
-    layer.style.width = `${Math.max(1, cr.width)}px`;
-    layer.style.height = `${Math.max(1, cr.height)}px`;
-  }
-  function updateCardinalVisibility() {
-    const visible =
-      cardinalsVisible &&
-      state.coordinateSystem === "horizontal" &&
-      HORIZON_PROJECTIONS.has(state.projection);
-    document.body.classList.toggle("non-horizontal", !visible);
-    document.body.classList.toggle("cardinals-visible", visible);
-    if (visible) requestAnimationFrame(updateCardinalGeometry);
-  }
-  function hideCardinalsAfterViewInteraction() {
-    if (!cardinalsVisible) return;
-    cardinalsVisible = false;
-    updateCardinalVisibility();
-  }
-  function showCardinalsForReset() {
-    cardinalsVisible = true;
-    updateCardinalVisibility();
-  }
   function updateProjectionHelp() {
     const select = $("projection-select");
     if (!select) return;
     const opt = select.options[select.selectedIndex];
     $("projection-help").textContent =
       state.lang === "zh" ? opt.dataset.descZh || "" : opt.dataset.descEn || "";
-    updateCardinalVisibility();
   }
   function scheduleSkyResize() {
     clearTimeout(resizeTimer);
@@ -2424,8 +2437,6 @@
             if (generation !== layoutResizeGeneration || !skyReady) return;
             syncRenderedMapBox(projectionCanvasMetrics());
             restoreView(view);
-            updateCardinalVisibility();
-            updateCardinalGeometry();
             updateDebugOverlay(true);
           }, 50);
         } catch (err) {
@@ -3131,7 +3142,7 @@
   }
   /**
    * 计算当前 UTC 瞬时的太阳、月球和行星位置。
-   * 返回赤道坐标，以及按当前坐标系统转换后的显示坐标；绘制和点击拾取共用同一结果。
+   * 返回赤道坐标，以及按当前坐标视角转换后的显示坐标；绘制和点击拾取共用同一结果。
    */
   function currentPlanetPositions() {
     const objects = window.__RSO_PLANET_OBJECTS__ || [],
@@ -4384,8 +4395,6 @@
         );
         attachCanvasInfo(canvas);
         updateSkyView(true);
-        updateCardinalVisibility();
-        updateCardinalGeometry();
         // 初始天空已由 Celestial 的 follow/zenith 配置居中。
         // 这里只恢复显式快照或已保存视角；投影尚未稳定时强行写入默认旋转，
         // 可能访问到 D3-Celestial 尚未初始化完成的内部中心。
@@ -4689,7 +4698,7 @@
       { capture: true },
     );
     // 除极端高纬区域外，保留 D3-Celestial 的四元数拖动。
-    // 在极区只拦截原生 mousedown，改用增量中心更新，并保持 v4.0 方向：
+    // 在极区只拦截原生 mousedown，改用增量中心更新，并保持当前拖动方向：
     // 向右增加经度，向下增加纬度。
     canvas.addEventListener(
       "mousedown",
@@ -4713,7 +4722,6 @@
             ) > Number(cfg("interaction.dragThreshold", 6))
           ) {
             pointerMoved = true;
-            hideCardinalsAfterViewInteraction();
           }
           const rect = canvas.getBoundingClientRect(),
             shortSide = Math.max(180, Math.min(rect.width, rect.height));
@@ -4758,7 +4766,6 @@
           ) > Number(cfg("interaction.dragThreshold", 6))
         ) {
           pointerMoved = true;
-          hideCardinalsAfterViewInteraction();
         }
         queueDebugOverlayUpdate();
       },
@@ -4861,7 +4868,7 @@
   }
 
   /**
-   * 坐标系统变化时重建已转换的目录几何。
+   * 坐标视角变化时重建已转换的目录几何。
    * 临时 Canvas 快照用于遮罩重建过程；数据层提供新副本，
    * 让 D3-Celestial 可以安全地原地转换 GeoJSON。
    */
@@ -4897,7 +4904,7 @@
   }
   /**
    * 切换地图投影，不改变观测者、时间或图层。
-   * 每个“坐标系统 + 投影”组合都保存独立中心和缩放。
+   * 每个“坐标视角 + 投影”组合都保存独立中心和缩放。
    */
   function switchProjection(next) {
     if (
@@ -4924,8 +4931,6 @@
           resetInternalZoom();
           syncRenderedMapBox(nextMetrics);
           restoreView(target);
-          updateCardinalVisibility();
-          updateCardinalGeometry();
           updateDebugOverlay(true);
         } catch (err) {
           console.warn("Projection resize failed", err);
@@ -4941,11 +4946,12 @@
    * 这是普通界面操作中唯一需要重建目录几何的路径。
    */
   function switchCoordinateSystem(next) {
-    if (
-      !["horizontal", "equatorial", "ecliptic", "galactic"].includes(next) ||
-      next === state.coordinateSystem
-    )
+    if (!["horizontal", "equatorial", "ecliptic", "galactic"].includes(next))
       return;
+    if (next === state.coordinateSystem) {
+      resetCurrentCoordinateView();
+      return;
+    }
     saveCurrentProjectionView();
     state.coordinateSystem = next;
     save();
@@ -5024,7 +5030,6 @@
       dy = event.clientY - paneDrag.y;
     if (Math.hypot(dx, dy) > 4) {
       paneDrag.moved = true;
-      hideCardinalsAfterViewInteraction();
     }
     const rect = canvasRect();
     if (!rect) return;
@@ -5053,6 +5058,53 @@
   }
 
   /**
+   * 把当前坐标视角恢复到该视角的默认中心和缩放。
+   * 不修改地点、时间、文化体系、显示参数、字体缩放或选中天体。
+   */
+  function resetCurrentCoordinateView() {
+    try {
+      const configured = cfg(`resetViews.${state.coordinateSystem}`, {
+        center: [0, 0, 0],
+        mapScale: 1,
+      });
+      const targetScale = viewMapScale(configured, defaults.mapScale);
+      if (state.coordinateSystem === "horizontal") {
+        // 地平坐标视角的默认中心依赖当前地点和时刻，由 skyview() 重新计算。
+        updateSkyView(true);
+        clearTimeout(customViewRestoreTimer);
+        customViewRestoreTimer = setTimeout(() => {
+          try {
+            setMapScale(targetScale);
+            resetInternalZoom();
+            redrawAndSyncMapBox("horizontal reset");
+            const centre = Celestial.rotate();
+            state.projectionViews[viewKey()] = {
+              center: Array.isArray(centre) ? centre.slice() : [0, 0, 0],
+              mapScale: targetScale,
+            };
+            save();
+          } catch (err) {
+            console.warn("Horizontal reset failed", err);
+          }
+        }, 120);
+        return;
+      }
+      const v = {
+        center: Array.isArray(configured.center)
+          ? configured.center.slice()
+          : [0, 0, 0],
+        mapScale: targetScale,
+      };
+      state.projectionViews[viewKey()] = {
+        center: v.center.slice(),
+        mapScale: v.mapScale,
+      };
+      restoreView(v);
+      save();
+    } catch (_) {}
+  }
+
+  /**
    * 将 DOM 控件连接到状态更新、渲染更新和持久化。
    * 事件流刻意保持直接：控件 -> 修改状态 -> 重绘/应用。
    */
@@ -5074,9 +5126,21 @@
     $("projection-select").addEventListener("change", (e) =>
       switchProjection(e.target.value),
     );
-    $("coordinate-select").addEventListener("change", (e) =>
+    const coordinateSelect = $("coordinate-select");
+    let coordinateSelectOpenedValue = coordinateSelect.value;
+    coordinateSelect.addEventListener("pointerdown", () => {
+      coordinateSelectOpenedValue = coordinateSelect.value;
+    });
+    coordinateSelect.addEventListener("change", (e) =>
       switchCoordinateSystem(e.target.value),
     );
+    coordinateSelect.addEventListener("blur", () => {
+      if (
+        coordinateSelect.value === coordinateSelectOpenedValue &&
+        coordinateSelect.value === state.coordinateSystem
+      )
+        resetCurrentCoordinateView();
+    });
     $("traditional-detail").addEventListener("change", (e) => {
       state.traditionalDetail = ["major", "battlefields", "mansions"].includes(
         e.target.value,
@@ -5255,53 +5319,7 @@
       save();
       applyVisualConfig(true);
     });
-    $("reset-view").addEventListener("click", () => {
-      try {
-        const configured = cfg(`resetViews.${state.coordinateSystem}`, {
-          center: [0, 0, 0],
-          mapScale: 1,
-        });
-        const targetScale = viewMapScale(configured, defaults.mapScale);
-        if (state.coordinateSystem === "horizontal") {
-          // 地平坐标下，正确的重置中心取决于当前观测者和时刻。
-          // 让 skyview() 计算该中心；这里只重置缩放，之后不要再用通用赤道
-          // [0,0,0] 中心覆盖它。
-          updateSkyView(true);
-          clearTimeout(customViewRestoreTimer);
-          customViewRestoreTimer = setTimeout(() => {
-            try {
-              setMapScale(targetScale);
-              resetInternalZoom();
-              redrawAndSyncMapBox("horizontal reset");
-              const centre = Celestial.rotate();
-              state.projectionViews[viewKey()] = {
-                center: Array.isArray(centre) ? centre.slice() : [0, 0, 0],
-                mapScale: targetScale,
-              };
-              updateCardinalGeometry();
-              showCardinalsForReset();
-              save();
-            } catch (err) {
-              console.warn("Horizontal reset failed", err);
-            }
-          }, 120);
-        } else {
-          const v = {
-            center: Array.isArray(configured.center)
-              ? configured.center.slice()
-              : [0, 0, 0],
-            mapScale: targetScale,
-          };
-          state.projectionViews[viewKey()] = {
-            center: v.center.slice(),
-            mapScale: v.mapScale,
-          };
-          restoreView(v);
-          showCardinalsForReset();
-          save();
-        }
-      } catch (_) {}
-    });
+    $("reset-view").addEventListener("click", resetCurrentCoordinateView);
     $("fullscreen").addEventListener("click", async () => {
       try {
         if (!document.fullscreenElement)
@@ -5430,7 +5448,6 @@
     bind();
     const fileMode = location.protocol === "file:";
     $("geo-mode-note").style.display = fileMode ? "block" : "none";
-    cardinalsVisible = true;
     initialDisplay(desiredView());
     requestAnimationFrame(animationLoop);
     if (fileMode) setTimeout(() => showToast(t("localServerHint")), 2200);

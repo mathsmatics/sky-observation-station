@@ -1,5 +1,5 @@
 /**
- * 真实星空观测台 5.1.5 —— 用户可配置文件
+ * 真实星空观测台 5.1.6 —— 用户可配置文件
  * ------------------------------------------------------------
  * 修改本文件后，运行 npm run build 并刷新 index.html 即可生效。
  * 建议每次只修改一个参数，并保留原值，便于出现问题时恢复。
@@ -57,6 +57,8 @@ window.RSO_CONFIG = {
       "objectInfo",
       "status",
     ],
+    collapsible: ["observer", "time", "viewProjection", "display"],
+    alwaysExpanded: ["viewTools", "search", "objectInfo", "status"],
   },
 
   /** 调试面板：开发时打开，完成后可把 enabled 改为 false 隐藏开关 */
@@ -73,17 +75,6 @@ window.RSO_CONFIG = {
     buttonFactor: 1.25,
   },
 
-  /** E / S / W / N 方位标识 */
-  cardinal: {
-    color: "#ff4040",
-    fontSizeMin: 12,
-    fontSizeViewport: 1.1, // CSS clamp 中间值，单位 vw
-    fontSizeMax: 16,
-    fontWeight: 900,
-    edgeOffset: 5, // 距实际投影边缘的安全距离
-    textShadow: "0 1px 3px #000, 0 0 6px rgba(255,0,0,.58)",
-  },
-
   /** 鼠标、触摸和视图稳定性 */
   interaction: {
     dragThreshold: 5, // 小于该像素距离视为“点击”，大于才视为“拖动”
@@ -92,7 +83,7 @@ window.RSO_CONFIG = {
     poleLatitudeClamp: 89.2, // 视图中心纬度限制，避免跨越极点发生翻转
     poleSlowdownStart: 70, // 超过该纬度后逐渐降低经向拖动灵敏度
     poleLongitudeFactorMin: 0.08, // 正对极点时保留的最小经向灵敏度
-    poleLockStart: 82, // 超过该中心纬度后启用“只纠正异常跳变”的极区保护；正常拖动仍由 v4.0 原生逻辑处理
+    poleLockStart: 82, // 超过该中心纬度后启用“只纠正异常跳变”的极区保护；正常拖动仍由 D3-Celestial 原生交互处理
     poleJumpLimitDegrees: 8, // 单次事件允许的最大异常角度变化；超过时按最短角差限幅
     poleLatitudeJumpLimitDegrees: 5, // 极区单次纬向异常变化上限
     poleGuardDelayMs: 0, // 原生拖动完成后再检查，0 表示下一事件循环
@@ -105,11 +96,12 @@ window.RSO_CONFIG = {
 
   /** 程序首次运行时的默认状态；浏览器已保存的设置优先于这里 */
   defaults: {
-    latitude: 35.6812,
-    longitude: 139.7671,
-    timezone: "Asia/Tokyo",
-    cityZh: "东京",
-    cityEn: "Tokyo",
+    latitude: 39.9042,
+    longitude: 116.4074,
+    timezone: "Asia/Shanghai",
+    cityZh: "北京",
+    cityEn: "Beijing",
+    instant: "1949-10-01T14:00:00.000Z",
     language: "zh",
     cultureMode: "western", // western / chinese / both
     magnitudeLimit: 5.5,
@@ -139,8 +131,8 @@ window.RSO_CONFIG = {
 
   /** 星图基础绘制 */
   sky: {
-    fillAvailablePane: false, // 必须保持 false：沿用 v4.0 的投影画布适配逻辑，不把天球拉伸到容器比例
-    removeEdgeVignette: false, // 保留 v4.0 的星空画布视觉，不改变投影显示区域
+    fillAvailablePane: false, // 必须保持 false：画布尺寸由应用层 mapScale 模型控制，不把天球拉伸到容器比例
+    removeEdgeVignette: false, // 保留星空画布边缘视觉，不改变投影显示区域
     background: {
       fill: "#02050d",
       stroke: "rgba(116,151,183,.65)",
