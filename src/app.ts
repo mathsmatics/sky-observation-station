@@ -579,7 +579,11 @@ import {
     internalUtc: state.instant || "-",
     jsDateYear: "-",
     julianDate: "-",
+    timezone: state.zone || "-",
+    utcOffset: "-",
+    utcOffsetNote: "-",
     updateSource: "startup",
+    refreshHealth: "healthy",
     errorStage: "-",
     skyviewStatus: "skipped",
     fallbackStatus: "unused",
@@ -591,6 +595,8 @@ import {
     planetCount: "-",
     precision: "normal",
     originalError: "-",
+    recoveredOriginalError: "-",
+    currentFatalError: "-",
     errorStack: "-",
     lastError: "-",
   };
@@ -828,6 +834,47 @@ import {
       m = a % 60;
     return `UTC${sign}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
   }
+
+  function formatOffsetDetailed(minutes) {
+    const totalSeconds = Math.round(Number(minutes) * 60);
+    if (!Number.isFinite(totalSeconds)) return "-";
+    const sign = totalSeconds >= 0 ? "+" : "−",
+      abs = Math.abs(totalSeconds),
+      h = Math.floor(abs / 3600),
+      m = Math.floor((abs % 3600) / 60),
+      sec = abs % 60;
+    return sec
+      ? `UTC${sign}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`
+      : `UTC${sign}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  }
+
+  function timeZoneOffsetDebug(dt) {
+    if (!dt || !dt.isValid)
+      return { timezone: state.zone || "-", utcOffset: "-", utcOffsetNote: "unknown" };
+    const seconds = Math.round(Number(dt.offset) * 60),
+      hasHistoricalSeconds = Number.isFinite(seconds) && Math.abs(seconds % 60) !== 0,
+      historicalYear = Number.isFinite(dt.year) && dt.year < 1970;
+    return {
+      timezone: dt.zoneName || state.zone || "-",
+      utcOffset: formatOffsetDetailed(dt.offset),
+      utcOffsetNote: historicalYear || hasHistoricalSeconds ? "iana-historical" : "zone-rule",
+    };
+  }
+
+  function debugOffsetNoteValue(note, zh) {
+    if (note === "iana-historical")
+      return zh ? "使用 IANA 历史偏移" : "using IANA historical offset";
+    if (note === "zone-rule")
+      return zh ? "使用当前时区规则" : "using current zone rule";
+    return "-";
+  }
+
+  function debugRefreshHealthValue(value, zh) {
+    if (value === "recovered") return zh ? "fallback 已恢复" : "recovered by fallback";
+    if (value === "failed") return zh ? "失败" : "failed";
+    if (value === "pending") return zh ? "刷新中" : "pending";
+    return zh ? "正常" : "healthy";
+  }
   function astronomicalYearToDisplay(year) {
     const n = Number(year);
     if (!Number.isFinite(n)) return "";
@@ -879,18 +926,25 @@ import {
         jsDateYear: "-",
         julianDate: "-",
         precision: "unknown",
+        timezone: state.zone || "-",
+        utcOffset: "-",
+        utcOffsetNote: "unknown",
       };
     }
     const utc = dt.toUTC(),
       jsDate = date || renderableDateForDateTime(utc),
       local = utc.setZone(safeZoneForCoordinates()),
-      jd = jsDate ? julianDateFromDate(jsDate) : null;
+      jd = jsDate ? julianDateFromDate(jsDate) : null,
+      zoneDebug = timeZoneOffsetDebug(local);
     return {
       display: formatCivilDateTime(local, false),
       utc: utc.toISO() || "-",
       jsDateYear: jsDate ? String(jsDate.getUTCFullYear()) : "-",
       julianDate: jd == null ? "-" : jd.toFixed(5),
       precision: precisionStatusForYear(local.year),
+      timezone: zoneDebug.timezone,
+      utcOffset: zoneDebug.utcOffset,
+      utcOffsetNote: zoneDebug.utcOffsetNote,
     };
   }
 
@@ -904,6 +958,9 @@ import {
       internalUtc: data.utc,
       jsDateYear: data.jsDateYear,
       julianDate: data.julianDate,
+      timezone: data.timezone,
+      utcOffset: data.utcOffset,
+      utcOffsetNote: data.utcOffsetNote,
       precision: data.precision,
       ...extra,
     });
@@ -1125,6 +1182,7 @@ import {
         errorStage: "rollback",
         originalError: debugErrorText(err),
         errorStack: debugStackText(err),
+        currentFatalError: `rollback failed: ${debugErrorText(err)}`,
         lastError: `rollback failed: ${debugErrorText(err)}`,
       });
     }
@@ -1140,6 +1198,8 @@ import {
       lastFailedCandidate: candidateData ? candidateData.display : timeRenderDebug.candidate,
       originalError: debugErrorText(err),
       errorStack: debugStackText(err),
+      refreshHealth: "failed",
+      currentFatalError: `${stage} failed: ${debugErrorText(err)}`,
       lastError: `${stage} failed: ${debugErrorText(err)}`,
     });
   }
@@ -1175,8 +1235,11 @@ import {
       updateSource: source,
       precision: candidateData.precision,
       rollbackStatus: "unused",
+      refreshHealth: "pending",
       errorStage: "-",
       originalError: "-",
+      recoveredOriginalError: "-",
+      currentFatalError: "-",
       errorStack: "-",
       lastError: "-",
     });
@@ -1207,10 +1270,15 @@ import {
       fields: timeFieldDebugText(),
       lastFailedCandidate: timeRenderDebug.lastFailedCandidate || "-",
       rollbackStatus: "unused",
+      refreshHealth: usedFallback ? "recovered" : "healthy",
       errorStage: usedFallback ? "skyview-fallback" : "-",
       originalError: usedFallback ? timeRenderDebug.originalError : "-",
+      recoveredOriginalError: usedFallback ? timeRenderDebug.originalError : "-",
+      currentFatalError: "-",
       errorStack: usedFallback ? timeRenderDebug.errorStack : "-",
-      lastError: usedFallback ? timeRenderDebug.lastError : "-",
+      lastError: usedFallback
+        ? `skyview fallback recovered after: ${timeRenderDebug.originalError}`
+        : "-",
     });
     save();
     return true;
@@ -2228,6 +2296,15 @@ import {
           ).length,
         ),
       ]),
+      debugLine(zh ? "当前时区" : "current time zone", [
+        debugValue(timeRenderDebug.timezone || state.zone || "-"),
+      ]),
+      debugLine(zh ? "本地 UTC 偏移" : "local UTC offset", [
+        debugValue(timeRenderDebug.utcOffset || "-"),
+      ]),
+      debugLine(zh ? "偏移来源" : "offset source", [
+        debugValue(debugOffsetNoteValue(timeRenderDebug.utcOffsetNote, zh)),
+      ]),
       debugLine(zh ? "时间输入状态" : "time input state", [
         debugValue(timeRenderDebug.inputStatus || "-"),
         debugSep(" field="),
@@ -2263,8 +2340,8 @@ import {
       debugLine(zh ? "更新时间来源" : "time update source", [
         debugValue(timeRenderDebug.updateSource || "-"),
       ]),
-      debugLine(zh ? "错误阶段" : "error stage", [
-        debugValue(timeRenderDebug.errorStage || "-"),
+      debugLine(zh ? "时间刷新链路" : "time refresh health", [
+        debugValue(debugRefreshHealthValue(timeRenderDebug.refreshHealth, zh)),
       ]),
       debugLine(zh ? "skyview 状态" : "skyview status", [
         debugValue(timeRenderDebug.skyviewStatus || "-"),
@@ -2291,14 +2368,17 @@ import {
       debugLine(zh ? "远日期精度" : "date precision", [
         debugValue(timeRenderDebug.precision || "-"),
       ]),
-      debugLine(zh ? "最后原始错误" : "last original error", [
-        debugValue(timeRenderDebug.originalError || "-"),
+      debugLine(zh ? "已恢复的 skyview 原始错误" : "recovered skyview original error", [
+        debugValue(timeRenderDebug.recoveredOriginalError || "-"),
+      ]),
+      debugLine(zh ? "当前致命错误" : "current fatal error", [
+        debugValue(timeRenderDebug.currentFatalError || "-"),
+      ]),
+      debugLine(zh ? "错误阶段" : "error stage", [
+        debugValue(timeRenderDebug.errorStage || "-"),
       ]),
       debugLine(zh ? "错误堆栈摘要" : "error stack summary", [
         debugValue(timeRenderDebug.errorStack || "-"),
-      ]),
-      debugLine(zh ? "最后错误" : "last error", [
-        debugValue(timeRenderDebug.lastError || "-"),
       ]),
       debugBlankLine(),
       debugGroup(label.interactionGroup),
@@ -2540,6 +2620,8 @@ import {
         redrawStatus: "failed",
         redrawReason: reason,
         redrawAt: new Date().toISOString(),
+        refreshHealth: "failed",
+        currentFatalError: `redraw failed: ${debugErrorText(err)}`,
         lastError: `redraw failed: ${debugErrorText(err)}`,
       });
     }
@@ -2558,6 +2640,8 @@ import {
             redrawStatus: "failed",
             redrawReason: `${reason} follow-up`,
             redrawAt: new Date().toISOString(),
+            refreshHealth: "failed",
+            currentFatalError: `follow-up redraw failed: ${debugErrorText(err)}`,
             lastError: `follow-up redraw failed: ${debugErrorText(err)}`,
           });
         }
@@ -5001,8 +5085,11 @@ import {
         errorStage: originalError ? "skyview-fallback" : "-",
         originalError: originalError ? debugErrorText(originalError) : timeRenderDebug.originalError || "-",
         errorStack: originalError ? debugStackText(originalError) : timeRenderDebug.errorStack || "-",
+        refreshHealth: originalError ? "recovered" : timeRenderDebug.refreshHealth || "healthy",
+        recoveredOriginalError: originalError ? debugErrorText(originalError) : timeRenderDebug.recoveredOriginalError || "-",
+        currentFatalError: "-",
         lastError: originalError
-          ? `skyview fallback used after: ${debugErrorText(originalError)}`
+          ? `skyview fallback recovered after: ${debugErrorText(originalError)}`
           : timeRenderDebug.lastError || "-",
       });
       return redrawAndSyncMapBox(reason || "horizontal skyview fallback");
@@ -5013,6 +5100,8 @@ import {
         errorStage: "skyview-fallback",
         originalError: debugErrorText(fallbackErr),
         errorStack: debugStackText(fallbackErr),
+        refreshHealth: "failed",
+        currentFatalError: `horizontal fallback failed: ${debugErrorText(fallbackErr)}`,
         lastError: `horizontal fallback failed: ${debugErrorText(fallbackErr)}`,
       });
       return false;
@@ -5047,6 +5136,7 @@ import {
           noteTimeRenderDebug({
             skyviewStatus: "failed",
             fallbackStatus: "pending",
+            refreshHealth: "pending",
             errorStage: "skyview",
             originalError: debugErrorText(skyviewErr),
             errorStack: debugStackText(skyviewErr),
@@ -5077,6 +5167,8 @@ import {
         errorStage: "sky-view-update",
         originalError: debugErrorText(err),
         errorStack: debugStackText(err),
+        refreshHealth: "failed",
+        currentFatalError: `sky view update failed: ${debugErrorText(err)}`,
         lastError: `sky view update failed: ${debugErrorText(err)}`,
       });
       return false;
@@ -5130,6 +5222,9 @@ import {
         inputStatus: "invalid",
         fields: timeFieldDebugText(),
         updateSource: source,
+        errorStage: "input",
+        refreshHealth: "failed",
+        currentFatalError: "time field parse failed",
         lastError: "time field parse failed",
       });
       reportInvalidTimeInput();
@@ -6158,6 +6253,9 @@ import {
           julianDate: (julianDateFromDate(renderDate) || 0).toFixed(5),
           updateSource: "playback",
           precision: precisionStatusForYear(nextInstant.setZone(safeZoneForCoordinates()).year),
+          refreshHealth: "healthy",
+          currentFatalError: "-",
+          recoveredOriginalError: "-",
           lastError: "-",
         });
       } else {
@@ -6165,6 +6263,9 @@ import {
         noteTimeRenderDebug({
           inputStatus: "invalid",
           updateSource: "playback",
+          errorStage: "playback",
+          refreshHealth: "failed",
+          currentFatalError: "playback produced non-renderable time",
           lastError: "playback produced non-renderable time",
         });
       }
