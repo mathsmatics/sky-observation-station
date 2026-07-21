@@ -39,7 +39,7 @@ docs/       架构、构建、数据来源和第三方声明文档。
 
 ## 数据来源和依赖
 
-项目使用本地固定版本的 D3 3.5.17、d3-geo-projection、D3-Celestial 0.7.35、Luxon 和 tz-lookup。第三方库保存在 `vendor/`，运行数据入口保存在 `src/data/`，当前大型天文数据仍通过 `vendor/data/preloaded-data.js` 作为离线兼容桥加载。
+项目使用本地固定版本的 D3 3.5.17、d3-geo-projection、D3-Celestial 0.7.35、Luxon 和 tz-lookup。第三方库保存在 `vendor/`，运行数据、拆分 JSON 和本地直开兼容数据映射保存在 `src/data/`。
 
 数据来源说明见 `docs/DATA_SOURCES.md`，第三方和许可证说明见 `docs/THIRD_PARTY_NOTICES.md`，许可证原文保存在 `licenses/`。
 

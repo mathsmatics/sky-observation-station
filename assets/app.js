@@ -740,12 +740,27 @@
   };
 
   // src/data/catalog-registry.ts
-  var CATALOG_DATA_PATH = "vendor/data/";
+  var CATALOG_DATA_PATH = "src/data/";
+  var DATASET_PATHS = {
+    milkyWay: "src/data/milky-way/mw.json",
+    stars: "src/data/stars/stars.6.json",
+    starNames: "src/data/stars/starnames.json",
+    deepSky: "src/data/deep-sky/dsos.bright.json",
+    deepSkyNames: "src/data/deep-sky/dsonames.json",
+    westernConstellationNames: "src/data/constellations/constellations.json",
+    westernConstellationLines: "src/data/constellations/constellations.lines.json",
+    westernConstellationBounds: "src/data/constellations/constellations.borders.json",
+    chineseAsterismNames: "src/data/chinese/constellations.cn.json",
+    chineseAsterismLines: "src/data/chinese/constellations.lines.cn.json",
+    planets: "src/data/planets/planets.json",
+    traditionalRegions: "src/data/traditional-regions/traditional.regions.cn.json",
+    traditionalRegionLabels: "src/data/traditional-regions/traditional.regions.labels.cn.json"
+  };
   var CATALOG_DATASETS = {
     milkyWay: {
       key: "milkyWay",
       file: "mw.json",
-      path: `${CATALOG_DATA_PATH}mw.json`,
+      path: DATASET_PATHS.milkyWay,
       purposeZh: "\u94F6\u6CB3\u8F6E\u5ED3\u663E\u793A",
       purposeEn: "Milky Way outline rendering",
       source: "D3-Celestial bundled data",
@@ -755,7 +770,7 @@
     stars: {
       key: "stars",
       file: "stars.6.json",
-      path: `${CATALOG_DATA_PATH}stars.6.json`,
+      path: DATASET_PATHS.stars,
       purposeZh: "\u6052\u661F\u70B9\u3001\u661F\u7B49\u3001\u989C\u8272\u548C\u70B9\u51FB\u62FE\u53D6",
       purposeEn: "star rendering, magnitude, color and picking",
       source: "D3-Celestial star catalog, Hipparcos/XHIP ecosystem",
@@ -765,7 +780,7 @@
     starNames: {
       key: "starNames",
       file: "starnames.json",
-      path: `${CATALOG_DATA_PATH}starnames.json`,
+      path: DATASET_PATHS.starNames,
       purposeZh: "\u6052\u661F\u540D\u79F0\u3001\u91CD\u8981\u661F\u540D\u6807\u7B7E\u548C\u641C\u7D22",
       purposeEn: "star names, labels and search",
       source: "D3-Celestial bundled data",
@@ -775,7 +790,7 @@
     deepSky: {
       key: "deepSky",
       file: "dsos.bright.json",
-      path: `${CATALOG_DATA_PATH}dsos.bright.json`,
+      path: DATASET_PATHS.deepSky,
       purposeZh: "\u4EAE\u6DF1\u7A7A\u5929\u4F53\u663E\u793A\u3001\u641C\u7D22\u548C\u70B9\u51FB\u62FE\u53D6",
       purposeEn: "bright DSO rendering, search and picking",
       source: "D3-Celestial bundled data",
@@ -785,7 +800,7 @@
     deepSkyNames: {
       key: "deepSkyNames",
       file: "dsonames.json",
-      path: `${CATALOG_DATA_PATH}dsonames.json`,
+      path: DATASET_PATHS.deepSkyNames,
       purposeZh: "\u6DF1\u7A7A\u5929\u4F53\u540D\u79F0\u548C\u641C\u7D22",
       purposeEn: "deep-sky object names and search",
       source: "D3-Celestial bundled data",
@@ -795,7 +810,7 @@
     westernConstellationNames: {
       key: "westernConstellationNames",
       file: "constellations.json",
-      path: `${CATALOG_DATA_PATH}constellations.json`,
+      path: DATASET_PATHS.westernConstellationNames,
       purposeZh: "\u897F\u65B9\u661F\u5EA7\u540D\u79F0\u70B9\u3001\u6807\u7B7E\u548C\u641C\u7D22",
       purposeEn: "western constellation label points and search",
       source: "D3-Celestial bundled IAU constellation data",
@@ -805,7 +820,7 @@
     westernConstellationLines: {
       key: "westernConstellationLines",
       file: "constellations.lines.json",
-      path: `${CATALOG_DATA_PATH}constellations.lines.json`,
+      path: DATASET_PATHS.westernConstellationLines,
       purposeZh: "\u897F\u65B9\u661F\u5EA7\u8FDE\u7EBF\u548C\u4E2D\u897F\u53CC\u4F53\u7CFB\u91CD\u5408\u7EBF\u6BB5\u6BD4\u8F83",
       purposeEn: "western constellation lines and dual-culture line comparison",
       source: "D3-Celestial bundled data",
@@ -814,8 +829,8 @@
     },
     westernConstellationBounds: {
       key: "westernConstellationBounds",
-      file: "constellations.bounds.json",
-      path: `${CATALOG_DATA_PATH}constellations.bounds.json`,
+      file: "constellations.borders.json",
+      path: DATASET_PATHS.westernConstellationBounds,
       purposeZh: "IAU \u661F\u5EA7\u8FB9\u754C\u663E\u793A",
       purposeEn: "IAU constellation boundary rendering",
       source: "D3-Celestial bundled IAU boundary data",
@@ -825,7 +840,7 @@
     chineseAsterismNames: {
       key: "chineseAsterismNames",
       file: "constellations.cn.json",
-      path: `${CATALOG_DATA_PATH}constellations.cn.json`,
+      path: DATASET_PATHS.chineseAsterismNames,
       purposeZh: "\u4E2D\u56FD\u661F\u5B98\u540D\u79F0\u70B9\u3001\u6807\u7B7E\u548C\u641C\u7D22",
       purposeEn: "Chinese asterism label points and search",
       source: "D3-Celestial Chinese sky culture data; upstream source to verify",
@@ -835,7 +850,7 @@
     chineseAsterismLines: {
       key: "chineseAsterismLines",
       file: "constellations.lines.cn.json",
-      path: `${CATALOG_DATA_PATH}constellations.lines.cn.json`,
+      path: DATASET_PATHS.chineseAsterismLines,
       purposeZh: "\u4E2D\u56FD\u661F\u5B98\u8FDE\u7EBF\u3001\u4F20\u7EDF\u661F\u540D\u6620\u5C04\u548C\u641C\u7D22\u8F85\u52A9",
       purposeEn: "Chinese asterism lines, star-name mapping and search helpers",
       source: "D3-Celestial Chinese sky culture data; upstream source to verify",
@@ -845,7 +860,7 @@
     planets: {
       key: "planets",
       file: "planets.json",
-      path: `${CATALOG_DATA_PATH}planets.json`,
+      path: DATASET_PATHS.planets,
       purposeZh: "\u592A\u9633\u3001\u6708\u7403\u548C\u884C\u661F\u8F68\u9053\u53C2\u6570",
       purposeEn: "Solar System orbit parameters",
       source: "D3-Celestial bundled planet data",
@@ -855,7 +870,7 @@
     traditionalRegions: {
       key: "traditionalRegions",
       file: "traditional.regions.cn.json",
-      path: `${CATALOG_DATA_PATH}traditional.regions.cn.json`,
+      path: DATASET_PATHS.traditionalRegions,
       purposeZh: "\u4E09\u57A3\u3001\u56DB\u8C61\u3001\u4E8C\u5341\u516B\u5BBF\u548C\u4E3B\u9898\u6218\u573A\u533A\u57DF\u663E\u793A",
       purposeEn: "traditional Chinese region, mansion and battlefield rendering",
       source: "project-generated visualization geometry",
@@ -865,7 +880,7 @@
     traditionalRegionLabels: {
       key: "traditionalRegionLabels",
       file: "traditional.regions.labels.cn.json",
-      path: `${CATALOG_DATA_PATH}traditional.regions.labels.cn.json`,
+      path: DATASET_PATHS.traditionalRegionLabels,
       purposeZh: "\u4F20\u7EDF\u5929\u533A\u6807\u7B7E\u4F4D\u7F6E",
       purposeEn: "traditional Chinese region label points",
       source: "project-generated visualization geometry",
