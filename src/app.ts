@@ -510,7 +510,7 @@ import {
     traditionalDetail: cfg("defaults.traditionalDetail", "battlefields"),
     mapScale: Number(cfg("defaults.mapScale", 1)),
     projectionViews: {},
-    coordinateViewSemantics: 5,
+    coordinateViewSemantics: 6,
     selectedObject: null,
   };
 
@@ -695,7 +695,7 @@ import {
         console.warn("Stored settings were invalid and have been ignored", err);
       }
     }
-    if (!Number.isFinite(new Date(state.instant).getTime()))
+    if (!DateTime || !DateTime.fromISO(String(state.instant || ""), { zone: "utc" }).isValid)
       state.instant = defaults.instant;
     if (!Number.isFinite(Number(state.lat)) || Math.abs(Number(state.lat)) > 90)
       state.lat = defaults.lat;
@@ -798,18 +798,33 @@ import {
       m = a % 60;
     return `UTC${sign}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
   }
+  function astronomicalYearToDisplay(year) {
+    const n = Number(year);
+    if (!Number.isFinite(n)) return "";
+    if (n <= 0) return `BC ${String(1 - Math.trunc(n)).padStart(1, "0")}`;
+    return String(Math.trunc(n)).padStart(4, "0");
+  }
+  function displayYearToAstronomical(prefix, value) {
+    const y = Math.trunc(Number(value));
+    if (!Number.isFinite(y) || y === 0) return null;
+    return String(prefix || "").trim().toUpperCase() === "BC" ? 1 - Math.abs(y) : y;
+  }
+  function currentInstantDate() {
+    const dt = DateTime.fromISO(String(state.instant || ""), { zone: "utc" });
+    return (dt.isValid ? dt : DateTime.fromISO(defaults.instant, { zone: "utc" })).toJSDate();
+  }
   function formatLocalInput() {
-    return observerDT().toFormat("yyyy-MM-dd'T'HH:mm");
+    const dt = observerDT();
+    return formatCivilDateTime(dt, false);
+  }
+  function formatCivilDateTime(dt, includeSeconds = false) {
+    const y = astronomicalYearToDisplay(dt.year);
+    const base = `${y}/${String(dt.month).padStart(2, "0")}/${String(dt.day).padStart(2, "0")} ${String(dt.hour).padStart(2, "0")}:${String(dt.minute).padStart(2, "0")}`;
+    return includeSeconds ? `${base}:${String(dt.second).padStart(2, "0")}` : base;
   }
   function formatLocalLong() {
-    const locale = state.lang === "zh" ? "zh-CN" : "en-US";
-    return observerDT()
-      .setLocale(locale)
-      .toFormat(
-        state.lang === "zh"
-          ? "yyyy年MM月dd日 HH:mm:ss ZZZZ"
-          : "yyyy-LL-dd HH:mm:ss ZZZZ",
-      );
+    const dt = observerDT();
+    return `${formatCivilDateTime(dt, true)} ${formatOffset(dt.offset)} · ${state.zone}`;
   }
   function cityName() {
     return state.lang === "zh"
@@ -2223,7 +2238,8 @@ import {
         b.type = "button";
         b.className = "city-option";
         b.setAttribute("role", "option");
-        b.innerHTML = `<span>${state.lang === "zh" ? c.zh : c.en}<small> · ${state.lang === "zh" ? c.en : c.zh}</small></span><small>${c.zone}</small>`;
+        b.title = `${c.zh} / ${c.en} · ${c.zone}`;
+        b.innerHTML = `<span class="city-option-name">${state.lang === "zh" ? c.zh : c.en}</span><small>${c.zone}</small>`;
         b.addEventListener("mouseenter", () => setActive(index));
         b.addEventListener("mousedown", (e) => {
           e.preventDefault();
@@ -2446,7 +2462,7 @@ import {
   }
   function horizontalFor(coord) {
     try {
-      const h = Celestial.horizontal(new Date(state.instant), coord, [
+      const h = Celestial.horizontal(currentInstantDate(), coord, [
         Number(state.lat),
         Number(state.lon),
       ]);
@@ -2483,7 +2499,7 @@ import {
     const az = degToRad(azimuth),
       alt = degToRad(altitude),
       lat = degToRad(state.lat),
-      lst = degToRad(localSiderealDegrees(new Date(state.instant), state.lon));
+      lst = degToRad(localSiderealDegrees(currentInstantDate(), state.lon));
     const sinDec =
         Math.sin(alt) * Math.sin(lat) +
         Math.cos(alt) * Math.cos(lat) * Math.cos(az),
@@ -2919,7 +2935,7 @@ import {
       origin = window.__RSO_PLANET_ORIGIN__;
     if (!origin || !objects.length) return [];
     try {
-      const dt = new Date(state.instant),
+      const dt = currentInstantDate(),
         observer = origin(dt).spherical();
       return objects
         .map((fn) => {
@@ -3640,15 +3656,12 @@ import {
       rows.splice(1, 0, [t("magnitude"), Number(p.mag).toFixed(2)]);
     if (obj.type === "star") {
       const n = STAR_NAMES[String(obj.d.id)] || {};
-      const others = [n.name, n.zh, n.bayer, n.flam, n.hip, n.hd]
-        .map(cleanNameToken)
-        .filter(Boolean)
-        .filter((v, i, a) => a.indexOf(v) === i);
+      const others = formatStarNameTokens(obj);
       if (others.length)
         rows.splice(1, 0, [t("otherNames"), others.join(" / ")]);
       if (p.bv !== undefined && p.bv !== "")
         rows.push([t("spectralInfo"), String(p.bv)]);
-      rows.push([t("catalogId"), n.hip || `HIP ${obj.d.id}`]);
+      rows.push([t("catalogId"), formatCatalogTokens(obj, rows)]);
       rows.push(...cultureRowsForImportantStar(obj, p, n));
     } else if (obj.type === "dso")
       rows.push([t("catalogId"), p.desig || String(obj.d.id)]);
@@ -3738,10 +3751,9 @@ import {
     panel.className = "floating-object-info-card";
     panel.innerHTML = `
       <div class="floating-info-head">
-        <span id="floating-object-meta">—</span>
+        <strong id="floating-object-title">—</strong>
         <button id="floating-object-close" type="button">×</button>
       </div>
-      <strong id="floating-object-title">—</strong>
       <div id="floating-object-grid" class="floating-info-lines"></div>
     `;
     $("sky-pane").appendChild(panel);
@@ -3752,12 +3764,79 @@ import {
     return panel;
   }
 
-  function cleanNameToken(value) {
-    const token = simplifyChinese(String(value || "").trim());
-    if (!token || token === "/" || /^\/+$/u.test(token)) return "";
-    if (/^[0-9]+$/u.test(token)) return "";
-    if (/^[α-ωΑ-Ω]$/u.test(token)) return "";
-    return token.replace(/^\/+|\/+$/g, "").trim();
+  function normalizeInfoToken(value) {
+    return simplifyChinese(String(value || ""))
+      .replace(/[\u200e\u200f\u202a-\u202e]/g, "")
+      .replace(/\s+/g, " ")
+      .replace(/^\s*\/+|\/+\s*$/g, "")
+      .trim();
+  }
+
+  function cleanNameToken(value, options = {}) {
+    const token = normalizeInfoToken(value);
+    if (!token || /^\/+$/u.test(token)) return "";
+    if (!options.allowSingleGreek && /^[α-ωΑ-Ω]$/u.test(token)) return "";
+    if (!options.allowBareNumber && /^[0-9]+$/u.test(token)) return "";
+    return token;
+  }
+
+  function uniqueTokens(values) {
+    const seen = new Set();
+    return values
+      .map((value) => cleanNameToken(value, { allowSingleGreek: false, allowBareNumber: false }))
+      .filter(Boolean)
+      .filter((value) => {
+        const key = value.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+  }
+
+  function constellationMeta(abbr) {
+    const feature = westernConstellationNameFeatures().find(
+      (item) => String(item.id || item.properties?.desig || "") === String(abbr || ""),
+    );
+    const props = (feature && feature.properties) || {};
+    return {
+      gen: cleanNameToken(props.gen || props.name || abbr, { allowBareNumber: true }),
+      zh: cleanNameToken(props.zh || abbr, { allowBareNumber: true }),
+    };
+  }
+
+  function formatStarNameTokens(obj) {
+    if (!obj || obj.type !== "star") return [];
+    const n = STAR_NAMES[String(obj.d && obj.d.id)] || {};
+    const meta = constellationMeta(n.c);
+    const bayer = cleanNameToken(n.bayer || n.desig, { allowSingleGreek: true });
+    const flam = cleanNameToken(n.flam, { allowBareNumber: true });
+    const values = [n.zh, n.name];
+    if (bayer && meta.gen && !/^\d+$/u.test(bayer)) {
+      values.push(`${bayer} ${meta.gen}`);
+      if (meta.zh) values.push(`${meta.zh} ${bayer}`);
+    }
+    if (flam && meta.gen && /^\d+[A-Za-z]?$/u.test(flam)) values.push(`${flam} ${meta.gen}`);
+    return uniqueTokens(values);
+  }
+
+  function formatCatalogTokens(obj, rows) {
+    const p = (obj.d && obj.d.properties) || {};
+    if (obj.type === "star") {
+      const n = STAR_NAMES[String(obj.d.id)] || {};
+      const values = [];
+      const hip = cleanNameToken(n.hip || (obj.d.id ? `HIP ${obj.d.id}` : ""), { allowBareNumber: true });
+      const hd = cleanNameToken(n.hd || p.hd, { allowBareNumber: true });
+      const hr = cleanNameToken(n.hr || p.hr, { allowBareNumber: true });
+      const gaia = cleanNameToken(n.gaia || p.gaia, { allowBareNumber: true });
+      if (hip) values.push(/^HIP\s/i.test(hip) ? hip : `HIP ${hip}`);
+      if (hd) values.push(/^HD\s/i.test(hd) ? hd : `HD ${hd}`);
+      if (hr) values.push(/^HR\s/i.test(hr) ? hr : `HR ${hr}`);
+      if (gaia) values.push(/^Gaia\s/i.test(gaia) ? gaia : `Gaia ${gaia}`);
+      return uniqueTokens(values).join(" / ") || floatingRowValue(rows, t("catalogId"));
+    }
+    if (obj.type === "dso") return p.desig || String(obj.d.id || "—");
+    if (obj.type === "planet") return String(obj.planetId || obj.d.id || "").toUpperCase();
+    return floatingRowValue(rows, t("catalogId"));
   }
 
   function floatingRowValue(rows, label) {
@@ -3765,44 +3844,40 @@ import {
     return row ? row[1] : "—";
   }
 
-  function objectCatalogId(obj, rows) {
-    const p = (obj.d && obj.d.properties) || {};
-    if (obj.type === "star") {
-      const n = STAR_NAMES[String(obj.d.id)] || {};
-      const parts = [];
-      if (n.hip || obj.d.id) parts.push(`HIP ${String(n.hip || obj.d.id).replace(/^HIP\s*/i, "")}`);
-      if (n.hd) parts.push(`HD ${String(n.hd).replace(/^HD\s*/i, "")}`);
-      if (n.bayer) parts.push(String(n.bayer));
-      if (n.flam) parts.push(String(n.flam));
-      return parts.map(cleanNameToken).filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(" / ") || floatingRowValue(rows, t("catalogId"));
-    }
-    if (obj.type === "dso") return p.desig || String(obj.d.id || "—");
-    if (obj.type === "planet") return String(obj.planetId || obj.d.id || "").toUpperCase();
-    return floatingRowValue(rows, t("catalogId"));
+  function pairLine(a, b, c, d) {
+    return `<div class="floating-info-pair"><span class="floating-field"><b>${a}：</b><em>${b || "—"}</em></span><span class="floating-field"><b>${c}：</b><em>${d || "—"}</em></span></div>`;
+  }
+
+  function singleLine(a, b) {
+    return `<div class="floating-info-single"><b>${a}：</b><em>${b || "—"}</em></div>`;
   }
 
   function renderFloatingObjectInfo(obj) {
     const rows = objectRows(obj);
     const type = floatingRowValue(rows, t("objectType"));
-    const catalog = objectCatalogId(obj, rows);
-    const name = cleanNameToken(
+    const catalog = formatCatalogTokens(obj, rows);
+    const title = cleanNameToken(
       state.lang === "zh"
         ? simplifyChinese(obj.label || objectLabel(obj.type, obj.d || { properties: {} }))
         : obj.label || objectLabel(obj.type, obj.d || { properties: {} }),
+      { allowBareNumber: true },
     ) || "—";
-    const line = (a, b, c, d) =>
-      `<div class="floating-info-line"><span>${a}：${b || "—"}</span><span>${c}：${d || "—"}</span></div>`;
+    const names = obj.type === "star"
+      ? formatStarNameTokens(obj)
+      : uniqueTokens([floatingRowValue(rows, t("otherNames")), title]);
+    const noteKeys = [t("westernCultureMeaning"), t("chineseCultureMeaning")];
     const notes = rows
-      .filter(([key]) => key === t("westernCultureMeaning") || key === t("chineseCultureMeaning"))
-      .map(([key, value]) => `<div class="floating-info-note"><b>${key}</b>：${value}</div>`)
+      .filter(([key, value]) => noteKeys.includes(key) && value)
+      .map(([key, value]) => singleLine(key, value))
       .join("");
     return {
-      meta: catalog && catalog !== "—" ? `${type} / ${catalog}` : type,
-      title: name,
+      title,
       html:
-        line(t("magnitude"), floatingRowValue(rows, t("magnitude")), t("spectralInfo"), floatingRowValue(rows, t("spectralInfo"))) +
-        line(t("rightAscension"), floatingRowValue(rows, t("rightAscension")), t("declination"), floatingRowValue(rows, t("declination"))) +
-        line(t("altitude"), floatingRowValue(rows, t("altitude")), t("azimuth"), floatingRowValue(rows, t("azimuth"))) +
+        pairLine(t("objectType"), type, t("catalogId"), catalog) +
+        singleLine(state.lang === "zh" ? "名称" : "Names", names.join(" / ") || title) +
+        pairLine(t("magnitude"), floatingRowValue(rows, t("magnitude")), t("spectralInfo"), floatingRowValue(rows, t("spectralInfo"))) +
+        pairLine(t("rightAscension"), floatingRowValue(rows, t("rightAscension")), t("declination"), floatingRowValue(rows, t("declination"))) +
+        pairLine(t("altitude"), floatingRowValue(rows, t("altitude")), t("azimuth"), floatingRowValue(rows, t("azimuth"))) +
         notes,
     };
   }
@@ -3816,7 +3891,6 @@ import {
     panel.classList.toggle("open", visible);
     if (!visible) return;
     const data = renderFloatingObjectInfo(currentSelected);
-    $("floating-object-meta").textContent = data.meta;
     $("floating-object-title").textContent = data.title;
     $("floating-object-grid").innerHTML = data.html;
   }
@@ -4398,7 +4472,7 @@ import {
       const dt = observerDT();
       if (isHorizontalView()) {
         Celestial.skyview({
-          date: new Date(state.instant),
+          date: currentInstantDate(),
           location: [Number(state.lat), Number(state.lon)],
           timezone: dt.offset,
         });
@@ -4414,9 +4488,7 @@ import {
     if (!DateTime) return;
     const dt = observerDT();
     const local = dt.setLocale(state.lang === "zh" ? "zh-CN" : "en-US");
-    $("hud-time").textContent = local.toFormat(
-      state.lang === "zh" ? "yyyy年MM月dd日 HH:mm:ss" : "yyyy-LL-dd HH:mm:ss",
-    );
+    $("hud-time").textContent = formatCivilDateTime(local, true);
     $("hud-location").textContent =
       `${cityName()} · ${Number(state.lat).toFixed(4)}° ${state.lat >= 0 ? "N" : "S"} / ${Math.abs(Number(state.lon)).toFixed(4)}° ${state.lon >= 0 ? "E" : "W"} · ${state.zone}`;
     $("speed-label").textContent = playing
@@ -4426,9 +4498,10 @@ import {
     $("play").classList.toggle("active", playing);
     $("status-title").textContent = `${cityName()} · ${cultureName()}`;
     $("status-local").textContent = formatLocalLong();
-    $("status-utc").textContent = DateTime.fromISO(state.instant, {
-      zone: "utc",
-    }).toFormat("yyyy-LL-dd HH:mm:ss 'UTC'");
+    const utcForStatus = DateTime.fromISO(state.instant, { zone: "utc" });
+    $("status-utc").textContent = utcForStatus.isValid
+      ? `${formatCivilDateTime(utcForStatus, true)} UTC`
+      : "—";
     $("status-offset").textContent =
       `${formatOffset(dt.offset)} · ${state.zone}`;
     $("status-culture").textContent = cultureName();
@@ -4446,7 +4519,7 @@ import {
         : state.coordinateSystem;
     if ($("sky-meta"))
       $("sky-meta").textContent =
-        `${cityName()} · ${local.toFormat(state.lang === "zh" ? "yyyy年MM月dd日 HH:mm" : "yyyy-LL-dd HH:mm")}`;
+        `${cityName()} · ${formatCivilDateTime(local, false)}`;
     $("observer-timezone").value = state.zone;
     if (syncInput) $("observer-datetime").value = formatLocalInput();
   }
@@ -4457,22 +4530,22 @@ import {
    * 避免静默改变用户输入的民用时间。
    */
   function parseObserverLocalTime(value) {
-    const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(
-      String(value || ""),
-    );
+    const text = String(value || "").trim().replace(/\s+/g, " ");
+    const match = /^(?:(BC|BCE)\s*)?([+-]?\d+)\/(\d{1,2})\/(\d{1,2})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?$/i.exec(text);
     if (!match) return null;
+    const year = displayYearToAstronomical(match[1], match[2]);
+    if (year === null) return null;
     const zone = safeZoneForCoordinates();
     const parts = {
-      year: Number(match[1]),
-      month: Number(match[2]),
-      day: Number(match[3]),
-      hour: Number(match[4]),
-      minute: Number(match[5]),
-      second: Number(match[6] || 0),
+      year,
+      month: Number(match[3]),
+      day: Number(match[4]),
+      hour: Number(match[5]),
+      minute: Number(match[6]),
+      second: Number(match[7] || 0),
     };
     const dt = DateTime.fromObject(parts, { zone });
     if (!dt.isValid) return null;
-    // 拒绝不存在的日历值和夏令时空档归一化，避免静默改写用户输入。
     if (
       dt.year !== parts.year ||
       dt.month !== parts.month ||
@@ -4483,6 +4556,41 @@ import {
       return null;
     return dt.toUTC();
   }
+
+  function commitObserverDateTimeInput() {
+    const input = $("observer-datetime");
+    const previous = formatLocalInput();
+    const dt = parseObserverLocalTime(input.value);
+    if (!dt) {
+      showToast(t("invalidDateTime"), true);
+      if (input) input.value = previous;
+      return false;
+    }
+    state.instant = dt.toISO();
+    playing = false;
+    save();
+    updateHUD(true);
+    updateSkyView(true);
+    return true;
+  }
+
+  function adjustInputYear(delta) {
+    const input = $("observer-datetime");
+    if (!input) return;
+    const dt = parseObserverLocalTime(input.value) || observerDT();
+    const shifted = dt.setZone(safeZoneForCoordinates()).plus({ years: delta });
+    if (!shifted.isValid) {
+      showToast(t("invalidDateTime"), true);
+      input.value = formatLocalInput();
+      return;
+    }
+    state.instant = shifted.toUTC().toISO();
+    playing = false;
+    save();
+    updateHUD(true);
+    updateSkyView(true);
+  }
+
   function shiftObserverTime(unit, amount) {
     const dt = observerDT();
     const delta = {};
@@ -4497,22 +4605,6 @@ import {
     save();
     updateHUD(true);
     updateSkyView(true);
-  }
-
-  function commitObserverDateTimeInput() {
-    const input = $("observer-datetime");
-    const dt = parseObserverLocalTime(input.value);
-    if (!dt) {
-      showToast(t("invalidDateTime"), true);
-      updateHUD(true);
-      return false;
-    }
-    state.instant = dt.toISO();
-    playing = false;
-    save();
-    updateHUD(true);
-    updateSkyView(true);
-    return true;
   }
 
   function readTimeStepValue() {
@@ -4855,7 +4947,15 @@ import {
           Celestial.resize(nextMetrics.width);
           resetInternalZoom();
           syncRenderedMapBox(nextMetrics);
-          restoreView(target);
+          if (isHorizontalView()) {
+            updateSkyView(true);
+            setMapScale(viewMapScale(target, state.mapScale));
+            resetInternalZoom();
+            state.projectionViews[viewKey()] = { mapScale: state.mapScale };
+            save();
+          } else {
+            restoreView(target);
+          }
           updateDebugOverlay(true);
         } catch (err) {
           console.warn("Projection resize failed", err);
@@ -5052,10 +5152,10 @@ import {
     if (!Array.isArray(center)) return false;
     const step = Number(cfg("interaction.keyboardPanDegrees", 4)) || 4;
     const next = center.slice();
-    if (key === "ArrowLeft") next[0] += step;
-    else if (key === "ArrowRight") next[0] -= step;
-    else if (key === "ArrowUp") next[1] = clamp(next[1] - step, -89.5, 89.5);
-    else if (key === "ArrowDown") next[1] = clamp(next[1] + step, -89.5, 89.5);
+    if (key === "ArrowLeft") next[0] -= step;
+    else if (key === "ArrowRight") next[0] += step;
+    else if (key === "ArrowUp") next[1] = clamp(next[1] + step, -89.5, 89.5);
+    else if (key === "ArrowDown") next[1] = clamp(next[1] - step, -89.5, 89.5);
     else return false;
     Celestial.rotate({ center: next });
     redrawAndSyncMapBox("keyboard pan");
@@ -5179,9 +5279,13 @@ import {
     });
     $("observer-datetime").addEventListener("change", commitObserverDateTimeInput);
     $("observer-datetime").addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.isComposing) {
+      if (e.isComposing) return;
+      if (e.key === "Enter") {
         e.preventDefault();
         if (commitObserverDateTimeInput()) $("observer-datetime").blur();
+      } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+        e.preventDefault();
+        adjustInputYear(e.key === "ArrowUp" ? 1 : -1);
       }
     });
     $("time-step-minus").addEventListener("click", () => shiftObserverTimeByControl(-1));
@@ -5395,9 +5499,10 @@ import {
     const dt = Math.min(0.25, (now - lastFrame) / 1000);
     lastFrame = now;
     if (playing) {
-      state.instant = new Date(
-        new Date(state.instant).getTime() + dt * Number(state.speed) * 1000,
-      ).toISOString();
+      const current = DateTime.fromISO(String(state.instant || ""), { zone: "utc" });
+      const nextInstant = (current.isValid ? current : DateTime.fromISO(defaults.instant, { zone: "utc" }))
+        .plus({ seconds: dt * Number(state.speed) });
+      state.instant = nextInstant.toISO();
       if (now - lastSkyUpdate > 220) {
         updateSkyView(false);
         lastSkyUpdate = now;
@@ -5436,11 +5541,9 @@ import {
     setupCitySearch();
     setupObjectSearch();
     bind();
-    const fileMode = location.protocol === "file:";
     if ($("geo-mode-note")) $("geo-mode-note").style.display = "none";
     initialDisplay(desiredView());
     requestAnimationFrame(animationLoop);
-    if (fileMode) setTimeout(() => showToast(t("localServerHint")), 2200);
   }
 
   window.addEventListener("error", (event) => {

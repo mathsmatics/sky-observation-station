@@ -234,7 +234,6 @@ button {
   color: var(--muted);
 }
 input[type="number"],
-input[type="datetime-local"],
 input[type="text"],
 select {
   width: 100%;
@@ -264,9 +263,6 @@ input:focus,
 select:focus {
   border-color: rgba(119, 220, 255, 0.6);
   box-shadow: 0 0 0 3px rgba(119, 220, 255, 0.08);
-}
-input[type="datetime-local"] {
-  color-scheme: dark;
 }
 input[readonly] {
   background: #08111f;
@@ -333,13 +329,15 @@ button.danger {
   gap: 7px;
   margin-bottom: 8px;
 }
-.calendar-shifts {
+.calendar-shifts,
+.time-jump-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 5px;
-  margin-bottom: 6px;
+  margin: 7px 0 6px;
 }
-.calendar-shifts button {
+.calendar-shifts button,
+.time-jump-grid button {
   padding-left: 2px;
   padding-right: 2px;
   font-size: calc(9px * var(--rso-font-scale));
@@ -1003,8 +1001,8 @@ body.panel-collapsed #sidebar {
 }
 .city-option {
   display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 8px;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 3px;
   width: 100%;
   padding: 8px 10px;
   border: 0;
@@ -1017,8 +1015,14 @@ body.panel-collapsed #sidebar {
   transform: none;
   background: #18304d;
 }
+.city-option-name {
+  min-width: 0;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
 .city-option small {
   color: var(--muted);
+  overflow-wrap: anywhere;
 }
 .object-option {
   display: grid;
@@ -1088,10 +1092,10 @@ select optgroup {
   right: 12px;
   bottom: 12px;
   display: none;
-  width: min(360px, calc(100% - 24px));
+  width: min(390px, calc(100% - 24px));
   max-height: min(48vh, 420px);
   overflow: auto;
-  padding: 11px;
+  padding: 10px 11px;
   border: 1px solid rgba(119, 220, 255, 0.24);
   border-radius: 12px;
   background: var(--info-card-bg);
@@ -1106,31 +1110,45 @@ select optgroup {
   align-items: flex-start;
   justify-content: space-between;
   gap: 8px;
+  margin-bottom: 6px;
 }
 .floating-info-head strong {
   color: var(--info-title);
-  font-size: calc(13px * var(--rso-font-scale));
-  line-height: 1.35;
+  font-size: calc(14px * var(--rso-font-scale));
+  line-height: 1.25;
 }
 .floating-info-head button {
-  min-width: 28px;
-  padding: 2px 7px;
+  min-width: 26px;
+  padding: 1px 7px;
 }
-#floating-object-grid {
+.floating-info-lines {
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 4px 8px;
-  margin: 9px 0 0;
+  gap: 3px;
   font-size: calc(10px * var(--rso-font-scale));
-  line-height: 1.5;
+  line-height: 1.35;
 }
-#floating-object-grid dt {
+.floating-info-pair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 7px;
+}
+.floating-info-single {
+  min-width: 0;
+}
+.floating-field,
+.floating-info-single {
   color: var(--info-muted);
+  overflow-wrap: anywhere;
 }
-#floating-object-grid dd {
-  margin: 0;
+.floating-field b,
+.floating-info-single b {
+  color: var(--info-muted);
+  font-weight: 600;
+}
+.floating-field em,
+.floating-info-single em {
   color: var(--info-text);
-  word-break: break-word;
+  font-style: normal;
 }
 .info-head {
   display: flex;
@@ -1254,8 +1272,7 @@ select optgroup {
     padding-bottom: max(10px, calc(env(safe-area-inset-bottom) + 10px));
   }
   input[type="number"],
-  input[type="datetime-local"],
-  input[type="text"],
+    input[type="text"],
   select {
     min-height: 42px;
     font-size: calc(16px * var(--rso-font-scale));
@@ -1564,7 +1581,7 @@ select optgroup {
   pointer-events: none !important;
 }
 
-/* 5.2.3 UI interaction refinements */
+/* UI interaction refinements */
 .time-step-row {
   display: grid;
   grid-template-columns: 38px minmax(58px, 0.72fr) minmax(86px, 1fr) 38px;
@@ -1589,39 +1606,6 @@ select optgroup {
   border-color: rgba(119, 220, 255, 0.58);
   background: rgba(77, 150, 206, 0.26);
 }
-.floating-object-info-card #floating-object-title {
-  display: block;
-  margin: 5px 0 6px;
-  color: var(--info-title, #f4fbff);
-  font-size: calc(13px * var(--rso-font-scale));
-  line-height: 1.35;
-}
-#floating-object-meta {
-  min-width: 0;
-  color: var(--info-muted, #8da4bb);
-  font-size: calc(10px * var(--rso-font-scale));
-  overflow-wrap: anywhere;
-}
-.floating-info-lines {
-  display: grid;
-  gap: 4px;
-}
-.floating-info-line {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 7px;
-  color: var(--info-text, #d8e8f5);
-  font-size: calc(10px * var(--rso-font-scale));
-  line-height: 1.38;
-}
-.floating-info-note {
-  margin-top: 4px;
-  padding-top: 4px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-  color: var(--info-text, #d8e8f5);
-  font-size: calc(10px * var(--rso-font-scale));
-  line-height: 1.45;
-}
 #sky-pane:focus-visible {
   outline: 1px solid rgba(119, 220, 255, 0.45);
   outline-offset: -3px;
@@ -1630,7 +1614,7 @@ select optgroup {
   .time-step-row {
     grid-template-columns: 36px 1fr 1fr 36px;
   }
-  .floating-info-line {
+  .floating-info-pair {
     grid-template-columns: 1fr;
   }
 }
