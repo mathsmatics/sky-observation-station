@@ -1,5 +1,5 @@
 /**
- * 真实星空观测台 5.1.7 —— 用户可配置文件
+ * 真实星空观测台 5.1.8 —— 用户可配置文件
  * ------------------------------------------------------------
  * 修改本文件后，运行 npm run build 并刷新 index.html 即可生效。
  * 建议每次只修改一个参数，并保留原值，便于出现问题时恢复。
@@ -125,10 +125,22 @@ window.RSO_CONFIG = {
     panelOpen: true,
     menuCollapsed: ["observer", "time", "viewProjection", "display"],
     projection: "airy",
-    coordinateSystem: "horizontal", // 坐标视角：horizontal / equatorial / ecliptic / galactic；不改变底层 transform
+    coordinateSystem: "horizontal", // 坐标视角：horizontal / equatorial / ecliptic / galactic
     showRegionBoundaries: false,
     traditionalDetail: "battlefields", // major / battlefields / mansions
     mapScale: 1, // 初始星图画布缩放；1 表示画布短边等于 sky-pane 短边
+  },
+
+  /**
+   * 坐标视角由两部分组成：
+   * transform 是 D3-Celestial 的坐标渲染基准；
+   * orientation 是项目用于说明和重置视角的朝向语义。
+   */
+  coordinateViews: {
+    horizontal: { transform: "equatorial", orientation: "local-sky" },
+    equatorial: { transform: "equatorial", orientation: "equatorial-default" },
+    ecliptic: { transform: "ecliptic", orientation: "ecliptic-default" },
+    galactic: { transform: "galactic", orientation: "galactic-default" },
   },
 
   /** 星图基础绘制 */
@@ -181,7 +193,7 @@ window.RSO_CONFIG = {
       opacity: 0.68,
       labelColor: "#ff5656",
       labelFont: "900 15px Inter, Microsoft YaHei, sans-serif",
-      labelInsetPx: 18,
+      labelAltitudeFallbackDegrees: [8, 6, 10, 12, 15],
     },
     horizontalGrid: {
       stroke: "#6fa78f",
@@ -332,7 +344,7 @@ window.RSO_CONFIG = {
   /**
    * “坐标视角”使用的默认中心与应用层画布缩放。
    * center = [经向中心, 纬向中心, 旋转角]，单位为度。
-   * 这些值只决定视图朝向，不是 D3-Celestial 的 transform 配置。
+   * transform 由 coordinateViews 配置；这里仅配置视角朝向。
    * horizontal 的中心会优先由当前地点和时间的天顶动态计算；这里是回退值。
    */
   resetViews: {

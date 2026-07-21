@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <meta content="dark" name="color-scheme" />
-    <title>真实星空观测台 5.1.7 本地版 · Real Sky Observatory</title>
+    <title>真实星空观测台 5.1.8 本地版 · Real Sky Observatory</title>
     <link href="vendor/d3-celestial/celestial.css" rel="stylesheet" />
     <link href="assets/app.css" rel="stylesheet" />
   </head>
@@ -17,7 +17,7 @@
     <header class="topbar">
       <div class="brand glass">
         <div class="brand-main">
-          <i class="signal"></i><span>REAL SKY OBSERVATORY 5.1.7</span>
+          <i class="signal"></i><span>REAL SKY OBSERVATORY 5.1.8</span>
         </div>
         <div class="brand-sub" data-i18n="brandSub">
           真实地点 × 真实时间 × 真实星表 × 双天文文化
@@ -667,7 +667,7 @@
           <article class="doc" data-doc-lang="zh">
             <h3>1. 项目目标、适用范围与总体架构</h3>
             <p>
-              真实星空观测台 5.1.7
+              真实星空观测台 5.1.8
               是一个完全本地化的浏览器天文馆。它不是随机星点动画，而是读取真实恒星目录、现代西方星座、中国传统星官、银河轮廓和太阳系天体数据，以观测者的经纬度、IANA
               时区和 UTC
               时刻为输入，计算并绘制当前天空。适合肉眼认星、天文文化比较、天球坐标教学和一般观测规划；不替代专业天体测量、精密历表、赤道仪自动指向或天文摄影规划软件。
@@ -810,7 +810,12 @@
               把度转换为时、分、秒；赤纬使用带正负号的角度。代码不再根据数值大小猜测角度或弧度。
             </p>
             <p>
-              坐标视角与投影是两个独立概念。坐标视角只决定当前视图朝向和默认重置中心；投影决定球面如何压到平面。底层星表、星座、星官、边界和深空数据始终以稳定赤道坐标为基准，不因选择黄道或银河坐标视角而重建。
+              坐标视角与投影是两个独立概念。投影决定球面如何压到平面；坐标视角由“坐标渲染基准
+              transform”和“视角朝向 orientation”共同组成。地平坐标视角使用赤道
+              transform，再按当前地点和时间转到当地天空朝向；赤道坐标视角使用赤道
+              transform 和赤道默认朝向；黄道与银河坐标视角分别使用
+              ecliptic / galactic transform 和对应默认朝向。这里的 transform
+              是 D3-Celestial 的底层坐标变换，不是屏幕投影。
             </p>
             <h3>4. 投影、视角、缩放、拖动与响应式布局</h3>
             <p>
@@ -858,11 +863,14 @@
               只切换列宽，<code>ResizeObserver</code> 触发
               <code>scheduleSkyResize()</code>，用
               <code>Celestial.resize()</code>
-              原位调整画布，不重载星表。只有启动和真正的渲染器回退路径才会完整重建，普通坐标视角切换不会重载目录。
+              原位调整画布，不重载星表。地平与赤道坐标视角同属赤道
+              transform，切换时只恢复对应视角；黄道和银河坐标视角会切换
+              D3-Celestial transform，因此走安全重建路径，并由
+              <code>preloaded-data.js</code> 为每次数据请求提供深拷贝，避免重复转换污染目录几何。
             </p>
             <p>
               <b>投影与坐标视角必须分开理解：</b
-              >投影是“怎么画到屏幕上”；坐标视角是“用哪一套经纬网描述天体”。重置视图不会擅自切回赤道坐标：地平坐标会按当前地点和当前时刻重新计算本地天空中心，并只把缩放恢复为默认值；赤道、黄道和银河坐标则读取
+              >投影是“怎么画到屏幕上”；坐标视角是“用哪一套坐标渲染基准和朝向观察天球”。重置视图不会擅自切回赤道坐标：地平坐标会按当前地点和当前时刻重新计算本地天空中心，并只把缩放恢复为默认值；赤道、黄道和银河坐标则读取
               <code>src/config.ts</code>
               中各自的默认中心与缩放。菜单变化只触发布局尺寸同步，不改写投影公式或强行拉伸天球。
             </p>
@@ -1019,10 +1027,11 @@
               >
               通过本地兼容补丁暴露的历表对象，调用
               <code>currentPlanetPositions()</code> 以当前 UTC
-              和地球位置计算太阳、月球及七大行星的赤道坐标，再按当前坐标视角转换、投影并绘制符号和名称；同一组动态坐标也用于点击拾取和信息框。普通开关通过
+              和地球位置计算太阳、月球及七大行星的赤道坐标，再按当前 D3-Celestial
+              transform 转换、投影并绘制符号和名称；同一组动态坐标也用于点击拾取和信息框。普通开关通过
               <code>Celestial.apply()</code> 原位更新；投影通过
               <code>Celestial.reproject()</code>
-              更新；坐标视角变化只恢复视图中心和缩放，不重新转换目录。中国星官和传统天区使用
+              更新；坐标视角如果切换了 D3-Celestial transform，会从深拷贝目录数据安全重建。中国星官和传统天区使用
               <code>Celestial.add()</code> 注册自定义 GeoJSON 图层，在每次
               <code>redraw</code>
               中依据文化模式、边界开关和细分层级决定是否绘制。
@@ -1191,7 +1200,8 @@
                     <code>resetCurrentCoordinateView()</code>
                   </td>
                   <td>
-                    切换或重置坐标视角，只恢复该视角的中心与缩放，不重建目录
+                    同一 transform 内恢复该视角的中心与缩放；黄道/银河 transform
+                    切换时从深拷贝目录安全重建
                   </td>
                 </tr>
                 <tr>
@@ -1257,12 +1267,12 @@
               天气、光污染和地形图层 / 手机陀螺仪与 AR 指向 /
               多套历史中国星图版本对照。
             </p>
-            <p><strong>说明页版本号：</strong>5.1.7</p>
+            <p><strong>说明页版本号：</strong>5.1.8</p>
           </article>
           <article class="doc" data-doc-lang="en">
             <h3>1. Purpose, scope and architecture</h3>
             <p>
-              Real Sky Observatory 5.1.7 is a fully local browser planetarium. It
+              Real Sky Observatory 5.1.8 is a fully local browser planetarium. It
               is not a random star field: it reads real stellar, constellation,
               Chinese asterism, Milky Way and Solar System datasets, combines
               them with the observer's coordinates, IANA time zone and UTC
@@ -1389,10 +1399,13 @@
               radians from numeric range.
             </p>
             <p>
-              Coordinate view and map projection are separate. Coordinate views
-              only change the viewing direction and reset centre. Catalogs,
-              constellation geometry, boundaries and deep-sky data stay on the
-              stable equatorial base.
+              Coordinate view and map projection are separate. A coordinate
+              view combines a D3-Celestial transform with a viewing orientation:
+              horizontal uses the equatorial transform with the local-sky
+              orientation, equatorial uses the equatorial transform with its
+              default orientation, and ecliptic/galactic use their matching
+              transforms and default orientations. The transform is the
+              coordinate rendering base, not the screen projection.
             </p>
             <h3>4. Projections, view state and interaction</h3>
             <p>
@@ -1419,9 +1432,11 @@
               centre and zoom. Projection changes use
               <code>Celestial.reproject()</code>; ordinary display changes use
               <code>Celestial.apply()</code>; layout resizing uses
-              <code>Celestial.resize()</code> without catalog reload. Coordinate
-              view changes only restore centres and scales; catalog conversion
-              is not part of that path.
+              <code>Celestial.resize()</code> without catalog reload.
+              Horizontal/equatorial coordinate view switches only restore
+              centres and scales. Ecliptic/galactic view switches change the
+              D3-Celestial transform and therefore rebuild from deep-copied
+              local catalog data.
             </p>
             <h3>4A. A beginner’s guide to the 14 projections</h3>
             <p>
@@ -1618,7 +1633,8 @@
               <code>applyVisualConfig()</code> updates ordinary layers;
               <code>switchProjection()</code> reprojects without catalog reload;
               <code>switchCoordinateSystem()/resetCurrentCoordinateView()</code>
-              restore the selected coordinate view centre and scale;
+              restore the selected coordinate view centre and scale, or rebuild
+              safely when the D3-Celestial transform changes;
               <code>scheduleSkyResize()</code> performs in-place responsive
               resizing;
               <code
@@ -1658,7 +1674,7 @@
               mobile sensors and multiple historical Chinese sky
               reconstructions.
             </p>
-            <p><strong>Guide version:</strong> 5.1.7</p>
+            <p><strong>Guide version:</strong> 5.1.8</p>
           </article>
         </div>
       </div>

@@ -145,12 +145,23 @@
       menuCollapsed: ["observer", "time", "viewProjection", "display"],
       projection: "airy",
       coordinateSystem: "horizontal",
-      // 坐标视角：horizontal / equatorial / ecliptic / galactic；不改变底层 transform
+      // 坐标视角：horizontal / equatorial / ecliptic / galactic
       showRegionBoundaries: false,
       traditionalDetail: "battlefields",
       // major / battlefields / mansions
       mapScale: 1
       // 初始星图画布缩放；1 表示画布短边等于 sky-pane 短边
+    },
+    /**
+     * 坐标视角由两部分组成：
+     * transform 是 D3-Celestial 的坐标渲染基准；
+     * orientation 是项目用于说明和重置视角的朝向语义。
+     */
+    coordinateViews: {
+      horizontal: { transform: "equatorial", orientation: "local-sky" },
+      equatorial: { transform: "equatorial", orientation: "equatorial-default" },
+      ecliptic: { transform: "ecliptic", orientation: "ecliptic-default" },
+      galactic: { transform: "galactic", orientation: "galactic-default" }
     },
     /** 星图基础绘制 */
     sky: {
@@ -204,7 +215,7 @@
         opacity: 0.68,
         labelColor: "#ff5656",
         labelFont: "900 15px Inter, Microsoft YaHei, sans-serif",
-        labelInsetPx: 18
+        labelAltitudeFallbackDegrees: [8, 6, 10, 12, 15]
       },
       horizontalGrid: {
         stroke: "#6fa78f",
@@ -360,7 +371,7 @@
     /**
      * “坐标视角”使用的默认中心与应用层画布缩放。
      * center = [经向中心, 纬向中心, 旋转角]，单位为度。
-     * 这些值只决定视图朝向，不是 D3-Celestial 的 transform 配置。
+     * transform 由 coordinateViews 配置；这里仅配置视角朝向。
      * horizontal 的中心会优先由当前地点和时间的天顶动态计算；这里是回退值。
      */
     resetViews: {
@@ -1159,7 +1170,7 @@
       traditionalDetail: cfg("defaults.traditionalDetail", "battlefields"),
       mapScale: Number(cfg("defaults.mapScale", 1)),
       projectionViews: {},
-      coordinateViewSemantics: 2,
+      coordinateViewSemantics: 3,
       selectedObject: null
     };
     const ZONE_ALIASES = {
@@ -1197,12 +1208,25 @@
     let objectSearchIndex = null, searchHighlight = null, searchHighlightTimer = null;
     const STAR_NAMES = window.__RSO_LOCAL_DATA__ && window.__RSO_LOCAL_DATA__["starnames.json"] || {};
     const DSO_NAMES = window.__RSO_LOCAL_DATA__ && window.__RSO_LOCAL_DATA__["dsonames.json"] || {};
+    function pointFeatureCoordinateMap(file) {
+      return new Map(
+        (((window.__RSO_LOCAL_DATA__ || {})[file] || {}).features || []).filter((feature) => feature.geometry?.type === "Point").map((feature) => [
+          String(feature.id),
+          feature.geometry.coordinates && feature.geometry.coordinates.slice()
+        ])
+      );
+    }
     const ORIGINAL_STARS = window.__RSO_LOCAL_DATA__ && window.__RSO_LOCAL_DATA__["stars.6.json"] && window.__RSO_LOCAL_DATA__["stars.6.json"].features || [];
     const ORIGINAL_STAR_COORDS = new Map(
       ORIGINAL_STARS.map((feature) => [
         String(feature.id),
         feature.geometry && feature.geometry.coordinates
       ])
+    );
+    const ORIGINAL_DSO_COORDS = pointFeatureCoordinateMap("dsos.bright.json"), ORIGINAL_CONSTELLATION_COORDS = pointFeatureCoordinateMap(
+      "constellations.json"
+    ), ORIGINAL_ASTERISM_COORDS = pointFeatureCoordinateMap(
+      "constellations.cn.json"
     );
     const CN_ASTERISM_NAMES = new Map(
       (((window.__RSO_LOCAL_DATA__ || {})["constellations.cn.json"] || {}).features || []).map((feature) => [
@@ -2931,7 +2955,7 @@
             console.warn("Traditional region data failed", error);
             return;
           }
-          const data = Celestial.getData(json, "equatorial");
+          const data = Celestial.getData(json, projectionCoordinateTransform());
           Celestial.container.selectAll(".rso-traditional-region").data(data.features).enter().append("path").attr("class", "rso-traditional-region");
           traditionalRegionsReady = true;
           redrawAndSyncMapBox("traditional regions loaded");
@@ -2965,7 +2989,7 @@
             console.warn("Traditional region label data failed", error);
             return;
           }
-          const data = Celestial.getData(json, "equatorial");
+          const data = Celestial.getData(json, projectionCoordinateTransform());
           Celestial.container.selectAll(".rso-traditional-label").data(data.features).enter().append("path").attr("class", "rso-traditional-label");
           traditionalLabelsReady = true;
           redrawAndSyncMapBox("traditional labels loaded");
@@ -3007,7 +3031,16 @@
       });
     }
     function projectionCoordinateTransform() {
-      return "equatorial";
+      return coordinateViewSpec().transform;
+    }
+    function coordinateViewSpec(coord = state.coordinateSystem) {
+      const configured = cfg(`coordinateViews.${coord}`, {}), transform = ["equatorial", "ecliptic", "galactic"].includes(
+        configured.transform
+      ) ? configured.transform : "equatorial";
+      return {
+        transform,
+        orientation: configured.orientation || `${coord}-default`
+      };
     }
     function isHorizontalView() {
       return state.coordinateSystem === "horizontal";
@@ -3126,11 +3159,12 @@
         ["S", 180],
         ["W", 270]
       ];
-      const inset = Number(cfg("sky.horizon.labelInsetPx", 18));
+      const labelAltitudes = Array.isArray(
+        cfg("sky.horizon.labelAltitudeFallbackDegrees", [])
+      ) ? cfg("sky.horizon.labelAltitudeFallbackDegrees", []) : [8, 6, 10, 12, 15];
       labels.forEach(([label, az]) => {
-        const edge = projectHorizontalCoordinate(az, 0), inner = projectHorizontalCoordinate(az, 8);
-        if (!edge || !inner) return;
-        const dx = inner[0] - edge[0], dy = inner[1] - edge[1], len = Math.hypot(dx, dy) || 1, point = [edge[0] + dx / len * inset, edge[1] + dy / len * inset];
+        const point = labelAltitudes.map((alt) => projectHorizontalCoordinate(az, Number(alt))).find(Boolean);
+        if (!point) return;
         drawReferenceText(label, point, {
           fill: cfg("sky.horizon.labelColor", "#ff5656"),
           font: cfg(
@@ -3436,7 +3470,16 @@
     }
     function displayCoordinateForEquatorial(coord) {
       if (!coord) return null;
-      return [normalizeCelestialLongitude(coord[0]), Number(coord[1])];
+      const equatorial = [
+        normalizeCelestialLongitude(coord[0]),
+        Number(coord[1])
+      ];
+      if (coordinateViewSpec().transform === "equatorial") return equatorial;
+      try {
+        return Celestial.getPoint(equatorial, coordinateViewSpec().transform);
+      } catch (_) {
+        return equatorial;
+      }
     }
     function currentPlanetPositions() {
       const objects = window.__RSO_PLANET_OBJECTS__ || [], origin = window.__RSO_PLANET_ORIGIN__;
@@ -3721,6 +3764,11 @@
     }
     function nearestCatalogObject(x, y) {
       let best = null;
+      const originalCoordForType = (type, d, fallback) => {
+        const id = String(d && d.id);
+        const coord = type === "star" ? ORIGINAL_STAR_COORDS.get(id) : type === "dso" ? ORIGINAL_DSO_COORDS.get(id) : type === "constellation" ? ORIGINAL_CONSTELLATION_COORDS.get(id) : type === "asterism" ? ORIGINAL_ASTERISM_COORDS.get(id) : fallback;
+        return coord && coord.slice ? coord.slice() : fallback;
+      };
       currentPlanetPositions().forEach((item) => {
         const c = item.displayCoord;
         if (!c || !Celestial.clip(c)) return;
@@ -3751,7 +3799,13 @@
           if (!pt) return;
           const dist = Math.hypot(pt[0] - x, pt[1] - y);
           if (dist <= limit && (!best || dist < best.dist))
-            best = { type, d, coord: c, dist };
+            best = {
+              type,
+              d,
+              coord: originalCoordForType(type, d, c),
+              displayCoord: c,
+              dist
+            };
         });
       });
       return best;
@@ -4304,7 +4358,7 @@
             console.warn("Western constellation line data failed", error);
             return;
           }
-          const data = Celestial.getData(json, "equatorial");
+          const data = Celestial.getData(json, projectionCoordinateTransform());
           westernDualLineFeatures = data.features || [];
           Celestial.container.selectAll(".rso-western-dual-line").data(westernDualLineFeatures).enter().append("path").attr("class", "rso-western-dual-line");
           westernDualLinesReady = true;
@@ -4331,7 +4385,7 @@
             console.warn("Chinese asterism line data failed", error);
             return;
           }
-          const data = Celestial.getData(json, "equatorial");
+          const data = Celestial.getData(json, projectionCoordinateTransform());
           chineseLineFeatures = data.features || [];
           Celestial.container.selectAll(".rso-cn-line").data(chineseLineFeatures).enter().append("path").attr("class", "rso-cn-line");
           chineseLinesReady = true;
@@ -4365,7 +4419,7 @@
             console.warn("Chinese asterism name data failed", error);
             return;
           }
-          const data = Celestial.getData(json, "equatorial");
+          const data = Celestial.getData(json, projectionCoordinateTransform());
           Celestial.container.selectAll(".rso-cn-name").data(data.features).enter().append("path").attr("class", "rso-cn-name");
           chineseNamesReady = true;
           redrawAndSyncMapBox("chinese asterism names loaded");
@@ -4928,11 +4982,23 @@
         resetCurrentCoordinateView();
         return;
       }
+      const previousTransform = projectionCoordinateTransform();
       saveCurrentProjectionView();
       state.coordinateSystem = next;
       save();
       updateProjectionHelp();
       updateHUD(false);
+      const target = desiredView(), nextTransform = projectionCoordinateTransform();
+      state.mapScale = viewMapScale(target, state.mapScale);
+      if (nextTransform !== previousTransform) {
+        try {
+          rebuildSkyPreservingPixels(target);
+        } catch (err) {
+          console.warn("Coordinate transform switch failed", err);
+          initialDisplay(target);
+        }
+        return;
+      }
       resetCurrentCoordinateView({ preferSaved: true });
       redrawAndSyncMapBox("coordinate view switch");
     }

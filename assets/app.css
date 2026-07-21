@@ -38,52 +38,6 @@ select {
 button {
   color: var(--text);
 }
-#sky-stage {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  display: block;
-  background: radial-gradient(
-    circle at 50% 50%,
-    #081128 0,
-    #02050d 58%,
-    #000 100%
-  );
-  overflow: hidden;
-}
-#celestial-frame {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  min-width: 0;
-  min-height: 0;
-}
-#celestial-map {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  right: auto;
-  bottom: auto;
-  transform: translate(-50%, -50%);
-  width: auto;
-  height: auto;
-  min-width: 0 !important;
-  min-height: 0 !important;
-  max-width: none !important;
-  max-height: none !important;
-  box-sizing: border-box;
-}
-#celestial-map canvas,
-#celestial-map svg {
-  display: block !important;
-  margin: 0 !important;
-  min-width: 0 !important;
-  min-height: 0 !important;
-  max-width: none !important;
-  max-height: none !important;
-  box-sizing: border-box;
-}
 #sky-stage::after {
   content: "";
   position: absolute;
@@ -208,26 +162,6 @@ button {
   margin-top: 5px;
   color: var(--muted);
   font-size: 10px;
-}
-#control-panel {
-  position: fixed;
-  z-index: 7;
-  left: 17px;
-  top: 94px;
-  bottom: 66px;
-  width: 335px;
-  border-radius: 18px;
-  overflow: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(119, 220, 255, 0.3) transparent;
-  transition:
-    transform 0.24s ease,
-    opacity 0.24s ease;
-}
-#control-panel.collapsed {
-  transform: translateX(calc(-100% - 30px));
-  opacity: 0.12;
-  pointer-events: none;
 }
 #control-panel::-webkit-scrollbar {
   width: 7px;
@@ -925,7 +859,7 @@ body.panel-collapsed #sidebar {
 }
 #sidebar-head {
   flex: 0 0 auto;
-  padding: 12px 12px 0;
+  padding: 52px 12px 0;
   background: linear-gradient(180deg, #0a1729 0, #07101f 100%);
 }
 #sidebar-head .brand {
@@ -970,9 +904,6 @@ body.panel-collapsed #sidebar {
 #sidebar-head #hud-location {
   line-height: 1.45;
 }
-.topbar {
-  display: none !important;
-}
 #control-panel {
   position: static !important;
   z-index: auto;
@@ -992,11 +923,8 @@ body.panel-collapsed #sidebar {
   pointer-events: auto !important;
   transition: none;
   overflow: auto;
-}
-#control-panel.collapsed {
-  transform: none;
-  opacity: 1;
-  pointer-events: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(119, 220, 255, 0.3) transparent;
 }
 #sky-pane {
   position: relative;
@@ -1013,7 +941,14 @@ body.panel-collapsed #sidebar {
 #sky-stage {
   position: absolute;
   inset: 0;
+  z-index: 0;
   display: block;
+  background: radial-gradient(
+    circle at 50% 50%,
+    #081128 0,
+    #02050d 58%,
+    #000 100%
+  );
   overflow: hidden;
 }
 #celestial-frame {
@@ -1170,13 +1105,9 @@ select optgroup {
 }
 .info-card-rso {
   display: none;
-  border: 1px solid rgba(119, 220, 255, 0.22);
+  border: 1px solid var(--info-card-border);
   border-radius: 12px;
-  background: linear-gradient(
-    145deg,
-    rgba(11, 27, 48, 0.94),
-    rgba(7, 16, 31, 0.96)
-  );
+  background: var(--info-card-bg);
   padding: 11px;
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.28);
 }
@@ -1242,7 +1173,7 @@ select optgroup {
 .info-title {
   font-size: calc(13px * var(--rso-font-scale));
   font-weight: 850;
-  color: #f4fbff;
+  color: var(--info-title);
   line-height: 1.35;
 }
 .info-actions {
@@ -1262,11 +1193,11 @@ select optgroup {
   line-height: 1.5;
 }
 .info-grid dt {
-  color: #8da4bb;
+  color: var(--info-muted);
 }
 .info-grid dd {
   margin: 0;
-  color: #d8e8f5;
+  color: var(--info-text);
   word-break: break-word;
 }
 .region-legend {
@@ -1500,12 +1431,9 @@ select optgroup {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
 }
 #debug-toggle {
-  position: fixed;
+  position: absolute;
   z-index: 80;
-  left: var(
-    --debug-toggle-left,
-    calc(var(--reset-toggle-left, 92px) + var(--panel-toggle-size, 36px) + 6px)
-  );
+  left: var(--debug-toggle-left, 8px);
   top: var(--debug-toggle-top, 8px);
   width: var(--debug-toggle-width, 46px);
   height: var(--debug-toggle-height, 36px);
@@ -1608,9 +1536,6 @@ select optgroup {
 .debug-blank {
   height: 6px;
 }
-#sidebar-head {
-  padding-top: 52px;
-}
 .view-tools-grid {
   display: grid;
   grid-template-columns: 44px 44px minmax(0, 1fr) minmax(0, 1fr) 44px 44px;
@@ -1619,19 +1544,6 @@ select optgroup {
 .view-tools-grid button {
   min-width: 0;
   background: var(--tool-button-bg, rgba(255, 255, 255, 0.045));
-}
-.info-card-rso {
-  background: var(--info-card-bg);
-  border-color: var(--info-card-border);
-}
-.info-title {
-  color: var(--info-title);
-}
-.info-grid dt {
-  color: var(--info-muted);
-}
-.info-grid dd {
-  color: var(--info-text);
 }
 @media (max-width: 800px) {
   #sky-meta {

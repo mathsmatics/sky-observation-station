@@ -472,7 +472,7 @@
     traditionalDetail: cfg("defaults.traditionalDetail", "battlefields"),
     mapScale: Number(cfg("defaults.mapScale", 1)),
     projectionViews: {},
-    coordinateViewSemantics: 2,
+    coordinateViewSemantics: 3,
     selectedObject: null,
   };
 
@@ -536,6 +536,16 @@
   const DSO_NAMES =
     (window.__RSO_LOCAL_DATA__ && window.__RSO_LOCAL_DATA__["dsonames.json"]) ||
     {};
+  function pointFeatureCoordinateMap(file) {
+    return new Map(
+      (((window.__RSO_LOCAL_DATA__ || {})[file] || {}).features || [])
+        .filter((feature) => feature.geometry?.type === "Point")
+        .map((feature) => [
+          String(feature.id),
+          feature.geometry.coordinates && feature.geometry.coordinates.slice(),
+        ]),
+    );
+  }
   const ORIGINAL_STARS =
     (window.__RSO_LOCAL_DATA__ &&
       window.__RSO_LOCAL_DATA__["stars.6.json"] &&
@@ -547,6 +557,13 @@
       feature.geometry && feature.geometry.coordinates,
     ]),
   );
+  const ORIGINAL_DSO_COORDS = pointFeatureCoordinateMap("dsos.bright.json"),
+    ORIGINAL_CONSTELLATION_COORDS = pointFeatureCoordinateMap(
+      "constellations.json",
+    ),
+    ORIGINAL_ASTERISM_COORDS = pointFeatureCoordinateMap(
+      "constellations.cn.json",
+    );
   const CN_ASTERISM_NAMES = new Map(
     (
       ((window.__RSO_LOCAL_DATA__ || {})["constellations.cn.json"] || {})
@@ -660,7 +677,7 @@
         const raw = JSON.parse(storage.getItem(STORAGE_KEY) || "null");
         if (raw && typeof raw === "object") state = { ...defaults, ...raw };
         else {
-          // 从 v2 做一次性迁移，但不信任旧版本自由文本时区字段。
+          // 兼容历史存储字段，但不信任自由文本时区。
           const old = JSON.parse(
             storage.getItem("real-sky-observatory-v2") || "null",
           );
@@ -2599,7 +2616,7 @@
           console.warn("Traditional region data failed", error);
           return;
         }
-        const data = Celestial.getData(json, "equatorial");
+        const data = Celestial.getData(json, projectionCoordinateTransform());
         Celestial.container
           .selectAll(".rso-traditional-region")
           .data(data.features)
@@ -2649,7 +2666,7 @@
           console.warn("Traditional region label data failed", error);
           return;
         }
-        const data = Celestial.getData(json, "equatorial");
+        const data = Celestial.getData(json, projectionCoordinateTransform());
         Celestial.container
           .selectAll(".rso-traditional-label")
           .data(data.features)
@@ -2712,7 +2729,19 @@
     });
   }
   function projectionCoordinateTransform() {
-    return "equatorial";
+    return coordinateViewSpec().transform;
+  }
+  function coordinateViewSpec(coord = state.coordinateSystem) {
+    const configured = cfg(`coordinateViews.${coord}`, {}),
+      transform = ["equatorial", "ecliptic", "galactic"].includes(
+        configured.transform,
+      )
+        ? configured.transform
+        : "equatorial";
+    return {
+      transform,
+      orientation: configured.orientation || `${coord}-default`,
+    };
   }
   function isHorizontalView() {
     return state.coordinateSystem === "horizontal";
@@ -2861,15 +2890,16 @@
       ["S", 180],
       ["W", 270],
     ];
-    const inset = Number(cfg("sky.horizon.labelInsetPx", 18));
+    const labelAltitudes = Array.isArray(
+      cfg("sky.horizon.labelAltitudeFallbackDegrees", []),
+    )
+      ? cfg("sky.horizon.labelAltitudeFallbackDegrees", [])
+      : [8, 6, 10, 12, 15];
     labels.forEach(([label, az]) => {
-      const edge = projectHorizontalCoordinate(az, 0),
-        inner = projectHorizontalCoordinate(az, 8);
-      if (!edge || !inner) return;
-      const dx = inner[0] - edge[0],
-        dy = inner[1] - edge[1],
-        len = Math.hypot(dx, dy) || 1,
-        point = [edge[0] + (dx / len) * inset, edge[1] + (dy / len) * inset];
+      const point = labelAltitudes
+        .map((alt) => projectHorizontalCoordinate(az, Number(alt)))
+        .find(Boolean);
+      if (!point) return;
       drawReferenceText(label, point, {
         fill: cfg("sky.horizon.labelColor", "#ff5656"),
         font: cfg(
@@ -3182,11 +3212,20 @@
   }
   function displayCoordinateForEquatorial(coord) {
     if (!coord) return null;
-    return [normalizeCelestialLongitude(coord[0]), Number(coord[1])];
+    const equatorial = [
+      normalizeCelestialLongitude(coord[0]),
+      Number(coord[1]),
+    ];
+    if (coordinateViewSpec().transform === "equatorial") return equatorial;
+    try {
+      return Celestial.getPoint(equatorial, coordinateViewSpec().transform);
+    } catch (_) {
+      return equatorial;
+    }
   }
   /**
    * 计算当前 UTC 瞬时的太阳、月球和行星位置。
-   * 返回赤道坐标；绘制和点击拾取共用同一套稳定赤道基准。
+   * 返回赤道目录坐标；绘制和点击拾取再转换到当前 D3-Celestial transform。
    */
   function currentPlanetPositions() {
     const objects = window.__RSO_PLANET_OBJECTS__ || [],
@@ -3558,6 +3597,21 @@
    */
   function nearestCatalogObject(x, y) {
     let best = null;
+    // D3 节点坐标已经是当前 transform 下的显示坐标；信息框仍需要原始赤道目录坐标。
+    const originalCoordForType = (type, d, fallback) => {
+      const id = String(d && d.id);
+      const coord =
+        type === "star"
+          ? ORIGINAL_STAR_COORDS.get(id)
+          : type === "dso"
+            ? ORIGINAL_DSO_COORDS.get(id)
+            : type === "constellation"
+              ? ORIGINAL_CONSTELLATION_COORDS.get(id)
+              : type === "asterism"
+                ? ORIGINAL_ASTERISM_COORDS.get(id)
+                : fallback;
+      return coord && coord.slice ? coord.slice() : fallback;
+    };
     currentPlanetPositions().forEach((item) => {
       const c = item.displayCoord;
       if (!c || !Celestial.clip(c)) return;
@@ -3589,7 +3643,13 @@
         if (!pt) return;
         const dist = Math.hypot(pt[0] - x, pt[1] - y);
         if (dist <= limit && (!best || dist < best.dist))
-          best = { type, d, coord: c, dist };
+          best = {
+            type,
+            d,
+            coord: originalCoordForType(type, d, c),
+            displayCoord: c,
+            dist,
+          };
       });
     });
     return best;
@@ -4224,7 +4284,7 @@
           console.warn("Western constellation line data failed", error);
           return;
         }
-        const data = Celestial.getData(json, "equatorial");
+        const data = Celestial.getData(json, projectionCoordinateTransform());
         westernDualLineFeatures = data.features || [];
         Celestial.container
           .selectAll(".rso-western-dual-line")
@@ -4260,7 +4320,7 @@
           console.warn("Chinese asterism line data failed", error);
           return;
         }
-        const data = Celestial.getData(json, "equatorial");
+        const data = Celestial.getData(json, projectionCoordinateTransform());
         chineseLineFeatures = data.features || [];
         Celestial.container
           .selectAll(".rso-cn-line")
@@ -4303,7 +4363,7 @@
           console.warn("Chinese asterism name data failed", error);
           return;
         }
-        const data = Celestial.getData(json, "equatorial");
+        const data = Celestial.getData(json, projectionCoordinateTransform());
         Celestial.container
           .selectAll(".rso-cn-name")
           .data(data.features)
@@ -4913,8 +4973,8 @@
 
   /**
    * 完整重载星图渲染器。
-   * 只用于启动和真正需要重建 D3-Celestial 实例的回退路径；
-   * 坐标视角切换不走这里，避免重复转换离线 GeoJSON。
+   * 只用于启动、回退路径，以及坐标视角改变 D3-Celestial transform 时；
+   * 每次重建都从 preloaded-data.js 的深拷贝数据开始，避免污染原始目录。
    */
   function rebuildSkyPreservingPixels(view) {
     if (rebuildInProgress) return;
@@ -4987,8 +5047,8 @@
   }
   /**
    * 在地平、赤道、黄道和银河坐标视角之间切换。
-   * 坐标视角只恢复对应视图中心和缩放，不改变 D3-Celestial transform，
-   * 也不重建星表、星座、星官、边界或深空数据。
+   * 坐标视角由坐标渲染基准 transform 和视角朝向 orientation 组成。
+   * 地平/赤道同属赤道 transform，只恢复视角；黄道/银河切换 transform 时完整重建。
    */
   function switchCoordinateSystem(next) {
     if (!["horizontal", "equatorial", "ecliptic", "galactic"].includes(next))
@@ -4997,11 +5057,24 @@
       resetCurrentCoordinateView();
       return;
     }
+    const previousTransform = projectionCoordinateTransform();
     saveCurrentProjectionView();
     state.coordinateSystem = next;
     save();
     updateProjectionHelp();
     updateHUD(false);
+    const target = desiredView(),
+      nextTransform = projectionCoordinateTransform();
+    state.mapScale = viewMapScale(target, state.mapScale);
+    if (nextTransform !== previousTransform) {
+      try {
+        rebuildSkyPreservingPixels(target);
+      } catch (err) {
+        console.warn("Coordinate transform switch failed", err);
+        initialDisplay(target);
+      }
+      return;
+    }
     resetCurrentCoordinateView({ preferSaved: true });
     redrawAndSyncMapBox("coordinate view switch");
   }
