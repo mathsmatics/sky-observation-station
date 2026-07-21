@@ -22,11 +22,11 @@
 ## 项目结构
 
 ```text
-src/        项目源码：TypeScript 入口、配置、样式、页面模板和小型项目数据。
+src/        项目源码：TypeScript 入口、配置、样式和运行数据入口。
 assets/     项目构建产物：app.css 和 app.js。
-vendor/     浏览器直接加载的固定版本第三方库、大型天文数据和外部参考资料。
+vendor/     浏览器直接加载的固定版本第三方库和外部参考资料。
 licenses/   第三方许可证原文。
-docs/       架构、构建和第三方声明文档。
+docs/       架构、构建、数据来源和第三方声明文档。
 ```
 
 ## 主要特性
@@ -39,9 +39,9 @@ docs/       架构、构建和第三方声明文档。
 
 ## 数据来源和依赖
 
-项目使用本地固定版本的 D3 3.5.17、d3-geo-projection、D3-Celestial 0.7.35、Luxon 和 tz-lookup。第三方库和运行时天文目录保存在 `vendor/`，由浏览器直接加载。
+项目使用本地固定版本的 D3 3.5.17、d3-geo-projection、D3-Celestial 0.7.35、Luxon 和 tz-lookup。第三方库保存在 `vendor/`，运行数据入口保存在 `src/data/`，当前大型天文数据仍通过 `vendor/data/preloaded-data.js` 作为离线兼容桥加载。
 
-第三方和数据说明见 `docs/THIRD_PARTY_NOTICES.md`，许可证原文保存在 `licenses/`。
+数据来源说明见 `docs/DATA_SOURCES.md`，第三方和许可证说明见 `docs/THIRD_PARTY_NOTICES.md`，许可证原文保存在 `licenses/`。
 
 ## 科学限制
 

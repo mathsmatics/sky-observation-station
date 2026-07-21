@@ -5,7 +5,7 @@ interface Window {
   tzlookup: any;
   d3: any;
   Celestial: any;
-  __RSO_LOCAL_DATA__: any;
+  __RSO_LOCAL_DATA__: Record<string, any>;
   __RSO_PLANET_OBJECTS__: any[];
   __RSO_PLANET_ORIGIN__: any;
 }

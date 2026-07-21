@@ -1,10 +1,39 @@
 // @ts-nocheck
+import { CATALOG_DATA_PATH, datasetFile } from "./data/catalog-registry";
+import {
+  chineseAsterismLineFeatures,
+  chineseAsterismLinePath,
+  chineseAsterismNameMap,
+  chineseAsterismNamePath,
+  chineseAsterismNameFeatures,
+  chineseAsterismCoordinateMap,
+} from "./data/chinese";
+import { CITIES, citySearchText } from "./data/cities";
+import {
+  westernConstellationCoordinateMap,
+  westernConstellationLinePath,
+  westernConstellationNameFeatures,
+} from "./data/constellations";
+import {
+  deepSkyCoordinateMap,
+  deepSkyFeatures,
+  deepSkyNames,
+} from "./data/deep-sky";
+import {
+  createSearchEntrySeed,
+  normalizeObjectSearchText,
+} from "./data/object-search-index";
+import { starCoordinateMap, starFeatures, starNames } from "./data/stars";
+import {
+  traditionalRegionLabelPath,
+  traditionalRegionPath,
+} from "./data/traditional-regions";
 (() => {
   "use strict";
   /**
    * 本地天文馆运行控制器。
    *
-   * 本模块维护唯一的可变 `state` 对象，从预加载数据层读取目录数据，
+   * 本模块维护唯一的可变 `state` 对象，通过 `src/data` 入口读取目录数据，
    * 注册 D3-Celestial 自定义图层，并把界面事件连接到投影、时间、
    * 地点和点击拾取更新。
    */
@@ -84,7 +113,6 @@
   applyConfigCss();
   const DateTime = window.luxon && window.luxon.DateTime;
   const STORAGE_KEY = "real-sky-observatory-v48";
-  const DATA_PATH = "vendor/data/";
 
   const I18N = {
     zh: {
@@ -530,50 +558,14 @@
     searchHighlight = null,
     searchHighlightTimer = null,
     floatingObjectInfoDismissed = false;
-  const STAR_NAMES =
-    (window.__RSO_LOCAL_DATA__ &&
-      window.__RSO_LOCAL_DATA__["starnames.json"]) ||
-    {};
-  const DSO_NAMES =
-    (window.__RSO_LOCAL_DATA__ && window.__RSO_LOCAL_DATA__["dsonames.json"]) ||
-    {};
-  function pointFeatureCoordinateMap(file) {
-    return new Map(
-      (((window.__RSO_LOCAL_DATA__ || {})[file] || {}).features || [])
-        .filter((feature) => feature.geometry?.type === "Point")
-        .map((feature) => [
-          String(feature.id),
-          feature.geometry.coordinates && feature.geometry.coordinates.slice(),
-        ]),
-    );
-  }
-  const ORIGINAL_STARS =
-    (window.__RSO_LOCAL_DATA__ &&
-      window.__RSO_LOCAL_DATA__["stars.6.json"] &&
-      window.__RSO_LOCAL_DATA__["stars.6.json"].features) ||
-    [];
-  const ORIGINAL_STAR_COORDS = new Map(
-    ORIGINAL_STARS.map((feature) => [
-      String(feature.id),
-      feature.geometry && feature.geometry.coordinates,
-    ]),
-  );
-  const ORIGINAL_DSO_COORDS = pointFeatureCoordinateMap("dsos.bright.json"),
-    ORIGINAL_CONSTELLATION_COORDS = pointFeatureCoordinateMap(
-      "constellations.json",
-    ),
-    ORIGINAL_ASTERISM_COORDS = pointFeatureCoordinateMap(
-      "constellations.cn.json",
-    );
-  const CN_ASTERISM_NAMES = new Map(
-    (
-      ((window.__RSO_LOCAL_DATA__ || {})["constellations.cn.json"] || {})
-        .features || []
-    ).map((feature) => [
-      String(feature.id),
-      (feature.properties && feature.properties.name) || "",
-    ]),
-  );
+  const STAR_NAMES = starNames();
+  const DSO_NAMES = deepSkyNames();
+  const ORIGINAL_STARS = starFeatures();
+  const ORIGINAL_STAR_COORDS = starCoordinateMap();
+  const ORIGINAL_DSO_COORDS = deepSkyCoordinateMap(),
+    ORIGINAL_CONSTELLATION_COORDS = westernConstellationCoordinateMap(),
+    ORIGINAL_ASTERISM_COORDS = chineseAsterismCoordinateMap();
+  const CN_ASTERISM_NAMES = chineseAsterismNameMap();
   let chineseStarAsterismIndex = null;
   let chineseAsterismCoordinateEntries = [];
 
@@ -1066,352 +1058,6 @@
     updateBoundaryUI();
   }
 
-  const CITIES = [
-    {
-      zh: "北京",
-      en: "Beijing",
-      lat: 39.9042,
-      lon: 116.4074,
-      zone: "Asia/Shanghai",
-      group: "华北 / North China",
-    },
-    {
-      zh: "上海",
-      en: "Shanghai",
-      lat: 31.2304,
-      lon: 121.4737,
-      zone: "Asia/Shanghai",
-      group: "华东 / East China",
-    },
-    {
-      zh: "天津",
-      en: "Tianjin",
-      lat: 39.0842,
-      lon: 117.2009,
-      zone: "Asia/Shanghai",
-      group: "华北 / North China",
-    },
-    {
-      zh: "重庆",
-      en: "Chongqing",
-      lat: 29.563,
-      lon: 106.5516,
-      zone: "Asia/Shanghai",
-      group: "西南 / Southwest",
-    },
-    {
-      zh: "广州",
-      en: "Guangzhou",
-      lat: 23.1291,
-      lon: 113.2644,
-      zone: "Asia/Shanghai",
-      group: "华南 / South China",
-    },
-    {
-      zh: "深圳",
-      en: "Shenzhen",
-      lat: 22.5431,
-      lon: 114.0579,
-      zone: "Asia/Shanghai",
-      group: "华南 / South China",
-    },
-    {
-      zh: "杭州",
-      en: "Hangzhou",
-      lat: 30.2741,
-      lon: 120.1551,
-      zone: "Asia/Shanghai",
-      group: "华东 / East China",
-    },
-    {
-      zh: "南京",
-      en: "Nanjing",
-      lat: 32.0603,
-      lon: 118.7969,
-      zone: "Asia/Shanghai",
-      group: "华东 / East China",
-    },
-    {
-      zh: "苏州",
-      en: "Suzhou",
-      lat: 31.2989,
-      lon: 120.5853,
-      zone: "Asia/Shanghai",
-      group: "华东 / East China",
-    },
-    {
-      zh: "武汉",
-      en: "Wuhan",
-      lat: 30.5928,
-      lon: 114.3055,
-      zone: "Asia/Shanghai",
-      group: "华中 / Central China",
-    },
-    {
-      zh: "成都",
-      en: "Chengdu",
-      lat: 30.5728,
-      lon: 104.0668,
-      zone: "Asia/Shanghai",
-      group: "西南 / Southwest",
-    },
-    {
-      zh: "西安",
-      en: "Xi'an",
-      lat: 34.3416,
-      lon: 108.9398,
-      zone: "Asia/Shanghai",
-      group: "西北 / Northwest",
-    },
-    {
-      zh: "郑州",
-      en: "Zhengzhou",
-      lat: 34.7466,
-      lon: 113.6254,
-      zone: "Asia/Shanghai",
-      group: "华中 / Central China",
-    },
-    {
-      zh: "长沙",
-      en: "Changsha",
-      lat: 28.2282,
-      lon: 112.9388,
-      zone: "Asia/Shanghai",
-      group: "华中 / Central China",
-    },
-    {
-      zh: "沈阳",
-      en: "Shenyang",
-      lat: 41.8057,
-      lon: 123.4315,
-      zone: "Asia/Shanghai",
-      group: "东北 / Northeast",
-    },
-    {
-      zh: "大连",
-      en: "Dalian",
-      lat: 38.914,
-      lon: 121.6147,
-      zone: "Asia/Shanghai",
-      group: "东北 / Northeast",
-    },
-    {
-      zh: "长春",
-      en: "Changchun",
-      lat: 43.8171,
-      lon: 125.3235,
-      zone: "Asia/Shanghai",
-      group: "东北 / Northeast",
-    },
-    {
-      zh: "哈尔滨",
-      en: "Harbin",
-      lat: 45.8038,
-      lon: 126.5349,
-      zone: "Asia/Shanghai",
-      group: "东北 / Northeast",
-    },
-    {
-      zh: "济南",
-      en: "Jinan",
-      lat: 36.6512,
-      lon: 117.1201,
-      zone: "Asia/Shanghai",
-      group: "华东 / East China",
-    },
-    {
-      zh: "青岛",
-      en: "Qingdao",
-      lat: 36.0671,
-      lon: 120.3826,
-      zone: "Asia/Shanghai",
-      group: "华东 / East China",
-    },
-    {
-      zh: "合肥",
-      en: "Hefei",
-      lat: 31.8206,
-      lon: 117.2272,
-      zone: "Asia/Shanghai",
-      group: "华东 / East China",
-    },
-    {
-      zh: "福州",
-      en: "Fuzhou",
-      lat: 26.0745,
-      lon: 119.2965,
-      zone: "Asia/Shanghai",
-      group: "华东 / East China",
-    },
-    {
-      zh: "厦门",
-      en: "Xiamen",
-      lat: 24.4798,
-      lon: 118.0894,
-      zone: "Asia/Shanghai",
-      group: "华东 / East China",
-    },
-    {
-      zh: "南昌",
-      en: "Nanchang",
-      lat: 28.682,
-      lon: 115.8579,
-      zone: "Asia/Shanghai",
-      group: "华东 / East China",
-    },
-    {
-      zh: "昆明",
-      en: "Kunming",
-      lat: 25.0389,
-      lon: 102.7183,
-      zone: "Asia/Shanghai",
-      group: "西南 / Southwest",
-    },
-    {
-      zh: "贵阳",
-      en: "Guiyang",
-      lat: 26.647,
-      lon: 106.6302,
-      zone: "Asia/Shanghai",
-      group: "西南 / Southwest",
-    },
-    {
-      zh: "南宁",
-      en: "Nanning",
-      lat: 22.817,
-      lon: 108.3665,
-      zone: "Asia/Shanghai",
-      group: "华南 / South China",
-    },
-    {
-      zh: "海口",
-      en: "Haikou",
-      lat: 20.044,
-      lon: 110.1999,
-      zone: "Asia/Shanghai",
-      group: "华南 / South China",
-    },
-    {
-      zh: "太原",
-      en: "Taiyuan",
-      lat: 37.8706,
-      lon: 112.5489,
-      zone: "Asia/Shanghai",
-      group: "华北 / North China",
-    },
-    {
-      zh: "石家庄",
-      en: "Shijiazhuang",
-      lat: 38.0428,
-      lon: 114.5149,
-      zone: "Asia/Shanghai",
-      group: "华北 / North China",
-    },
-    {
-      zh: "呼和浩特",
-      en: "Hohhot",
-      lat: 40.8426,
-      lon: 111.7492,
-      zone: "Asia/Shanghai",
-      group: "华北 / North China",
-    },
-    {
-      zh: "兰州",
-      en: "Lanzhou",
-      lat: 36.0611,
-      lon: 103.8343,
-      zone: "Asia/Shanghai",
-      group: "西北 / Northwest",
-    },
-    {
-      zh: "西宁",
-      en: "Xining",
-      lat: 36.6171,
-      lon: 101.7782,
-      zone: "Asia/Shanghai",
-      group: "西北 / Northwest",
-    },
-    {
-      zh: "银川",
-      en: "Yinchuan",
-      lat: 38.4872,
-      lon: 106.2309,
-      zone: "Asia/Shanghai",
-      group: "西北 / Northwest",
-    },
-    {
-      zh: "乌鲁木齐",
-      en: "Urumqi",
-      lat: 43.8256,
-      lon: 87.6168,
-      zone: "Asia/Shanghai",
-      group: "西北 / Northwest",
-    },
-    {
-      zh: "拉萨",
-      en: "Lhasa",
-      lat: 29.652,
-      lon: 91.1721,
-      zone: "Asia/Shanghai",
-      group: "西南 / Southwest",
-    },
-    {
-      zh: "香港",
-      en: "Hong Kong",
-      lat: 22.3193,
-      lon: 114.1694,
-      zone: "Asia/Hong_Kong",
-      group: "港澳台 / HK-MO-TW",
-    },
-    {
-      zh: "澳门",
-      en: "Macau",
-      lat: 22.1987,
-      lon: 113.5439,
-      zone: "Asia/Macau",
-      group: "港澳台 / HK-MO-TW",
-    },
-    {
-      zh: "台北",
-      en: "Taipei",
-      lat: 25.033,
-      lon: 121.5654,
-      zone: "Asia/Taipei",
-      group: "港澳台 / HK-MO-TW",
-    },
-    {
-      zh: "东京",
-      en: "Tokyo",
-      lat: 35.6812,
-      lon: 139.7671,
-      zone: "Asia/Tokyo",
-      group: "国际 / International",
-    },
-    {
-      zh: "纽约",
-      en: "New York",
-      lat: 40.7128,
-      lon: -74.006,
-      zone: "America/New_York",
-      group: "国际 / International",
-    },
-    {
-      zh: "伦敦",
-      en: "London",
-      lat: 51.5074,
-      lon: -0.1278,
-      zone: "Europe/London",
-      group: "国际 / International",
-    },
-    {
-      zh: "悉尼",
-      en: "Sydney",
-      lat: -33.8688,
-      lon: 151.2093,
-      zone: "Australia/Sydney",
-      group: "国际 / International",
-    },
-  ];
   const HORIZON_PROJECTIONS = new Set([
     "airy",
     "orthographic",
@@ -2535,11 +2181,7 @@
     const render = (query = "") => {
       const q = String(query).trim().toLowerCase();
       const found = CITIES.filter(
-        (c) =>
-          !q ||
-          c.zh.includes(q) ||
-          c.en.toLowerCase().includes(q) ||
-          c.group.toLowerCase().includes(q),
+        (c) => !q || citySearchText(c).includes(q),
       ).slice(0, 40);
       box.innerHTML = "";
       found.forEach((c) => {
@@ -2612,7 +2254,7 @@
   function registerTraditionalRegionsOverlay() {
     Celestial.add({
       type: "json",
-      file: DATA_PATH + "traditional.regions.cn.json",
+      file: traditionalRegionPath(),
       callback: function (error, json) {
         if (error) {
           console.warn("Traditional region data failed", error);
@@ -2662,7 +2304,7 @@
     });
     Celestial.add({
       type: "json",
-      file: DATA_PATH + "traditional.regions.labels.cn.json",
+      file: traditionalRegionLabelPath(),
       callback: function (error, json) {
         if (error) {
           console.warn("Traditional region label data failed", error);
@@ -3344,10 +2986,7 @@
   }
 
   function normalizeSearchText(value) {
-    return simplifyChinese(value || "")
-      .toLowerCase()
-      .replace(/^hip\s*/i, "hip")
-      .replace(/\s+/g, "");
+    return normalizeObjectSearchText(simplifyChinese(value || ""));
   }
 
   function objectSearchTypeLabel(type) {
@@ -3365,25 +3004,20 @@
   }
 
   function addSearchEntry(entries, type, d, coord, names, extra = {}) {
-    const cleanNames = (names || [])
-      .map((name) => simplifyChinese(name || ""))
-      .filter(Boolean)
-      .filter((name, index, list) => list.indexOf(name) === index);
-    if (!coord || !cleanNames.length) return;
-    entries.push({
+    const entry = createSearchEntrySeed(
       type,
       d,
-      coord: coord.slice(),
-      names: cleanNames,
-      terms: cleanNames.map(normalizeSearchText),
-      ...extra,
-    });
+      coord,
+      names,
+      simplifyChinese,
+      extra,
+    );
+    if (entry) entries.push(entry);
   }
 
   function buildObjectSearchIndex() {
     if (objectSearchIndex) return objectSearchIndex;
-    const entries = [],
-      data = window.__RSO_LOCAL_DATA__ || {};
+    const entries = [];
 
     ORIGINAL_STARS.forEach((feature) => {
       const coord = candidateCoord(feature),
@@ -3401,10 +3035,7 @@
       addSearchEntry(entries, "star", feature, coord, names);
     });
 
-    (
-      (data["dsos.bright.json"] && data["dsos.bright.json"].features) ||
-      []
-    ).forEach((feature) => {
+    deepSkyFeatures().forEach((feature) => {
       const coord = candidateCoord(feature),
         names = DSO_NAMES[String(feature.id)] || {},
         p = feature.properties || {};
@@ -3417,10 +3048,7 @@
       ]);
     });
 
-    (
-      (data["constellations.json"] && data["constellations.json"].features) ||
-      []
-    ).forEach((feature) => {
+    westernConstellationNameFeatures().forEach((feature) => {
       const p = feature.properties || {};
       addSearchEntry(
         entries,
@@ -3438,11 +3066,7 @@
       );
     });
 
-    (
-      (data["constellations.cn.json"] &&
-        data["constellations.cn.json"].features) ||
-      []
-    ).forEach((feature) => {
+    chineseAsterismNameFeatures().forEach((feature) => {
       const p = feature.properties || {};
       addSearchEntry(entries, "asterism", feature, candidateCoord(feature), [
         objectLabel("asterism", feature),
@@ -3817,9 +3441,8 @@
   }
   function buildChineseStarAsterismIndex() {
     if (chineseStarAsterismIndex) return chineseStarAsterismIndex;
-    const index = new Map(),
-      data = (window.__RSO_LOCAL_DATA__ || {})["constellations.lines.cn.json"];
-    ((data && data.features) || []).forEach((feature) => {
+    const index = new Map();
+    chineseAsterismLineFeatures().forEach((feature) => {
       const name = simplifyChinese(
         CN_ASTERISM_NAMES.get(String(feature.id)) || "",
       );
@@ -4112,7 +3735,7 @@
       lang: zh ? "zh" : "en",
       culture: "iau",
       container: "celestial-map",
-      datapath: DATA_PATH,
+      datapath: CATALOG_DATA_PATH,
       stars: {
         show: true,
         limit: Number(state.magnitude),
@@ -4135,7 +3758,7 @@
         propernameLimit: Number(cfg("sky.stars.properNameMagnitudeLimit", 2.1)),
         size: Number(state.starSize),
         exponent: Number(cfg("sky.stars.exponent", -0.28)),
-        data: "stars.6.json",
+        data: datasetFile("stars"),
       },
       dsos: {
         show: state.deepSky,
@@ -4154,7 +3777,7 @@
           align: "left",
           baseline: "top",
         },
-        data: "dsos.bright.json",
+        data: datasetFile("deepSky"),
       },
       planets: {
         show: false,
@@ -4290,7 +3913,7 @@
 
     Celestial.add({
       type: "json",
-      file: DATA_PATH + "constellations.lines.json",
+      file: westernConstellationLinePath(),
       callback: function (error, json) {
         if (error) {
           console.warn("Western constellation line data failed", error);
@@ -4326,7 +3949,7 @@
 
     Celestial.add({
       type: "json",
-      file: DATA_PATH + "constellations.lines.cn.json",
+      file: chineseAsterismLinePath(),
       callback: function (error, json) {
         if (error) {
           console.warn("Chinese asterism line data failed", error);
@@ -4369,7 +3992,7 @@
 
     Celestial.add({
       type: "json",
-      file: DATA_PATH + "constellations.cn.json",
+      file: chineseAsterismNamePath(),
       callback: function (error, json) {
         if (error) {
           console.warn("Chinese asterism name data failed", error);
