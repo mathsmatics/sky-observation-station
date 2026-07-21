@@ -9,6 +9,7 @@ interface Window {
   __RSO_LOAD_COUNTS__: Record<string, number>;
   __RSO_DATA_MODE__: string;
   registerSkyData: (path: string, data: any) => void;
+  __RSO_PREPARE_SKY_DATASET__?: (path: string, data: any) => any;
   __RSO_PLANET_OBJECTS__: any[];
   __RSO_PLANET_ORIGIN__: any;
 }

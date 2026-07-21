@@ -1,5 +1,5 @@
 /**
- * 真实星空观测台 5.2.9 —— 用户可配置文件
+ * 真实星空观测台 5.3.1 —— 用户可配置文件
  * ------------------------------------------------------------
  * 修改本文件后，运行 npm run build 并刷新 index.html 即可生效。
  * 建议每次只修改一个参数，并保留原值，便于出现问题时恢复。
@@ -99,6 +99,16 @@ window.RSO_CONFIG = {
     zoomButtonFactor: 1.25,
     viewRestoreDelayMs: 70,
     resizeDebounceMs: 140,
+  },
+
+
+  /** 天文模型边界：5.3.1 默认启用轻量岁差；不做章动、自行、折射或高精度行星历表 */
+  astronomyModel: {
+    precession: true,
+    nutation: false,
+    properMotion: false,
+    refraction: false,
+    planetModel: "current/simple",
   },
 
   /** 程序首次运行时的默认状态；浏览器已保存的设置优先于这里 */

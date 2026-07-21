@@ -118,6 +118,14 @@
       viewRestoreDelayMs: 70,
       resizeDebounceMs: 140
     },
+    /** 天文模型边界：5.3.1 默认启用轻量岁差；不做章动、自行、折射或高精度行星历表 */
+    astronomyModel: {
+      precession: true,
+      nutation: false,
+      properMotion: false,
+      refraction: false,
+      planetModel: "current/simple"
+    },
     /** 程序首次运行时的默认状态；浏览器已保存的设置优先于这里 */
     defaults: {
       latitude: 39.9042,
@@ -1441,6 +1449,93 @@
     return datasetPath("traditionalRegionLabels");
   }
 
+  // src/astronomy/precession.ts
+  var DEG_TO_RAD = Math.PI / 180;
+  var RAD_TO_DEG = 180 / Math.PI;
+  var J2000_JD = 2451545;
+  function normalizeSignedDegrees(value) {
+    return ((Number(value) + 180) % 360 + 360) % 360 - 180;
+  }
+  function julianDateFromDate(date) {
+    return date.getTime() / 864e5 + 24405875e-1;
+  }
+  function julianCenturiesFromJ2000(date) {
+    return (julianDateFromDate(date) - J2000_JD) / 36525;
+  }
+  function toVector(coord) {
+    const ra = Number(coord[0]) * DEG_TO_RAD;
+    const dec = Number(coord[1]) * DEG_TO_RAD;
+    const cosDec = Math.cos(dec);
+    return [cosDec * Math.cos(ra), cosDec * Math.sin(ra), Math.sin(dec)];
+  }
+  function fromVector(v) {
+    const r = Math.hypot(v[0], v[1], v[2]) || 1;
+    const x = v[0] / r;
+    const y = v[1] / r;
+    const z = Math.max(-1, Math.min(1, v[2] / r));
+    const ra = normalizeSignedDegrees(Math.atan2(y, x) * RAD_TO_DEG);
+    const dec = Math.asin(z) * RAD_TO_DEG;
+    return [ra, dec];
+  }
+  function rotateZ(v, angleRad) {
+    const c = Math.cos(angleRad), s = Math.sin(angleRad);
+    return [c * v[0] - s * v[1], s * v[0] + c * v[1], v[2]];
+  }
+  function rotateY(v, angleRad) {
+    const c = Math.cos(angleRad), s = Math.sin(angleRad);
+    return [c * v[0] + s * v[2], v[1], -s * v[0] + c * v[2]];
+  }
+  function precessionAnglesArcsec(t) {
+    const zeta = 2306.2181 * t + 0.30188 * t * t + 0.017998 * t * t * t;
+    const z = 2306.2181 * t + 1.09468 * t * t + 0.018203 * t * t * t;
+    const theta = 2004.3109 * t - 0.42665 * t * t - 0.041833 * t * t * t;
+    return { zeta, z, theta };
+  }
+  function precessEquatorialJ2000ToDate(coord, date) {
+    if (!Array.isArray(coord) || coord.length < 2) return [NaN, NaN];
+    const t = julianCenturiesFromJ2000(date);
+    if (!Number.isFinite(t) || Math.abs(t) < 1e-12) {
+      return [normalizeSignedDegrees(Number(coord[0])), Number(coord[1])];
+    }
+    const angles = precessionAnglesArcsec(t);
+    let v = toVector([Number(coord[0]), Number(coord[1])]);
+    v = rotateZ(v, angles.zeta / 3600 * DEG_TO_RAD);
+    v = rotateY(v, -angles.theta / 3600 * DEG_TO_RAD);
+    v = rotateZ(v, angles.z / 3600 * DEG_TO_RAD);
+    return fromVector(v);
+  }
+  function meanObliquityDegrees(date) {
+    const t = julianCenturiesFromJ2000(date);
+    const seconds = 21.448 - 46.815 * t - 59e-5 * t * t + 1813e-6 * t * t * t;
+    return 23 + 26 / 60 + seconds / 3600;
+  }
+  function eclipticJ2000ToEquatorialJ2000(lambdaDeg, betaDeg = 0) {
+    const eps = 23.439291111 * DEG_TO_RAD;
+    const lambda = Number(lambdaDeg) * DEG_TO_RAD;
+    const beta = Number(betaDeg) * DEG_TO_RAD;
+    const sinDec = Math.sin(beta) * Math.cos(eps) + Math.cos(beta) * Math.sin(eps) * Math.sin(lambda);
+    const y = Math.sin(lambda) * Math.cos(eps) - Math.tan(beta) * Math.sin(eps);
+    const x = Math.cos(lambda);
+    return [normalizeSignedDegrees(Math.atan2(y, x) * RAD_TO_DEG), Math.asin(Math.max(-1, Math.min(1, sinDec))) * RAD_TO_DEG];
+  }
+  function diagnosticsForDate(date) {
+    const jd = julianDateFromDate(date);
+    const t = (jd - J2000_JD) / 36525;
+    return {
+      sourceEpoch: "J2000",
+      displayEpoch: "epoch-of-date",
+      precessionStatus: "enabled",
+      modelName: "IAU 1976 lightweight precession",
+      nutation: "off",
+      properMotion: "off",
+      refraction: "off",
+      julianDate: jd,
+      julianCenturiesT: t,
+      meanObliquityDegrees: meanObliquityDegrees(date),
+      eclipticModel: "J2000 ecliptic precessed to display frame"
+    };
+  }
+
   // src/app.ts
   (() => {
     "use strict";
@@ -1515,6 +1610,8 @@
     applyConfigCss();
     const DateTime = window.luxon && window.luxon.DateTime;
     const STORAGE_KEY = "real-sky-observatory-v48";
+    const STORAGE_SCHEMA_VERSION = "5.3.1";
+    const ASTRONOMY_MODEL_VERSION = "epoch-date-precession-v1";
     const I18N = {
       zh: {
         brandSub: "\u771F\u5B9E\u5730\u70B9 \xD7 \u771F\u5B9E\u65F6\u95F4 \xD7 \u771F\u5B9E\u661F\u8868 \xD7 \u53CC\u5929\u6587\u6587\u5316",
@@ -1881,7 +1978,9 @@
       traditionalDetail: cfg("defaults.traditionalDetail", "battlefields"),
       mapScale: Number(cfg("defaults.mapScale", 1)),
       projectionViews: {},
-      coordinateViewSemantics: 6,
+      coordinateViewSemantics: 7,
+      storageSchemaVersion: STORAGE_SCHEMA_VERSION,
+      astronomyModelVersion: ASTRONOMY_MODEL_VERSION,
       selectedObject: null
     };
     const ZONE_ALIASES = {
@@ -1951,6 +2050,28 @@
       currentFatalError: "-",
       errorStack: "-",
       lastError: "-"
+    };
+    const astronomyModelDebug = {
+      sourceEpoch: "J2000",
+      displayEpoch: "epoch-of-date",
+      precessionStatus: "enabled",
+      precessionModel: "IAU 1976 lightweight precession",
+      nutation: "off",
+      properMotion: "off",
+      refraction: "off",
+      julianCenturiesT: "-",
+      meanObliquity: "-",
+      eclipticModel: "J2000 ecliptic precessed to display frame",
+      planetModel: "current/simple",
+      planetEpochHandling: "connected to display frame",
+      fixedLayerPrecession: "pending",
+      boundaryPrecession: "pending",
+      asterismPrecession: "pending",
+      searchPickFrame: "J2000 source -> epoch-of-date render",
+      storageSchemaVersion: STORAGE_SCHEMA_VERSION,
+      astronomyModelVersion: ASTRONOMY_MODEL_VERSION,
+      cacheMigration: "pending",
+      lastPrecessionError: "-"
     };
     let objectSearchIndex = null, searchHighlight = null, searchHighlightTimer = null, floatingObjectInfoDismissed = false;
     const STAR_NAMES = starNames();
@@ -2043,22 +2164,33 @@
       if (storage) {
         try {
           const raw = JSON.parse(storage.getItem(STORAGE_KEY) || "null");
-          if (raw && typeof raw === "object") state = { ...defaults, ...raw };
-          else {
+          if (raw && typeof raw === "object") {
+            const schemaOk = raw.storageSchemaVersion === STORAGE_SCHEMA_VERSION;
+            const astronomyOk = raw.astronomyModelVersion === ASTRONOMY_MODEL_VERSION;
+            if (schemaOk && astronomyOk) {
+              state = { ...defaults, ...raw };
+              astronomyModelDebug.cacheMigration = "current";
+            } else {
+              storage.removeItem(STORAGE_KEY);
+              state = { ...defaults };
+              astronomyModelDebug.cacheMigration = "cleared old 5.2 cache";
+            }
+          } else {
             const old = JSON.parse(
               storage.getItem("real-sky-observatory-v2") || "null"
             );
             if (old && typeof old === "object") {
-              const migrated = { ...old };
-              migrated.cultureMode = old.chineseCulture ? "chinese" : "western";
-              delete migrated.chineseCulture;
-              state = { ...defaults, ...migrated };
-            }
+              storage.removeItem("real-sky-observatory-v2");
+              astronomyModelDebug.cacheMigration = "cleared legacy v2 cache";
+            } else astronomyModelDebug.cacheMigration = "fresh defaults";
           }
         } catch (err) {
           console.warn("Stored settings were invalid and have been ignored", err);
+          astronomyModelDebug.cacheMigration = "invalid cache ignored";
         }
       }
+      state.storageSchemaVersion = STORAGE_SCHEMA_VERSION;
+      state.astronomyModelVersion = ASTRONOMY_MODEL_VERSION;
       if (!DateTime || !DateTime.fromISO(String(state.instant || ""), { zone: "utc" }).isValid)
         state.instant = defaults.instant;
       if (!Number.isFinite(Number(state.lat)) || Math.abs(Number(state.lat)) > 90)
@@ -2182,7 +2314,7 @@
       const dt = DateTime.fromISO(String(state.instant || ""), { zone: "utc" });
       return (dt.isValid ? dt : DateTime.fromISO(defaults.instant, { zone: "utc" })).toJSDate();
     }
-    function julianDateFromDate(date) {
+    function julianDateFromDate2(date) {
       if (!(date instanceof Date) || !Number.isFinite(date.getTime())) return null;
       return date.getTime() / 864e5 + 24405875e-1;
     }
@@ -2215,7 +2347,7 @@
           utcOffsetNote: "unknown"
         };
       }
-      const utc = dt.toUTC(), jsDate = date || renderableDateForDateTime(utc), local = utc.setZone(safeZoneForCoordinates()), jd = jsDate ? julianDateFromDate(jsDate) : null, zoneDebug = timeZoneOffsetDebug(local);
+      const utc = dt.toUTC(), jsDate = date || renderableDateForDateTime(utc), local = utc.setZone(safeZoneForCoordinates()), jd = jsDate ? julianDateFromDate2(jsDate) : null, zoneDebug = timeZoneOffsetDebug(local);
       return {
         display: formatCivilDateTime(local, false),
         utc: utc.toISO() || "-",
@@ -3414,6 +3546,59 @@
           debugValue(timeRenderDebug.errorStack || "-")
         ]),
         debugBlankLine(),
+        debugGroup(zh ? "\u5929\u6587\u6A21\u578B / \u5386\u5143\u4E00\u81F4\u6027" : "Astronomy model / epoch consistency"),
+        debugLine(zh ? "\u6E90\u6570\u636E\u5386\u5143" : "source epoch", [
+          debugValue(astronomyModelDebug.sourceEpoch || "-")
+        ]),
+        debugLine(zh ? "\u663E\u793A\u5386\u5143" : "display epoch", [
+          debugValue(astronomyModelDebug.displayEpoch || "-")
+        ]),
+        debugLine(zh ? "\u5C81\u5DEE\u72B6\u6001" : "precession", [
+          debugValue(astronomyModelDebug.precessionStatus || "-")
+        ]),
+        debugLine(zh ? "\u5C81\u5DEE\u6A21\u578B" : "precession model", [
+          debugValue(astronomyModelDebug.precessionModel || "-")
+        ]),
+        debugLine(zh ? "\u7AE0\u52A8 / \u81EA\u884C / \u6298\u5C04" : "nutation / proper motion / refraction", [
+          debugValue(`${astronomyModelDebug.nutation} / ${astronomyModelDebug.properMotion} / ${astronomyModelDebug.refraction}`)
+        ]),
+        debugLine(zh ? "J2000 \u8D77\u7B97\u5112\u7565\u4E16\u7EAA T" : "Julian centuries from J2000", [
+          debugValue(astronomyModelDebug.julianCenturiesT || "-")
+        ]),
+        debugLine(zh ? "\u5E73\u5747\u9EC4\u8D64\u4EA4\u89D2" : "mean obliquity", [
+          debugValue(astronomyModelDebug.meanObliquity || "-")
+        ]),
+        debugLine(zh ? "\u9EC4\u9053\u6A21\u578B" : "ecliptic model", [
+          debugValue(astronomyModelDebug.eclipticModel || "-")
+        ]),
+        debugLine(zh ? "\u884C\u661F\u7B97\u6CD5" : "planet model", [
+          debugValue(astronomyModelDebug.planetModel || "-")
+        ]),
+        debugLine(zh ? "\u884C\u661F\u5386\u5143\u5904\u7406" : "planet epoch handling", [
+          debugValue(astronomyModelDebug.planetEpochHandling || "-")
+        ]),
+        debugLine(zh ? "\u56FA\u5B9A\u56FE\u5C42\u5C81\u5DEE" : "fixed layer precession", [
+          debugValue(astronomyModelDebug.fixedLayerPrecession || "-")
+        ]),
+        debugLine(zh ? "\u8FB9\u754C / \u661F\u5B98\u5C81\u5DEE" : "boundary / asterism precession", [
+          debugValue(`${astronomyModelDebug.boundaryPrecession || "-"} / ${astronomyModelDebug.asterismPrecession || "-"}`)
+        ]),
+        debugLine(zh ? "\u641C\u7D22/\u62FE\u53D6\u5750\u6807\u6846\u67B6" : "search/pick coordinate frame", [
+          debugValue(astronomyModelDebug.searchPickFrame || "-")
+        ]),
+        debugLine(zh ? "localStorage schema" : "localStorage schema", [
+          debugValue(astronomyModelDebug.storageSchemaVersion || "-")
+        ]),
+        debugLine(zh ? "\u5929\u6587\u6A21\u578B\u7248\u672C" : "astronomy model version", [
+          debugValue(astronomyModelDebug.astronomyModelVersion || "-")
+        ]),
+        debugLine(zh ? "\u7F13\u5B58\u8FC1\u79FB\u72B6\u6001" : "cache migration", [
+          debugValue(astronomyModelDebug.cacheMigration || "-")
+        ]),
+        debugLine(zh ? "\u6700\u540E\u5C81\u5DEE\u8F6C\u6362\u9519\u8BEF" : "last precession error", [
+          debugValue(astronomyModelDebug.lastPrecessionError || "-")
+        ]),
+        debugBlankLine(),
         debugGroup(label.interactionGroup),
         debugLine(label.interaction, [debugValue(debugDragMode(zh))]),
         debugLine(label.dragMoved, [
@@ -3599,6 +3784,7 @@
     function redrawAndSyncMapBox(reason = "redraw", metrics = projectionCanvasMetrics()) {
       let ok = true;
       try {
+        updateLoadedCoordinateFrame();
         Celestial.redraw();
         noteTimeRenderDebug({
           redrawStatus: "ok",
@@ -3621,6 +3807,7 @@
       if (/time|location|observer|sky view|playback/i.test(String(reason))) {
         requestAnimationFrame(() => {
           try {
+            updateLoadedCoordinateFrame();
             Celestial.redraw();
             noteTimeRenderDebug({
               redrawStatus: "ok",
@@ -3973,9 +4160,10 @@
     function formatDec(deg) {
       return `${Number(deg) >= 0 ? "+" : "\u2212"}${Math.abs(Number(deg)).toFixed(2)}\xB0`;
     }
-    function horizontalFor(coord) {
+    function horizontalFor(coord, options = {}) {
       try {
-        const h = Celestial.horizontal(currentInstantDate(), coord, [
+        const eq = options.alreadyEpoch ? coord : epochEquatorialFromJ2000(coord);
+        const h = Celestial.horizontal(currentInstantDate(), eq, [
           Number(state.lat),
           Number(state.lon)
         ]);
@@ -4020,8 +4208,14 @@
       const pt = Celestial.mapProjection(display);
       return pt && Number.isFinite(pt[0]) && Number.isFinite(pt[1]) ? pt : null;
     }
+    function projectEpochEquatorialCoordinate(coord) {
+      const display = displayCoordinateForEpochEquatorial(coord);
+      if (!display || !Celestial.clip(display)) return null;
+      const pt = Celestial.mapProjection(display);
+      return pt && Number.isFinite(pt[0]) && Number.isFinite(pt[1]) ? pt : null;
+    }
     function projectHorizontalCoordinate(azimuth, altitude) {
-      return projectEquatorialCoordinate(
+      return projectEpochEquatorialCoordinate(
         equatorialFromHorizontal(azimuth, altitude)
       );
     }
@@ -4143,14 +4337,14 @@
       for (let lon = 0; lon < 360; lon += 30)
         drawReferenceText(
           `${lon}\xB0`,
-          projectEquatorialCoordinate([normalizeCelestialLongitude(lon), 0]),
+          projectEpochEquatorialCoordinate([normalizeCelestialLongitude(lon), 0]),
           style
         );
       for (let lat = -60; lat <= 60; lat += 30) {
         if (lat === 0) continue;
         drawReferenceText(
           `${lat > 0 ? "+" : ""}${lat}\xB0`,
-          projectEquatorialCoordinate([0, lat]),
+          projectEpochEquatorialCoordinate([0, lat]),
           style,
           "left"
         );
@@ -4180,6 +4374,20 @@
       ctx.stroke();
       ctx.restore();
     }
+    function drawEclipticLineLayer() {
+      if (!state.ecliptic) return;
+      const style = {
+        stroke: cfg("sky.ecliptic.stroke", "#e5b85e"),
+        width: Number(cfg("sky.ecliptic.width", 1.15)),
+        opacity: Number(cfg("sky.ecliptic.opacity", 0.82))
+      };
+      const points = [];
+      for (let lon = 0; lon <= 360; lon += 2) {
+        const eq = eclipticJ2000ToEquatorialJ2000(lon, 0);
+        points.push(projectEquatorialCoordinate(eq));
+      }
+      drawProjectedLine(points, style);
+    }
     function registerReferenceOverlays() {
       Celestial.add({
         type: "raw",
@@ -4189,6 +4397,7 @@
           drawHorizontalGridLayer();
           drawHorizonLayer();
           drawEquatorialGridLabels();
+          drawEclipticLineLayer();
           drawSearchHighlight();
         }
       });
@@ -4388,17 +4597,144 @@
     function normalizeCelestialLongitude(deg) {
       return ((Number(deg) + 180) % 360 + 360) % 360 - 180;
     }
-    function displayCoordinateForEquatorial(coord) {
+    function astronomyModelEnabled() {
+      return !!cfg("astronomyModel.precession", true);
+    }
+    function epochEquatorialFromJ2000(coord, date = currentInstantDate()) {
+      if (!coord) return null;
+      const source = [normalizeCelestialLongitude(coord[0]), Number(coord[1])];
+      if (!Number.isFinite(source[0]) || !Number.isFinite(source[1])) return null;
+      if (!astronomyModelEnabled()) return source;
+      try {
+        return precessEquatorialJ2000ToDate(source, date);
+      } catch (err) {
+        astronomyModelDebug.lastPrecessionError = debugErrorText(err);
+        return source;
+      }
+    }
+    function displayCoordinateForEpochEquatorial(coord) {
       if (!coord) return null;
       const equatorial = [
         normalizeCelestialLongitude(coord[0]),
         Number(coord[1])
       ];
+      if (!Number.isFinite(equatorial[0]) || !Number.isFinite(equatorial[1])) return null;
       if (coordinateViewSpec().transform === "equatorial") return equatorial;
       try {
         return Celestial.getPoint(equatorial, coordinateViewSpec().transform);
       } catch (_) {
         return equatorial;
+      }
+    }
+    function displayCoordinateForEquatorial(coord) {
+      return displayCoordinateForEpochEquatorial(epochEquatorialFromJ2000(coord));
+    }
+    function cloneGeometry(geometry) {
+      return geometry ? JSON.parse(JSON.stringify(geometry)) : null;
+    }
+    function mapGeometryCoordinates(geometry, mapper) {
+      if (!geometry || !Array.isArray(geometry.coordinates)) return geometry;
+      const mapCoord = (value) => {
+        if (Array.isArray(value) && value.length >= 2 && Number.isFinite(Number(value[0])) && Number.isFinite(Number(value[1]))) {
+          const mapped = mapper([Number(value[0]), Number(value[1])]);
+          return mapped ? [mapped[0], mapped[1]] : [Number(value[0]), Number(value[1])];
+        }
+        return Array.isArray(value) ? value.map(mapCoord) : value;
+      };
+      return { ...geometry, coordinates: mapCoord(geometry.coordinates) };
+    }
+    function ensureFeatureSourceGeometry(feature) {
+      if (!feature || !feature.geometry) return null;
+      feature.properties = feature.properties || {};
+      if (!feature.properties.__rsoJ2000Geometry)
+        feature.properties.__rsoJ2000Geometry = cloneGeometry(feature.geometry);
+      feature.properties.__rsoSourceEpoch = "J2000";
+      return feature.properties.__rsoJ2000Geometry;
+    }
+    function applyFeatureGeometryFrame(feature, mapper) {
+      const source = ensureFeatureSourceGeometry(feature);
+      if (!source) return false;
+      feature.geometry = mapGeometryCoordinates(source, mapper);
+      feature.properties.__rsoDisplayEpoch = "epoch-of-date";
+      return true;
+    }
+    function prepareDatasetForEpoch(path, data) {
+      if (!data || data.type !== "FeatureCollection" || !Array.isArray(data.features)) return data;
+      const date = currentInstantDate();
+      let transformed = 0;
+      data.features.forEach((feature) => {
+        if (applyFeatureGeometryFrame(feature, (coord) => epochEquatorialFromJ2000(coord, date)))
+          transformed += 1;
+      });
+      astronomyModelDebug.fixedLayerPrecession = `${transformed} features prepared`;
+      astronomyModelDebug.lastPrecessionError = "-";
+      return data;
+    }
+    function installDatasetEpochHook() {
+      window.__RSO_PREPARE_SKY_DATASET__ = function(path, data) {
+        try {
+          return prepareDatasetForEpoch(path, data);
+        } catch (err) {
+          astronomyModelDebug.lastPrecessionError = debugErrorText(err);
+          console.warn("Epoch data preparation failed", path, err);
+          return data;
+        }
+      };
+    }
+    function updateAstronomyModelDebug() {
+      try {
+        const date = currentInstantDate();
+        const diag = diagnosticsForDate(date);
+        astronomyModelDebug.sourceEpoch = diag.sourceEpoch;
+        astronomyModelDebug.displayEpoch = diag.displayEpoch;
+        astronomyModelDebug.precessionStatus = astronomyModelEnabled() ? diag.precessionStatus : "disabled";
+        astronomyModelDebug.precessionModel = diag.modelName;
+        astronomyModelDebug.nutation = "off";
+        astronomyModelDebug.properMotion = "off";
+        astronomyModelDebug.refraction = "off";
+        astronomyModelDebug.julianCenturiesT = diag.julianCenturiesT.toFixed(8);
+        astronomyModelDebug.meanObliquity = `${diag.meanObliquityDegrees.toFixed(6)}\xB0`;
+        astronomyModelDebug.eclipticModel = diag.eclipticModel;
+        astronomyModelDebug.planetModel = cfg("astronomyModel.planetModel", "current/simple");
+        astronomyModelDebug.planetEpochHandling = "connected to display frame";
+        astronomyModelDebug.storageSchemaVersion = STORAGE_SCHEMA_VERSION;
+        astronomyModelDebug.astronomyModelVersion = ASTRONOMY_MODEL_VERSION;
+      } catch (err) {
+        astronomyModelDebug.lastPrecessionError = debugErrorText(err);
+      }
+    }
+    function updateLoadedCoordinateFrame() {
+      if (!skyReady || !window.Celestial || !Celestial.container) return;
+      updateAstronomyModelDebug();
+      const mapper = (coord) => displayCoordinateForEquatorial(coord);
+      const selectors = [
+        ".star",
+        ".dso",
+        ".constline",
+        ".constname",
+        ".boundaryline",
+        ".rso-western-dual-line",
+        ".rso-cn-line",
+        ".rso-cn-name",
+        ".rso-traditional-region",
+        ".rso-traditional-label"
+      ];
+      let transformed = 0;
+      try {
+        selectors.forEach((selector) => {
+          selectionNodes(selector).forEach((node) => {
+            const d = node && node.__data__;
+            if (applyFeatureGeometryFrame(d, mapper)) transformed += 1;
+          });
+        });
+        astronomyModelDebug.fixedLayerPrecession = transformed ? `${transformed} displayed features` : "no loaded feature geometry";
+        astronomyModelDebug.boundaryPrecession = transformed ? "connected" : astronomyModelDebug.boundaryPrecession;
+        astronomyModelDebug.asterismPrecession = transformed ? "connected" : astronomyModelDebug.asterismPrecession;
+        if (westernDualLineFeatures.length || chineseLineFeatures.length) rebuildSharedCultureSegments();
+        astronomyModelDebug.lastPrecessionError = "-";
+      } catch (err) {
+        astronomyModelDebug.lastPrecessionError = debugErrorText(err);
+        console.warn("Loaded coordinate frame update failed", err);
       }
     }
     function currentPlanetPositions() {
@@ -4413,11 +4749,13 @@
           const body = fn(dt).equatorial(observer), ep = body && body.ephemeris || {}, eq = ep.pos;
           if (!eq || !Number.isFinite(eq[0]) || !Number.isFinite(eq[1]))
             return null;
+          const epochCoord = epochEquatorialFromJ2000(eq);
           return {
             id: fn.id(),
             body,
             coord: eq.slice(),
-            displayCoord: displayCoordinateForEquatorial(eq)
+            epochCoord,
+            displayCoord: displayCoordinateForEpochEquatorial(epochCoord)
           };
         }).filter(Boolean);
         noteTimeRenderDebug({
@@ -4591,7 +4929,7 @@
             item.body.name,
             item.id
           ],
-          { planetId: item.id, displayCoord: item.displayCoord }
+          { planetId: item.id, displayCoord: item.displayCoord, epochCoord: item.epochCoord }
         );
       });
       objectSearchIndex = entries;
@@ -4722,6 +5060,7 @@
         type: "planet",
         d: entry.d,
         coord: entry.coord,
+        epochCoord: entry.epochCoord,
         displayCoord: entry.displayCoord,
         planetId: entry.planetId,
         label: objectLabel("planet", entry.d)
@@ -4754,6 +5093,7 @@
             type: "planet",
             d: item.body,
             coord: item.coord,
+            epochCoord: item.epochCoord,
             displayCoord: c,
             planetId: item.id,
             dist
@@ -4993,8 +5333,13 @@
       }
       return rows;
     }
+    function objectEpochCoordinate(obj) {
+      if (obj && obj.epochCoord) return obj.epochCoord;
+      if (obj && obj.type === "skyPosition") return obj.coord;
+      return epochEquatorialFromJ2000(obj && obj.coord);
+    }
     function objectRows(obj) {
-      const c = obj.coord, h = horizontalFor(c), p = obj.d && obj.d.properties || {}, rows = [];
+      const sourceCoord = obj.coord, c = objectEpochCoordinate(obj) || sourceCoord, h = horizontalFor(c, { alreadyEpoch: true }), p = obj.d && obj.d.properties || {}, rows = [];
       rows.push([
         t("objectType"),
         t(
@@ -5227,6 +5572,7 @@
           type: "skyPosition",
           d: { properties: {} },
           coord: p,
+          epochCoord: p,
           label: t("skyPosition")
         });
       } catch (err) {
@@ -5381,7 +5727,7 @@
             opacity: Number(cfg("sky.celestialEquator.opacity", 0.7))
           },
           ecliptic: {
-            show: state.ecliptic,
+            show: false,
             stroke: cfg("sky.ecliptic.stroke", "#e5b85e"),
             width: Number(cfg("sky.ecliptic.width", 1.15)),
             opacity: Number(cfg("sky.ecliptic.opacity", 0.82))
@@ -6337,7 +6683,12 @@
       if (!window.confirm(t("resetDefaultsConfirm"))) return;
       const storage = getStorage();
       try {
-        if (storage) storage.removeItem(STORAGE_KEY);
+        if (storage) {
+          Object.keys(storage).forEach((key) => {
+            if (/^(real-sky-observatory|rso-|__rso_)/i.test(key)) storage.removeItem(key);
+          });
+          storage.removeItem(STORAGE_KEY);
+        }
       } catch (err) {
         console.warn("Default reset could not remove stored state", err);
       }
@@ -6724,7 +7075,7 @@
             inputStatus: "valid",
             internalUtc: iso,
             jsDateYear: String(renderDate.getUTCFullYear()),
-            julianDate: (julianDateFromDate(renderDate) || 0).toFixed(5),
+            julianDate: (julianDateFromDate2(renderDate) || 0).toFixed(5),
             updateSource: "playback",
             precision: precisionStatusForYear(nextInstant.setZone(safeZoneForCoordinates()).year),
             refreshHealth: "healthy",
@@ -6773,6 +7124,8 @@
       setupCitySearch();
       setupObjectSearch();
       bind();
+      installDatasetEpochHook();
+      updateAstronomyModelDebug();
       if ($("geo-mode-note")) $("geo-mode-note").style.display = "none";
       initialDisplay(desiredView());
       requestAnimationFrame(animationLoop);

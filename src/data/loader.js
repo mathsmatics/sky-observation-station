@@ -2,6 +2,9 @@
  * Data shards under src/data are the single editable source data.
  * This bridge keeps file:// direct-open mode working by serving D3-Celestial's
  * d3.json() requests from registered in-memory datasets.
+ * If the application installs __RSO_PREPARE_SKY_DATASET__, each returned
+ * deep copy can be annotated/transformed for the active astronomy model without
+ * mutating the editable source shards.
  */
 (function () {
   "use strict";
@@ -53,6 +56,13 @@
       if (data !== undefined) {
         counts[clean || name] = (counts[clean || name] || 0) + 1;
         var copy = cloneData(data);
+        if (typeof window.__RSO_PREPARE_SKY_DATASET__ === "function") {
+          try {
+            copy = window.__RSO_PREPARE_SKY_DATASET__(clean || name, copy) || copy;
+          } catch (error) {
+            console.warn("RSO sky data preparation failed", clean || name, error);
+          }
+        }
         if (typeof callback === "function") {
           setTimeout(function () {
             callback(null, copy);
