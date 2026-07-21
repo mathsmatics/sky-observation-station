@@ -67,7 +67,8 @@
         "status"
       ],
       collapsible: ["observer", "time", "viewProjection", "display"],
-      alwaysExpanded: ["viewTools", "search", "objectInfo", "status"]
+      alwaysExpanded: ["viewTools", "search", "objectInfo", "status"],
+      defaultCollapsed: ["observer", "time", "viewProjection", "display"]
     },
     /** 调试面板：开发时打开，完成后可把 enabled 改为 false 隐藏开关 */
     debug: {
@@ -141,9 +142,10 @@
       showDeepSky: false,
       timeSpeed: 3600,
       panelOpen: true,
+      menuCollapsed: ["observer", "time", "viewProjection", "display"],
       projection: "airy",
       coordinateSystem: "horizontal",
-      // horizontal / equatorial / ecliptic / galactic
+      // 坐标视角：horizontal / equatorial / ecliptic / galactic；不改变底层 transform
       showRegionBoundaries: false,
       traditionalDetail: "battlefields",
       // major / battlefields / mansions
@@ -356,15 +358,16 @@
       nep: { symbol: "\u2646", color: "#799dff", size: 18 }
     },
     /**
-     * “重置视图”使用的默认中心与应用层画布缩放。
+     * “坐标视角”使用的默认中心与应用层画布缩放。
      * center = [经向中心, 纬向中心, 旋转角]，单位为度。
+     * 这些值只决定视图朝向，不是 D3-Celestial 的 transform 配置。
      * horizontal 的中心会优先由当前地点和时间的天顶动态计算；这里是回退值。
      */
     resetViews: {
       horizontal: { center: [0, 0, 0], mapScale: 1 },
       equatorial: { center: [0, 0, 0], mapScale: 1 },
-      ecliptic: { center: [0, 0, 0], mapScale: 1 },
-      galactic: { center: [0, 0, 0], mapScale: 1 }
+      ecliptic: { center: [0, -23.44, 0], mapScale: 1 },
+      galactic: { center: [-93.6, -28.94, 0], mapScale: 1 }
     },
     /** 说明：下面列出各投影初始缩放，可单独微调 */
     projectionZoom: {
@@ -766,6 +769,7 @@
         "--panel-toggle-left": `${cfg("layout.panelToggleLeft", 8)}px`,
         "--panel-toggle-top": `${cfg("layout.panelToggleTop", 8)}px`,
         "--panel-toggle-size": `${cfg("layout.panelToggleSize", 36)}px`,
+        "--reset-toggle-left": `calc(${cfg("layout.panelToggleLeft", 8)}px + (${cfg("layout.panelToggleSize", 36)}px + 6px) * 2)`,
         "--panel-toggle-bg": cfg(
           "components.panelToggleBackground",
           "rgba(8,19,36,.94)"
@@ -1020,7 +1024,7 @@
       coordinateSystemLabel: "\u5750\u6807\u89C6\u89D2\uFF1A",
       projection: "\u5929\u7403\u6295\u5F71",
       coordinateSystem: "\u5750\u6807\u89C6\u89D2",
-      horizontalCoordinates: "\u5730\u5E73\u5750\u6807\u89C6\u89D2",
+      horizontalCoordinates: "\u5730\u5E73\u5750\u6807\u89C6\u89D2\uFF08\u5F53\u5730\u5929\u7A7A\uFF09",
       equatorialCoordinates: "\u8D64\u9053\u5750\u6807\u89C6\u89D2",
       eclipticCoordinates: "\u9EC4\u9053\u5750\u6807\u89C6\u89D2",
       galacticCoordinates: "\u94F6\u6CB3\u5750\u6807\u89C6\u89D2",
@@ -1061,7 +1065,9 @@
       copiedObject: "\u5929\u4F53\u4FE1\u606F\u5DF2\u590D\u5236",
       westernCultureMeaning: "\u897F\u65B9\u6587\u5316",
       chineseCultureMeaning: "\u4E2D\u56FD\u6587\u5316",
-      noReliableTraditionalBoundary: "\u5F53\u524D\u6570\u636E\u4E0D\u628A\u6BCF\u4E2A\u661F\u5B98\u5F3A\u884C\u5C01\u95ED\uFF1B\u4EC5\u663E\u793A\u4E09\u57A3\u3001\u56DB\u8C61\u3001\u8FD1\u5357\u6781\u661F\u533A\u53CA\u53EF\u9009\u4E3B\u9898\u533A\u3002"
+      noReliableTraditionalBoundary: "\u5F53\u524D\u6570\u636E\u4E0D\u628A\u6BCF\u4E2A\u661F\u5B98\u5F3A\u884C\u5C01\u95ED\uFF1B\u4EC5\u663E\u793A\u4E09\u57A3\u3001\u56DB\u8C61\u3001\u8FD1\u5357\u6781\u661F\u533A\u53CA\u53EF\u9009\u4E3B\u9898\u533A\u3002",
+      resetDefaults: "\u6062\u590D\u9ED8\u8BA4\u914D\u7F6E",
+      resetDefaultsConfirm: "\u786E\u5B9A\u6062\u590D\u9ED8\u8BA4\u914D\u7F6E\u5417\uFF1F\u8FD9\u4F1A\u91CD\u7F6E\u5730\u70B9\u3001\u65F6\u95F4\u3001\u89C6\u56FE\u3001\u5B57\u4F53\u548C\u6240\u6709\u663E\u793A\u53C2\u6570\u3002"
     });
     Object.assign(I18N.en, {
       citySearch: "Search city",
@@ -1074,7 +1080,7 @@
       coordinateSystemLabel: "Coordinate view: ",
       projection: "Celestial projection",
       coordinateSystem: "Coordinate View",
-      horizontalCoordinates: "Horizontal Coordinate View",
+      horizontalCoordinates: "Horizontal Coordinate View (Local Sky)",
       equatorialCoordinates: "Equatorial Coordinate View",
       eclipticCoordinates: "Ecliptic Coordinate View",
       galacticCoordinates: "Galactic Coordinate View",
@@ -1115,7 +1121,9 @@
       copiedObject: "Object information copied",
       westernCultureMeaning: "Western culture",
       chineseCultureMeaning: "Chinese culture",
-      noReliableTraditionalBoundary: "Individual asterisms are not forced into fake closed polygons; only higher-level traditional regions and optional thematic zones are shown."
+      noReliableTraditionalBoundary: "Individual asterisms are not forced into fake closed polygons; only higher-level traditional regions and optional thematic zones are shown.",
+      resetDefaults: "Reset to defaults",
+      resetDefaultsConfirm: "Reset all settings to defaults? This will reset location, time, view, font size, and all display options."
     });
     const defaults = {
       lat: Number(cfg("defaults.latitude", 39.9042)),
@@ -1146,10 +1154,12 @@
       panelOpen: !!cfg("defaults.panelOpen", true),
       projection: cfg("defaults.projection", "airy"),
       coordinateSystem: cfg("defaults.coordinateSystem", "horizontal"),
+      menuCollapsed: Array.isArray(cfg("defaults.menuCollapsed", [])) ? cfg("defaults.menuCollapsed", []).slice() : [],
       regionBoundaries: !!cfg("defaults.showRegionBoundaries", false),
       traditionalDetail: cfg("defaults.traditionalDetail", "battlefields"),
       mapScale: Number(cfg("defaults.mapScale", 1)),
       projectionViews: {},
+      coordinateViewSemantics: 2,
       selectedObject: null
     };
     const ZONE_ALIASES = {
@@ -1304,8 +1314,10 @@
         state.instant = defaults.instant;
       if (!Number.isFinite(Number(state.lat)) || Math.abs(Number(state.lat)) > 90)
         state.lat = defaults.lat;
+      else state.lat = Number(state.lat);
       if (!Number.isFinite(Number(state.lon)) || Math.abs(Number(state.lon)) > 180)
         state.lon = defaults.lon;
+      else state.lon = Number(state.lon);
       if (!state.zone || typeof state.zone !== "string")
         state.zone = defaults.zone;
       if (!["zh", "en"].includes(state.lang)) state.lang = "zh";
@@ -1324,6 +1336,18 @@
         state.traditionalDetail = "battlefields";
       if (!state.projectionViews || typeof state.projectionViews !== "object")
         state.projectionViews = {};
+      if (state.coordinateViewSemantics !== defaults.coordinateViewSemantics) {
+        state.projectionViews = {};
+        state.coordinateViewSemantics = defaults.coordinateViewSemantics;
+      }
+      const allowedMenuSections = new Set(
+        Array.isArray(cfg("menu.collapsible", [])) ? cfg("menu.collapsible", []) : []
+      );
+      if (!Array.isArray(state.menuCollapsed))
+        state.menuCollapsed = Array.isArray(cfg("menu.defaultCollapsed", [])) ? cfg("menu.defaultCollapsed", []).slice() : [];
+      state.menuCollapsed = state.menuCollapsed.filter(
+        (id) => allowedMenuSections.has(id)
+      );
       state.mapScale = viewMapScale(
         { mapScale: state.mapScale, zoom: state.zoom },
         defaults.mapScale
@@ -1523,6 +1547,8 @@
       $("explain-btn").innerHTML = "<b>?</b>";
       $("explain-btn").title = t("technicalGuide");
       $("explain-btn").setAttribute("aria-label", t("technicalGuide"));
+      $("reset-defaults-btn").title = t("resetDefaults");
+      $("reset-defaults-btn").setAttribute("aria-label", t("resetDefaults"));
       document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
         const key = el.dataset.i18nPlaceholder;
         if (I18N[state.lang][key]) el.placeholder = I18N[state.lang][key];
@@ -1984,10 +2010,18 @@
       }
     }
     function applyMenuSectionOrder(panel = $("control-panel")) {
-      if (!panel || panel.dataset.menuOrdered === "true") return;
+      if (!panel || panel.dataset.menuOrderChecked === "true") return;
       const configured = cfg("menu.order", []), order = Array.isArray(configured) ? configured : [];
-      order.map((id) => panel.querySelector(`[data-menu-id="${id}"]`)).filter(Boolean).forEach((section) => panel.appendChild(section));
-      panel.dataset.menuOrdered = "true";
+      const actual = Array.from(panel.querySelectorAll("[data-menu-id]")).map(
+        (section) => section.dataset.menuId
+      );
+      const mismatch = order.length && order.some((id, index) => actual[index] && actual[index] !== id);
+      if (mismatch)
+        console.warn("Menu section order differs from config.menu.order", {
+          expected: order,
+          actual
+        });
+      panel.dataset.menuOrderChecked = "true";
     }
     function initializeMenuSections(panel = $("control-panel")) {
       if (!panel || panel.dataset.menuSectionsReady === "true") return;
@@ -2004,12 +2038,18 @@
         );
         if (!collapsible.has(id) || !title) return;
         section.classList.add("section-collapsible");
+        const collapsed = state.menuCollapsed.includes(id);
+        section.classList.toggle("section-collapsed", collapsed);
         title.setAttribute("role", "button");
         title.setAttribute("tabindex", "0");
-        title.setAttribute("aria-expanded", "true");
+        title.setAttribute("aria-expanded", String(!collapsed));
         const toggle = () => {
-          const collapsed = section.classList.toggle("section-collapsed");
-          title.setAttribute("aria-expanded", String(!collapsed));
+          const collapsed2 = section.classList.toggle("section-collapsed");
+          title.setAttribute("aria-expanded", String(!collapsed2));
+          state.menuCollapsed = Array.from(
+            panel.querySelectorAll(".section-collapsible.section-collapsed")
+          ).map((item) => item.dataset.menuId).filter(Boolean);
+          save();
         };
         title.addEventListener("click", toggle);
         title.addEventListener("keydown", (event) => {
@@ -2369,7 +2409,7 @@
         centerDelta: "map center delta from pane",
         celestial: "celestial metrics",
         projection: "current projection",
-        coords: "current coordinate system",
+        coords: "current coordinate view",
         culture: "current sky culture",
         language: "language",
         viewKey: "saved view key",
@@ -2727,9 +2767,17 @@
       };
     }
     function desiredView() {
-      return state.projectionViews && state.projectionViews[viewKey()] || PROJECTION_DEFAULTS[state.projection] || {
+      const fallback = coordinateViewDefault();
+      return state.projectionViews && state.projectionViews[viewKey()] || fallback;
+    }
+    function coordinateViewDefault(coord = state.coordinateSystem, projection = state.projection) {
+      const projectionDefault = PROJECTION_DEFAULTS[projection] || {
         center: [0, 0, 0],
         mapScale: 1
+      }, configured = cfg(`resetViews.${coord}`, {});
+      return {
+        center: Array.isArray(configured.center) ? configured.center.slice() : projectionDefault.center.slice(),
+        mapScale: viewMapScale(configured, projectionDefault.mapScale)
       };
     }
     function setMapScale(value, options = {}) {
@@ -2959,7 +3007,7 @@
       });
     }
     function projectionCoordinateTransform() {
-      return state.coordinateSystem === "horizontal" ? "equatorial" : state.coordinateSystem;
+      return "equatorial";
     }
     function isHorizontalView() {
       return state.coordinateSystem === "horizontal";
@@ -3388,17 +3436,7 @@
     }
     function displayCoordinateForEquatorial(coord) {
       if (!coord) return null;
-      const equatorial = [
-        normalizeCelestialLongitude(coord[0]),
-        Number(coord[1])
-      ];
-      if (state.coordinateSystem === "horizontal" || state.coordinateSystem === "equatorial")
-        return equatorial;
-      try {
-        return Celestial.getPoint(equatorial, state.coordinateSystem);
-      } catch (_) {
-        return equatorial;
-      }
+      return [normalizeCelestialLongitude(coord[0]), Number(coord[1])];
     }
     function currentPlanetPositions() {
       const objects = window.__RSO_PLANET_OBJECTS__ || [], origin = window.__RSO_PLANET_ORIGIN__;
@@ -4226,7 +4264,7 @@
             opacity: Number(cfg("sky.ecliptic.opacity", 0.82))
           },
           galactic: {
-            show: state.coordinateSystem === "galactic",
+            show: false,
             stroke: cfg("labels.galacticGridColor", "#a887e7"),
             width: Number(cfg("labels.galacticGridWidth", 1)),
             opacity: Number(cfg("labels.galacticGridOpacity", 0.58))
@@ -4895,14 +4933,8 @@
       save();
       updateProjectionHelp();
       updateHUD(false);
-      const target = desiredView();
-      state.mapScale = viewMapScale(target, state.mapScale);
-      try {
-        rebuildSkyPreservingPixels(target);
-      } catch (err) {
-        console.warn("Coordinate switch failed", err);
-        initialDisplay(target);
-      }
+      resetCurrentCoordinateView({ preferSaved: true });
+      redrawAndSyncMapBox("coordinate view switch");
     }
     function clamp(value, min, max) {
       return Math.max(min, Math.min(max, value));
@@ -4927,7 +4959,7 @@
     }
     function beginPaneMarginDrag(event) {
       if (event.button !== 0 || event.target.closest(
-        "canvas,button,input,select,textarea,#debug-overlay,.info-card-rso,.fixed-tools"
+        "canvas,button,input,select,textarea,#debug-overlay,.info-card-rso"
       ))
         return;
       if (!skyReady || !window.Celestial) return;
@@ -4980,13 +5012,14 @@
       saveCurrentProjectionView();
       save();
     }
-    function resetCurrentCoordinateView() {
+    function resetCurrentCoordinateView(options = {}) {
       try {
-        const configured = cfg(`resetViews.${state.coordinateSystem}`, {
-          center: [0, 0, 0],
-          mapScale: 1
-        });
-        const targetScale = viewMapScale(configured, defaults.mapScale);
+        const saved = options.preferSaved && state.projectionViews && state.projectionViews[viewKey()], configured = saved || coordinateViewDefault(), targetScale = viewMapScale(configured, defaults.mapScale);
+        if (saved) {
+          restoreView(saved);
+          save();
+          return;
+        }
         if (state.coordinateSystem === "horizontal") {
           updateSkyView(true);
           clearTimeout(customViewRestoreTimer);
@@ -5019,6 +5052,19 @@
         save();
       } catch (_) {
       }
+    }
+    function resetAllDefaults() {
+      if (!window.confirm(t("resetDefaultsConfirm"))) return;
+      const storage = getStorage();
+      try {
+        if (storage) storage.removeItem(STORAGE_KEY);
+      } catch (err) {
+        console.warn("Default reset could not remove stored state", err);
+      }
+      currentSelected = null;
+      const search = $("object-search");
+      if (search) search.value = "";
+      window.location.reload();
     }
     function bind() {
       $("language-select").addEventListener("change", (e) => {
@@ -5240,6 +5286,7 @@
         (e) => selectGuidePage(Number(e.target.value))
       );
       $("guide-next-page").addEventListener("click", () => setGuidePage(1));
+      $("reset-defaults-btn").addEventListener("click", resetAllDefaults);
       $("close-modal").addEventListener(
         "click",
         () => $("tech-modal").classList.remove("open")

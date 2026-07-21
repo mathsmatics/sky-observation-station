@@ -50,6 +50,7 @@
       "--panel-toggle-left": `${cfg("layout.panelToggleLeft", 8)}px`,
       "--panel-toggle-top": `${cfg("layout.panelToggleTop", 8)}px`,
       "--panel-toggle-size": `${cfg("layout.panelToggleSize", 36)}px`,
+      "--reset-toggle-left": `calc(${cfg("layout.panelToggleLeft", 8)}px + (${cfg("layout.panelToggleSize", 36)}px + 6px) * 2)`,
       "--panel-toggle-bg": cfg(
         "components.panelToggleBackground",
         "rgba(8,19,36,.94)",
@@ -324,7 +325,7 @@
     coordinateSystemLabel: "坐标视角：",
     projection: "天球投影",
     coordinateSystem: "坐标视角",
-    horizontalCoordinates: "地平坐标视角",
+    horizontalCoordinates: "地平坐标视角（当地天空）",
     equatorialCoordinates: "赤道坐标视角",
     eclipticCoordinates: "黄道坐标视角",
     galacticCoordinates: "银河坐标视角",
@@ -369,6 +370,9 @@
     chineseCultureMeaning: "中国文化",
     noReliableTraditionalBoundary:
       "当前数据不把每个星官强行封闭；仅显示三垣、四象、近南极星区及可选主题区。",
+    resetDefaults: "恢复默认配置",
+    resetDefaultsConfirm:
+      "确定恢复默认配置吗？这会重置地点、时间、视图、字体和所有显示参数。",
   });
   Object.assign(I18N.en, {
     citySearch: "Search city",
@@ -381,7 +385,7 @@
     coordinateSystemLabel: "Coordinate view: ",
     projection: "Celestial projection",
     coordinateSystem: "Coordinate View",
-    horizontalCoordinates: "Horizontal Coordinate View",
+    horizontalCoordinates: "Horizontal Coordinate View (Local Sky)",
     equatorialCoordinates: "Equatorial Coordinate View",
     eclipticCoordinates: "Ecliptic Coordinate View",
     galacticCoordinates: "Galactic Coordinate View",
@@ -427,6 +431,9 @@
     chineseCultureMeaning: "Chinese culture",
     noReliableTraditionalBoundary:
       "Individual asterisms are not forced into fake closed polygons; only higher-level traditional regions and optional thematic zones are shown.",
+    resetDefaults: "Reset to defaults",
+    resetDefaultsConfirm:
+      "Reset all settings to defaults? This will reset location, time, view, font size, and all display options.",
   });
 
   const defaults = {
@@ -458,10 +465,14 @@
     panelOpen: !!cfg("defaults.panelOpen", true),
     projection: cfg("defaults.projection", "airy"),
     coordinateSystem: cfg("defaults.coordinateSystem", "horizontal"),
+    menuCollapsed: Array.isArray(cfg("defaults.menuCollapsed", []))
+      ? cfg("defaults.menuCollapsed", []).slice()
+      : [],
     regionBoundaries: !!cfg("defaults.showRegionBoundaries", false),
     traditionalDetail: cfg("defaults.traditionalDetail", "battlefields"),
     mapScale: Number(cfg("defaults.mapScale", 1)),
     projectionViews: {},
+    coordinateViewSemantics: 2,
     selectedObject: null,
   };
 
@@ -668,11 +679,13 @@
       state.instant = defaults.instant;
     if (!Number.isFinite(Number(state.lat)) || Math.abs(Number(state.lat)) > 90)
       state.lat = defaults.lat;
+    else state.lat = Number(state.lat);
     if (
       !Number.isFinite(Number(state.lon)) ||
       Math.abs(Number(state.lon)) > 180
     )
       state.lon = defaults.lon;
+    else state.lon = Number(state.lon);
     if (!state.zone || typeof state.zone !== "string")
       state.zone = defaults.zone;
     if (!["zh", "en"].includes(state.lang)) state.lang = "zh";
@@ -697,6 +710,22 @@
       state.traditionalDetail = "battlefields";
     if (!state.projectionViews || typeof state.projectionViews !== "object")
       state.projectionViews = {};
+    if (state.coordinateViewSemantics !== defaults.coordinateViewSemantics) {
+      state.projectionViews = {};
+      state.coordinateViewSemantics = defaults.coordinateViewSemantics;
+    }
+    const allowedMenuSections = new Set(
+      Array.isArray(cfg("menu.collapsible", []))
+        ? cfg("menu.collapsible", [])
+        : [],
+    );
+    if (!Array.isArray(state.menuCollapsed))
+      state.menuCollapsed = Array.isArray(cfg("menu.defaultCollapsed", []))
+        ? cfg("menu.defaultCollapsed", []).slice()
+        : [];
+    state.menuCollapsed = state.menuCollapsed.filter((id) =>
+      allowedMenuSections.has(id),
+    );
     state.mapScale = viewMapScale(
       { mapScale: state.mapScale, zoom: state.zoom },
       defaults.mapScale,
@@ -950,6 +979,8 @@
     $("explain-btn").innerHTML = "<b>?</b>";
     $("explain-btn").title = t("technicalGuide");
     $("explain-btn").setAttribute("aria-label", t("technicalGuide"));
+    $("reset-defaults-btn").title = t("resetDefaults");
+    $("reset-defaults-btn").setAttribute("aria-label", t("resetDefaults"));
     document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
       const key = el.dataset.i18nPlaceholder;
       if (I18N[state.lang][key]) el.placeholder = I18N[state.lang][key];
@@ -1422,14 +1453,21 @@
   }
 
   function applyMenuSectionOrder(panel = $("control-panel")) {
-    if (!panel || panel.dataset.menuOrdered === "true") return;
+    if (!panel || panel.dataset.menuOrderChecked === "true") return;
     const configured = cfg("menu.order", []),
       order = Array.isArray(configured) ? configured : [];
-    order
-      .map((id) => panel.querySelector(`[data-menu-id="${id}"]`))
-      .filter(Boolean)
-      .forEach((section) => panel.appendChild(section));
-    panel.dataset.menuOrdered = "true";
+    const actual = Array.from(panel.querySelectorAll("[data-menu-id]")).map(
+      (section) => section.dataset.menuId,
+    );
+    const mismatch =
+      order.length &&
+      order.some((id, index) => actual[index] && actual[index] !== id);
+    if (mismatch)
+      console.warn("Menu section order differs from config.menu.order", {
+        expected: order,
+        actual,
+      });
+    panel.dataset.menuOrderChecked = "true";
   }
 
   /**
@@ -1457,12 +1495,20 @@
       );
       if (!collapsible.has(id) || !title) return;
       section.classList.add("section-collapsible");
+      const collapsed = state.menuCollapsed.includes(id);
+      section.classList.toggle("section-collapsed", collapsed);
       title.setAttribute("role", "button");
       title.setAttribute("tabindex", "0");
-      title.setAttribute("aria-expanded", "true");
+      title.setAttribute("aria-expanded", String(!collapsed));
       const toggle = () => {
         const collapsed = section.classList.toggle("section-collapsed");
         title.setAttribute("aria-expanded", String(!collapsed));
+        state.menuCollapsed = Array.from(
+          panel.querySelectorAll(".section-collapsible.section-collapsed"),
+        )
+          .map((item) => item.dataset.menuId)
+          .filter(Boolean);
+        save();
       };
       title.addEventListener("click", toggle);
       title.addEventListener("keydown", (event) => {
@@ -1904,7 +1950,7 @@
             centerDelta: "map center delta from pane",
             celestial: "celestial metrics",
             projection: "current projection",
-            coords: "current coordinate system",
+            coords: "current coordinate view",
             culture: "current sky culture",
             language: "language",
             viewKey: "saved view key",
@@ -2353,13 +2399,26 @@
     };
   }
   function desiredView() {
+    const fallback = coordinateViewDefault();
     return (
-      (state.projectionViews && state.projectionViews[viewKey()]) ||
-      PROJECTION_DEFAULTS[state.projection] || {
+      (state.projectionViews && state.projectionViews[viewKey()]) || fallback
+    );
+  }
+  function coordinateViewDefault(
+    coord = state.coordinateSystem,
+    projection = state.projection,
+  ) {
+    const projectionDefault = PROJECTION_DEFAULTS[projection] || {
         center: [0, 0, 0],
         mapScale: 1,
-      }
-    );
+      },
+      configured = cfg(`resetViews.${coord}`, {});
+    return {
+      center: Array.isArray(configured.center)
+        ? configured.center.slice()
+        : projectionDefault.center.slice(),
+      mapScale: viewMapScale(configured, projectionDefault.mapScale),
+    };
   }
   function setMapScale(value, options = {}) {
     const next = clampMapScale(value);
@@ -2653,9 +2712,7 @@
     });
   }
   function projectionCoordinateTransform() {
-    return state.coordinateSystem === "horizontal"
-      ? "equatorial"
-      : state.coordinateSystem;
+    return "equatorial";
   }
   function isHorizontalView() {
     return state.coordinateSystem === "horizontal";
@@ -3125,24 +3182,11 @@
   }
   function displayCoordinateForEquatorial(coord) {
     if (!coord) return null;
-    const equatorial = [
-      normalizeCelestialLongitude(coord[0]),
-      Number(coord[1]),
-    ];
-    if (
-      state.coordinateSystem === "horizontal" ||
-      state.coordinateSystem === "equatorial"
-    )
-      return equatorial;
-    try {
-      return Celestial.getPoint(equatorial, state.coordinateSystem);
-    } catch (_) {
-      return equatorial;
-    }
+    return [normalizeCelestialLongitude(coord[0]), Number(coord[1])];
   }
   /**
    * 计算当前 UTC 瞬时的太阳、月球和行星位置。
-   * 返回赤道坐标，以及按当前坐标视角转换后的显示坐标；绘制和点击拾取共用同一结果。
+   * 返回赤道坐标；绘制和点击拾取共用同一套稳定赤道基准。
    */
   function currentPlanetPositions() {
     const objects = window.__RSO_PLANET_OBJECTS__ || [],
@@ -4133,7 +4177,7 @@
           opacity: Number(cfg("sky.ecliptic.opacity", 0.82)),
         },
         galactic: {
-          show: state.coordinateSystem === "galactic",
+          show: false,
           stroke: cfg("labels.galacticGridColor", "#a887e7"),
           width: Number(cfg("labels.galacticGridWidth", 1)),
           opacity: Number(cfg("labels.galacticGridOpacity", 0.58)),
@@ -4499,8 +4543,8 @@
 
   /**
    * 将时间和观测者变化应用到可见星图。
-   * 地平模式会旋转到当地天顶；非地平模式的目录坐标已经转换完成，
-   * 因此只在强制刷新时重绘。
+   * 地平坐标视角会旋转到当地天顶；其他坐标视角保持当前保存的视图中心，
+   * 只在强制刷新时重绘。
    */
   function updateSkyView(force = false) {
     if (!skyReady || !window.Celestial || !DateTime) return;
@@ -4868,9 +4912,9 @@
   }
 
   /**
-   * 坐标视角变化时重建已转换的目录几何。
-   * 临时 Canvas 快照用于遮罩重建过程；数据层提供新副本，
-   * 让 D3-Celestial 可以安全地原地转换 GeoJSON。
+   * 完整重载星图渲染器。
+   * 只用于启动和真正需要重建 D3-Celestial 实例的回退路径；
+   * 坐标视角切换不走这里，避免重复转换离线 GeoJSON。
    */
   function rebuildSkyPreservingPixels(view) {
     if (rebuildInProgress) return;
@@ -4942,8 +4986,9 @@
     }
   }
   /**
-   * 在地平、赤道、黄道和银河坐标之间切换。
-   * 这是普通界面操作中唯一需要重建目录几何的路径。
+   * 在地平、赤道、黄道和银河坐标视角之间切换。
+   * 坐标视角只恢复对应视图中心和缩放，不改变 D3-Celestial transform，
+   * 也不重建星表、星座、星官、边界或深空数据。
    */
   function switchCoordinateSystem(next) {
     if (!["horizontal", "equatorial", "ecliptic", "galactic"].includes(next))
@@ -4957,14 +5002,8 @@
     save();
     updateProjectionHelp();
     updateHUD(false);
-    const target = desiredView();
-    state.mapScale = viewMapScale(target, state.mapScale);
-    try {
-      rebuildSkyPreservingPixels(target);
-    } catch (err) {
-      console.warn("Coordinate switch failed", err);
-      initialDisplay(target);
-    }
+    resetCurrentCoordinateView({ preferSaved: true });
+    redrawAndSyncMapBox("coordinate view switch");
   }
 
   function clamp(value, min, max) {
@@ -5004,7 +5043,7 @@
     if (
       event.button !== 0 ||
       event.target.closest(
-        "canvas,button,input,select,textarea,#debug-overlay,.info-card-rso,.fixed-tools",
+        "canvas,button,input,select,textarea,#debug-overlay,.info-card-rso",
       )
     )
       return;
@@ -5061,13 +5100,19 @@
    * 把当前坐标视角恢复到该视角的默认中心和缩放。
    * 不修改地点、时间、文化体系、显示参数、字体缩放或选中天体。
    */
-  function resetCurrentCoordinateView() {
+  function resetCurrentCoordinateView(options = {}) {
     try {
-      const configured = cfg(`resetViews.${state.coordinateSystem}`, {
-        center: [0, 0, 0],
-        mapScale: 1,
-      });
-      const targetScale = viewMapScale(configured, defaults.mapScale);
+      const saved =
+          options.preferSaved &&
+          state.projectionViews &&
+          state.projectionViews[viewKey()],
+        configured = saved || coordinateViewDefault(),
+        targetScale = viewMapScale(configured, defaults.mapScale);
+      if (saved) {
+        restoreView(saved);
+        save();
+        return;
+      }
       if (state.coordinateSystem === "horizontal") {
         // 地平坐标视角的默认中心依赖当前地点和时刻，由 skyview() 重新计算。
         updateSkyView(true);
@@ -5102,6 +5147,20 @@
       restoreView(v);
       save();
     } catch (_) {}
+  }
+
+  function resetAllDefaults() {
+    if (!window.confirm(t("resetDefaultsConfirm"))) return;
+    const storage = getStorage();
+    try {
+      if (storage) storage.removeItem(STORAGE_KEY);
+    } catch (err) {
+      console.warn("Default reset could not remove stored state", err);
+    }
+    currentSelected = null;
+    const search = $("object-search");
+    if (search) search.value = "";
+    window.location.reload();
   }
 
   /**
@@ -5332,6 +5391,7 @@
       selectGuidePage(Number(e.target.value)),
     );
     $("guide-next-page").addEventListener("click", () => setGuidePage(1));
+    $("reset-defaults-btn").addEventListener("click", resetAllDefaults);
     $("close-modal").addEventListener("click", () =>
       $("tech-modal").classList.remove("open"),
     );

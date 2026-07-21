@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <meta content="dark" name="color-scheme" />
-    <title>真实星空观测台 5.1.6 本地版 · Real Sky Observatory</title>
+    <title>真实星空观测台 5.1.7 本地版 · Real Sky Observatory</title>
     <link href="vendor/d3-celestial/celestial.css" rel="stylesheet" />
     <link href="assets/app.css" rel="stylesheet" />
   </head>
@@ -17,7 +17,7 @@
     <header class="topbar">
       <div class="brand glass">
         <div class="brand-main">
-          <i class="signal"></i><span>REAL SKY OBSERVATORY 5.1.6</span>
+          <i class="signal"></i><span>REAL SKY OBSERVATORY 5.1.7</span>
         </div>
         <div class="brand-sub" data-i18n="brandSub">
           真实地点 × 真实时间 × 真实星表 × 双天文文化
@@ -52,6 +52,43 @@
       </div>
     </header>
     <aside class="glass" id="control-panel">
+      <section class="section" data-menu-id="viewTools" id="view-tools-section">
+        <div class="section-title">
+          <span data-i18n="viewTools">视图控制</span
+          ><span data-i18n="viewToolsHint">不改变地点与时间</span>
+        </div>
+        <div class="view-tools-grid">
+          <button id="zoom-out" title="Zoom out">−</button
+          ><button id="zoom-in" title="Zoom in">＋</button
+          ><button data-i18n="resetView" id="reset-view">重置视图</button
+          ><button data-i18n="fullscreen" id="fullscreen">全屏</button
+          ><button id="font-decrease" title="A−">A−</button
+          ><button id="font-increase" title="A+">A+</button>
+        </div>
+      </section>
+      <section class="section" data-menu-id="search" id="object-search-section">
+        <div class="section-title">
+          <span data-i18n="objectSearch">天体搜索</span
+          ><span data-i18n="objectSearchHint">恒星 / 行星 / 星座 / 星官 / 深空</span>
+        </div>
+        <div class="object-search-wrap">
+          <div class="field">
+            <label data-i18n="objectSearch" for="object-search">天体搜索</label>
+            <input
+              autocomplete="off"
+              data-i18n-placeholder="objectSearchPlaceholder"
+              id="object-search"
+              placeholder="输入名称或 HIP 编号"
+              type="text"
+            />
+          </div>
+          <div
+            class="object-suggestions"
+            id="object-suggestions"
+            role="listbox"
+          ></div>
+        </div>
+      </section>
       <section class="section" data-menu-id="observer" id="observer-section">
         <div class="section-title">
           <span data-i18n="observer">观测地点</span
@@ -379,7 +416,7 @@
           >
           <select id="coordinate-select">
             <option data-i18n="horizontalCoordinates" value="horizontal">
-              地平坐标视角
+              地平坐标视角（当地天空）
             </option>
             <option data-i18n="equatorialCoordinates" value="equatorial">
               赤道坐标视角
@@ -524,43 +561,6 @@
           “语言”控制界面与重要恒星名称；“星官”控制天区划分、连线和名称体系。两者互相独立。
         </div>
       </section>
-      <section class="section" data-menu-id="viewTools" id="view-tools-section">
-        <div class="section-title">
-          <span data-i18n="viewTools">视图控制</span
-          ><span data-i18n="viewToolsHint">不改变地点与时间</span>
-        </div>
-        <div class="view-tools-grid">
-          <button id="zoom-out" title="Zoom out">−</button
-          ><button id="zoom-in" title="Zoom in">＋</button
-          ><button data-i18n="resetView" id="reset-view">重置视图</button
-          ><button data-i18n="fullscreen" id="fullscreen">全屏</button
-          ><button id="font-decrease" title="A−">A−</button
-          ><button id="font-increase" title="A+">A+</button>
-        </div>
-      </section>
-      <section class="section" data-menu-id="search" id="object-search-section">
-        <div class="section-title">
-          <span data-i18n="objectSearch">天体搜索</span
-          ><span data-i18n="objectSearchHint">恒星 / 行星 / 星座 / 星官 / 深空</span>
-        </div>
-        <div class="object-search-wrap">
-          <div class="field">
-            <label data-i18n="objectSearch" for="object-search">天体搜索</label>
-            <input
-              autocomplete="off"
-              data-i18n-placeholder="objectSearchPlaceholder"
-              id="object-search"
-              placeholder="输入名称或 HIP 编号"
-              type="text"
-            />
-          </div>
-          <div
-            class="object-suggestions"
-            id="object-suggestions"
-            role="listbox"
-          ></div>
-        </div>
-      </section>
       <section class="section" data-menu-id="objectInfo" id="object-info-section">
         <div class="section-title">
           <span data-i18n="selectedObject">选中天体</span
@@ -629,6 +629,7 @@
     ><button id="explain-btn" title="代码与计算说明" aria-label="代码与计算说明">
       <b>?</b>
     </button>
+    <button id="reset-defaults-btn" title="恢复默认配置" aria-label="恢复默认配置">↺</button>
     <div class="loading" id="loading">
       <div class="loader-box">
         <div class="orbit"></div>
@@ -666,7 +667,7 @@
           <article class="doc" data-doc-lang="zh">
             <h3>1. 项目目标、适用范围与总体架构</h3>
             <p>
-              真实星空观测台 5.1.6
+              真实星空观测台 5.1.7
               是一个完全本地化的浏览器天文馆。它不是随机星点动画，而是读取真实恒星目录、现代西方星座、中国传统星官、银河轮廓和太阳系天体数据，以观测者的经纬度、IANA
               时区和 UTC
               时刻为输入，计算并绘制当前天空。适合肉眼认星、天文文化比较、天球坐标教学和一般观测规划；不替代专业天体测量、精密历表、赤道仪自动指向或天文摄影规划软件。
@@ -809,10 +810,7 @@
               把度转换为时、分、秒；赤纬使用带正负号的角度。代码不再根据数值大小猜测角度或弧度。
             </p>
             <p>
-              坐标视角与投影是两个独立概念。坐标视角决定数据使用地平、赤道、黄道或银河基准；投影决定球面如何压到平面。地平模式的底层目录仍以赤道坐标载入，再根据地点和时刻旋转；切换到赤道、黄道或银河坐标时，D3-Celestial
-              需要重新转换 GeoJSON
-              坐标。为避免离线数据被重复原地变换，内置数据加载器每次返回独立深拷贝；重建期间用当前
-              Canvas 快照遮罩，完成后恢复视角。
+              坐标视角与投影是两个独立概念。坐标视角只决定当前视图朝向和默认重置中心；投影决定球面如何压到平面。底层星表、星座、星官、边界和深空数据始终以稳定赤道坐标为基准，不因选择黄道或银河坐标视角而重建。
             </p>
             <h3>4. 投影、视角、缩放、拖动与响应式布局</h3>
             <p>
@@ -860,8 +858,7 @@
               只切换列宽，<code>ResizeObserver</code> 触发
               <code>scheduleSkyResize()</code>，用
               <code>Celestial.resize()</code>
-              原位调整画布，不重载星表。真正需要重新转换坐标的数据重建由互斥标志和代数编号保护，避免
-              ResizeObserver 重入造成空图。
+              原位调整画布，不重载星表。只有启动和真正的渲染器回退路径才会完整重建，普通坐标视角切换不会重载目录。
             </p>
             <p>
               <b>投影与坐标视角必须分开理解：</b
@@ -1025,7 +1022,7 @@
               和地球位置计算太阳、月球及七大行星的赤道坐标，再按当前坐标视角转换、投影并绘制符号和名称；同一组动态坐标也用于点击拾取和信息框。普通开关通过
               <code>Celestial.apply()</code> 原位更新；投影通过
               <code>Celestial.reproject()</code>
-              更新；只有坐标视角变化需要重新转换目录。中国星官和传统天区使用
+              更新；坐标视角变化只恢复视图中心和缩放，不重新转换目录。中国星官和传统天区使用
               <code>Celestial.add()</code> 注册自定义 GeoJSON 图层，在每次
               <code>redraw</code>
               中依据文化模式、边界开关和细分层级决定是否绘制。
@@ -1130,7 +1127,7 @@
               注册为本地数据对象，并接管
               <code>d3.json()</code>。每次请求返回独立深拷贝，因为 D3-Celestial
               的 <code>getData()</code> 会原地转换 GeoJSON
-              坐标；这一处理保证坐标视角可以反复切换而不累积坐标误差。源数据归档在
+              坐标；这一处理保证启动和完整重载时不会累积坐标误差。源数据归档在
               <code>vendor/data/</code>，浏览器也直接从该目录读取。
             </p>
             <h3>8. 关键函数与状态流</h3>
@@ -1191,10 +1188,10 @@
                 <tr>
                   <td>
                     <code>switchCoordinateSystem()</code> /
-                    <code>rebuildSkyPreservingPixels()</code>
+                    <code>resetCurrentCoordinateView()</code>
                   </td>
                   <td>
-                    为新坐标系重新转换本地目录；使用快照、互斥锁和独立数据副本避免闪空与重入
+                    切换或重置坐标视角，只恢复该视角的中心与缩放，不重建目录
                   </td>
                 </tr>
                 <tr>
@@ -1260,12 +1257,12 @@
               天气、光污染和地形图层 / 手机陀螺仪与 AR 指向 /
               多套历史中国星图版本对照。
             </p>
-            <p><strong>说明页版本号：</strong>5.1.6</p>
+            <p><strong>说明页版本号：</strong>5.1.7</p>
           </article>
           <article class="doc" data-doc-lang="en">
             <h3>1. Purpose, scope and architecture</h3>
             <p>
-              Real Sky Observatory 5.1.6 is a fully local browser planetarium. It
+              Real Sky Observatory 5.1.7 is a fully local browser planetarium. It
               is not a random star field: it reads real stellar, constellation,
               Chinese asterism, Milky Way and Solar System datasets, combines
               them with the observer's coordinates, IANA time zone and UTC
@@ -1295,7 +1292,7 @@
                   <td>State</td>
                   <td>
                     Observer, UTC instant, language, culture, projection,
-                    coordinate system, layers and per-projection view
+                    coordinate view, layers and per-projection view
                   </td>
                   <td>
                     Single validated <code>state</code> object persisted in
@@ -1392,13 +1389,10 @@
               radians from numeric range.
             </p>
             <p>
-              Coordinate view and map projection are separate. Horizontal mode
-              loads equatorial catalog coordinates and rotates them to the local
-              sky; equatorial, ecliptic and galactic modes transform the catalog
-              geometry. D3-Celestial transforms GeoJSON in place, so the bundled
-              loader returns a fresh deep copy on every coordinate rebuild. A
-              canvas snapshot masks the brief conversion and the previous view
-              is restored.
+              Coordinate view and map projection are separate. Coordinate views
+              only change the viewing direction and reset centre. Catalogs,
+              constellation geometry, boundaries and deep-sky data stay on the
+              stable equatorial base.
             </p>
             <h3>4. Projections, view state and interaction</h3>
             <p>
@@ -1421,13 +1415,13 @@
               <code>projectionCanvasMetrics()</code> fits the largest complete
               Canvas into the pane; undeclared global projections use the
               conventional 2:1 ratio. E/S/W/N are attached to the actual Canvas
-              boundary. Each coordinate-system/projection pair has its own saved
+              boundary. Each coordinate-view/projection pair has its own saved
               centre and zoom. Projection changes use
               <code>Celestial.reproject()</code>; ordinary display changes use
               <code>Celestial.apply()</code>; layout resizing uses
               <code>Celestial.resize()</code> without catalog reload. Coordinate
-              transforms are the only operation requiring catalog conversion,
-              protected by a rebuild lock and generation token.
+              view changes only restore centres and scales; catalog conversion
+              is not part of that path.
             </p>
             <h3>4A. A beginner’s guide to the 14 projections</h3>
             <p>
@@ -1509,7 +1503,7 @@
               <code>registerPlanetOverlay()</code>.
               <code>currentPlanetPositions()</code> computes the Sun, Moon and
               seven planets for the current UTC instant and Earth origin, then
-              transforms, projects, draws and exposes the same positions for
+              projects, draws and exposes the same equatorial-base positions for
               picking. <code>registerChineseOverlay()</code> and
               <code>registerTraditionalRegionsOverlay()</code> add custom
               GeoJSON. Chinese labels use simple screen-distance suppression;
@@ -1623,8 +1617,8 @@
               verify the real star layer;
               <code>applyVisualConfig()</code> updates ordinary layers;
               <code>switchProjection()</code> reprojects without catalog reload;
-              <code>switchCoordinateSystem()/rebuildSkyPreservingPixels()</code>
-              rebuild transformed geometry with a snapshot and lock;
+              <code>switchCoordinateSystem()/resetCurrentCoordinateView()</code>
+              restore the selected coordinate view centre and scale;
               <code>scheduleSkyResize()</code> performs in-place responsive
               resizing;
               <code
@@ -1664,7 +1658,7 @@
               mobile sensors and multiple historical Chinese sky
               reconstructions.
             </p>
-            <p><strong>Guide version:</strong> 5.1.6</p>
+            <p><strong>Guide version:</strong> 5.1.7</p>
           </article>
         </div>
       </div>

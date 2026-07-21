@@ -524,26 +524,6 @@ input[type="range"] {
   font-size: calc(9px * var(--rso-font-scale));
   line-height: 1.65;
 }
-.fixed-tools {
-  position: fixed;
-  z-index: 9;
-  left: 17px;
-  bottom: 16px;
-  display: flex;
-  gap: 7px;
-}
-.fixed-tools.right {
-  left: auto;
-  right: 17px;
-}
-.fixed-tools button {
-  height: 39px;
-  min-width: 39px;
-  background: var(--panel);
-  backdrop-filter: blur(16px);
-  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
-  font-size: 12px;
-}
 #explain-btn {
   position: fixed;
   z-index: 80;
@@ -560,6 +540,23 @@ input[type="range"] {
   color: #ffe4a5;
   background: rgba(45, 35, 19, 0.87);
   font-size: calc(16px * var(--rso-font-scale));
+  font-weight: 900;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
+}
+#reset-defaults-btn {
+  position: fixed;
+  z-index: 80;
+  left: var(--reset-toggle-left, 92px);
+  top: var(--panel-toggle-top, 8px);
+  width: var(--panel-toggle-size, 36px);
+  height: var(--panel-toggle-size, 36px);
+  min-width: 0;
+  padding: 0;
+  border-color: rgba(119, 220, 255, 0.36);
+  border-radius: 10px;
+  color: #dff7ff;
+  background: rgba(12, 30, 51, 0.88);
+  font-size: calc(17px * var(--rso-font-scale));
   font-weight: 900;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.38);
 }
@@ -849,13 +846,6 @@ body.lang-en [data-doc-lang="en"] {
     bottom: 58px;
     width: min(335px, calc(100vw - 18px));
   }
-  .fixed-tools {
-    left: 9px;
-    bottom: 9px;
-  }
-  .fixed-tools.right {
-    right: 9px;
-  }
   #celestial-frame {
     min-width: 0;
     min-height: 0;
@@ -1066,29 +1056,6 @@ body.panel-collapsed #sidebar {
   box-sizing: border-box;
   touch-action: none;
   user-select: none;
-}
-.fixed-tools {
-  position: absolute;
-  z-index: 14;
-  left: 10px;
-  bottom: 10px;
-}
-.fixed-tools.right {
-  position: absolute;
-  z-index: 14;
-  left: auto;
-  right: 10px;
-  bottom: 10px;
-}
-#panel-toggle {
-  position: absolute;
-  z-index: 20;
-  left: 10px;
-  top: 10px;
-  bottom: auto;
-}
-body:not(.panel-collapsed) #panel-toggle {
-  left: 10px;
 }
 .city-search-wrap {
   position: relative;
@@ -1535,7 +1502,10 @@ select optgroup {
 #debug-toggle {
   position: fixed;
   z-index: 80;
-  left: var(--debug-toggle-left, 98px);
+  left: var(
+    --debug-toggle-left,
+    calc(var(--reset-toggle-left, 92px) + var(--panel-toggle-size, 36px) + 6px)
+  );
   top: var(--debug-toggle-top, 8px);
   width: var(--debug-toggle-width, 46px);
   height: var(--debug-toggle-height, 36px);
@@ -1662,9 +1632,6 @@ select optgroup {
 }
 .info-grid dd {
   color: var(--info-text);
-}
-.fixed-tools {
-  display: none !important;
 }
 @media (max-width: 800px) {
   #sky-meta {

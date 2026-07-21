@@ -1,5 +1,5 @@
 /**
- * 真实星空观测台 5.1.6 —— 用户可配置文件
+ * 真实星空观测台 5.1.7 —— 用户可配置文件
  * ------------------------------------------------------------
  * 修改本文件后，运行 npm run build 并刷新 index.html 即可生效。
  * 建议每次只修改一个参数，并保留原值，便于出现问题时恢复。
@@ -59,6 +59,7 @@ window.RSO_CONFIG = {
     ],
     collapsible: ["observer", "time", "viewProjection", "display"],
     alwaysExpanded: ["viewTools", "search", "objectInfo", "status"],
+    defaultCollapsed: ["observer", "time", "viewProjection", "display"],
   },
 
   /** 调试面板：开发时打开，完成后可把 enabled 改为 false 隐藏开关 */
@@ -122,8 +123,9 @@ window.RSO_CONFIG = {
     showDeepSky: false,
     timeSpeed: 3600,
     panelOpen: true,
+    menuCollapsed: ["observer", "time", "viewProjection", "display"],
     projection: "airy",
-    coordinateSystem: "horizontal", // horizontal / equatorial / ecliptic / galactic
+    coordinateSystem: "horizontal", // 坐标视角：horizontal / equatorial / ecliptic / galactic；不改变底层 transform
     showRegionBoundaries: false,
     traditionalDetail: "battlefields", // major / battlefields / mansions
     mapScale: 1, // 初始星图画布缩放；1 表示画布短边等于 sky-pane 短边
@@ -328,15 +330,16 @@ window.RSO_CONFIG = {
   },
 
   /**
-   * “重置视图”使用的默认中心与应用层画布缩放。
+   * “坐标视角”使用的默认中心与应用层画布缩放。
    * center = [经向中心, 纬向中心, 旋转角]，单位为度。
+   * 这些值只决定视图朝向，不是 D3-Celestial 的 transform 配置。
    * horizontal 的中心会优先由当前地点和时间的天顶动态计算；这里是回退值。
    */
   resetViews: {
     horizontal: { center: [0, 0, 0], mapScale: 1 },
     equatorial: { center: [0, 0, 0], mapScale: 1 },
-    ecliptic: { center: [0, 0, 0], mapScale: 1 },
-    galactic: { center: [0, 0, 0], mapScale: 1 },
+    ecliptic: { center: [0, -23.44, 0], mapScale: 1 },
+    galactic: { center: [-93.6, -28.94, 0], mapScale: 1 },
   },
 
   /** 说明：下面列出各投影初始缩放，可单独微调 */
