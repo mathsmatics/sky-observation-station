@@ -1563,3 +1563,74 @@ select optgroup {
   visibility: hidden !important;
   pointer-events: none !important;
 }
+
+/* 5.2.3 UI interaction refinements */
+.time-step-row {
+  display: grid;
+  grid-template-columns: 38px minmax(58px, 0.72fr) minmax(86px, 1fr) 38px;
+  gap: 6px;
+  align-items: center;
+  margin: 8px 0 6px;
+}
+.time-step-row input,
+.time-step-row select,
+.time-step-button {
+  min-height: 34px;
+}
+.time-step-row input {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.play-row {
+  margin-top: 7px;
+}
+.city-option.active,
+.object-option.active {
+  border-color: rgba(119, 220, 255, 0.58);
+  background: rgba(77, 150, 206, 0.26);
+}
+.floating-object-info-card #floating-object-title {
+  display: block;
+  margin: 5px 0 6px;
+  color: var(--info-title, #f4fbff);
+  font-size: calc(13px * var(--rso-font-scale));
+  line-height: 1.35;
+}
+#floating-object-meta {
+  min-width: 0;
+  color: var(--info-muted, #8da4bb);
+  font-size: calc(10px * var(--rso-font-scale));
+  overflow-wrap: anywhere;
+}
+.floating-info-lines {
+  display: grid;
+  gap: 4px;
+}
+.floating-info-line {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  color: var(--info-text, #d8e8f5);
+  font-size: calc(10px * var(--rso-font-scale));
+  line-height: 1.38;
+}
+.floating-info-note {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--info-text, #d8e8f5);
+  font-size: calc(10px * var(--rso-font-scale));
+  line-height: 1.45;
+}
+#sky-pane:focus-visible {
+  outline: 1px solid rgba(119, 220, 255, 0.45);
+  outline-offset: -3px;
+}
+@media (max-width: 430px) {
+  .time-step-row {
+    grid-template-columns: 36px 1fr 1fr 36px;
+  }
+  .floating-info-line {
+    grid-template-columns: 1fr;
+  }
+}

@@ -137,6 +137,11 @@ import {
       play: "▶ 播放",
       pause: "❚❚ 暂停",
       timeSpeed: "时间流速",
+      timeStepMinutes: "分钟",
+      timeStepHours: "小时",
+      timeStepDays: "天",
+      timeStepYears: "年",
+      invalidTimeStep: "请输入大于 0 的整数时间步长",
       speed1: "×1 实时",
       speed60: "×60：1 秒 = 1 分钟",
       speed600: "×600：1 秒 = 10 分钟",
@@ -247,6 +252,11 @@ import {
       play: "▶ Play",
       pause: "❚❚ Pause",
       timeSpeed: "Time speed",
+      timeStepMinutes: "min",
+      timeStepHours: "hour",
+      timeStepDays: "day",
+      timeStepYears: "year",
+      invalidTimeStep: "Enter a positive integer time step",
       speed1: "×1 real time",
       speed60: "×60: 1 sec = 1 min",
       speed600: "×600: 1 sec = 10 min",
@@ -500,7 +510,7 @@ import {
     traditionalDetail: cfg("defaults.traditionalDetail", "battlefields"),
     mapScale: Number(cfg("defaults.mapScale", 1)),
     projectionViews: {},
-    coordinateViewSemantics: 4,
+    coordinateViewSemantics: 5,
     selectedObject: null,
   };
 
@@ -1953,16 +1963,15 @@ import {
   ) {
     const pane = skyPaneSize(),
       ratio = projectionNaturalRatio(name),
-      baseShortSide = Math.max(1, Math.min(pane.width, pane.height)),
+      fitPadding = 0.96,
+      widthFactor = ratio >= 1 ? ratio : 1,
+      heightFactor = ratio >= 1 ? 1 : 1 / Math.max(ratio, 0.0001),
+      fitByWidth = pane.width / widthFactor,
+      fitByHeight = pane.height / heightFactor,
+      baseFitSide = Math.max(1, Math.min(fitByWidth, fitByHeight) * fitPadding),
       mapScale = clampMapScale(scale);
-    let width, height;
-    if (ratio >= 1) {
-      height = baseShortSide * mapScale;
-      width = height * ratio;
-    } else {
-      width = baseShortSide * mapScale;
-      height = width / ratio;
-    }
+    let width = baseFitSide * widthFactor * mapScale,
+      height = baseFitSide * heightFactor * mapScale;
     width = Math.max(1, Math.round(width));
     height = Math.max(1, Math.round(height));
     return {
@@ -1970,7 +1979,7 @@ import {
       paneHeight: pane.height,
       paneCenterX: pane.width / 2,
       paneCenterY: pane.height / 2,
-      baseShortSide,
+      baseShortSide: baseFitSide,
       ratio,
       scale: mapScale,
       width,
@@ -2058,6 +2067,10 @@ import {
     if (!skyReady || !window.Celestial) return;
     const v = captureView();
     state.projectionViews = state.projectionViews || {};
+    if (isHorizontalView()) {
+      state.projectionViews[viewKey()] = { mapScale: v.mapScale };
+      return;
+    }
     state.projectionViews[viewKey()] = {
       mapScale: v.mapScale,
       center: Array.isArray(v.center) ? v.center.slice() : v.center,
@@ -2065,9 +2078,14 @@ import {
   }
   function desiredView() {
     const fallback = coordinateViewDefault();
-    return (
-      (state.projectionViews && state.projectionViews[viewKey()]) || fallback
-    );
+    const saved = state.projectionViews && state.projectionViews[viewKey()];
+    if (isHorizontalView()) {
+      return {
+        ...fallback,
+        mapScale: viewMapScale(saved || fallback, fallback.mapScale),
+      };
+    }
+    return saved || fallback;
   }
   function coordinateViewDefault(
     coord = state.coordinateSystem,
@@ -2178,38 +2196,63 @@ import {
     const input = $("city-search"),
       box = $("city-suggestions");
     if (!input || !box) return;
+    let found = [],
+      activeIndex = -1,
+      composing = false;
+    const setActive = (index) => {
+      const buttons = Array.from(box.querySelectorAll(".city-option"));
+      activeIndex = buttons.length ? (index + buttons.length) % buttons.length : -1;
+      buttons.forEach((button, i) => {
+        button.classList.toggle("active", i === activeIndex);
+        button.setAttribute("aria-selected", String(i === activeIndex));
+      });
+      if (buttons[activeIndex]) buttons[activeIndex].scrollIntoView({ block: "nearest" });
+    };
+    const choose = (city) => {
+      if (!city) return;
+      input.value = state.lang === "zh" ? city.zh : city.en;
+      box.classList.remove("open");
+      setObserver(city.lat, city.lon, city.zone, city.zh, city.en, true);
+    };
     const render = (query = "") => {
       const q = String(query).trim().toLowerCase();
-      const found = CITIES.filter(
-        (c) => !q || citySearchText(c).includes(q),
-      ).slice(0, 40);
+      found = CITIES.filter((c) => !q || citySearchText(c).includes(q)).slice(0, 40);
       box.innerHTML = "";
-      found.forEach((c) => {
+      found.forEach((c, index) => {
         const b = document.createElement("button");
         b.type = "button";
         b.className = "city-option";
+        b.setAttribute("role", "option");
         b.innerHTML = `<span>${state.lang === "zh" ? c.zh : c.en}<small> · ${state.lang === "zh" ? c.en : c.zh}</small></span><small>${c.zone}</small>`;
+        b.addEventListener("mouseenter", () => setActive(index));
         b.addEventListener("mousedown", (e) => {
           e.preventDefault();
-          input.value = state.lang === "zh" ? c.zh : c.en;
-          box.classList.remove("open");
-          setObserver(c.lat, c.lon, c.zone, c.zh, c.en, true);
+          choose(c);
         });
         box.appendChild(b);
       });
       box.classList.toggle("open", found.length > 0);
+      setActive(found.length ? 0 : -1);
     };
+    input.addEventListener("compositionstart", () => (composing = true));
+    input.addEventListener("compositionend", () => (composing = false));
     input.addEventListener("focus", () => render(input.value));
     input.addEventListener("input", () => render(input.value));
     input.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        const q = input.value.trim().toLowerCase(),
-          c = CITIES.find(
-            (x) => x.zh === input.value.trim() || x.en.toLowerCase() === q,
-          );
-        if (c) {
-          setObserver(c.lat, c.lon, c.zone, c.zh, c.en, true);
-          box.classList.remove("open");
+      if (composing || e.isComposing) return;
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        if (!box.classList.contains("open")) render(input.value);
+        else setActive(activeIndex + 1);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        if (!box.classList.contains("open")) render(input.value);
+        else setActive(activeIndex - 1);
+      } else if (e.key === "Enter") {
+        const city = found[activeIndex] || CITIES.find((x) => x.zh === input.value.trim() || x.en.toLowerCase() === input.value.trim().toLowerCase());
+        if (city) {
+          e.preventDefault();
+          choose(city);
           input.blur();
         }
       } else if (e.key === "Escape") box.classList.remove("open");
@@ -3120,8 +3163,27 @@ import {
       .map((item) => item.entry);
   }
 
+  let objectSearchResults = [],
+    objectSearchActiveIndex = -1;
+
+  function setObjectSearchActive(index) {
+    const box = $("object-suggestions"),
+      buttons = box ? Array.from(box.querySelectorAll(".object-option")) : [];
+    objectSearchActiveIndex = buttons.length
+      ? (index + buttons.length) % buttons.length
+      : -1;
+    buttons.forEach((button, i) => {
+      button.classList.toggle("active", i === objectSearchActiveIndex);
+      button.setAttribute("aria-selected", String(i === objectSearchActiveIndex));
+    });
+    if (buttons[objectSearchActiveIndex])
+      buttons[objectSearchActiveIndex].scrollIntoView({ block: "nearest" });
+  }
+
   function renderObjectSuggestions(results, empty = false) {
     const box = $("object-suggestions");
+    objectSearchResults = results.slice();
+    objectSearchActiveIndex = -1;
     box.innerHTML = "";
     if (empty) {
       const div = document.createElement("div");
@@ -3131,10 +3193,11 @@ import {
       box.classList.add("open");
       return;
     }
-    results.forEach((entry) => {
+    results.forEach((entry, index) => {
       const button = document.createElement("button");
       button.className = "object-option";
       button.type = "button";
+      button.setAttribute("role", "option");
       const title =
         state.lang === "zh" ? entry.names[0] : entry.names[1] || entry.names[0];
       const name = document.createElement("span"),
@@ -3142,25 +3205,52 @@ import {
       name.textContent = title;
       type.textContent = objectSearchTypeLabel(entry.type);
       button.append(name, type);
-      button.addEventListener("click", () => selectObjectSearchResult(entry));
+      button.addEventListener("mouseenter", () => setObjectSearchActive(index));
+      button.addEventListener("mousedown", (e) => {
+        e.preventDefault();
+        selectObjectSearchResult(entry);
+      });
       box.appendChild(button);
     });
     box.classList.toggle("open", results.length > 0);
+    setObjectSearchActive(results.length ? 0 : -1);
   }
 
   function setupObjectSearch() {
     const input = $("object-search"),
       box = $("object-suggestions");
     if (!input || !box) return;
+    let composing = false;
+    input.addEventListener("compositionstart", () => (composing = true));
+    input.addEventListener("compositionend", () => (composing = false));
     input.addEventListener("input", () => {
       const value = input.value.trim();
       if (!value) {
         box.classList.remove("open");
         box.innerHTML = "";
+        objectSearchResults = [];
+        objectSearchActiveIndex = -1;
         return;
       }
       const results = searchObjects(value);
       renderObjectSuggestions(results, results.length === 0);
+    });
+    input.addEventListener("keydown", (e) => {
+      if (composing || e.isComposing) return;
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        if (objectSearchResults.length) setObjectSearchActive(objectSearchActiveIndex + 1);
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        if (objectSearchResults.length) setObjectSearchActive(objectSearchActiveIndex - 1);
+      } else if (e.key === "Enter") {
+        const entry = objectSearchResults[objectSearchActiveIndex] || objectSearchResults[0];
+        if (entry) {
+          e.preventDefault();
+          selectObjectSearchResult(entry);
+          input.blur();
+        }
+      } else if (e.key === "Escape") box.classList.remove("open");
     });
     document.addEventListener("click", (event) => {
       if (!event.target.closest("#object-search-section"))
@@ -3551,6 +3641,7 @@ import {
     if (obj.type === "star") {
       const n = STAR_NAMES[String(obj.d.id)] || {};
       const others = [n.name, n.zh, n.bayer, n.flam, n.hip, n.hd]
+        .map(cleanNameToken)
         .filter(Boolean)
         .filter((v, i, a) => a.indexOf(v) === i);
       if (others.length)
@@ -3647,10 +3738,11 @@ import {
     panel.className = "floating-object-info-card";
     panel.innerHTML = `
       <div class="floating-info-head">
-        <strong id="floating-object-title">—</strong>
+        <span id="floating-object-meta">—</span>
         <button id="floating-object-close" type="button">×</button>
       </div>
-      <dl id="floating-object-grid"></dl>
+      <strong id="floating-object-title">—</strong>
+      <div id="floating-object-grid" class="floating-info-lines"></div>
     `;
     $("sky-pane").appendChild(panel);
     $("floating-object-close").addEventListener("click", () => {
@@ -3658,6 +3750,61 @@ import {
       updateFloatingObjectInfo();
     });
     return panel;
+  }
+
+  function cleanNameToken(value) {
+    const token = simplifyChinese(String(value || "").trim());
+    if (!token || token === "/" || /^\/+$/u.test(token)) return "";
+    if (/^[0-9]+$/u.test(token)) return "";
+    if (/^[α-ωΑ-Ω]$/u.test(token)) return "";
+    return token.replace(/^\/+|\/+$/g, "").trim();
+  }
+
+  function floatingRowValue(rows, label) {
+    const row = rows.find(([key]) => key === label);
+    return row ? row[1] : "—";
+  }
+
+  function objectCatalogId(obj, rows) {
+    const p = (obj.d && obj.d.properties) || {};
+    if (obj.type === "star") {
+      const n = STAR_NAMES[String(obj.d.id)] || {};
+      const parts = [];
+      if (n.hip || obj.d.id) parts.push(`HIP ${String(n.hip || obj.d.id).replace(/^HIP\s*/i, "")}`);
+      if (n.hd) parts.push(`HD ${String(n.hd).replace(/^HD\s*/i, "")}`);
+      if (n.bayer) parts.push(String(n.bayer));
+      if (n.flam) parts.push(String(n.flam));
+      return parts.map(cleanNameToken).filter(Boolean).filter((v, i, a) => a.indexOf(v) === i).join(" / ") || floatingRowValue(rows, t("catalogId"));
+    }
+    if (obj.type === "dso") return p.desig || String(obj.d.id || "—");
+    if (obj.type === "planet") return String(obj.planetId || obj.d.id || "").toUpperCase();
+    return floatingRowValue(rows, t("catalogId"));
+  }
+
+  function renderFloatingObjectInfo(obj) {
+    const rows = objectRows(obj);
+    const type = floatingRowValue(rows, t("objectType"));
+    const catalog = objectCatalogId(obj, rows);
+    const name = cleanNameToken(
+      state.lang === "zh"
+        ? simplifyChinese(obj.label || objectLabel(obj.type, obj.d || { properties: {} }))
+        : obj.label || objectLabel(obj.type, obj.d || { properties: {} }),
+    ) || "—";
+    const line = (a, b, c, d) =>
+      `<div class="floating-info-line"><span>${a}：${b || "—"}</span><span>${c}：${d || "—"}</span></div>`;
+    const notes = rows
+      .filter(([key]) => key === t("westernCultureMeaning") || key === t("chineseCultureMeaning"))
+      .map(([key, value]) => `<div class="floating-info-note"><b>${key}</b>：${value}</div>`)
+      .join("");
+    return {
+      meta: catalog && catalog !== "—" ? `${type} / ${catalog}` : type,
+      title: name,
+      html:
+        line(t("magnitude"), floatingRowValue(rows, t("magnitude")), t("spectralInfo"), floatingRowValue(rows, t("spectralInfo"))) +
+        line(t("rightAscension"), floatingRowValue(rows, t("rightAscension")), t("declination"), floatingRowValue(rows, t("declination"))) +
+        line(t("altitude"), floatingRowValue(rows, t("altitude")), t("azimuth"), floatingRowValue(rows, t("azimuth"))) +
+        notes,
+    };
   }
 
   function updateFloatingObjectInfo() {
@@ -3668,8 +3815,10 @@ import {
       !floatingObjectInfoDismissed;
     panel.classList.toggle("open", visible);
     if (!visible) return;
-    $("floating-object-title").textContent = $("object-info-title").textContent;
-    $("floating-object-grid").innerHTML = $("object-info-grid").innerHTML;
+    const data = renderFloatingObjectInfo(currentSelected);
+    $("floating-object-meta").textContent = data.meta;
+    $("floating-object-title").textContent = data.title;
+    $("floating-object-grid").innerHTML = data.html;
   }
   function skyEventPoint(canvas, event) {
     const rect = canvas.getBoundingClientRect();
@@ -4139,10 +4288,10 @@ import {
         // 可能访问到 D3-Celestial 尚未初始化完成的内部中心。
         const savedView =
           state.projectionViews && state.projectionViews[viewKey()];
-        const shouldRestoreViewState =
-          viewState && !(isHorizontalView() && !savedView);
+        const shouldRestoreViewState = viewState && !isHorizontalView();
         if (shouldRestoreViewState) restoreView(viewState);
-        else if (savedView) restoreView(savedView);
+        else if (savedView && !isHorizontalView()) restoreView(savedView);
+        else if (isHorizontalView()) setMapScale(viewMapScale(savedView || desiredView(), state.mapScale));
         updateSelectedObject();
         setTimeout(() => {
           if (generation !== rebuildGeneration) return;
@@ -4348,6 +4497,41 @@ import {
     save();
     updateHUD(true);
     updateSkyView(true);
+  }
+
+  function commitObserverDateTimeInput() {
+    const input = $("observer-datetime");
+    const dt = parseObserverLocalTime(input.value);
+    if (!dt) {
+      showToast(t("invalidDateTime"), true);
+      updateHUD(true);
+      return false;
+    }
+    state.instant = dt.toISO();
+    playing = false;
+    save();
+    updateHUD(true);
+    updateSkyView(true);
+    return true;
+  }
+
+  function readTimeStepValue() {
+    const input = $("time-step-value");
+    const value = Math.floor(Number(input && input.value));
+    if (!Number.isFinite(value) || value < 1) {
+      if (input) input.value = "1";
+      showToast(t("invalidTimeStep"), true);
+      return 1;
+    }
+    if (input) input.value = String(value);
+    return value;
+  }
+
+  function shiftObserverTimeByControl(sign) {
+    const unitSelect = $("time-step-unit");
+    const unit = unitSelect ? unitSelect.value : "hours";
+    if (!["minutes", "hours", "days", "years"].includes(unit)) return;
+    shiftObserverTime(unit, readTimeStepValue() * (sign < 0 ? -1 : 1));
   }
 
   function resolveZone(lat, lon, explicitZone) {
@@ -4816,15 +5000,15 @@ import {
           options.preferSaved &&
           state.projectionViews &&
           state.projectionViews[viewKey()],
-        configured = saved || coordinateViewDefault(),
-        targetScale = viewMapScale(configured, defaults.mapScale);
-      if (saved) {
+        configured = state.coordinateSystem === "horizontal" ? coordinateViewDefault() : saved || coordinateViewDefault(),
+        targetScale = viewMapScale(saved || configured, defaults.mapScale);
+      if (state.coordinateSystem !== "horizontal" && saved) {
         restoreView(saved);
         save();
         return;
       }
       if (state.coordinateSystem === "horizontal") {
-        // 地平坐标视角的默认中心依赖当前地点和时刻，由 skyview() 重新计算。
+        // 地平坐标视角的中心始终由当前地点和时间的本地天空计算，不恢复旧 center。
         updateSkyView(true);
         clearTimeout(customViewRestoreTimer);
         customViewRestoreTimer = setTimeout(() => {
@@ -4832,11 +5016,7 @@ import {
             setMapScale(targetScale);
             resetInternalZoom();
             redrawAndSyncMapBox("horizontal reset");
-            const centre = Celestial.rotate();
-            state.projectionViews[viewKey()] = {
-              center: Array.isArray(centre) ? centre.slice() : [0, 0, 0],
-              mapScale: targetScale,
-            };
+            state.projectionViews[viewKey()] = { mapScale: targetScale };
             save();
           } catch (err) {
             console.warn("Horizontal reset failed", err);
@@ -4857,6 +5037,31 @@ import {
       restoreView(v);
       save();
     } catch (_) {}
+  }
+
+  function isTextEditingTarget(target) {
+    if (!target || !target.closest) return false;
+    return !!target.closest(
+      "input,select,textarea,[contenteditable='true'],.modal,#debug-overlay",
+    );
+  }
+
+  function panSkyByKeyboard(key) {
+    if (!skyReady || !window.Celestial || isTextEditingTarget(document.activeElement)) return false;
+    const center = Celestial.rotate();
+    if (!Array.isArray(center)) return false;
+    const step = Number(cfg("interaction.keyboardPanDegrees", 4)) || 4;
+    const next = center.slice();
+    if (key === "ArrowLeft") next[0] += step;
+    else if (key === "ArrowRight") next[0] -= step;
+    else if (key === "ArrowUp") next[1] = clamp(next[1] - step, -89.5, 89.5);
+    else if (key === "ArrowDown") next[1] = clamp(next[1] + step, -89.5, 89.5);
+    else return false;
+    Celestial.rotate({ center: next });
+    redrawAndSyncMapBox("keyboard pan");
+    saveCurrentProjectionView();
+    save();
+    return true;
   }
 
   function resetAllDefaults() {
@@ -4972,18 +5177,21 @@ import {
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 },
       );
     });
-    $("observer-datetime").addEventListener("change", () => {
-      const dt = parseObserverLocalTime($("observer-datetime").value);
-      if (!dt) {
-        showToast(t("invalidDateTime"), true);
-        updateHUD(true);
-        return;
+    $("observer-datetime").addEventListener("change", commitObserverDateTimeInput);
+    $("observer-datetime").addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.isComposing) {
+        e.preventDefault();
+        if (commitObserverDateTimeInput()) $("observer-datetime").blur();
       }
-      state.instant = dt.toISO();
-      playing = false;
-      save();
-      updateHUD(true);
-      updateSkyView(true);
+    });
+    $("time-step-minus").addEventListener("click", () => shiftObserverTimeByControl(-1));
+    $("time-step-plus").addEventListener("click", () => shiftObserverTimeByControl(1));
+    $("time-step-value").addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && !e.isComposing) {
+        e.preventDefault();
+        readTimeStepValue();
+        $("time-step-value").blur();
+      }
     });
     $("observer-now").addEventListener("click", () => {
       state.instant = new Date().toISOString();
@@ -5158,6 +5366,16 @@ import {
     $("sky-pane").addEventListener("pointermove", movePaneMarginDrag);
     $("sky-pane").addEventListener("pointerup", endPaneMarginDrag);
     $("sky-pane").addEventListener("pointercancel", endPaneMarginDrag);
+    $("sky-pane").setAttribute("tabindex", "0");
+    $("sky-pane").setAttribute(
+      "aria-label",
+      state.lang === "zh" ? "星图区域，可用方向键平移" : "Sky map, use arrow keys to pan",
+    );
+    document.addEventListener("keydown", (event) => {
+      if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
+      if (isTextEditingTarget(event.target)) return;
+      if (panSkyByKeyboard(event.key)) event.preventDefault();
+    });
     window.addEventListener("pointerup", () => {
       const m = $("celestial-map");
       if (m) m.classList.remove("dragging");
@@ -5219,7 +5437,7 @@ import {
     setupObjectSearch();
     bind();
     const fileMode = location.protocol === "file:";
-    $("geo-mode-note").style.display = fileMode ? "block" : "none";
+    if ($("geo-mode-note")) $("geo-mode-note").style.display = "none";
     initialDisplay(desiredView());
     requestAnimationFrame(animationLoop);
     if (fileMode) setTimeout(() => showToast(t("localServerHint")), 2200);
