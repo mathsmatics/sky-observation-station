@@ -1917,6 +1917,24 @@
     let rebuildInProgress = false, suppressResizeUntil = 0, rebuildGeneration = 0;
     let resizeObserver = null, clickStart = null, pointerMoved = false, paneDrag = null, poleCustomDrag = null;
     let currentSelected = null, customViewRestoreTimer = null, lastRenderedSize = null, debugVisible = !!cfg("debug.enabled", false) && !!cfg("debug.defaultOpen", false), lastDebugUpdate = 0, lastDebugPlainText = "", debugCopyStatus = "idle", debugCopyTimer = null, debugFramePending = false, layoutResizeGeneration = 0;
+    const timeRenderDebug = {
+      inputStatus: "valid",
+      activeField: "year",
+      fields: "-",
+      candidate: "-",
+      internalUtc: state.instant || "-",
+      jsDateYear: "-",
+      julianDate: "-",
+      updateSource: "startup",
+      skyviewStatus: "skipped",
+      redrawStatus: "skipped",
+      redrawReason: "startup",
+      redrawAt: "-",
+      planetStatus: "skipped",
+      planetCount: "-",
+      precision: "normal",
+      lastError: "-"
+    };
     let objectSearchIndex = null, searchHighlight = null, searchHighlightTimer = null, floatingObjectInfoDismissed = false;
     const STAR_NAMES = starNames();
     const DSO_NAMES = deepSkyNames();
@@ -2118,18 +2136,79 @@
       const dt = DateTime.fromISO(String(state.instant || ""), { zone: "utc" });
       return (dt.isValid ? dt : DateTime.fromISO(defaults.instant, { zone: "utc" })).toJSDate();
     }
+    function julianDateFromDate(date) {
+      if (!(date instanceof Date) || !Number.isFinite(date.getTime())) return null;
+      return date.getTime() / 864e5 + 24405875e-1;
+    }
+    function precisionStatusForYear(year) {
+      const y = Number(year);
+      if (!Number.isFinite(y)) return "unknown";
+      if (y >= 1900 && y <= 2100) return "normal";
+      if (y >= 1600 && y <= 2600) return "historical approximation";
+      return "far-date approximation";
+    }
+    function debugErrorText(err) {
+      if (!err) return "-";
+      if (err && err.message) return String(err.message);
+      return String(err);
+    }
+    function noteTimeRenderDebug(patch = {}) {
+      Object.assign(timeRenderDebug, patch);
+      if (debugVisible) updateDebugOverlay(true);
+    }
     function formatCivilDateTime(dt, includeSeconds = false) {
       const y = astronomicalYearToDisplay(dt.year);
       const base = `${y}/${String(dt.month).padStart(2, "0")}/${String(dt.day).padStart(2, "0")} ${String(dt.hour).padStart(2, "0")}:${String(dt.minute).padStart(2, "0")}`;
       return includeSeconds ? `${base}:${String(dt.second).padStart(2, "0")}` : base;
     }
-    const TIME_FIELD_IDS = [
-      "time-year",
-      "time-month",
-      "time-day",
-      "time-hour",
-      "time-minute"
-    ];
+    const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
+    const TIME_FIELD_TO_ID = {
+      year: "time-year",
+      month: "time-month",
+      day: "time-day",
+      hour: "time-hour",
+      minute: "time-minute"
+    };
+    const TIME_FIELD_ID_TO_KEY = Object.fromEntries(
+      Object.entries(TIME_FIELD_TO_ID).map(([key, id]) => [id, key])
+    );
+    const TIME_FIELD_IDS = Object.values(TIME_FIELD_TO_ID);
+    function timeFieldByKey(key) {
+      const id = TIME_FIELD_TO_ID[key];
+      return id ? $(id) : null;
+    }
+    function markTimeFieldSelected(field) {
+      if (!field) return;
+      field.dataset.replaceOnType = "1";
+      field.classList.add("time-part-active");
+      try {
+        field.select();
+      } catch (_) {
+      }
+      noteTimeRenderDebug({
+        inputStatus: "draft",
+        activeField: TIME_FIELD_ID_TO_KEY[field.id] || "-",
+        fields: timeFieldDebugText()
+      });
+    }
+    function focusTimeField(key) {
+      const field = timeFieldByKey(key);
+      if (!field) return;
+      requestAnimationFrame(() => {
+        field.focus({ preventScroll: true });
+        markTimeFieldSelected(field);
+      });
+    }
+    function moveTimeField(id, delta) {
+      const key = TIME_FIELD_ID_TO_KEY[id];
+      const index = TIME_FIELD_KEYS.indexOf(key);
+      if (index < 0) return;
+      const next = TIME_FIELD_KEYS[Math.max(0, Math.min(TIME_FIELD_KEYS.length - 1, index + delta))];
+      focusTimeField(next);
+    }
+    function timeFieldDebugText() {
+      return TIME_FIELD_KEYS.map((key) => `${key}=${timeFieldByKey(key)?.value || ""}`).join(" ");
+    }
     function displayTimeParts(dt = observerDT()) {
       return {
         year: astronomicalYearToInput(dt.year),
@@ -2143,9 +2222,12 @@
       TIME_FIELD_IDS.forEach((id) => {
         const el = $(id);
         if (!el) return;
+        const raw = String(el.value || "");
         if (id === "time-year") {
-          const len = Math.max(3, String(el.value || "").length || 4);
+          const len = Math.max(3, raw.length || 4);
           el.style.width = `${len + 0.8}ch`;
+        } else {
+          el.style.width = "2.4ch";
         }
       });
     }
@@ -2156,7 +2238,16 @@
       if ($("time-day")) $("time-day").value = parts.day;
       if ($("time-hour")) $("time-hour").value = parts.hour;
       if ($("time-minute")) $("time-minute").value = parts.minute;
+      TIME_FIELD_IDS.forEach((id) => {
+        const field = $(id);
+        if (field) field.dataset.replaceOnType = "1";
+      });
       setTimeFieldWidths();
+      noteTimeRenderDebug({
+        inputStatus: "valid",
+        fields: timeFieldDebugText(),
+        candidate: formatCivilDateTime(dt, false)
+      });
     }
     function reportInvalidTimeInput() {
       showToast(t("invalidDateTime"), true);
@@ -2200,18 +2291,51 @@
       const date = dt.toUTC().toJSDate();
       return Number.isFinite(date.getTime()) ? date : null;
     }
-    function applyObserverDateTime(dt, syncInputs = true) {
+    function applyObserverDateTime(dt, syncInputs = true, source = "time input", options = {}) {
       const utc = dt && dt.isValid ? dt.toUTC() : null;
-      if (!utc || !utc.isValid || !utc.toISO() || !renderableDateForDateTime(utc)) {
+      const date = utc ? renderableDateForDateTime(utc) : null;
+      const iso = utc && utc.isValid ? utc.toISO() : null;
+      if (!utc || !utc.isValid || !iso || !date) {
+        noteTimeRenderDebug({
+          inputStatus: "invalid",
+          updateSource: source,
+          lastError: "invalid or non-renderable time"
+        });
         reportInvalidTimeInput();
         if (syncInputs) syncTimeInputs();
         return false;
       }
-      state.instant = utc.toISO();
-      playing = false;
-      save();
+      const previousInstant = state.instant;
+      const previousPlaying = playing;
+      const jd = julianDateFromDate(date);
+      noteTimeRenderDebug({
+        inputStatus: "valid",
+        fields: timeFieldDebugText(),
+        candidate: formatCivilDateTime(utc.setZone(safeZoneForCoordinates()), false),
+        internalUtc: iso,
+        jsDateYear: String(date.getUTCFullYear()),
+        julianDate: jd == null ? "-" : jd.toFixed(5),
+        updateSource: source,
+        precision: precisionStatusForYear(utc.setZone(safeZoneForCoordinates()).year),
+        lastError: "-"
+      });
+      state.instant = iso;
+      if (!options.keepPlaying) playing = false;
       updateHUD(syncInputs);
-      updateSkyView(true);
+      const ok = updateSkyView(true, source);
+      if (!ok) {
+        state.instant = previousInstant;
+        playing = previousPlaying;
+        updateHUD(true);
+        noteTimeRenderDebug({
+          inputStatus: "invalid",
+          internalUtc: state.instant || "-",
+          lastError: `time update rolled back after ${source}`
+        });
+        reportInvalidTimeInput();
+        return false;
+      }
+      save();
       return true;
     }
     function formatLocalLong() {
@@ -3029,11 +3153,50 @@
             ).length
           )
         ]),
-        debugLine(zh ? "\u65F6\u95F4\u8F93\u5165" : "time input", [
-          debugValue(parseObserverTimeFields() ? "valid" : "draft/invalid")
+        debugLine(zh ? "\u65F6\u95F4\u8F93\u5165\u72B6\u6001" : "time input state", [
+          debugValue(timeRenderDebug.inputStatus || "-"),
+          debugSep(" field="),
+          debugValue(timeRenderDebug.activeField || "-")
+        ]),
+        debugLine(zh ? "\u8F93\u5165\u5B57\u6BB5" : "input fields", [
+          debugValue(timeRenderDebug.fields || timeFieldDebugText())
+        ]),
+        debugLine(zh ? "\u5019\u9009\u65F6\u95F4" : "candidate time", [
+          debugValue(timeRenderDebug.candidate || "-")
         ]),
         debugLine(zh ? "\u5185\u90E8 UTC" : "internal UTC", [
-          debugValue(state.instant || "-")
+          debugValue(timeRenderDebug.internalUtc || state.instant || "-")
+        ]),
+        debugLine(zh ? "JS Date \u5E74\u4EFD" : "JS Date year", [
+          debugValue(timeRenderDebug.jsDateYear || "-")
+        ]),
+        debugLine(zh ? "Julian Date" : "Julian Date", [
+          debugValue(timeRenderDebug.julianDate || "-")
+        ]),
+        debugLine(zh ? "\u66F4\u65B0\u65F6\u95F4\u6765\u6E90" : "time update source", [
+          debugValue(timeRenderDebug.updateSource || "-")
+        ]),
+        debugLine(zh ? "skyview \u72B6\u6001" : "skyview status", [
+          debugValue(timeRenderDebug.skyviewStatus || "-")
+        ]),
+        debugLine(zh ? "redraw \u72B6\u6001" : "redraw status", [
+          debugValue(timeRenderDebug.redrawStatus || "-"),
+          debugSep(" reason="),
+          debugValue(timeRenderDebug.redrawReason || "-")
+        ]),
+        debugLine(zh ? "redraw \u65F6\u95F4" : "redraw at", [
+          debugValue(timeRenderDebug.redrawAt || "-")
+        ]),
+        debugLine(zh ? "\u884C\u661F\u8BA1\u7B97" : "planet calculation", [
+          debugValue(timeRenderDebug.planetStatus || "-"),
+          debugSep(" count="),
+          debugValue(timeRenderDebug.planetCount)
+        ]),
+        debugLine(zh ? "\u8FDC\u65E5\u671F\u7CBE\u5EA6" : "date precision", [
+          debugValue(timeRenderDebug.precision || "-")
+        ]),
+        debugLine(zh ? "\u6700\u540E\u9519\u8BEF" : "last error", [
+          debugValue(timeRenderDebug.lastError || "-")
         ]),
         debugBlankLine(),
         debugGroup(label.interactionGroup),
@@ -3219,12 +3382,46 @@
       });
     }
     function redrawAndSyncMapBox(reason = "redraw", metrics = projectionCanvasMetrics()) {
+      let ok = true;
       try {
         Celestial.redraw();
+        noteTimeRenderDebug({
+          redrawStatus: "ok",
+          redrawReason: reason,
+          redrawAt: (/* @__PURE__ */ new Date()).toISOString()
+        });
       } catch (err) {
+        ok = false;
         console.warn("Celestial redraw failed", reason, err);
+        noteTimeRenderDebug({
+          redrawStatus: "failed",
+          redrawReason: reason,
+          redrawAt: (/* @__PURE__ */ new Date()).toISOString(),
+          lastError: `redraw failed: ${debugErrorText(err)}`
+        });
       }
       syncMapBoxAfterRedraw(metrics);
+      if (/time|location|observer|sky view|playback/i.test(String(reason))) {
+        requestAnimationFrame(() => {
+          try {
+            Celestial.redraw();
+            noteTimeRenderDebug({
+              redrawStatus: "ok",
+              redrawReason: `${reason} follow-up`,
+              redrawAt: (/* @__PURE__ */ new Date()).toISOString()
+            });
+          } catch (err) {
+            noteTimeRenderDebug({
+              redrawStatus: "failed",
+              redrawReason: `${reason} follow-up`,
+              redrawAt: (/* @__PURE__ */ new Date()).toISOString(),
+              lastError: `follow-up redraw failed: ${debugErrorText(err)}`
+            });
+          }
+          syncMapBoxAfterRedraw(projectionCanvasMetrics());
+        });
+      }
+      return ok;
     }
     function resizeCelestialCanvas(metrics = projectionCanvasMetrics()) {
       applyMapBoxMetrics(metrics);
@@ -3987,10 +4184,13 @@
     }
     function currentPlanetPositions() {
       const objects = window.__RSO_PLANET_OBJECTS__ || [], origin = window.__RSO_PLANET_ORIGIN__;
-      if (!origin || !objects.length) return [];
+      if (!origin || !objects.length) {
+        noteTimeRenderDebug({ planetStatus: "skipped", planetCount: 0 });
+        return [];
+      }
       try {
         const dt = currentInstantDate(), observer = origin(dt).spherical();
-        return objects.map((fn) => {
+        const planets = objects.map((fn) => {
           const body = fn(dt).equatorial(observer), ep = body && body.ephemeris || {}, eq = ep.pos;
           if (!eq || !Number.isFinite(eq[0]) || !Number.isFinite(eq[1]))
             return null;
@@ -4001,8 +4201,18 @@
             displayCoord: displayCoordinateForEquatorial(eq)
           };
         }).filter(Boolean);
+        noteTimeRenderDebug({
+          planetStatus: "ok",
+          planetCount: planets.length
+        });
+        return planets;
       } catch (err) {
         console.warn("Planet position calculation failed", err);
+        noteTimeRenderDebug({
+          planetStatus: "failed",
+          planetCount: 0,
+          lastError: `planet calculation failed: ${debugErrorText(err)}`
+        });
         return [];
       }
     }
@@ -5259,22 +5469,42 @@
         );
       else showToast(t("cultureReady"));
     }
-    function updateSkyView(force = false) {
-      if (!skyReady || !window.Celestial || !DateTime) return;
+    function updateSkyView(force = false, reason = "sky view") {
+      if (!skyReady || !window.Celestial || !DateTime) {
+        noteTimeRenderDebug({ skyviewStatus: "skipped" });
+        return true;
+      }
       try {
         const dt = observerDT();
+        let redrawOk = true;
         if (isHorizontalView()) {
           Celestial.skyview({
             date: currentInstantDate(),
             location: [Number(state.lat), Number(state.lon)],
             timezone: dt.offset
           });
-          if (force) redrawAndSyncMapBox("horizontal sky view");
+          noteTimeRenderDebug({ skyviewStatus: "ok" });
+          if (force) redrawOk = redrawAndSyncMapBox(reason || "horizontal sky view");
           else syncMapBoxAfterRedraw(projectionCanvasMetrics());
-        } else if (force) redrawAndSyncMapBox("sky view");
-        updateSelectedObject();
+        } else {
+          noteTimeRenderDebug({ skyviewStatus: "skipped" });
+          if (force) redrawOk = redrawAndSyncMapBox(reason || "sky view");
+        }
+        try {
+          updateSelectedObject();
+        } catch (err) {
+          noteTimeRenderDebug({
+            lastError: `selected object update failed: ${debugErrorText(err)}`
+          });
+        }
+        return redrawOk;
       } catch (err) {
         console.warn("Sky view update failed", err);
+        noteTimeRenderDebug({
+          skyviewStatus: "failed",
+          lastError: `skyview failed: ${debugErrorText(err)}`
+        });
+        return false;
       }
     }
     function updateHUD(syncInput = false) {
@@ -5303,20 +5533,23 @@
       $("observer-timezone").value = state.zone;
       if (syncInput) syncTimeInputs(local);
     }
-    function commitObserverDateTimeInput() {
+    function commitObserverDateTimeInput(source = "Enter") {
       const dt = parseObserverTimeFields();
       if (!dt) {
+        noteTimeRenderDebug({
+          inputStatus: "invalid",
+          fields: timeFieldDebugText(),
+          updateSource: source,
+          lastError: "time field parse failed"
+        });
         reportInvalidTimeInput();
         syncTimeInputs();
         return false;
       }
-      return applyObserverDateTime(dt, true);
+      return applyObserverDateTime(dt, true, source);
     }
     function adjustTimeField(field, delta) {
-      const parsed = parseObserverTimeFields();
-      const base = (parsed && parsed.isValid ? parsed : observerDT()).setZone(
-        safeZoneForCoordinates()
-      );
+      const base = observerDT().setZone(safeZoneForCoordinates());
       const units = {
         year: "years",
         month: "months",
@@ -5325,15 +5558,21 @@
         minute: "minutes"
       };
       const unit = units[field];
-      if (!unit) return;
+      if (!unit) return false;
       const change = {};
       change[unit] = delta;
-      applyObserverDateTime(base.plus(change), true);
+      const ok = applyObserverDateTime(
+        base.plus(change),
+        true,
+        `${field} ${delta > 0 ? "ArrowUp" : "ArrowDown"}`
+      );
+      if (ok) focusTimeField(field);
+      return ok;
     }
-    function shiftObserverTime(unit, amount) {
+    function shiftObserverTime(unit, amount, source = "shortcut") {
       const delta = {};
       delta[unit] = Number(amount);
-      applyObserverDateTime(observerDT().plus(delta), true);
+      return applyObserverDateTime(observerDT().plus(delta), true, source);
     }
     function readTimeStepValue() {
       const input = $("time-step-value");
@@ -5350,7 +5589,7 @@
       const unitSelect = $("time-step-unit");
       const unit = unitSelect ? unitSelect.value : "hours";
       if (!["minutes", "hours", "days", "years"].includes(unit)) return;
-      shiftObserverTime(unit, readTimeStepValue() * (sign < 0 ? -1 : 1));
+      shiftObserverTime(unit, readTimeStepValue() * (sign < 0 ? -1 : 1), "step");
     }
     function resolveZone(lat, lon, explicitZone) {
       return normalizeZone(explicitZone) || lookupZone(lat, lon) || longitudeFallbackZone(lon);
@@ -5371,7 +5610,7 @@
       syncControls();
       updateHUD(true);
       save();
-      updateSkyView(true);
+      updateSkyView(true, "location update");
       if (notice)
         showToast(`${t("locationApplied")} \xB7 ${resolved} \xB7 ${t("sameInstant")}`);
       return true;
@@ -5903,23 +6142,79 @@
       TIME_FIELD_IDS.forEach((id) => {
         const field = $(id);
         if (!field) return;
-        field.addEventListener("input", setTimeFieldWidths);
-        field.addEventListener("blur", () => syncTimeInputs());
+        field.dataset.replaceOnType = "1";
+        field.addEventListener("focus", () => markTimeFieldSelected(field));
+        field.addEventListener("click", () => markTimeFieldSelected(field));
+        field.addEventListener("mouseup", (e) => {
+          e.preventDefault();
+          markTimeFieldSelected(field);
+        });
+        field.addEventListener("input", () => {
+          field.value = field.value.replace(id === "time-year" ? /[^0-9-]/g : /\D/g, "");
+          if (id === "time-year") field.value = field.value.replace(/(?!^)-/g, "");
+          setTimeFieldWidths();
+          noteTimeRenderDebug({
+            inputStatus: "draft",
+            activeField: TIME_FIELD_ID_TO_KEY[id] || "-",
+            fields: timeFieldDebugText()
+          });
+        });
+        field.addEventListener("blur", (event) => {
+          field.classList.remove("time-part-active");
+          field.dataset.replaceOnType = "1";
+          const shell = $("observer-time-fields");
+          if (shell && event.relatedTarget && shell.contains(event.relatedTarget)) return;
+          syncTimeInputs();
+        });
         field.addEventListener("keydown", (e) => {
           if (e.isComposing) return;
+          const key = TIME_FIELD_ID_TO_KEY[id];
           if (e.key === "Enter") {
             e.preventDefault();
-            if (commitObserverDateTimeInput()) field.blur();
-          } else if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+            if (commitObserverDateTimeInput("Enter")) {
+              field.dataset.replaceOnType = "1";
+              markTimeFieldSelected(field);
+            }
+            return;
+          }
+          if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
             e.preventDefault();
-            const map = {
-              "time-year": "year",
-              "time-month": "month",
-              "time-day": "day",
-              "time-hour": "hour",
-              "time-minute": "minute"
-            };
-            adjustTimeField(map[id], e.key === "ArrowUp" ? 1 : -1);
+            moveTimeField(id, e.key === "ArrowRight" ? 1 : -1);
+            return;
+          }
+          if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+            e.preventDefault();
+            adjustTimeField(key, e.key === "ArrowUp" ? 1 : -1);
+            return;
+          }
+          if (/^[0-9]$/.test(e.key) || id === "time-year" && e.key === "-") {
+            e.preventDefault();
+            if (field.dataset.replaceOnType === "1") {
+              field.value = "";
+              field.dataset.replaceOnType = "0";
+            }
+            if (e.key === "-" && field.value.includes("-")) return;
+            field.value += e.key;
+            setTimeFieldWidths();
+            markTimeFieldSelected(field);
+            field.dataset.replaceOnType = "0";
+            noteTimeRenderDebug({
+              inputStatus: "draft",
+              activeField: key || "-",
+              fields: timeFieldDebugText()
+            });
+            return;
+          }
+          if (e.key === "Backspace" || e.key === "Delete") {
+            e.preventDefault();
+            field.value = "";
+            field.dataset.replaceOnType = "0";
+            setTimeFieldWidths();
+            noteTimeRenderDebug({
+              inputStatus: "draft",
+              activeField: key || "-",
+              fields: timeFieldDebugText()
+            });
           }
         });
       });
@@ -5933,13 +6228,13 @@
         }
       });
       $("observer-now").addEventListener("click", () => {
-        applyObserverDateTime(DateTime.utc(), true);
+        applyObserverDateTime(DateTime.utc(), true, "now");
         showToast(t("nowApplied"));
       });
       document.querySelectorAll("[data-shift-unit]").forEach(
         (btn) => btn.addEventListener(
           "click",
-          () => shiftObserverTime(btn.dataset.shiftUnit, btn.dataset.shiftValue)
+          () => shiftObserverTime(btn.dataset.shiftUnit, btn.dataset.shiftValue, "shortcut")
         )
       );
       $("play").addEventListener("click", () => {
@@ -6127,9 +6422,29 @@
       if (playing) {
         const current = DateTime.fromISO(String(state.instant || ""), { zone: "utc" });
         const nextInstant = (current.isValid ? current : DateTime.fromISO(defaults.instant, { zone: "utc" })).plus({ seconds: dt * Number(state.speed) });
-        state.instant = nextInstant.toISO();
+        const iso = nextInstant.isValid ? nextInstant.toISO() : null;
+        const renderDate = renderableDateForDateTime(nextInstant);
+        if (iso && renderDate) {
+          state.instant = iso;
+          noteTimeRenderDebug({
+            inputStatus: "valid",
+            internalUtc: iso,
+            jsDateYear: String(renderDate.getUTCFullYear()),
+            julianDate: (julianDateFromDate(renderDate) || 0).toFixed(5),
+            updateSource: "playback",
+            precision: precisionStatusForYear(nextInstant.setZone(safeZoneForCoordinates()).year),
+            lastError: "-"
+          });
+        } else {
+          playing = false;
+          noteTimeRenderDebug({
+            inputStatus: "invalid",
+            updateSource: "playback",
+            lastError: "playback produced non-renderable time"
+          });
+        }
         if (now - lastSkyUpdate > 220) {
-          updateSkyView(false);
+          updateSkyView(true, "playback");
           lastSkyUpdate = now;
         }
         if (now - lastHudUpdate > 240) {

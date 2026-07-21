@@ -370,15 +370,21 @@ button.danger {
   font-size: calc(11px * var(--rso-font-scale));
   font-variant-numeric: tabular-nums;
   box-shadow: none;
+  caret-color: transparent;
+  cursor: text;
 }
-.datetime-shell .time-year {
-  width: 4.8ch;
-  text-align: right;
+.datetime-shell .time-part::selection {
+  background: transparent;
 }
+.datetime-shell .time-part-active,
 .datetime-shell .time-part:focus {
   background: #79bfff;
   color: #05111d;
   box-shadow: none;
+}
+.datetime-shell .time-year {
+  width: 4.8ch;
+  text-align: right;
 }
 .time-sep {
   color: var(--muted);
