@@ -715,7 +715,25 @@
           </h2>
           <div class="modal-head-actions">
             <div class="doc-pager" aria-label="说明页章节翻页">
-              <select id="guide-page-select" aria-label="选择说明章节"></select>
+              <div class="guide-page-dropdown" id="guide-page-dropdown">
+                <button
+                  class="guide-page-trigger"
+                  id="guide-page-trigger"
+                  type="button"
+                  aria-haspopup="listbox"
+                  aria-expanded="false"
+                  aria-label="选择说明章节"
+                >
+                  <span id="guide-page-label">选择说明章节</span>
+                  <span class="guide-page-caret" aria-hidden="true">▾</span>
+                </button>
+                <div
+                  class="guide-page-menu"
+                  id="guide-page-menu"
+                  role="listbox"
+                  aria-label="选择说明章节"
+                ></div>
+              </div>
               <button data-i18n="guideNextPage" id="guide-next-page">
                 下一章
               </button>

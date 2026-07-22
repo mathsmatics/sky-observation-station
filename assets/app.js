@@ -3079,23 +3079,87 @@
       const heading = page.querySelector("h3");
       return String(heading?.textContent || (state.lang === "zh" ? "\u8BF4\u660E" : "Guide")).trim();
     }
+    function closeGuidePageDropdown() {
+      const dropdown = $("guide-page-dropdown");
+      const trigger = $("guide-page-trigger");
+      const menu = $("guide-page-menu");
+      if (!dropdown || !trigger || !menu) return;
+      dropdown.classList.remove("open");
+      trigger.setAttribute("aria-expanded", "false");
+    }
+    function openGuidePageDropdown() {
+      const dropdown = $("guide-page-dropdown");
+      const trigger = $("guide-page-trigger");
+      const menu = $("guide-page-menu");
+      if (!dropdown || !trigger || !menu) return;
+      dropdown.classList.add("open");
+      trigger.setAttribute("aria-expanded", "true");
+      const active = menu.querySelector('[aria-selected="true"]');
+      active?.scrollIntoView({ block: "nearest" });
+    }
+    function toggleGuidePageDropdown() {
+      const dropdown = $("guide-page-dropdown");
+      if (!dropdown) return;
+      if (dropdown.classList.contains("open")) closeGuidePageDropdown();
+      else openGuidePageDropdown();
+    }
+    function focusGuidePageOption(offset) {
+      const menu = $("guide-page-menu");
+      if (!menu) return;
+      const options = Array.from(menu.querySelectorAll(".guide-page-option"));
+      if (!options.length) return;
+      const active = document.activeElement;
+      const current = Math.max(0, options.indexOf(active));
+      const next = Math.max(0, Math.min(current + offset, options.length - 1));
+      options[next].focus();
+    }
+    function renderGuidePageDropdown(sections, activeIndex) {
+      const trigger = $("guide-page-trigger");
+      const label = $("guide-page-label");
+      const menu = $("guide-page-menu");
+      if (!trigger || !label || !menu) return;
+      const ariaLabel = t("guideSelectLabel");
+      trigger.setAttribute("aria-label", ariaLabel);
+      menu.setAttribute("aria-label", ariaLabel);
+      label.textContent = sections[activeIndex] ? guidePageTitle(sections[activeIndex]) : ariaLabel;
+      menu.textContent = "";
+      sections.forEach((section, index) => {
+        const option = document.createElement("button");
+        option.type = "button";
+        option.className = "guide-page-option";
+        option.setAttribute("role", "option");
+        option.setAttribute("aria-selected", String(index === activeIndex));
+        option.dataset.guideIndex = String(index);
+        option.textContent = guidePageTitle(section);
+        option.addEventListener("click", () => {
+          selectGuidePage(index);
+          closeGuidePageDropdown();
+          trigger.focus();
+        });
+        option.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowDown") {
+            e.preventDefault();
+            focusGuidePageOption(1);
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            focusGuidePageOption(-1);
+          } else if (e.key === "Escape") {
+            e.preventDefault();
+            closeGuidePageDropdown();
+            trigger.focus();
+          }
+        });
+        menu.appendChild(option);
+      });
+    }
     function updateGuidePaginationUI(scrollToTop = false) {
       initializeGuidePagination();
       const article = currentGuideArticle();
       if (!article) return;
       const sections = guidePages(article);
-      const select = $("guide-page-select");
-      select.setAttribute("aria-label", t("guideSelectLabel"));
-      select.textContent = "";
-      sections.forEach((section, index2) => {
-        const option = document.createElement("option");
-        option.value = String(index2);
-        option.textContent = guidePageTitle(section);
-        select.appendChild(option);
-      });
       const index = Math.max(0, Math.min(guidePageByLang[guideLang()], sections.length - 1));
       guidePageByLang[guideLang()] = index;
-      if (sections.length) select.value = String(index);
+      renderGuidePageDropdown(sections, index);
       $("guide-next-page").disabled = index >= sections.length - 1;
       if (scrollToTop) sections[index]?.scrollIntoView({ block: "start" });
     }
@@ -3246,12 +3310,12 @@
       const selector = document.querySelector(".selector-card");
       const hud = document.querySelector(".hud");
       const panel = $("control-panel");
-      const infoShell = createSectionShell("topInfo", "topInfo", "topInfoHint", "top-info-section");
       const head = document.createElement("div");
       head.id = "sidebar-head";
       if (brand) head.appendChild(brand);
-      if (hud) head.appendChild(hud);
-      infoShell.body.appendChild(head);
+      sidebar.appendChild(head);
+      const infoShell = createSectionShell("topInfo", "topInfo", "topInfoHint", "top-info-section");
+      if (hud) infoShell.body.appendChild(hud);
       panel.prepend(infoShell.section);
       const cultureShell = createSectionShell("cultureSettings", "cultureSettings", "cultureSettingsHint", "culture-settings-section");
       if (selector) cultureShell.body.appendChild(selector);
@@ -7367,10 +7431,24 @@
         }
       });
       $("explain-btn").addEventListener("click", openTechnicalGuide);
-      $("guide-page-select").addEventListener(
-        "change",
-        (e) => selectGuidePage(Number(e.target.value))
-      );
+      $("guide-page-trigger").addEventListener("click", (e) => {
+        e.stopPropagation();
+        toggleGuidePageDropdown();
+      });
+      $("guide-page-trigger").addEventListener("keydown", (e) => {
+        if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openGuidePageDropdown();
+          const first = $("guide-page-menu").querySelector(".guide-page-option");
+          first?.focus();
+        } else if (e.key === "Escape") {
+          closeGuidePageDropdown();
+        }
+      });
+      $("guide-page-menu").addEventListener("click", (e) => e.stopPropagation());
+      document.addEventListener("click", (e) => {
+        if (!$("guide-page-dropdown")?.contains(e.target)) closeGuidePageDropdown();
+      });
       $("guide-next-page").addEventListener("click", () => setGuidePage(1));
       $("reset-defaults-btn").addEventListener("click", resetAllDefaults);
       $("close-modal").addEventListener(
@@ -7383,6 +7461,7 @@
       });
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
+          closeGuidePageDropdown();
           $("tech-modal").classList.remove("open");
           $("city-suggestions").classList.remove("open");
         }
