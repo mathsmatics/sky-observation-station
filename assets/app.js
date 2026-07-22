@@ -130,13 +130,13 @@
       viewRestoreDelayMs: 70,
       resizeDebounceMs: 140
     },
-    /** 天文模型边界：当前默认启用轻量岁差；不做章动、自行、折射或高精度行星历表 */
+    /** 天文模型边界：启用轻量岁差；太阳/月亮使用 Meeus lightweight；行星仍不是高精度历表 */
     astronomyModel: {
       precession: true,
       nutation: false,
       properMotion: false,
       refraction: false,
-      planetModel: "current/simple"
+      planetModel: "sun/moon Meeus lightweight; planets simple"
     },
     /** 程序首次运行时的默认状态；浏览器已保存的设置优先于这里 */
     defaults: {
@@ -1703,7 +1703,9 @@
         title: "10. \u592A\u9633\u3001\u6708\u4EAE\u3001\u884C\u661F\u4E0E\u9EC4\u9053",
         blocks: [
           { type: "paragraph", html: "\u6052\u661F\u80CC\u666F\u5728\u77ED\u65F6\u95F4\u5185\u51E0\u4E4E\u56FA\u5B9A\uFF0C\u4F46\u592A\u9633\u3001\u6708\u4EAE\u548C\u884C\u661F\u4F1A\u5728\u6052\u661F\u80CC\u666F\u4E0A\u79FB\u52A8\u3002\u592A\u9633\u7684\u5468\u5E74\u89C6\u8FD0\u52A8\u5B9A\u4E49\u4E86\u9EC4\u9053\uFF1B\u6708\u4EAE\u548C\u884C\u661F\u5927\u591A\u9760\u8FD1\u9EC4\u9053\uFF0C\u662F\u56E0\u4E3A\u592A\u9633\u7CFB\u4E3B\u8981\u5929\u4F53\u7684\u8F68\u9053\u5E73\u9762\u5927\u81F4\u63A5\u8FD1\u3002" },
-          { type: "paragraph", html: "\u6708\u4EAE\u548C\u884C\u661F\u4F4D\u7F6E\u6BD4\u6052\u661F\u96BE\u7B97\u3002\u6052\u661F\u4E3B\u8981\u662F\u5750\u6807\u6846\u67B6\u95EE\u9898\uFF1B\u6708\u4EAE\u548C\u884C\u661F\u662F\u771F\u6B63\u5728\u8F68\u9053\u4E0A\u8FD0\u52A8\uFF0C\u53D7\u5230\u5F15\u529B\u6270\u52A8\u3001\u8F68\u9053\u503E\u89D2\u3001\u8FD1\u5730\u70B9\u6216\u8FD1\u65E5\u70B9\u53D8\u5316\u7B49\u5F71\u54CD\u3002\u5F53\u524D\u592A\u9633\u7CFB\u663E\u793A\u4F7F\u7528\u8F7B\u91CF\u8FD1\u4F3C\u6A21\u578B\uFF0C\u9002\u5408\u6559\u5B66\u548C\u89C2\u661F\u53C2\u8003\uFF0C\u4E0D\u7B49\u540C\u4E8E\u4E13\u4E1A\u661F\u5386\u3002" }
+          { type: "paragraph", html: "5.3.4 \u8D77\uFF0C\u592A\u9633\u4F4D\u7F6E\u6539\u7528 Meeus lightweight \u592A\u9633\u6A21\u578B\uFF0C\u6708\u4EAE\u4F4D\u7F6E\u6539\u7528 Meeus \u6708\u7403\u4E3B\u8981\u5468\u671F\u9879\u3002\u70B9\u51FB\u6708\u4EAE\u65F6\uFF0C\u4FE1\u606F\u6D6E\u7A97\u4F1A\u663E\u793A\u6708\u76F8\u540D\u79F0\u3001\u7167\u660E\u6BD4\u4F8B\u3001\u6708\u9F84\u548C\u8DDD\u79BB\uFF1B\u70B9\u51FB\u592A\u9633\u6216\u6708\u4EAE\u65F6\u4E5F\u4F1A\u663E\u793A\u7B97\u6CD5\u6765\u6E90\u4E0E\u7CBE\u5EA6\u8FB9\u754C\u3002" },
+          { type: "paragraph", html: "\u884C\u661F\u4ECD\u4FDD\u7559\u9879\u76EE\u539F\u6765\u7684 simple orbital model\uFF0C\u4E0D\u5F15\u5165 VSOP87\uFF0C\u4E5F\u4E0D\u63A5\u5165 JPL DE \u4E13\u4E1A\u661F\u5386\u3002\u8FD9\u6837\u80FD\u5148\u63D0\u5347\u6700\u5BB9\u6613\u770B\u51FA\u8BEF\u5DEE\u7684\u592A\u9633\u3001\u6708\u4EAE\u548C\u6708\u76F8\uFF0C\u540C\u65F6\u4FDD\u6301\u672C\u5730\u7F51\u9875\u7684\u8F7B\u91CF\u7ED3\u6784\u3002" },
+          { type: "warning", html: "Meeus lightweight \u9002\u5408\u6559\u5B66\u548C\u89C2\u661F\u53C2\u8003\uFF0C\u4F46\u4E0D\u662F\u4E13\u4E1A\u661F\u5386\u3002\u4E0D\u8981\u7528\u672C\u9879\u76EE\u5224\u5B9A\u65E5\u98DF\u3001\u6708\u98DF\u3001\u63A9\u661F\u3001\u822A\u6D77\u5B9A\u4F4D\u6216\u79D1\u7814\u7EA7\u7CBE\u786E\u89C2\u6D4B\u3002" }
         ]
       },
       {
@@ -1723,7 +1725,9 @@
           { type: "table", headers: ["\u5BF9\u8C61/\u56FE\u5C42", "\u53EF\u9760\u6027", "\u6CE8\u610F\u4E8B\u9879"], rows: [
             ["\u6052\u661F\u3001\u661F\u5EA7\u3001\u661F\u5B98", "\u73B0\u4EE3\u548C\u5386\u53F2\u8FD1\u4F3C\u663E\u793A\u8F83\u7A33\u5B9A", "\u4E0D\u8003\u8651\u6052\u661F\u81EA\u884C\u65F6\uFF0C\u6781\u957F\u65F6\u95F4\u540E\u4E2A\u522B\u8FD1\u661F\u4F1A\u504F\u3002"],
             ["\u8D64\u9053\u7F51\u548C\u5317\u5929\u6781", "\u5C81\u5DEE\u8D8B\u52BF\u53EF\u89C6\u5316\u5408\u7406", "\u4E0D\u5305\u542B\u7AE0\u52A8\u7B49\u5C0F\u5E45\u9879\u3002"],
-            ["\u592A\u9633\u3001\u6708\u4EAE\u3001\u884C\u661F", "\u9002\u5408\u6559\u5B66\u548C\u89C2\u661F\u53C2\u8003", "\u8FDC\u65E5\u671F\u4E0D\u7B49\u540C\u4E13\u4E1A\u661F\u5386\u3002"],
+            ["\u592A\u9633", "Meeus lightweight \u53EF\u89C6\u5316\u6A21\u578B", "\u4E0D\u542B\u4E13\u4E1A\u661F\u5386\u3001\u5C0F\u5E45\u7AE0\u52A8\u5168\u9879\u548C\u5927\u6C14\u6298\u5C04\u3002"],
+            ["\u6708\u4EAE\u4E0E\u6708\u76F8", "Meeus \u4E3B\u8981\u5468\u671F\u9879\u548C\u6708\u76F8\u8FD1\u4F3C", "\u53EF\u663E\u793A\u6708\u76F8\u3001\u7167\u660E\u6BD4\u4F8B\u3001\u6708\u9F84\u548C\u8DDD\u79BB\uFF0C\u4F46\u4E0D\u7528\u4E8E\u65E5\u6708\u98DF\u3002"],
+            ["\u884C\u661F", "simple orbital model", "\u672C\u8F6E\u672A\u5F15\u5165 VSOP87\uFF0C\u8FDC\u65E5\u671F\u4E0D\u627F\u8BFA\u4E13\u4E1A\u7CBE\u5EA6\u3002"],
             ["\u4F20\u7EDF\u5929\u533A", "\u6587\u5316\u53EF\u89C6\u5316\u53C2\u8003", "\u4E0D\u662F\u552F\u4E00\u5386\u53F2\u8FB9\u754C\uFF0C\u4E5F\u4E0D\u662F\u73B0\u4EE3 IAU \u6CD5\u5B9A\u8FB9\u754C\u3002"],
             ["\u5730\u5E73\u7EBF", "\u51E0\u4F55\u5730\u5E73\u7EBF", "\u4E0D\u542B\u5927\u6C14\u6298\u5C04\u3001\u5C71\u8109\u3001\u5EFA\u7B51\u7269\u548C\u771F\u5B9E\u5730\u5F62\u906E\u6321\u3002"]
           ] }
@@ -1902,7 +1906,361 @@
     return [norm(ra), radToDeg(dec)];
   }
 
+  // src/astronomy/meeus-sun.ts
+  function julianCenturyFromJulianDate(julianDate) {
+    return (Number(julianDate) - 2451545) / 36525;
+  }
+  function meanObliquityMeeusDeg(T) {
+    const seconds = 21.448 - T * (46.815 + T * (59e-5 - T * 1813e-6));
+    return 23 + 26 / 60 + seconds / 3600;
+  }
+  function eclipticToEquatorialDeg(longitudeDeg, latitudeDeg, obliquityDeg) {
+    const lambda = degToRad(longitudeDeg);
+    const beta = degToRad(latitudeDeg);
+    const epsilon = degToRad(obliquityDeg);
+    const sinAlpha = Math.sin(lambda) * Math.cos(epsilon) - Math.tan(beta) * Math.sin(epsilon);
+    const cosAlpha = Math.cos(lambda);
+    const alpha = normalizeDegrees(radToDeg(Math.atan2(sinAlpha, cosAlpha)));
+    const delta = radToDeg(
+      Math.asin(
+        Math.sin(beta) * Math.cos(epsilon) + Math.cos(beta) * Math.sin(epsilon) * Math.sin(lambda)
+      )
+    );
+    return [alpha, delta];
+  }
+  function calculateMeeusSun(date) {
+    const jd = julianDateFromDate2(date);
+    if (!Number.isFinite(jd)) return null;
+    const T = julianCenturyFromJulianDate(jd);
+    const L0 = normalizeDegrees(280.46646 + 36000.76983 * T + 3032e-7 * T * T);
+    const M = normalizeDegrees(357.52911 + 35999.05029 * T - 1537e-7 * T * T + T * T * T / 2449e4);
+    const Mrad = degToRad(M);
+    const e = 0.016708634 - T * (42037e-9 + 1267e-10 * T);
+    const C = (1.914602 - T * (4817e-6 + 14e-6 * T)) * Math.sin(Mrad) + (0.019993 - 101e-6 * T) * Math.sin(2 * Mrad) + 289e-6 * Math.sin(3 * Mrad);
+    const trueLongitude = L0 + C;
+    const trueAnomaly = M + C;
+    const omega = 125.04 - 1934.136 * T;
+    const apparentLongitude = trueLongitude - 569e-5 - 478e-5 * Math.sin(degToRad(omega));
+    const meanObliquity = meanObliquityMeeusDeg(T);
+    const trueObliquity = meanObliquity + 256e-5 * Math.cos(degToRad(omega));
+    const [ra, dec] = eclipticToEquatorialDeg(apparentLongitude, 0, trueObliquity);
+    const distanceAu = 1.000001018 * (1 - e * e) / (1 + e * Math.cos(degToRad(trueAnomaly)));
+    return {
+      julianDate: jd,
+      julianCentury: T,
+      geometricMeanLongitudeDeg: L0,
+      meanAnomalyDeg: M,
+      equationOfCenterDeg: C,
+      trueLongitudeDeg: normalizeDegrees(trueLongitude),
+      apparentLongitudeDeg: normalizeDegrees(apparentLongitude),
+      meanObliquityDeg: meanObliquity,
+      trueObliquityDeg: trueObliquity,
+      rightAscensionDeg: ra,
+      declinationDeg: dec,
+      distanceAu
+    };
+  }
+
+  // src/astronomy/moon-phase.ts
+  var SYNODIC_MONTH_DAYS = 29.530588853;
+  var PHASE_NAMES = [
+    ["\u65B0\u6708", "New Moon"],
+    ["\u86FE\u7709\u6708", "Waxing Crescent"],
+    ["\u4E0A\u5F26\u6708", "First Quarter"],
+    ["\u76C8\u51F8\u6708", "Waxing Gibbous"],
+    ["\u6EE1\u6708", "Full Moon"],
+    ["\u4E8F\u51F8\u6708", "Waning Gibbous"],
+    ["\u4E0B\u5F26\u6708", "Last Quarter"],
+    ["\u6B8B\u6708", "Waning Crescent"]
+  ];
+  function calculateMoonPhase(moonLongitudeDeg, sunLongitudeDeg) {
+    const elongation = normalizeDegrees(Number(moonLongitudeDeg) - Number(sunLongitudeDeg));
+    const illumination = Math.max(0, Math.min(1, (1 - Math.cos(degToRad(elongation))) / 2));
+    const ageDays = elongation / 360 * SYNODIC_MONTH_DAYS;
+    const index = Math.floor((elongation + 22.5) % 360 / 45);
+    const [phaseNameZh, phaseNameEn] = PHASE_NAMES[index] || PHASE_NAMES[0];
+    return {
+      phaseAngleDeg: elongation,
+      illumination,
+      ageDays,
+      phaseNameZh,
+      phaseNameEn
+    };
+  }
+
+  // src/astronomy/meeus-moon.ts
+  var LON_DIST_TERMS = [
+    [0, 0, 1, 0, 6288774, -20905355],
+    [2, 0, -1, 0, 1274027, -3699111],
+    [2, 0, 0, 0, 658314, -2955968],
+    [0, 0, 2, 0, 213618, -569925],
+    [0, 1, 0, 0, -185116, 48888],
+    [0, 0, 0, 2, -114332, -3149],
+    [2, 0, -2, 0, 58793, 246158],
+    [2, -1, -1, 0, 57066, -152138],
+    [2, 0, 1, 0, 53322, -170733],
+    [2, -1, 0, 0, 45758, -204586],
+    [0, 1, -1, 0, -40923, -129620],
+    [1, 0, 0, 0, -34720, 108743],
+    [0, 1, 1, 0, -30383, 104755],
+    [2, 0, 0, -2, 15327, 10321],
+    [0, 0, 1, 2, -12528, 0],
+    [0, 0, 1, -2, 10980, 79661],
+    [4, 0, -1, 0, 10675, -34782],
+    [0, 0, 3, 0, 10034, -23210],
+    [4, 0, -2, 0, 8548, -21636],
+    [2, 1, -1, 0, -7888, 24208],
+    [2, 1, 0, 0, -6766, 30824],
+    [1, 0, -1, 0, -5163, -8379],
+    [1, 1, 0, 0, 4987, -16675],
+    [2, -1, 1, 0, 4036, -12831],
+    [2, 0, 2, 0, 3994, -10445],
+    [4, 0, 0, 0, 3861, -11650],
+    [2, 0, -3, 0, 3665, 14403],
+    [0, 1, -2, 0, -2689, -7003],
+    [2, 0, -1, 2, -2602, 0],
+    [2, -1, -2, 0, 2390, 10056],
+    [1, 0, 1, 0, -2348, 6322],
+    [2, -2, 0, 0, 2236, -9884],
+    [0, 1, 2, 0, -2120, 5751],
+    [0, 2, 0, 0, -2069, 0],
+    [2, -2, -1, 0, 2048, -4950],
+    [2, 0, 1, -2, -1773, 4130],
+    [2, 0, 0, 2, -1595, 0],
+    [4, -1, -1, 0, 1215, -3958],
+    [0, 0, 2, 2, -1110, 0],
+    [3, 0, -1, 0, -892, 3258],
+    [2, 1, 1, 0, -810, 2616],
+    [4, -1, -2, 0, 759, -1897],
+    [0, 2, -1, 0, -713, -2117],
+    [2, 2, -1, 0, -700, 2354],
+    [2, 1, -2, 0, 691, 0],
+    [2, -1, 0, -2, 596, 0],
+    [4, 0, 1, 0, 549, -1423],
+    [0, 0, 4, 0, 537, -1117],
+    [4, -1, 0, 0, 520, -1571],
+    [1, 0, -2, 0, -487, -1739],
+    [2, 1, 0, -2, -399, 0],
+    [0, 0, 2, -2, -381, -4421],
+    [1, 1, 1, 0, 351, 0],
+    [3, 0, -2, 0, -340, 0],
+    [4, 0, -3, 0, 330, 0],
+    [2, -1, 2, 0, 327, 0],
+    [0, 2, 1, 0, -323, 1165],
+    [1, 1, -1, 0, 299, 0],
+    [2, 0, 3, 0, 294, 0],
+    [2, 0, -1, -2, 0, 8752]
+  ];
+  var LAT_TERMS = [
+    [0, 0, 0, 1, 5128122],
+    [0, 0, 1, 1, 280602],
+    [0, 0, 1, -1, 277693],
+    [2, 0, 0, -1, 173237],
+    [2, 0, -1, 1, 55413],
+    [2, 0, -1, -1, 46271],
+    [2, 0, 0, 1, 32573],
+    [0, 0, 2, 1, 17198],
+    [2, 0, 1, -1, 9266],
+    [0, 0, 2, -1, 8822],
+    [2, -1, 0, -1, 8216],
+    [2, 0, -2, -1, 4324],
+    [2, 0, 1, 1, 4200],
+    [2, 1, 0, -1, -3359],
+    [2, -1, -1, 1, 2463],
+    [2, -1, 0, 1, 2211],
+    [2, -1, -1, -1, 2065],
+    [0, 1, -1, -1, -1870],
+    [4, 0, -1, -1, 1828],
+    [0, 1, 0, 1, -1794],
+    [0, 0, 0, 3, -1749],
+    [0, 1, -1, 1, -1565],
+    [1, 0, 0, 1, -1491],
+    [0, 1, 1, 1, -1475],
+    [0, 1, 1, -1, -1410],
+    [0, 1, 0, -1, -1344],
+    [1, 0, 0, -1, -1335],
+    [0, 0, 3, 1, 1107],
+    [4, 0, 0, -1, 1021],
+    [4, 0, -1, 1, 833],
+    [0, 0, 1, -3, 777],
+    [4, 0, -2, 1, 671],
+    [2, 0, 0, -3, 607],
+    [2, 0, 2, -1, 596],
+    [2, -1, 1, -1, 491],
+    [2, 0, -2, 1, -451],
+    [0, 0, 3, -1, 439],
+    [2, 0, 2, 1, 422],
+    [2, 0, -3, -1, 421],
+    [2, 1, -1, 1, -366],
+    [2, 1, 0, 1, -351],
+    [4, 0, 0, 1, 331],
+    [2, -1, 1, 1, 315],
+    [2, -2, 0, -1, 302],
+    [0, 0, 1, 3, -283],
+    [2, 1, 1, -1, -229],
+    [1, 1, 0, -1, 223],
+    [1, 1, 0, 1, 223],
+    [0, 1, -2, -1, -220],
+    [2, 1, -1, -1, -220],
+    [1, 0, 1, 1, -185],
+    [2, -1, -2, -1, 181],
+    [0, 1, 2, 1, -177],
+    [4, 0, -2, -1, 176],
+    [4, -1, -1, -1, 166],
+    [1, 0, 1, -1, -164],
+    [4, 0, 1, -1, 132],
+    [1, 0, -1, -1, -119],
+    [4, -1, 0, -1, 115],
+    [2, -2, 0, 1, 107]
+  ];
+  function eccentricityFactor(mCoefficient, E) {
+    const n = Math.abs(mCoefficient);
+    if (n === 1) return E;
+    if (n === 2) return E * E;
+    return 1;
+  }
+  function calculateMeeusMoon(date) {
+    const jd = julianDateFromDate2(date);
+    if (!Number.isFinite(jd)) return null;
+    const T = julianCenturyFromJulianDate(jd);
+    const T2 = T * T;
+    const T3 = T2 * T;
+    const T4 = T3 * T;
+    const Lp = normalizeDegrees(218.3164477 + 481267.88123421 * T - 15786e-7 * T2 + T3 / 538841 - T4 / 65194e3);
+    const D = normalizeDegrees(297.8501921 + 445267.1114034 * T - 18819e-7 * T2 + T3 / 545868 - T4 / 113065e3);
+    const M = normalizeDegrees(357.5291092 + 35999.0502909 * T - 1536e-7 * T2 + T3 / 2449e4);
+    const Mp = normalizeDegrees(134.9633964 + 477198.8675055 * T + 87414e-7 * T2 + T3 / 69699 - T4 / 14712e3);
+    const F = normalizeDegrees(93.272095 + 483202.0175233 * T - 36539e-7 * T2 - T3 / 3526e3 + T4 / 86331e4);
+    const E = 1 - 2516e-6 * T - 74e-7 * T2;
+    let sumLongitude = 0;
+    let sumDistance = 0;
+    for (const [d, m, mp, f, lCoeff, rCoeff] of LON_DIST_TERMS) {
+      const arg = degToRad(d * D + m * M + mp * Mp + f * F);
+      const factor = eccentricityFactor(m, E);
+      sumLongitude += lCoeff * factor * Math.sin(arg);
+      sumDistance += rCoeff * factor * Math.cos(arg);
+    }
+    let sumLatitude = 0;
+    for (const [d, m, mp, f, bCoeff] of LAT_TERMS) {
+      const arg = degToRad(d * D + m * M + mp * Mp + f * F);
+      sumLatitude += bCoeff * eccentricityFactor(m, E) * Math.sin(arg);
+    }
+    const A1 = normalizeDegrees(119.75 + 131.849 * T);
+    const A2 = normalizeDegrees(53.09 + 479264.29 * T);
+    const A3 = normalizeDegrees(313.45 + 481266.484 * T);
+    sumLongitude += 3958 * Math.sin(degToRad(A1));
+    sumLongitude += 1962 * Math.sin(degToRad(Lp - F));
+    sumLongitude += 318 * Math.sin(degToRad(A2));
+    sumLatitude += -2235 * Math.sin(degToRad(Lp));
+    sumLatitude += 382 * Math.sin(degToRad(A3));
+    sumLatitude += 175 * Math.sin(degToRad(A1 - F));
+    sumLatitude += 175 * Math.sin(degToRad(A1 + F));
+    sumLatitude += 127 * Math.sin(degToRad(Lp - Mp));
+    sumLatitude += -115 * Math.sin(degToRad(Lp + Mp));
+    const longitude = normalizeDegrees(Lp + sumLongitude / 1e6);
+    const latitude = sumLatitude / 1e6;
+    const distanceKm = 385000.56 + sumDistance / 1e3;
+    const obliquity = meanObliquityMeeusDeg(T);
+    const [ra, dec] = eclipticToEquatorialDeg(longitude, latitude, obliquity);
+    const sun = calculateMeeusSun(date);
+    const phase = calculateMoonPhase(longitude, sun ? sun.apparentLongitudeDeg : longitude);
+    return {
+      julianDate: jd,
+      julianCentury: T,
+      longitudeDeg: longitude,
+      latitudeDeg: latitude,
+      distanceKm,
+      rightAscensionDeg: ra,
+      declinationDeg: dec,
+      meanLongitudeDeg: Lp,
+      elongationDeg: normalizeDegrees(longitude - (sun ? sun.apparentLongitudeDeg : longitude)),
+      sunMeanAnomalyDeg: M,
+      moonMeanAnomalyDeg: Mp,
+      argumentOfLatitudeDeg: F,
+      phase
+    };
+  }
+
   // src/astronomy/bodies-simple.ts
+  var BODY_NAMES = {
+    sol: { id: "sol", name: "Sun", en: "Sun", zh: "\u592A\u9633", desig: "Sol", sym: "\u2609" },
+    lun: { id: "lun", name: "Moon", en: "Moon", zh: "\u6708\u7403", desig: "Lun", sym: "\u263E" }
+  };
+  function cloneBody(base, id) {
+    const fallback = BODY_NAMES[id] || { id, name: id, en: id, zh: id, desig: id };
+    return {
+      ...fallback,
+      ...base || {},
+      id,
+      name: base && base.name || fallback.name,
+      en: base && base.en || fallback.en,
+      zh: base && base.zh || fallback.zh,
+      desig: base && base.desig || fallback.desig,
+      ephemeris: { ...base && base.ephemeris || {} }
+    };
+  }
+  function normalizeCelestialLongitude(deg) {
+    return ((Number(deg) + 180) % 360 + 360) % 360 - 180;
+  }
+  function maybeBaseBody(fn, date, observer) {
+    try {
+      return fn(date).equatorial(observer);
+    } catch (_) {
+      return null;
+    }
+  }
+  function calculateMeeusSolarSystemBody(id, fn, date, observer, displayCoordinateForEpochEquatorial) {
+    const base = cloneBody(maybeBaseBody(fn, date, observer), id);
+    if (id === "sol") {
+      const sun = calculateMeeusSun(date);
+      if (!sun) return null;
+      const epochCoord = [normalizeCelestialLongitude(sun.rightAscensionDeg), sun.declinationDeg];
+      base.ephemeris = {
+        ...base.ephemeris,
+        pos: epochCoord.slice(),
+        rt: sun.distanceAu,
+        model: "Meeus lightweight solar model",
+        precision: "visual reference, not precision ephemeris",
+        apparentLongitudeDeg: sun.apparentLongitudeDeg,
+        trueObliquityDeg: sun.trueObliquityDeg
+      };
+      return {
+        id,
+        body: base,
+        coord: epochCoord.slice(),
+        epochCoord,
+        displayCoord: displayCoordinateForEpochEquatorial(epochCoord)
+      };
+    }
+    if (id === "lun") {
+      const moon = calculateMeeusMoon(date);
+      if (!moon) return null;
+      const epochCoord = [normalizeCelestialLongitude(moon.rightAscensionDeg), moon.declinationDeg];
+      base.ephemeris = {
+        ...base.ephemeris,
+        pos: epochCoord.slice(),
+        rt: moon.distanceKm,
+        phase: moon.phase.illumination,
+        illumination: moon.phase.illumination,
+        age: moon.phase.ageDays,
+        phaseAngleDeg: moon.phase.phaseAngleDeg,
+        phaseNameZh: moon.phase.phaseNameZh,
+        phaseNameEn: moon.phase.phaseNameEn,
+        eclipticLongitudeDeg: moon.longitudeDeg,
+        eclipticLatitudeDeg: moon.latitudeDeg,
+        model: "Meeus lunar periodic terms",
+        precision: "visual reference, not precision ephemeris"
+      };
+      return {
+        id,
+        body: base,
+        coord: epochCoord.slice(),
+        epochCoord,
+        displayCoord: displayCoordinateForEpochEquatorial(epochCoord)
+      };
+    }
+    return null;
+  }
   function calculateCurrentPlanetPositions(options) {
     const objects = options.objects || [];
     const origin = options.origin;
@@ -1913,13 +2271,16 @@
     try {
       const observer = origin(options.date).spherical();
       const planets = objects.map((fn) => {
+        const id = fn.id();
+        const meeusBody = id === "sol" || id === "lun" ? calculateMeeusSolarSystemBody(id, fn, options.date, observer, options.displayCoordinateForEpochEquatorial) : null;
+        if (meeusBody) return meeusBody;
         const body = fn(options.date).equatorial(observer);
         const ep = body && body.ephemeris || {};
         const eq = ep.pos;
         if (!eq || !Number.isFinite(eq[0]) || !Number.isFinite(eq[1])) return null;
         const epochCoord = options.epochEquatorialFromJ2000(eq);
         return {
-          id: fn.id(),
+          id,
           body,
           coord: eq.slice(),
           epochCoord,
@@ -2895,6 +3256,10 @@
       spectralInfo: "\u989C\u8272\u6307\u6570 B\u2212V",
       illumination: "\u7167\u660E\u6BD4\u4F8B",
       moonAge: "\u6708\u9F84",
+      moonPhase: "\u6708\u76F8",
+      algorithm: "\u7B97\u6CD5",
+      precisionBoundary: "\u7CBE\u5EA6",
+      visualReferencePrecision: "\u89C6\u89C9\u53C2\u8003\uFF0C\u975E\u4E13\u4E1A\u661F\u5386",
       distance: "\u8DDD\u79BB",
       star: "\u6052\u661F",
       deepSkyObject: "\u6DF1\u7A7A\u5929\u4F53",
@@ -2951,6 +3316,10 @@
       spectralInfo: "B\u2212V colour index",
       illumination: "Illumination",
       moonAge: "Moon age",
+      moonPhase: "Moon phase",
+      algorithm: "Model",
+      precisionBoundary: "Precision",
+      visualReferencePrecision: "visual reference, not precision ephemeris",
       distance: "Distance",
       star: "Star",
       deepSkyObject: "Deep-sky object",
@@ -3090,7 +3459,12 @@
       julianCenturiesT: "-",
       meanObliquity: "-",
       eclipticModel: "J2000 ecliptic precessed to display frame",
-      planetModel: "current/simple",
+      sunModel: "Meeus lightweight",
+      moonModel: "Meeus lunar periodic terms",
+      moonPhaseModel: "Meeus phase approximation",
+      planetModel: "simple orbital model",
+      vsop87: "off",
+      precisionBoundary: "visual reference, not precision ephemeris",
       planetEpochHandling: "connected to display frame",
       fixedLayerPrecession: "pending",
       boundaryPrecession: "pending",
@@ -4439,6 +4813,19 @@
         debugLine(zh ? "\u9EC4\u9053\u6A21\u578B" : "ecliptic model", [
           debugValue(astronomyModelDebug.eclipticModel || "-")
         ]),
+        debugLine(zh ? "\u592A\u9633\u7B97\u6CD5" : "sun model", [
+          debugValue(astronomyModelDebug.sunModel || "-")
+        ]),
+        debugLine(zh ? "\u6708\u4EAE\u7B97\u6CD5" : "moon model", [
+          debugValue(astronomyModelDebug.moonModel || "-")
+        ]),
+        debugLine(zh ? "\u6708\u76F8\u7B97\u6CD5" : "moon phase model", [
+          debugValue(astronomyModelDebug.moonPhaseModel || "-")
+        ]),
+        debugLine("VSOP87", [debugValue(astronomyModelDebug.vsop87 || "-")]),
+        debugLine(zh ? "\u7CBE\u5EA6\u8FB9\u754C" : "precision", [
+          debugValue(astronomyModelDebug.precisionBoundary || "-")
+        ]),
         debugLine(zh ? "\u884C\u661F\u7B97\u6CD5" : "planet model", [
           debugValue(astronomyModelDebug.planetModel || "-")
         ]),
@@ -4948,7 +5335,7 @@
         latitude: state.lat,
         longitude: state.lon,
         date: currentInstantDate(),
-        normalizeLongitude: normalizeCelestialLongitude
+        normalizeLongitude: normalizeCelestialLongitude2
       });
     }
     function scaleFont(font) {
@@ -5090,7 +5477,7 @@
       for (let lon = 0; lon < 360; lon += 30)
         drawReferenceText2(
           `${lon}\xB0`,
-          projectEpochEquatorialCoordinate([normalizeCelestialLongitude(lon), 0]),
+          projectEpochEquatorialCoordinate([normalizeCelestialLongitude2(lon), 0]),
           style
         );
       for (let lat = -60; lat <= 60; lat += 30) {
@@ -5343,7 +5730,7 @@
         (ch) => TRAD_TO_SIMP[ch] || ch
       );
     }
-    function normalizeCelestialLongitude(deg) {
+    function normalizeCelestialLongitude2(deg) {
       return ((Number(deg) + 180) % 360 + 360) % 360 - 180;
     }
     function astronomyModelEnabled() {
@@ -5351,7 +5738,7 @@
     }
     function epochEquatorialFromJ2000(coord, date = currentInstantDate()) {
       if (!coord) return null;
-      const source = [normalizeCelestialLongitude(coord[0]), Number(coord[1])];
+      const source = [normalizeCelestialLongitude2(coord[0]), Number(coord[1])];
       if (!Number.isFinite(source[0]) || !Number.isFinite(source[1])) return null;
       if (!astronomyModelEnabled()) return source;
       try {
@@ -5364,7 +5751,7 @@
     function displayCoordinateForEpochEquatorial(coord) {
       if (!coord) return null;
       const equatorial = [
-        normalizeCelestialLongitude(coord[0]),
+        normalizeCelestialLongitude2(coord[0]),
         Number(coord[1])
       ];
       if (!Number.isFinite(equatorial[0]) || !Number.isFinite(equatorial[1])) return null;
@@ -5444,7 +5831,12 @@
         astronomyModelDebug.julianCenturiesT = diag.julianCenturiesT.toFixed(8);
         astronomyModelDebug.meanObliquity = `${diag.meanObliquityDegrees.toFixed(6)}\xB0`;
         astronomyModelDebug.eclipticModel = diag.eclipticModel;
-        astronomyModelDebug.planetModel = cfg("astronomyModel.planetModel", "current/simple");
+        astronomyModelDebug.sunModel = "Meeus lightweight";
+        astronomyModelDebug.moonModel = "Meeus lunar periodic terms";
+        astronomyModelDebug.moonPhaseModel = "Meeus phase approximation";
+        astronomyModelDebug.planetModel = "simple orbital model";
+        astronomyModelDebug.vsop87 = "off";
+        astronomyModelDebug.precisionBoundary = "visual reference, not precision ephemeris";
         astronomyModelDebug.planetEpochHandling = "connected to display frame";
         astronomyModelDebug.storageSchemaVersion = STORAGE_SCHEMA_VERSION;
         astronomyModelDebug.astronomyModelVersion = ASTRONOMY_MODEL_VERSION;
@@ -6098,15 +6490,18 @@
         if (!["sol", "lun"].includes(obj.planetId) && Number.isFinite(Number(ep.mag)))
           rows.splice(1, 0, [t("magnitude"), Number(ep.mag).toFixed(2)]);
         if (obj.planetId === "lun") {
-          if (Number.isFinite(Number(ep.phase)))
+          const phaseName = state.lang === "zh" ? ep.phaseNameZh : ep.phaseNameEn;
+          if (phaseName) rows.push([t("moonPhase"), String(phaseName)]);
+          const illum = Number.isFinite(Number(ep.illumination)) ? Number(ep.illumination) : Number(ep.phase);
+          if (Number.isFinite(illum))
             rows.push([
               t("illumination"),
-              `${(Math.max(0, Math.min(1, Number(ep.phase))) * 100).toFixed(1)}%`
+              `${(Math.max(0, Math.min(1, illum)) * 100).toFixed(1)}%`
             ]);
           if (Number.isFinite(Number(ep.age)))
             rows.push([
               t("moonAge"),
-              `${Number(ep.age).toFixed(2)} ${state.lang === "zh" ? "\u65E5" : "days"}`
+              `${Number(ep.age).toFixed(1)} ${state.lang === "zh" ? "\u5929" : "days"}`
             ]);
         }
         if (Number.isFinite(Number(ep.rt)))
@@ -6114,6 +6509,10 @@
             t("distance"),
             obj.planetId === "lun" ? `${Number(ep.rt).toLocaleString(void 0, { maximumFractionDigits: 0 })} km` : `${Number(ep.rt).toFixed(3)} AU`
           ]);
+        if (obj.planetId === "sol" || obj.planetId === "lun") {
+          if (ep.model) rows.push([t("algorithm"), String(ep.model)]);
+          rows.push([t("precisionBoundary"), t("visualReferencePrecision")]);
+        }
         rows.push([
           t("catalogId"),
           String(obj.planetId || obj.d.id || "").toUpperCase()

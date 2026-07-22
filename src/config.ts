@@ -1,5 +1,5 @@
 /**
- * 真实星空观测台 5.3.3 —— 用户可配置文件
+ * 真实星空观测台 5.3.4 —— 用户可配置文件
  * ------------------------------------------------------------
  * 修改本文件后，运行 npm run build 并刷新 index.html 即可生效。
  * 建议每次只修改一个参数，并保留原值，便于出现问题时恢复。
@@ -114,13 +114,13 @@ window.RSO_CONFIG = {
   },
 
 
-  /** 天文模型边界：当前默认启用轻量岁差；不做章动、自行、折射或高精度行星历表 */
+  /** 天文模型边界：启用轻量岁差；太阳/月亮使用 Meeus lightweight；行星仍不是高精度历表 */
   astronomyModel: {
     precession: true,
     nutation: false,
     properMotion: false,
     refraction: false,
-    planetModel: "current/simple",
+    planetModel: "sun/moon Meeus lightweight; planets simple",
   },
 
   /** 程序首次运行时的默认状态；浏览器已保存的设置优先于这里 */

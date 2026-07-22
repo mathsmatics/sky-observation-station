@@ -462,6 +462,10 @@ import {
     spectralInfo: "颜色指数 B−V",
     illumination: "照明比例",
     moonAge: "月龄",
+    moonPhase: "月相",
+    algorithm: "算法",
+    precisionBoundary: "精度",
+    visualReferencePrecision: "视觉参考，非专业星历",
     distance: "距离",
     star: "恒星",
     deepSkyObject: "深空天体",
@@ -522,6 +526,10 @@ import {
     spectralInfo: "B−V colour index",
     illumination: "Illumination",
     moonAge: "Moon age",
+    moonPhase: "Moon phase",
+    algorithm: "Model",
+    precisionBoundary: "Precision",
+    visualReferencePrecision: "visual reference, not precision ephemeris",
     distance: "Distance",
     star: "Star",
     deepSkyObject: "Deep-sky object",
@@ -688,7 +696,12 @@ import {
     julianCenturiesT: "-",
     meanObliquity: "-",
     eclipticModel: "J2000 ecliptic precessed to display frame",
-    planetModel: "current/simple",
+    sunModel: "Meeus lightweight",
+    moonModel: "Meeus lunar periodic terms",
+    moonPhaseModel: "Meeus phase approximation",
+    planetModel: "simple orbital model",
+    vsop87: "off",
+    precisionBoundary: "visual reference, not precision ephemeris",
     planetEpochHandling: "connected to display frame",
     fixedLayerPrecession: "pending",
     boundaryPrecession: "pending",
@@ -2296,6 +2309,19 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
       debugLine(zh ? "黄道模型" : "ecliptic model", [
         debugValue(astronomyModelDebug.eclipticModel || "-"),
       ]),
+      debugLine(zh ? "太阳算法" : "sun model", [
+        debugValue(astronomyModelDebug.sunModel || "-"),
+      ]),
+      debugLine(zh ? "月亮算法" : "moon model", [
+        debugValue(astronomyModelDebug.moonModel || "-"),
+      ]),
+      debugLine(zh ? "月相算法" : "moon phase model", [
+        debugValue(astronomyModelDebug.moonPhaseModel || "-"),
+      ]),
+      debugLine("VSOP87", [debugValue(astronomyModelDebug.vsop87 || "-")]),
+      debugLine(zh ? "精度边界" : "precision", [
+        debugValue(astronomyModelDebug.precisionBoundary || "-"),
+      ]),
       debugLine(zh ? "行星算法" : "planet model", [
         debugValue(astronomyModelDebug.planetModel || "-"),
       ]),
@@ -3453,7 +3479,12 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
       astronomyModelDebug.julianCenturiesT = diag.julianCenturiesT.toFixed(8);
       astronomyModelDebug.meanObliquity = `${diag.meanObliquityDegrees.toFixed(6)}°`;
       astronomyModelDebug.eclipticModel = diag.eclipticModel;
-      astronomyModelDebug.planetModel = cfg("astronomyModel.planetModel", "current/simple");
+      astronomyModelDebug.sunModel = "Meeus lightweight";
+      astronomyModelDebug.moonModel = "Meeus lunar periodic terms";
+      astronomyModelDebug.moonPhaseModel = "Meeus phase approximation";
+      astronomyModelDebug.planetModel = "simple orbital model";
+      astronomyModelDebug.vsop87 = "off";
+      astronomyModelDebug.precisionBoundary = "visual reference, not precision ephemeris";
       astronomyModelDebug.planetEpochHandling = "connected to display frame";
       astronomyModelDebug.storageSchemaVersion = STORAGE_SCHEMA_VERSION;
       astronomyModelDebug.astronomyModelVersion = ASTRONOMY_MODEL_VERSION;
@@ -4236,15 +4267,18 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
       )
         rows.splice(1, 0, [t("magnitude"), Number(ep.mag).toFixed(2)]);
       if (obj.planetId === "lun") {
-        if (Number.isFinite(Number(ep.phase)))
+        const phaseName = state.lang === "zh" ? ep.phaseNameZh : ep.phaseNameEn;
+        if (phaseName) rows.push([t("moonPhase"), String(phaseName)]);
+        const illum = Number.isFinite(Number(ep.illumination)) ? Number(ep.illumination) : Number(ep.phase);
+        if (Number.isFinite(illum))
           rows.push([
             t("illumination"),
-            `${(Math.max(0, Math.min(1, Number(ep.phase))) * 100).toFixed(1)}%`,
+            `${(Math.max(0, Math.min(1, illum)) * 100).toFixed(1)}%`,
           ]);
         if (Number.isFinite(Number(ep.age)))
           rows.push([
             t("moonAge"),
-            `${Number(ep.age).toFixed(2)} ${state.lang === "zh" ? "日" : "days"}`,
+            `${Number(ep.age).toFixed(1)} ${state.lang === "zh" ? "天" : "days"}`,
           ]);
       }
       if (Number.isFinite(Number(ep.rt)))
@@ -4254,6 +4288,10 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
             ? `${Number(ep.rt).toLocaleString(undefined, { maximumFractionDigits: 0 })} km`
             : `${Number(ep.rt).toFixed(3)} AU`,
         ]);
+      if (obj.planetId === "sol" || obj.planetId === "lun") {
+        if (ep.model) rows.push([t("algorithm"), String(ep.model)]);
+        rows.push([t("precisionBoundary"), t("visualReferencePrecision")]);
+      }
       rows.push([
         t("catalogId"),
         String(obj.planetId || obj.d.id || "").toUpperCase(),

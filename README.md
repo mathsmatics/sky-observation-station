@@ -60,7 +60,7 @@ docs/       架构、构建、数据来源和第三方声明文档。
 
 ## 科学限制
 
-本项目用于教育和一般天文馆式显示。当前实现的是轻量岁差与历元一致性，不提供科研级天体测量、任意历元恒星自行传播、章动、大气折射/消光、本地地形地平线、天气、光污染、月光天光或 JPL 级行星历表。
+本项目用于教育和一般天文馆式显示。当前实现的是轻量岁差与历元一致性，并用 Meeus lightweight 方法显示太阳、月亮和月相；不提供科研级天体测量、任意历元恒星自行传播、章动全项、大气折射/消光、本地地形地平线、天气、光污染、月光天光、VSOP87 或 JPL 级行星历表。
 
 中国传统天区和战场主题区域是用于比较和教学的现代可视化复原，不是唯一的历史法定边界。
 
@@ -72,4 +72,6 @@ Commercial use is not permitted without prior permission.
 
 ## Source layout note
 
-Version 5.3.3 keeps the accepted UI and astronomy behavior while organizing source code by functional area. `src/state/` contains state/storage helpers, `src/ui/` contains controls, help, panels and layout helpers, `src/sky/` contains renderer, projection, layer and interaction helpers, and `src/astronomy/` contains reusable angle, time, sidereal-time, coordinate and precession utilities. `src/app.ts` remains the application assembly layer that connects state, UI, D3-Celestial and data. Build outputs in `assets/` are generated artifacts and should not be edited by hand.
+Version 5.3.4 keeps the 5.3.3 functional source layout and adds Meeus lightweight astronomy modules. `src/state/` contains state/storage helpers, `src/ui/` contains controls, help, panels and layout helpers, `src/sky/` contains renderer, projection, layer and interaction helpers, and `src/astronomy/` contains reusable angle, time, sidereal-time, coordinate, precession, Meeus Sun, Meeus Moon and moon-phase utilities. `src/app.ts` remains the application assembly layer that connects state, UI, D3-Celestial and data. Build outputs in `assets/` are generated artifacts and should not be edited by hand.
+
+5.3.4 upgrades the Sun to a Meeus lightweight solar model and the Moon to Meeus lunar periodic terms with phase name, illumination, age and distance in the object information panel. Planets remain on the existing simple orbital model; VSOP87 and professional ephemerides are not included.
