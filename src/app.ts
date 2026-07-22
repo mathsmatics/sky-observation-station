@@ -35,6 +35,7 @@ import {
   meanObliquityDegrees,
   precessEquatorialJ2000ToDate,
 } from "./astronomy/precession";
+import { helpManualForLanguage } from "./data/content/help-manual";
 (() => {
   "use strict";
   /**
@@ -120,7 +121,7 @@ import {
   applyConfigCss();
   const DateTime = window.luxon && window.luxon.DateTime;
   const STORAGE_KEY = "real-sky-observatory-v48";
-  const STORAGE_SCHEMA_VERSION = "5.3.1";
+  const STORAGE_SCHEMA_VERSION = "5.3.2";
   const ASTRONOMY_MODEL_VERSION = "epoch-date-precession-v1";
 
   const I18N = {
@@ -128,6 +129,10 @@ import {
       brandSub: "真实地点 × 真实时间 × 真实星表 × 双天文文化",
       language: "语言",
       skyCulture: "星空体系",
+      topInfo: "顶部信息",
+      topInfoHint: "项目与当前状态",
+      cultureSettings: "语言与星空体系",
+      cultureSettingsHint: "界面语言与文化图层",
       observer: "观测地点",
       wgs: "WGS84 经纬度",
       latitude: "纬度 Latitude",
@@ -243,6 +248,10 @@ import {
       brandSub: "Real location × real time × real catalogs × two sky cultures",
       language: "Language",
       skyCulture: "Sky system",
+      topInfo: "Top info",
+      topInfoHint: "project and current state",
+      cultureSettings: "Language & sky system",
+      cultureSettingsHint: "UI language and culture layers",
       observer: "Observer location",
       wgs: "WGS84 coordinates",
       latitude: "Latitude",
@@ -612,6 +621,13 @@ import {
     lastError: "-",
   };
 
+  const mobileResizeDebug = {
+    lastSource: "startup",
+    lastAt: "-",
+    lastStatus: "pending",
+    lastError: "-",
+  };
+
   const astronomyModelDebug = {
     sourceEpoch: "J2000",
     displayEpoch: "epoch-of-date",
@@ -760,7 +776,7 @@ import {
             astronomyModelDebug.cacheMigration = "cleared old 5.2 cache";
           }
         } else {
-          // 兼容历史存储字段，但 5.3.1 天文模型升级会清理旧缓存，避免旧视角中心污染岁差显示。
+          // 兼容历史存储字段，天文模型升级会清理旧缓存，避免旧视角中心污染岁差显示。
           const old = JSON.parse(
             storage.getItem("real-sky-observatory-v2") || "null",
           );
@@ -1370,136 +1386,153 @@ import {
     return document.querySelector(`[data-doc-lang="${guideLang()}"]`);
   }
 
-  function guidePages(article) {
-    return Array.from(article.children).filter((el) =>
-      el.classList.contains("doc-page"),
-    );
-  }
-
-  function guidePageHasBody(elements) {
-    return elements.some(
-      (el) =>
-        el.tagName !== "H3" && String(el.textContent || "").trim().length > 0,
-    );
-  }
-
-  /**
-   * 将说明页正文按 h3 章节拆成页面。
-   *
-   * 输入是 index.html 中当前语言的 article，输出是在 article 内生成的
-   * section.doc-page。正文仍来自原始 HTML；这里不改写内容，只改变显示结构。
-   * 如果遇到没有正文的空章节标题，会并入后一个有内容的章节，避免翻到空页。
-   */
-  function paginateGuideArticle(article) {
-    if (!article || article.dataset.paginated === "true") return;
-
-    const originalChildren = Array.from(article.children);
-    article.dataset.copyText = originalChildren
-      .map((el) => String(el.innerText || el.textContent || "").trim())
-      .filter(Boolean)
-      .join("\n\n");
-
-    const rawGroups = [];
-    let currentGroup = [];
-    originalChildren.forEach((el) => {
-      if (el.tagName === "H3" && currentGroup.length) {
-        rawGroups.push(currentGroup);
-        currentGroup = [];
-      }
-      currentGroup.push(el);
-    });
-    if (currentGroup.length) rawGroups.push(currentGroup);
-
-    const groups = [];
-    let pendingHeadings = [];
-    rawGroups.forEach((group) => {
-      if (!guidePageHasBody(group)) {
-        pendingHeadings = pendingHeadings.concat(group);
-        return;
-      }
-      groups.push(pendingHeadings.concat(group));
-      pendingHeadings = [];
-    });
-    if (pendingHeadings.length) {
-      if (groups.length) groups[groups.length - 1].push(...pendingHeadings);
-      else groups.push(pendingHeadings);
+  function createGuideElement(block) {
+    if (block.type === "paragraph") {
+      const p = document.createElement("p");
+      p.innerHTML = block.html;
+      return p;
     }
+    if (block.type === "subheading") {
+      const h = document.createElement("h4");
+      h.innerHTML = block.html;
+      return h;
+    }
+    if (block.type === "list") {
+      const ul = document.createElement("ul");
+      (block.items || []).forEach((item) => {
+        const li = document.createElement("li");
+        li.innerHTML = item;
+        ul.appendChild(li);
+      });
+      return ul;
+    }
+    if (block.type === "table") {
+      const table = document.createElement("table");
+      const thead = document.createElement("thead");
+      const headRow = document.createElement("tr");
+      (block.headers || []).forEach((header) => {
+        const th = document.createElement("th");
+        th.innerHTML = header;
+        headRow.appendChild(th);
+      });
+      thead.appendChild(headRow);
+      const tbody = document.createElement("tbody");
+      (block.rows || []).forEach((row) => {
+        const tr = document.createElement("tr");
+        row.forEach((cell) => {
+          const td = document.createElement("td");
+          td.innerHTML = cell;
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      table.append(thead, tbody);
+      return table;
+    }
+    if (block.type === "formula") {
+      const div = document.createElement("div");
+      div.className = "doc-formula";
+      div.innerHTML = block.html;
+      return div;
+    }
+    if (block.type === "code") {
+      const pre = document.createElement("pre");
+      const code = document.createElement("code");
+      code.textContent = block.text || "";
+      pre.appendChild(code);
+      return pre;
+    }
+    if (block.type === "note" || block.type === "warning") {
+      const div = document.createElement("div");
+      div.className = block.type === "warning" ? "warn" : "doc-note";
+      div.innerHTML = block.html;
+      return div;
+    }
+    const p = document.createElement("p");
+    p.textContent = String(block.html || block.text || "");
+    return p;
+  }
 
+  function renderGuideArticle(article, manual) {
     article.textContent = "";
-    groups.forEach((group, index) => {
-      const page = document.createElement("section");
-      page.className = "doc-page";
-      page.dataset.docPage = String(index);
-      group.forEach((el) => page.appendChild(el));
-      article.appendChild(page);
+    article.dataset.copyText = "";
+    const title = document.createElement("h3");
+    title.textContent = manual.title;
+    article.appendChild(title);
+    const copyParts = [manual.title];
+    manual.sections.forEach((section) => {
+      const sectionEl = document.createElement("section");
+      sectionEl.className = "doc-section";
+      sectionEl.id = `guide-${section.id}`;
+      sectionEl.dataset.docSection = section.id;
+      const h = document.createElement("h3");
+      h.textContent = section.title;
+      sectionEl.appendChild(h);
+      copyParts.push(section.title);
+      (section.blocks || []).forEach((block) => {
+        sectionEl.appendChild(createGuideElement(block));
+        if (block.html) copyParts.push(String(block.html).replace(/<[^>]+>/g, ""));
+        if (block.text) copyParts.push(block.text);
+        if (block.items) copyParts.push(block.items.join("\n"));
+      });
+      article.appendChild(sectionEl);
     });
-    article.dataset.paginated = "true";
+    article.dataset.copyText = copyParts.filter(Boolean).join("\n\n");
   }
 
   function initializeGuidePagination() {
-    document
-      .querySelectorAll(".doc[data-doc-lang]")
-      .forEach((article) => paginateGuideArticle(article));
+    const manual = helpManualForLanguage(guideLang());
+    document.querySelectorAll(".doc[data-doc-lang]").forEach((article) => {
+      const lang = article.dataset.docLang || "zh";
+      renderGuideArticle(article, helpManualForLanguage(lang));
+    });
+  }
+
+  function guidePages(article) {
+    return Array.from(article.querySelectorAll(".doc-section"));
   }
 
   function guidePageTitle(page) {
-    const headings = Array.from(page.querySelectorAll("h3"))
-      .map((el) => String(el.textContent || "").trim())
-      .filter(Boolean);
-    return headings[0] || (state.lang === "zh" ? "说明" : "Guide");
+    const heading = page.querySelector("h3");
+    return String(heading?.textContent || (state.lang === "zh" ? "说明" : "Guide")).trim();
   }
 
   function updateGuidePaginationUI(scrollToTop = false) {
     initializeGuidePagination();
     const article = currentGuideArticle();
     if (!article) return;
-
-    const pages = guidePages(article);
-    const total = pages.length || 1;
-    const lang = guideLang();
-    const index = Math.max(0, Math.min(guidePageByLang[lang], total - 1));
-    guidePageByLang[lang] = index;
-
-    pages.forEach((page, pageIndex) => {
-      page.hidden = pageIndex !== index;
-    });
-
+    const sections = guidePages(article);
     const select = $("guide-page-select");
     select.setAttribute("aria-label", t("guideSelectLabel"));
     select.textContent = "";
-    pages.forEach((page, pageIndex) => {
+    sections.forEach((section, index) => {
       const option = document.createElement("option");
-      option.value = String(pageIndex);
-      option.textContent = `${pageIndex + 1}. ${guidePageTitle(page)}`;
+      option.value = String(index);
+      option.textContent = guidePageTitle(section);
       select.appendChild(option);
     });
-    select.value = String(index);
-    $("guide-next-page").disabled = index >= total - 1;
-
-    if (scrollToTop) $("tech-modal").querySelector(".modal-body").scrollTop = 0;
+    const index = Math.max(0, Math.min(guidePageByLang[guideLang()], sections.length - 1));
+    guidePageByLang[guideLang()] = index;
+    if (sections.length) select.value = String(index);
+    $("guide-next-page").disabled = index >= sections.length - 1;
+    if (scrollToTop) sections[index]?.scrollIntoView({ block: "start" });
   }
 
   function selectGuidePage(index) {
     const article = currentGuideArticle();
     if (!article) return;
-    const pages = guidePages(article);
+    const sections = guidePages(article);
     const lang = guideLang();
-    guidePageByLang[lang] = Math.max(
-      0,
-      Math.min(index, Math.max(0, pages.length - 1)),
-    );
+    guidePageByLang[lang] = Math.max(0, Math.min(index, Math.max(0, sections.length - 1)));
     updateGuidePaginationUI(true);
   }
 
   function setGuidePage(offset) {
     const article = currentGuideArticle();
     if (!article) return;
-    const pages = guidePages(article);
+    const sections = guidePages(article);
     const lang = guideLang();
-    guidePageByLang[lang] = Math.max(
-      0,
-      Math.min(guidePageByLang[lang] + offset, Math.max(0, pages.length - 1)),
-    );
+    guidePageByLang[lang] = Math.max(0, Math.min(guidePageByLang[lang] + offset, Math.max(0, sections.length - 1)));
     updateGuidePaginationUI(true);
   }
 
@@ -1613,25 +1646,54 @@ import {
     sinusoidal: { center: [0, 0, 0], mapScale: 1 },
   };
 
+  function createSectionShell(id, titleKey, hintKey, contentClass = "") {
+    const section = document.createElement("section");
+    section.className = `section ${contentClass}`.trim();
+    section.dataset.menuId = id;
+    section.id = `${id.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`)}-section`;
+    const title = document.createElement("div");
+    title.className = "section-title";
+    const titleText = document.createElement("span");
+    titleText.dataset.i18n = titleKey;
+    titleText.textContent = t(titleKey);
+    const hint = document.createElement("span");
+    hint.dataset.i18n = hintKey;
+    hint.textContent = t(hintKey);
+    title.append(titleText, hint);
+    const body = document.createElement("div");
+    body.className = "section-body";
+    section.append(title, body);
+    return { section, body };
+  }
+
   function initializeIntegratedLayout() {
     if ($("app-shell")) return;
     const shell = document.createElement("div");
     shell.id = "app-shell";
     const sidebar = document.createElement("aside");
     sidebar.id = "sidebar";
-    const head = document.createElement("div");
-    head.id = "sidebar-head";
     const pane = document.createElement("main");
     pane.id = "sky-pane";
     const top = document.querySelector(".topbar");
     const brand = document.querySelector(".brand");
     const selector = document.querySelector(".selector-card");
     const hud = document.querySelector(".hud");
-    if (brand) head.appendChild(brand);
-    if (selector) head.appendChild(selector);
-    if (hud) head.appendChild(hud);
-    sidebar.appendChild(head);
     const panel = $("control-panel");
+
+    const infoShell = createSectionShell("topInfo", "topInfo", "topInfoHint", "top-info-section");
+    const head = document.createElement("div");
+    head.id = "sidebar-head";
+    if (brand) head.appendChild(brand);
+    if (hud) head.appendChild(hud);
+    infoShell.body.appendChild(head);
+    panel.prepend(infoShell.section);
+
+    const cultureShell = createSectionShell("cultureSettings", "cultureSettings", "cultureSettingsHint", "culture-settings-section");
+    if (selector) cultureShell.body.appendChild(selector);
+    const searchSection = panel.querySelector('[data-menu-id="search"]');
+    if (searchSection && searchSection.nextSibling) panel.insertBefore(cultureShell.section, searchSection.nextSibling);
+    else panel.appendChild(cultureShell.section);
+
     sidebar.appendChild(panel);
     applyMenuSectionOrder(panel);
     initializeMenuSections(panel);
@@ -1642,8 +1704,9 @@ import {
     document.body.insertBefore(shell, document.body.firstChild);
     if (top) top.remove();
     if (window.ResizeObserver) {
-      resizeObserver = new ResizeObserver(() => scheduleSkyResize());
+      resizeObserver = new ResizeObserver(() => scheduleSkyResize("resize-observer"));
       resizeObserver.observe(pane);
+      resizeObserver.observe(sidebar);
     }
   }
 
@@ -1651,43 +1714,24 @@ import {
     if (!panel || panel.dataset.menuOrderChecked === "true") return;
     const configured = cfg("menu.order", []),
       order = Array.isArray(configured) ? configured : [];
-    const actual = Array.from(panel.querySelectorAll("[data-menu-id]")).map(
-      (section) => section.dataset.menuId,
-    );
-    const mismatch =
-      order.length &&
-      order.some((id, index) => actual[index] && actual[index] !== id);
-    if (mismatch)
-      console.warn("Menu section order differs from config.menu.order", {
-        expected: order,
-        actual,
-      });
+    order.forEach((id) => {
+      const section = panel.querySelector(`[data-menu-id="${id}"]`);
+      if (section) panel.appendChild(section);
+    });
     panel.dataset.menuOrderChecked = "true";
   }
 
   /**
-   * 菜单只在初始化时根据配置标记可折叠大分区。
-   * 小分组保持普通视觉分区，不参与折叠状态。
+   * 所有大分区都支持折叠；默认展开和不可折叠不再混用。
    */
   function initializeMenuSections(panel = $("control-panel")) {
     if (!panel || panel.dataset.menuSectionsReady === "true") return;
     const collapsible = new Set(
-        Array.isArray(cfg("menu.collapsible", []))
-          ? cfg("menu.collapsible", [])
-          : [],
-      ),
-      alwaysExpanded = new Set(
-        Array.isArray(cfg("menu.alwaysExpanded", []))
-          ? cfg("menu.alwaysExpanded", [])
-          : [],
-      );
+      Array.isArray(cfg("menu.collapsible", [])) ? cfg("menu.collapsible", []) : [],
+    );
     panel.querySelectorAll("[data-menu-id]").forEach((section) => {
       const id = section.dataset.menuId,
         title = section.querySelector(".section-title");
-      section.classList.toggle(
-        "section-always-expanded",
-        alwaysExpanded.has(id),
-      );
       if (!collapsible.has(id) || !title) return;
       section.classList.add("section-collapsible");
       const collapsed = state.menuCollapsed.includes(id);
@@ -1704,6 +1748,7 @@ import {
           .map((item) => item.dataset.menuId)
           .filter(Boolean);
         save();
+        scheduleSkyResize("menu-section-toggle");
       };
       title.addEventListener("click", toggle);
       title.addEventListener("keydown", (event) => {
@@ -2254,6 +2299,22 @@ import {
         label.viewport,
         debugSizeParts(window.innerWidth, window.innerHeight),
       ),
+      debugLine(zh ? "文档视口 documentElement" : "documentElement viewport",
+        debugSizeParts(document.documentElement.clientWidth, document.documentElement.clientHeight)),
+      debugLine(zh ? "visualViewport 尺寸" : "visualViewport size",
+        window.visualViewport ? debugSizeParts(window.visualViewport.width, window.visualViewport.height) : [debugValue("-")]),
+      debugLine(zh ? "visualViewport scale/offset" : "visualViewport scale/offset",
+        window.visualViewport ? [
+          debugSep("scale="), debugValue(Number(window.visualViewport.scale || 1).toFixed(3)),
+          debugSep(" offset="), debugValue(Math.round(window.visualViewport.offsetLeft || 0)),
+          debugSep(","), debugValue(Math.round(window.visualViewport.offsetTop || 0)),
+        ] : [debugValue("-")]),
+      debugLine(zh ? "屏幕 screen" : "screen", debugSizeParts(screen.width, screen.height)),
+      debugLine(zh ? "屏幕方向" : "orientation", [debugValue(screen.orientation?.type || String(window.orientation ?? "-"))]),
+      debugLine(zh ? "最后 resize 来源" : "last resize source", [debugValue(mobileResizeDebug.lastSource)]),
+      debugLine(zh ? "最后 resize 状态" : "last resize status", [debugValue(mobileResizeDebug.lastStatus)]),
+      debugLine(zh ? "最后 resize 时间" : "last resize time", [debugValue(mobileResizeDebug.lastAt)]),
+      debugLine(zh ? "最后 resize 错误" : "last resize error", [debugValue(mobileResizeDebug.lastError)]),
       debugLine(label.dpr, [
         debugValue(Number(window.devicePixelRatio || 1).toFixed(2)),
       ]),
@@ -2860,7 +2921,8 @@ import {
     $("projection-help").textContent =
       state.lang === "zh" ? opt.dataset.descZh || "" : opt.dataset.descEn || "";
   }
-  function scheduleSkyResize() {
+  function scheduleSkyResize(source = "unknown") {
+    mobileResizeDebug.lastSource = source;
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(
       () => {
@@ -2876,8 +2938,12 @@ import {
           lastRenderedSize &&
           Math.abs(pane.width - lastRenderedSize.width) < 2 &&
           Math.abs(pane.height - lastRenderedSize.height) < 2
-        )
+        ) {
+          mobileResizeDebug.lastAt = new Date().toISOString();
+          mobileResizeDebug.lastStatus = "skipped same size";
+          updateDebugOverlay(true);
           return;
+        }
         const view = captureView(),
           generation = ++layoutResizeGeneration,
           metrics = projectionCanvasMetrics();
@@ -2885,6 +2951,9 @@ import {
           suppressResizeUntil = performance.now() + 420;
           resizeCelestialCanvas(metrics);
           lastRenderedSize = { width: pane.width, height: pane.height };
+          mobileResizeDebug.lastAt = new Date().toISOString();
+          mobileResizeDebug.lastStatus = "ok";
+          mobileResizeDebug.lastError = "-";
           setTimeout(() => {
             if (generation !== layoutResizeGeneration || !skyReady) return;
             syncRenderedMapBox(projectionCanvasMetrics());
@@ -2892,6 +2961,9 @@ import {
             updateDebugOverlay(true);
           }, 50);
         } catch (err) {
+          mobileResizeDebug.lastAt = new Date().toISOString();
+          mobileResizeDebug.lastStatus = "failed";
+          mobileResizeDebug.lastError = err?.message || String(err);
           console.warn("Responsive resize failed", err);
         }
       },
@@ -5793,7 +5865,7 @@ import {
     document.body.classList.toggle("panel-collapsed", !state.panelOpen);
     if (persist) save();
     updateDebugOverlay(true);
-    setTimeout(scheduleSkyResize, 230);
+    setTimeout(() => scheduleSkyResize("panel-toggle"), 230);
   }
   function captureView() {
     try {
@@ -6514,7 +6586,13 @@ import {
         save();
       }
     });
-    window.addEventListener("resize", () => scheduleSkyResize());
+    window.addEventListener("resize", () => scheduleSkyResize("window.resize"));
+    window.addEventListener("orientationchange", () => scheduleSkyResize("orientationchange"));
+    window.addEventListener("pageshow", () => scheduleSkyResize("pageshow"));
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener("resize", () => scheduleSkyResize("visualViewport.resize"));
+      window.visualViewport.addEventListener("scroll", () => scheduleSkyResize("visualViewport.scroll"));
+    }
   }
 
   /**

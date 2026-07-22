@@ -1,5 +1,5 @@
 /**
- * 真实星空观测台 5.3.1 —— 用户可配置文件
+ * 真实星空观测台 5.3.2 —— 用户可配置文件
  * ------------------------------------------------------------
  * 修改本文件后，运行 npm run build 并刷新 index.html 即可生效。
  * 建议每次只修改一个参数，并保留原值，便于出现问题时恢复。
@@ -48,8 +48,10 @@ window.RSO_CONFIG = {
   /** 左侧菜单分组顺序；每个值对应一个稳定的 data-menu-id */
   menu: {
     order: [
+      "topInfo",
       "viewTools",
       "search",
+      "cultureSettings",
       "observer",
       "time",
       "viewProjection",
@@ -57,8 +59,18 @@ window.RSO_CONFIG = {
       "objectInfo",
       "status",
     ],
-    collapsible: ["observer", "time", "viewProjection", "display"],
-    alwaysExpanded: ["viewTools", "search", "objectInfo", "status"],
+    collapsible: [
+      "topInfo",
+      "viewTools",
+      "search",
+      "cultureSettings",
+      "observer",
+      "time",
+      "viewProjection",
+      "display",
+      "objectInfo",
+      "status",
+    ],
     defaultCollapsed: ["observer", "time", "viewProjection", "display"],
   },
 
@@ -102,7 +114,7 @@ window.RSO_CONFIG = {
   },
 
 
-  /** 天文模型边界：5.3.1 默认启用轻量岁差；不做章动、自行、折射或高精度行星历表 */
+  /** 天文模型边界：当前默认启用轻量岁差；不做章动、自行、折射或高精度行星历表 */
   astronomyModel: {
     precession: true,
     nutation: false,
