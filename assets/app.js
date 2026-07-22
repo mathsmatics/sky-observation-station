@@ -93,8 +93,8 @@
       // 是否显示左上角 DBG 开关
       defaultOpen: false,
       // 页面打开时是否默认展开调试信息
-      refreshMs: 350
-      // 调试信息刷新间隔
+      refreshMs: 200
+      // 调试信息刷新间隔；约 5 FPS，避免拖动时 Debug 自身造成卡顿
     },
     /** 应用层星图画布缩放：缩放会改变 #celestial-map / canvas 的 CSS 尺寸 */
     mapScale: {
@@ -113,6 +113,8 @@
       // 欧拉角中轴约束：进入极区保护的角距离阈值
       poleGuardExitDegrees: 12,
       // 欧拉角中轴约束：退出极区保护的滞回阈值，略大于进入阈值避免边界抖动
+      poleGuardPointerEnabled: true,
+      // 鼠标靠近当前坐标系极点时，禁止危险的横向旋转
       keyboardPanDegrees: 4,
       // 方向键单次按下的即时平移角度
       keyboardPanDegreesPerSecond: 72,
@@ -3732,7 +3734,7 @@
     let traditionalRegionsReady = false, traditionalLabelsReady = false;
     let rebuildInProgress = false, suppressResizeUntil = 0, rebuildGeneration = 0;
     let resizeObserver = null, clickStart = null, pointerMoved = false, paneDrag = null, rotationPointerDrag = null;
-    let currentSelected = null, customViewRestoreTimer = null, lastRenderedSize = null, debugVisible = !!cfg("debug.enabled", false) && !!cfg("debug.defaultOpen", false), lastDebugUpdate = 0, lastDebugPlainText = "", debugCopyStatus = "idle", debugCopyTimer = null, debugFramePending = false, mapBoxSyncFramePending = false, pendingMapBoxSyncMetrics = null, canvasResizeFramePending = false, pendingCanvasResizeMetrics = null, pendingCanvasResizeReason = "scheduled resize", layoutResizeGeneration = 0;
+    let currentSelected = null, customViewRestoreTimer = null, lastRenderedSize = null, debugVisible = !!cfg("debug.enabled", false) && !!cfg("debug.defaultOpen", false), lastDebugUpdate = 0, lastDebugPlainText = "", debugCopyStatus = "idle", debugCopyTimer = null, debugPointerSkyCoord = null, debugPointerActive = false, debugLastAction = "none", debugFramePending = false, mapBoxSyncFramePending = false, pendingMapBoxSyncMetrics = null, canvasResizeFramePending = false, pendingCanvasResizeMetrics = null, pendingCanvasResizeReason = "scheduled resize", layoutResizeGeneration = 0;
     const rotationController = createRotationController();
     const skyPanKeys = /* @__PURE__ */ new Set();
     let keyboardPanDirty = false;
@@ -3746,6 +3748,7 @@
       centerNegativeDeg: NaN,
       positiveName: "-",
       negativeName: "-",
+      polesDefined: false,
       positivePoint: null,
       negativePoint: null,
       centerlineX: NaN,
@@ -4556,10 +4559,33 @@
       const number = Number(value);
       return Number.isFinite(number) ? `${number.toFixed(2)}\xB0` : "-";
     }
+    function formatAngleOrUnavailable(value) {
+      const number = Number(value);
+      return Number.isFinite(number) ? `${number.toFixed(2)}\xB0` : "unavailable";
+    }
     function formatSigned(value) {
       const number = Number(value);
       if (!Number.isFinite(number)) return "-";
       return `${number >= 0 ? "+" : ""}${number.toFixed(1)}`;
+    }
+    function debugRefreshIntervalMs() {
+      const configured = Number(cfg("debug.refreshMs", 200));
+      return Math.max(100, Math.min(500, Number.isFinite(configured) ? configured : 200));
+    }
+    function noteDebugLastAction(action) {
+      debugLastAction = action || "none";
+    }
+    function currentViewControlMode() {
+      return poleAxisConstraintEnabled() ? "Euler constrained" : "Quaternion free";
+    }
+    function pressedArrowKeysLabel() {
+      const keys = [
+        ["ArrowUp", "\u2191"],
+        ["ArrowDown", "\u2193"],
+        ["ArrowLeft", "\u2190"],
+        ["ArrowRight", "\u2192"]
+      ].filter(([key]) => skyPanKeys.has(key)).map(([, label]) => label);
+      return keys.length ? keys.join(" ") : "none";
     }
     function debugResponsiveMode() {
       const coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches, hover = window.matchMedia && window.matchMedia("(hover: hover)").matches, narrow = window.innerWidth <= 800, veryNarrow = window.innerWidth <= 520;
@@ -4770,6 +4796,9 @@
       const exit = Number(cfg("interaction.poleGuardExitDegrees", 12)) || 12;
       return Math.max(exit, poleGuardEnterDeg());
     }
+    function poleGuardPointerEnabled() {
+      return cfg("interaction.poleGuardPointerEnabled", true) !== false;
+    }
     function normalizeCenterForControlMode(center) {
       const source = Array.isArray(center) ? center.slice() : [0, 0, 0];
       const next = [
@@ -4791,10 +4820,10 @@
       try {
         if (state.coordinateSystem === "horizontal") {
           return {
-            positiveName: state.lang === "en" ? "Zenith" : "\u5929\u9876",
-            negativeName: state.lang === "en" ? "Nadir" : "\u5929\u5E95",
-            positiveCoord: equatorialFromHorizontal2(0, 90),
-            negativeCoord: equatorialFromHorizontal2(0, -90)
+            positiveName: state.lang === "en" ? "North celestial pole" : "\u5317\u5929\u6781",
+            negativeName: state.lang === "en" ? "South celestial pole" : "\u5357\u5929\u6781",
+            positiveCoord: [0, 90],
+            negativeCoord: [0, -90]
           };
         }
         if (state.coordinateSystem === "equatorial") {
@@ -4842,13 +4871,15 @@
       poleAxisDebug.status = status || (poleAxisConstraintEnabled() ? "euler-constrained" : "quaternion-free");
       if (!poles) {
         Object.assign(poleAxisDebug, {
-          guardReason: "unavailable",
+          guardActive: false,
+          guardReason: "undefined",
           pointerPositiveDeg: NaN,
           pointerNegativeDeg: NaN,
           centerPositiveDeg: NaN,
           centerNegativeDeg: NaN,
-          positiveName: "-",
-          negativeName: "-",
+          positiveName: "undefined",
+          negativeName: "undefined",
+          polesDefined: false,
           positivePoint: null,
           negativePoint: null,
           centerlineX: NaN,
@@ -4864,11 +4895,12 @@
       let axisAngleDeg = NaN;
       if (positivePoint && negativePoint) {
         const dx = positivePoint.x - negativePoint.x, dy = positivePoint.y - negativePoint.y;
-        axisAngleDeg = radToDeg(Math.atan2(dx, -dy));
+        axisAngleDeg = radToDeg(Math.atan2(Math.abs(dx), Math.abs(dy)));
       }
       Object.assign(poleAxisDebug, {
         positiveName: poles.positiveName,
         negativeName: poles.negativeName,
+        polesDefined: true,
         pointerPositiveDeg: pointer ? angularDistanceDeg(pointer, poles.positiveCoord) : NaN,
         pointerNegativeDeg: pointer ? angularDistanceDeg(pointer, poles.negativeCoord) : NaN,
         centerPositiveDeg: viewCenter ? angularDistanceDeg(viewCenter, poles.positiveCoord) : NaN,
@@ -4884,16 +4916,14 @@
     }
     function evaluatePoleGuard(pointerCoord = null, center = null) {
       const enter = poleGuardEnterDeg(), exit = poleGuardExitDeg(), threshold = poleAxisDebug.guardActive ? exit : enter, diag = updatePoleAxisDebug(pointerCoord, center);
-      const candidates = [
+      const candidates = (poleGuardPointerEnabled() ? [
         ["pointer-near-positive-pole", diag.pointerPositiveDeg],
-        ["pointer-near-negative-pole", diag.pointerNegativeDeg],
-        ["positive-pole-near-center", diag.centerPositiveDeg],
-        ["negative-pole-near-center", diag.centerNegativeDeg]
-      ].filter((item) => Number.isFinite(Number(item[1]))).sort((a, b) => Number(a[1]) - Number(b[1]));
+        ["pointer-near-negative-pole", diag.pointerNegativeDeg]
+      ] : []).filter((item) => Number.isFinite(Number(item[1]))).sort((a, b) => Number(a[1]) - Number(b[1]));
       const nearest = candidates[0];
       const active = !!nearest && Number(nearest[1]) <= threshold;
       poleAxisDebug.guardActive = active;
-      poleAxisDebug.guardReason = active ? nearest[0] : candidates.length ? "none" : "unavailable";
+      poleAxisDebug.guardReason = active ? nearest[0] : candidates.length ? "none" : "undefined";
       poleAxisDebug.status = active ? "guard-active" : poleAxisDebug.status;
       return poleAxisDebug;
     }
@@ -4921,6 +4951,7 @@
         sensitivity: Number(cfg("interaction.dragSensitivity", 1))
       });
       Celestial.rotate({ center: nextCenter });
+      noteDebugLastAction("quaternion drag");
       redrawAndSyncMapBox(reason);
       queueDebugOverlayUpdate();
       return true;
@@ -4956,6 +4987,7 @@
       });
       if (!Array.isArray(nextCenter)) return false;
       Celestial.rotate({ center: nextCenter });
+      noteDebugLastAction("quaternion drag");
       redrawAndSyncMapBox(reason);
       queueDebugOverlayUpdate();
       return true;
@@ -4963,7 +4995,8 @@
     function applyEulerConstrainedPointerDelta(dx, dy, rect, currentCoord = null, reason = "euler constrained drag") {
       if (!window.Celestial || !rect) return false;
       const center = normalizeCenterForControlMode(currentCelestialCenter());
-      const shortSide = Math.max(180, Math.min(Number(rect.width) || 0, Number(rect.height) || 0));
+      const metrics = projectionCanvasMetrics2();
+      const shortSide = Math.max(180, Math.min(Number(metrics.virtualWidth) || Number(rect.width) || 0, Number(metrics.virtualHeight) || Number(rect.height) || 0));
       const sensitivity = Number(cfg("interaction.dragSensitivity", 1)) || 1;
       const degreesPerPixel = 180 / shortSide * sensitivity;
       const guard = evaluatePoleGuard(currentCoord, center);
@@ -4977,6 +5010,7 @@
         Math.max(-89.5, Math.min(89.5, center[1] + latDelta)),
         0
       ];
+      noteDebugLastAction(guard.guardActive ? "pole guard active" : "euler drag");
       setCelestialCenter(next, reason);
       updatePoleAxisDebug(currentCoord, next, guard.guardActive ? "guard-active" : "euler-constrained");
       redrawAndSyncMapBox(reason);
@@ -5007,6 +5041,85 @@
       if (dragging) return zh ? "Canvas \u62D6\u52A8" : "canvas drag";
       if (clickStart) return zh ? "\u7B49\u5F85\u533A\u5206\u70B9\u51FB/\u62D6\u52A8" : "click-or-drag pending";
       return zh ? "\u7A7A\u95F2" : "idle";
+    }
+    function debugRenderedViewParts(center) {
+      if (!Array.isArray(center)) return [debugValue("unavailable")];
+      return [
+        debugSep("lon="),
+        debugValue(formatAngle(center[0])),
+        debugSep(" lat="),
+        debugValue(formatAngle(center[1])),
+        debugSep(" roll="),
+        debugValue(formatAngle(center[2] || 0))
+      ];
+    }
+    function debugEulerStateParts(center, active) {
+      if (!active) return [debugValue("inactive")];
+      return [
+        debugSep("longitude="),
+        debugValue(formatAngle(center && center[0])),
+        debugSep(" latitude="),
+        debugValue(formatAngle(center && center[1])),
+        debugSep(" roll="),
+        debugValue(formatAngle(center && center[2]))
+      ];
+    }
+    function debugQuaternionStateParts(rotationStats, active) {
+      if (!active) return [debugValue("inactive")];
+      const q = rotationStats && rotationStats.quaternion ? rotationStats.quaternion : {};
+      return [
+        debugSep("qx="),
+        debugValue(Number(q.x).toFixed(6)),
+        debugSep(" qy="),
+        debugValue(Number(q.y).toFixed(6)),
+        debugSep(" qz="),
+        debugValue(Number(q.z).toFixed(6)),
+        debugSep(" qw="),
+        debugValue(Number(q.w).toFixed(6)),
+        debugSep(" |q|="),
+        debugValue(Number(rotationStats.norm).toFixed(6))
+      ];
+    }
+    function debugPolePointParts(point) {
+      if (!point) return [debugValue("unavailable")];
+      return [
+        debugSep("x="),
+        debugValue(Math.round(point.x)),
+        debugSep(" y="),
+        debugValue(Math.round(point.y)),
+        debugSep(" "),
+        debugValue(point.visible ? "visible" : "unavailable")
+      ];
+    }
+    function debugStatusSummary({ view, poleStats, rotationStats, controlMode, uiMatches }) {
+      const errors = [];
+      const warnings = [];
+      const center = view && view.center;
+      const eulerActive = controlMode === "Euler constrained";
+      const quaternionActive = controlMode === "Quaternion free";
+      if (!uiMatches) errors.push("toggle mismatch");
+      if (!Object.prototype.hasOwnProperty.call(PROJECTION_DEFAULTS, state.projection))
+        errors.push("projection invalid");
+      if (!["horizontal", "equatorial", "ecliptic", "galactic"].includes(state.coordinateSystem))
+        errors.push("coordinate invalid");
+      if (!Array.isArray(center) || center.slice(0, 3).some((value) => !Number.isFinite(Number(value))))
+        errors.push("rendered view non-finite");
+      if (eulerActive && !poleStats.polesDefined) errors.push("poles undefined");
+      if (quaternionActive) {
+        const norm = Number(rotationStats.norm);
+        if (!Number.isFinite(norm) || Math.abs(norm - 1) > 0.05) errors.push("quaternion norm error");
+        else if (Math.abs(norm - 1) > 1e-3) warnings.push("quaternion norm drift");
+      }
+      if (poleStats.guardActive) warnings.push("pole guard active");
+      if (poleStats.polesDefined && (!poleStats.positivePoint || !poleStats.negativePoint))
+        warnings.push("pole projection unavailable");
+      if (eulerActive && Number.isFinite(Number(poleStats.axisAngleDeg)) && Math.abs(Number(poleStats.axisAngleDeg)) > 5)
+        warnings.push("axis not vertical");
+      if (eulerActive && Array.isArray(center) && Math.abs(Number(center[1])) > 85)
+        warnings.push("euler latitude near singularity");
+      const level = errors.length ? "ERROR" : warnings.length ? "WARNING" : "OK";
+      const detail = errors.concat(warnings).join("; ");
+      return detail ? `${level} ${detail}` : level;
     }
     function updateDebugOverlay(force = false) {
       if (!debugVisible && !force) return;
@@ -5085,39 +5198,33 @@
         culture: "\u5F53\u524D\u661F\u7A7A\u4F53\u7CFB",
         language: "\u8BED\u8A00",
         viewKey: "\u89C6\u89D2\u4FDD\u5B58\u952E",
-        viewCenter: "\u5F53\u524D\u89C6\u56FE\u4E2D\u5FC3",
+        viewCenter: "\u5F53\u524D\u5B9E\u9645\u89C6\u89D2\u4E2D\u5FC3 lon / lat / roll",
         interaction: "\u62D6\u52A8/\u70B9\u51FB\u72B6\u6001",
         dragMoved: "\u5DF2\u8D85\u8FC7\u62D6\u52A8\u9608\u503C",
         clickPending: "\u70B9\u51FB\u5224\u5B9A\u4E2D",
         dragThreshold: "\u70B9\u51FB/\u62D6\u52A8\u9608\u503C",
         dragSensitivity: "\u62D6\u52A8\u7075\u654F\u5EA6",
-        rotationMode: "\u65CB\u8F6C\u6A21\u5F0F",
+        debugStatus: "Status",
+        lastAction: "Last action",
         viewControlMode: "\u89C6\u89D2\u63A7\u5236\u6A21\u5F0F",
         poleAxisConstraint: "\u5929\u6781\u4E2D\u8F74\u7EA6\u675F",
+        renderedViewState: "Rendered View State",
+        eulerState: "Euler State",
+        quaternionState: "Quaternion State",
+        keyboardPan: "Keyboard pan",
+        pressedArrowKeys: "Pressed arrow keys",
         poleGuard: "\u6781\u533A\u4FDD\u62A4",
         poleGuardReason: "\u6781\u533A\u4FDD\u62A4\u539F\u56E0",
         poleGuardThreshold: "\u4FDD\u62A4\u9608\u503C",
-        pointerPoleDistance: "\u9F20\u6807\u5230\u6781\u70B9\u89D2\u8DDD\u79BB",
-        centerPoleDistance: "\u89C6\u573A\u4E2D\u5FC3\u5230\u6781\u70B9\u89D2\u8DDD\u79BB",
+        pointerPositivePoleDistance: "\u9F20\u6807\u5230\u6B63\u6781\u89D2\u8DDD\u79BB",
+        pointerNegativePoleDistance: "\u9F20\u6807\u5230\u8D1F\u6781\u89D2\u8DDD\u79BB",
         currentPoles: "\u5F53\u524D\u5750\u6807\u89C6\u89D2\u6781\u70B9",
         positivePolePoint: "\u6B63\u6781\u5C4F\u5E55\u5750\u6807",
         negativePolePoint: "\u8D1F\u6781\u5C4F\u5E55\u5750\u6807",
-        poleCenterline: "\u5C4F\u5E55\u4E2D\u8F74\u7EBF",
-        poleDx: "\u6781\u70B9\u504F\u79BB\u4E2D\u8F74\u7EBF",
+        poleCenterline: "\u5C4F\u5E55\u4E2D\u8F74\u7EBF x",
+        poleDx: "\u6B63\u6781 dx / \u8D1F\u6781 dx",
         poleAxisAngle: "\u6781\u8F74\u5C4F\u5E55\u89D2\u5EA6",
-        poleStatus: "\u7EA6\u675F/\u4FDD\u62A4\u72B6\u6001",
-        rotationDragMode: "\u62D6\u52A8\u7B97\u6CD5",
-        grabAnchor: "\u6293\u53D6\u951A\u70B9",
-        grabCurrent: "\u5F53\u524D\u9F20\u6807\u5929\u7403\u70B9",
-        grabAngle: "\u6293\u53D6\u65CB\u8F6C\u89D2\u8DDD\u79BB",
-        quaternion: "Quaternion",
-        quaternionNorm: "Quaternion \u957F\u5EA6",
-        quaternionNormalized: "\u662F\u5426\u5F52\u4E00\u5316",
-        eulerDisplay: "\u663E\u793A\u7528\u6B27\u62C9\u89D2",
-        rotationCenter: "\u56DB\u5143\u6570\u89C6\u56FE\u4E2D\u5FC3",
-        nearPole: "\u662F\u5426\u63A5\u8FD1\u6781\u533A",
-        poleDistance: "\u6781\u533A\u8DDD\u79BB",
-        lastRotationSync: "\u6700\u8FD1\u540C\u6B65\u6765\u6E90",
+        poleAxisAngleRule: "\u6781\u8F74\u89D2\u5EA6\u5B9A\u4E49",
         displayOptions: "\u663E\u793A\u9009\u9879",
         starLimit: "\u6052\u661F\u6700\u6697\u661F\u7B49",
         starSize: "\u6052\u661F\u5927\u5C0F",
@@ -5194,39 +5301,33 @@
         culture: "current sky culture",
         language: "language",
         viewKey: "saved view key",
-        viewCenter: "current view center",
+        viewCenter: "current rendered center lon / lat / roll",
         interaction: "drag/click mode",
         dragMoved: "drag threshold crossed",
         clickPending: "click pending",
         dragThreshold: "click/drag threshold",
         dragSensitivity: "drag sensitivity",
-        rotationMode: "rotation mode",
+        debugStatus: "Status",
+        lastAction: "Last action",
         viewControlMode: "view control mode",
         poleAxisConstraint: "pole-axis constraint",
+        renderedViewState: "Rendered View State",
+        eulerState: "Euler State",
+        quaternionState: "Quaternion State",
+        keyboardPan: "Keyboard pan",
+        pressedArrowKeys: "Pressed arrow keys",
         poleGuard: "pole guard",
         poleGuardReason: "pole guard reason",
         poleGuardThreshold: "guard thresholds",
-        pointerPoleDistance: "pointer-to-pole angular distance",
-        centerPoleDistance: "center-to-pole angular distance",
+        pointerPositivePoleDistance: "pointer to positive pole",
+        pointerNegativePoleDistance: "pointer to negative pole",
         currentPoles: "current coordinate poles",
         positivePolePoint: "positive pole screen point",
         negativePolePoint: "negative pole screen point",
-        poleCenterline: "screen centerline",
-        poleDx: "pole centerline dx",
+        poleCenterline: "screen centerline x",
+        poleDx: "positive dx / negative dx",
         poleAxisAngle: "pole-axis screen angle",
-        poleStatus: "constraint/guard status",
-        rotationDragMode: "drag algorithm",
-        grabAnchor: "grab anchor",
-        grabCurrent: "current pointer sky coord",
-        grabAngle: "grab angular distance",
-        quaternion: "Quaternion",
-        quaternionNorm: "Quaternion norm",
-        quaternionNormalized: "normalized",
-        eulerDisplay: "Euler for display",
-        rotationCenter: "quaternion view center",
-        nearPole: "near pole",
-        poleDistance: "pole distance",
-        lastRotationSync: "last sync reason",
+        poleAxisAngleRule: "axis angle rule",
         displayOptions: "display options",
         starLimit: "stellar magnitude limit",
         starSize: "star size",
@@ -5253,7 +5354,7 @@
         skyReady: "skyReady",
         rebuild: "rebuild"
       };
-      const pane = $("sky-pane"), canvas = document.querySelector("#celestial-map canvas"), svg = document.querySelector("#celestial-map svg"), metrics = projectionCanvasMetrics2(), starMagnitudeStats = currentStarMagnitudeStats(), rotationStats = rotationController.debugState(), poleStats = updatePoleAxisDebug(null, view.center), celestialMetrics = window.Celestial && typeof Celestial.metrics === "function" ? Celestial.metrics() : null;
+      const pane = $("sky-pane"), canvas = document.querySelector("#celestial-map canvas"), svg = document.querySelector("#celestial-map svg"), metrics = projectionCanvasMetrics2(), starMagnitudeStats = currentStarMagnitudeStats(), rotationStats = rotationController.debugState(), celestialMetrics = window.Celestial && typeof Celestial.metrics === "function" ? Celestial.metrics() : null;
       const paneRect = pane ? pane.getBoundingClientRect() : null, sidebarRect = elementRect2("#sidebar"), panelToggleRect = elementRect2("#panel-toggle"), overlayRect = overlay.getBoundingClientRect(), stageRect = elementRect2("#sky-stage"), frameRect = elementRect2("#celestial-frame"), mapRect = elementRect2("#celestial-map"), canvasRect3 = canvas ? canvas.getBoundingClientRect() : null, svgRect = svg ? svg.getBoundingClientRect() : null, paneCenter = paneRect ? {
         x: paneRect.left + paneRect.width / 2,
         y: paneRect.top + paneRect.height / 2
@@ -5268,6 +5369,19 @@
         y: canvasCenter.y - paneCenter.y
       } : null;
       const pointerInfo = debugPointerInfo(zh), mapStyle = mapRect ? getComputedStyle($("celestial-map")) : null, sameSize = (a, b) => !a || !b || Math.abs(a.width - b.width) <= 1 && Math.abs(a.height - b.height) <= 1, matchesTarget = (rect) => !rect || Math.abs(rect.width - metrics.width) <= 1 && Math.abs(rect.height - metrics.height) <= 1, sizesOk = matchesTarget(mapRect) && matchesTarget(canvasRect3) && matchesTarget(svgRect) && sameSize(mapRect, canvasRect3) && sameSize(canvasRect3, svgRect);
+      const controlMode = currentViewControlMode(), eulerActive = controlMode === "Euler constrained", quaternionActive = controlMode === "Quaternion free", poleToggle = $("pole-axis-constraint"), poleToggleMatchesState = !poleToggle || !!poleToggle.checked === poleAxisConstraintEnabled(), debugPointerCoord = debugPointerActive ? debugPointerSkyCoord : null;
+      const poleStats = updatePoleAxisDebug(
+        debugPointerCoord,
+        view.center,
+        poleAxisDebug.guardActive ? "guard-active" : eulerActive ? "euler-constrained" : "quaternion-free"
+      );
+      const debugStatus = debugStatusSummary({
+        view,
+        poleStats,
+        rotationStats,
+        controlMode,
+        uiMatches: poleToggleMatchesState
+      });
       overlay.style.display = debugVisible ? "block" : "none";
       content.replaceChildren(
         debugGroup(label.viewportGroup),
@@ -5551,6 +5665,8 @@
         debugBlankLine(),
         debugGroup(label.interactionGroup),
         debugLine(label.interaction, [debugValue(debugDragMode(zh))]),
+        // 不显示 dragDeltaX / dragDeltaY / appliedDelta 等瞬时值：它们变化太快，
+        // 人工观察和截图反馈都很难使用，还会增加 Debug 刷新时的 DOM 重写负担。
         debugLine(label.dragMoved, [
           debugValue(bool(pointerMoved)),
           debugSep(` ${label.clickPending}=`),
@@ -5565,11 +5681,27 @@
         ]),
         debugBlankLine(),
         debugGroup(label.rotationGroup),
-        debugLine(label.poleAxisConstraint, [debugValue(poleAxisConstraintEnabled() ? "ON" : "OFF")]),
-        debugLine(label.viewControlMode, [
-          debugValue(poleAxisConstraintEnabled() ? "Euler constrained" : "Quaternion free")
+        debugLine(label.debugStatus, [debugValue(debugStatus)]),
+        debugLine(label.lastAction, [debugValue(debugLastAction || "none")]),
+        debugLine(label.poleAxisConstraint, [
+          debugValue(poleAxisConstraintEnabled() ? "ON" : "OFF"),
+          debugSep(" ui="),
+          debugValue(poleToggle ? poleToggle.checked ? "ON" : "OFF" : "unavailable")
         ]),
-        debugLine(label.poleGuard, [debugValue(bool(!!poleStats.guardActive))]),
+        debugLine(label.viewControlMode, [
+          debugValue(controlMode),
+          debugSep(" actual-branch")
+        ]),
+        // Debug 里分开最终渲染视角、欧拉状态和四元数状态：渲染视角来自
+        // Celestial.rotate()，欧拉/四元数只在各自控制模式 active 时显示，避免旧缓存误导。
+        debugLine(label.renderedViewState, debugRenderedViewParts(view.center)),
+        debugLine(label.eulerState, debugEulerStateParts(view.center, eulerActive)),
+        debugLine(label.quaternionState, debugQuaternionStateParts(rotationStats, quaternionActive)),
+        // 方向键长按只显示 active/idle 和当前按键，不显示每帧移动量；
+        // 每帧 delta 太快且难截图，真正有价值的是动画帧循环是否启动和是否释放。
+        debugLine(label.keyboardPan, [debugValue(skyPanKeys.size ? "active" : "idle")]),
+        debugLine(label.pressedArrowKeys, [debugValue(pressedArrowKeysLabel())]),
+        debugLine(label.poleGuard, [debugValue(poleStats.guardActive ? "ON" : "OFF")]),
         debugLine(label.poleGuardReason, [debugValue(poleStats.guardReason || "none")]),
         debugLine(label.poleGuardThreshold, [
           debugSep("enter="),
@@ -5579,38 +5711,18 @@
         ]),
         debugLine(label.currentPoles, [
           debugSep("+="),
-          debugValue(poleStats.positiveName || "-"),
+          debugValue(poleStats.positiveName || "undefined"),
           debugSep(" -="),
-          debugValue(poleStats.negativeName || "-")
+          debugValue(poleStats.negativeName || "undefined")
         ]),
-        debugLine(label.pointerPoleDistance, [
-          debugSep("+="),
-          debugValue(formatAngle(poleStats.pointerPositiveDeg)),
-          debugSep(" -="),
-          debugValue(formatAngle(poleStats.pointerNegativeDeg))
+        debugLine(label.pointerPositivePoleDistance, [
+          debugValue(formatAngleOrUnavailable(poleStats.pointerPositiveDeg))
         ]),
-        debugLine(label.centerPoleDistance, [
-          debugSep("+="),
-          debugValue(formatAngle(poleStats.centerPositiveDeg)),
-          debugSep(" -="),
-          debugValue(formatAngle(poleStats.centerNegativeDeg))
+        debugLine(label.pointerNegativePoleDistance, [
+          debugValue(formatAngleOrUnavailable(poleStats.pointerNegativeDeg))
         ]),
-        debugLine(label.positivePolePoint, [
-          debugSep("x="),
-          debugValue(poleStats.positivePoint ? Math.round(poleStats.positivePoint.x) : "-"),
-          debugSep(" y="),
-          debugValue(poleStats.positivePoint ? Math.round(poleStats.positivePoint.y) : "-"),
-          debugSep(" "),
-          debugValue(poleStats.positivePoint ? "visible" : "unavailable")
-        ]),
-        debugLine(label.negativePolePoint, [
-          debugSep("x="),
-          debugValue(poleStats.negativePoint ? Math.round(poleStats.negativePoint.x) : "-"),
-          debugSep(" y="),
-          debugValue(poleStats.negativePoint ? Math.round(poleStats.negativePoint.y) : "-"),
-          debugSep(" "),
-          debugValue(poleStats.negativePoint ? "visible" : "unavailable")
-        ]),
+        debugLine(label.positivePolePoint, debugPolePointParts(poleStats.positivePoint)),
+        debugLine(label.negativePolePoint, debugPolePointParts(poleStats.negativePoint)),
         debugLine(label.poleCenterline, [
           debugSep("x="),
           debugValue(Number.isFinite(poleStats.centerlineX) ? Math.round(poleStats.centerlineX) : "-"),
@@ -5625,58 +5737,9 @@
           debugUnit("px")
         ]),
         debugLine(label.poleAxisAngle, [debugValue(formatAngle(poleStats.axisAngleDeg))]),
-        debugLine(label.poleStatus, [debugValue(poleStats.status || "-")]),
-        debugLine(label.rotationMode, [debugValue(rotationStats.mode)]),
-        debugLine(label.rotationDragMode, [debugValue(rotationStats.dragMode || "-")]),
-        debugLine(label.grabAnchor, [
-          debugSep("lon="),
-          debugValue(rotationStats.grabAnchor ? formatAngle(rotationStats.grabAnchor[0]) : "-"),
-          debugSep(" lat="),
-          debugValue(rotationStats.grabAnchor ? formatAngle(rotationStats.grabAnchor[1]) : "-")
+        debugLine(label.poleAxisAngleRule, [
+          debugValue("0\xB0 = vertical, 90\xB0 = horizontal")
         ]),
-        debugLine(label.grabCurrent, [
-          debugSep("lon="),
-          debugValue(rotationStats.grabCurrent ? formatAngle(rotationStats.grabCurrent[0]) : "-"),
-          debugSep(" lat="),
-          debugValue(rotationStats.grabCurrent ? formatAngle(rotationStats.grabCurrent[1]) : "-")
-        ]),
-        debugLine(label.grabAngle, [debugValue(formatAngle(rotationStats.grabAngleDeg || 0))]),
-        debugLine(label.quaternion, [
-          debugSep("w="),
-          debugValue(Number(rotationStats.quaternion.w).toFixed(6)),
-          debugSep(" x="),
-          debugValue(Number(rotationStats.quaternion.x).toFixed(6)),
-          debugSep(" y="),
-          debugValue(Number(rotationStats.quaternion.y).toFixed(6)),
-          debugSep(" z="),
-          debugValue(Number(rotationStats.quaternion.z).toFixed(6))
-        ]),
-        debugLine(label.quaternionNorm, [debugValue(Number(rotationStats.norm).toFixed(6))]),
-        debugLine(label.quaternionNormalized, debugBoolParts(rotationStats.normalized)),
-        debugLine(label.eulerDisplay, [
-          debugSep("yaw="),
-          debugValue(formatAngle(rotationStats.eulerForDisplay.yaw)),
-          debugSep(" pitch="),
-          debugValue(formatAngle(rotationStats.eulerForDisplay.pitch)),
-          debugSep(" roll="),
-          debugValue(formatAngle(rotationStats.eulerForDisplay.roll))
-        ]),
-        debugLine(label.rotationCenter, [
-          debugSep("lon="),
-          debugValue(formatAngle(rotationStats.center[0])),
-          debugSep(" lat="),
-          debugValue(formatAngle(rotationStats.center[1])),
-          debugSep(" roll="),
-          debugValue(formatAngle(rotationStats.center[2]))
-        ]),
-        debugLine(label.nearPole, debugBoolParts(rotationStats.nearPole)),
-        debugLine(label.poleDistance, [
-          debugSep("N="),
-          debugValue(formatAngle(rotationStats.northPoleDistance)),
-          debugSep(" S="),
-          debugValue(formatAngle(rotationStats.southPoleDistance))
-        ]),
-        debugLine(label.lastRotationSync, [debugValue(rotationStats.lastSyncReason || "-")]),
         debugBlankLine(),
         debugGroup(label.layerGroup),
         debugLine(label.starLimit, [debugValue(state.magnitude)]),
@@ -5719,10 +5782,14 @@
     function queueDebugOverlayUpdate() {
       if (!debugVisible || debugFramePending) return;
       debugFramePending = true;
-      requestAnimationFrame(() => {
-        debugFramePending = false;
-        updateDebugOverlay();
-      });
+      const delay = Math.max(0, debugRefreshIntervalMs() - (performance.now() - lastDebugUpdate));
+      setTimeout(() => {
+        requestAnimationFrame(() => {
+          debugFramePending = false;
+          lastDebugUpdate = performance.now();
+          updateDebugOverlay();
+        });
+      }, delay);
     }
     function setDebugVisible(open) {
       debugVisible = !!open;
@@ -6987,6 +7054,7 @@
       try {
         const display = obj.displayCoord || displayCoordinateForEquatorial(obj.coord);
         if (!display) return;
+        noteDebugLastAction("search locate");
         setCelestialCenter(display.slice(), "object search center");
         redrawAndSyncMapBox("object search center");
         saveCurrentProjectionView();
@@ -8229,6 +8297,7 @@
       canvas.addEventListener(
         "pointerdown",
         (event) => {
+          releaseMenuFocusForSkyInteraction();
           clickStart = {
             x: event.clientX,
             y: event.clientY,
@@ -8238,6 +8307,8 @@
           map.classList.add("dragging");
           const center = syncRotationFromCurrentView("pointerdown");
           const anchorCoord = invertSkyCoordinateAtClient(event.clientX, event.clientY, canvas);
+          debugPointerActive = true;
+          debugPointerSkyCoord = anchorCoord;
           rotationPointerDrag = center ? {
             id: event.pointerId,
             lastX: event.clientX,
@@ -8272,6 +8343,8 @@
               const dx = event.clientX - rotationPointerDrag.lastX, dy = event.clientY - rotationPointerDrag.lastY;
               const rect = canvas.getBoundingClientRect();
               const currentCoord = invertSkyCoordinateAtClient(event.clientX, event.clientY, canvas);
+              debugPointerActive = true;
+              debugPointerSkyCoord = currentCoord;
               if (poleAxisConstraintEnabled()) {
                 applyEulerConstrainedPointerDelta(dx, dy, rect, currentCoord, "euler constrained drag");
               } else {
@@ -8298,6 +8371,8 @@
           ) > Number(cfg("interaction.dragThreshold", 6))) {
             pointerMoved = true;
           }
+          debugPointerActive = true;
+          debugPointerSkyCoord = invertSkyCoordinateAtClient(event.clientX, event.clientY, canvas);
           queueDebugOverlayUpdate();
         },
         { capture: true }
@@ -8321,6 +8396,8 @@
         clickStart = null;
         pointerMoved = false;
         rotationPointerDrag = null;
+        debugPointerActive = false;
+        debugPointerSkyCoord = null;
         persistViewSoon();
       };
       canvas.addEventListener("pointerup", finish, { capture: true });
@@ -8331,6 +8408,8 @@
           clickStart = null;
           pointerMoved = false;
           rotationPointerDrag = null;
+          debugPointerActive = false;
+          debugPointerSkyCoord = null;
           persistViewSoon();
         },
         { capture: true }
@@ -8340,10 +8419,11 @@
         passive: false
       });
       canvas.addEventListener("touchend", persistViewSoon, { passive: true });
-      canvas.addEventListener(
-        "mouseleave",
-        () => map.classList.remove("dragging")
-      );
+      canvas.addEventListener("mouseleave", () => {
+        map.classList.remove("dragging");
+        debugPointerActive = false;
+        debugPointerSkyCoord = null;
+      });
     }
     function setPanel(open, persist = true) {
       state.panelOpen = !!open;
@@ -8430,6 +8510,7 @@
     function switchProjection(next) {
       if (!Object.prototype.hasOwnProperty.call(PROJECTION_DEFAULTS, next) || next === state.projection)
         return;
+      noteDebugLastAction("projection changed");
       saveCurrentProjectionView();
       state.projection = next;
       save();
@@ -8477,9 +8558,11 @@
       if (!["horizontal", "equatorial", "ecliptic", "galactic"].includes(next))
         return;
       if (next === state.coordinateSystem) {
+        noteDebugLastAction("reset view");
         resetCurrentCoordinateView();
         return;
       }
+      noteDebugLastAction("coordinate system changed");
       const previousTransform = projectionCoordinateTransform();
       saveCurrentProjectionView();
       state.coordinateSystem = next;
@@ -8507,6 +8590,7 @@
       if (event.target.closest && event.target.closest("#debug-overlay"))
         return false;
       if (!skyReady || !window.Celestial) return false;
+      releaseMenuFocusForSkyInteraction();
       const unit = event.deltaMode === 1 ? 36 : event.deltaMode === 2 ? window.innerHeight : 1, delta = Number(event.deltaY || 0) * unit, steps = -delta / 240, factor = Math.pow(mapScaleButtonFactor(), steps);
       if (!Number.isFinite(factor) || Math.abs(factor - 1) < 1e-4) return false;
       event.preventDefault();
@@ -8523,10 +8607,13 @@
       ))
         return;
       if (!skyReady || !window.Celestial) return;
+      releaseMenuFocusForSkyInteraction();
       const center = Celestial.rotate();
       if (!Array.isArray(center)) return;
       rotationController.syncFromCenter(center, "pane margin pointerdown");
-      updatePoleAxisDebug(invertSkyCoordinateAtClient(event.clientX, event.clientY), center, poleAxisConstraintEnabled() ? "euler-constrained" : "quaternion-free");
+      debugPointerActive = true;
+      debugPointerSkyCoord = invertSkyCoordinateAtClient(event.clientX, event.clientY);
+      updatePoleAxisDebug(debugPointerSkyCoord, center, poleAxisConstraintEnabled() ? "euler-constrained" : "quaternion-free");
       paneDrag = {
         id: event.pointerId,
         x: event.clientX,
@@ -8556,6 +8643,8 @@
         const stepDx = event.clientX - paneDrag.lastX;
         const stepDy = event.clientY - paneDrag.lastY;
         const currentCoord = invertSkyCoordinateAtClient(event.clientX, event.clientY);
+        debugPointerActive = true;
+        debugPointerSkyCoord = currentCoord;
         if (poleAxisConstraintEnabled()) {
           applyEulerConstrainedPointerDelta(
             stepDx,
@@ -8590,6 +8679,8 @@
       if (!paneDrag || event.pointerId !== paneDrag.id) return;
       paneDrag = null;
       $("celestial-map").classList.remove("dragging");
+      debugPointerActive = false;
+      debugPointerSkyCoord = null;
       try {
         $("sky-pane").releasePointerCapture(event.pointerId);
       } catch (_) {
@@ -8598,6 +8689,7 @@
       save();
     }
     function resetCurrentCoordinateView(options = {}) {
+      noteDebugLastAction("reset view");
       try {
         const saved = options.preferSaved && state.projectionViews && state.projectionViews[viewKey2()], configured = state.coordinateSystem === "horizontal" ? coordinateViewDefault2() : saved || coordinateViewDefault2(), targetScale = viewMapScale2(saved || configured, defaults.mapScale);
         if (state.coordinateSystem !== "horizontal" && saved) {
@@ -8637,6 +8729,19 @@
     function isTextEditingTarget2(target) {
       return isTextEditingTarget(target);
     }
+    function releaseMenuFocusForSkyInteraction() {
+      const pane = $("sky-pane"), active = document.activeElement;
+      if (active && active !== document.body && active !== pane) {
+        try {
+          if (!active.closest || !active.closest("#debug-overlay")) active.blur();
+        } catch (_) {
+        }
+      }
+      try {
+        if (pane && document.activeElement !== pane) pane.focus({ preventScroll: true });
+      } catch (_) {
+      }
+    }
     function applyKeyboardPanDelta(lonDelta, latDelta, reason = "keyboard pan") {
       if (!skyReady || !window.Celestial || isTextEditingTarget2(document.activeElement)) return false;
       const center = Celestial.rotate();
@@ -8645,6 +8750,7 @@
       next[0] = normalizeCelestialLongitude2(next[0] + lonDelta);
       next[1] = clampNumber(next[1] + latDelta, -89.5, 89.5);
       setCelestialCenter(next, reason);
+      noteDebugLastAction("keyboard pan");
       redrawAndSyncMapBox(reason);
       keyboardPanDirty = true;
       return true;
@@ -8697,6 +8803,7 @@
       flushKeyboardPanView();
       resetCurrentCoordinateView();
       state.poleAxisConstraintEnabled = next;
+      noteDebugLastAction("mode switched");
       poleAxisDebug.guardActive = false;
       poleAxisDebug.guardReason = "none";
       syncControls();
@@ -9105,20 +9212,27 @@
           skyPanKeys.add(event.key);
           panSkyByKeyboard(event.key);
           lastKeyboardPanFrame = performance.now();
+          queueDebugOverlayUpdate();
         }
       });
       document.addEventListener("keyup", (event) => {
         if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
-        if (skyPanKeys.delete(event.key) && !skyPanKeys.size) flushKeyboardPanView();
+        if (skyPanKeys.delete(event.key)) {
+          if (!skyPanKeys.size) flushKeyboardPanView();
+          queueDebugOverlayUpdate();
+        }
       });
       window.addEventListener("blur", () => {
         if (!skyPanKeys.size) return;
         skyPanKeys.clear();
         flushKeyboardPanView();
+        queueDebugOverlayUpdate();
       });
       window.addEventListener("pointerup", () => {
         const m = $("celestial-map");
         if (m) m.classList.remove("dragging");
+        debugPointerActive = false;
+        debugPointerSkyCoord = null;
         if (skyReady) {
           saveCurrentProjectionView();
           save();
@@ -9175,7 +9289,7 @@
         }
       }
       updateKeyboardPanFrame(now);
-      if (debugVisible && now - lastDebugUpdate > Number(cfg("debug.refreshMs", 350))) {
+      if (debugVisible && now - lastDebugUpdate > debugRefreshIntervalMs()) {
         lastDebugUpdate = now;
         updateDebugOverlay();
       }

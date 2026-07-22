@@ -1596,10 +1596,15 @@ select optgroup {
   display: none;
   left: var(--debug-overlay-left, 8px);
   top: var(--debug-overlay-top, 8px);
-  max-width: min(var(--debug-overlay-width, 560px), calc(100% - 12px));
-  max-height: min(var(--debug-overlay-max-height, 70dvh), calc(100% - 16px));
+  width: min(var(--debug-overlay-width, 33.333%), calc(100% - 12px));
+  height: min(var(--debug-overlay-height, 50%), calc(100% - 16px));
+  max-width: calc(100% - 12px);
+  max-height: calc(100% - 16px);
   margin: 0;
   padding: var(--debug-overlay-padding, 8px 9px);
+  min-width: 220px;
+  min-height: 120px;
+  resize: both;
   overflow: auto;
   overscroll-behavior: contain;
   border: 1px solid rgba(119, 220, 255, 0.35);
@@ -1712,11 +1717,9 @@ select optgroup {
   #debug-overlay {
     left: var(--debug-touch-overlay-left, max(8px, env(safe-area-inset-left)));
     top: var(--debug-touch-overlay-top, max(8px, env(safe-area-inset-top)));
-    max-width: min(var(--debug-touch-overlay-width, 390px), calc(100% - 12px));
-    max-height: min(
-      var(--debug-touch-overlay-max-height, 68dvh),
-      calc(100% - 12px)
-    );
+    width: min(var(--debug-touch-overlay-width, 520px), calc(100% - 12px));
+    max-width: calc(100% - 12px);
+    max-height: calc(100% - 12px);
     padding-top: var(--debug-touch-overlay-padding-top, 8px);
     font-size: 9px;
   }

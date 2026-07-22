@@ -1,5 +1,5 @@
 /**
- * 真实星空观测台 5.3.9 —— 用户可配置文件
+ * 真实星空观测台 5.4.1 —— 用户可配置文件
  * ------------------------------------------------------------
  * 修改本文件后，运行 npm run build 并刷新 index.html 即可生效。
  * 建议每次只修改一个参数，并保留原值，便于出现问题时恢复。
@@ -84,7 +84,7 @@ window.RSO_CONFIG = {
   debug: {
     enabled: true, // 是否显示左上角 DBG 开关
     defaultOpen: false, // 页面打开时是否默认展开调试信息
-    refreshMs: 350, // 调试信息刷新间隔
+    refreshMs: 200, // 调试信息刷新间隔；约 5 FPS，避免拖动时 Debug 自身造成卡顿
   },
 
   /** 应用层星图画布缩放：缩放会改变 #celestial-map / canvas 的 CSS 尺寸 */
@@ -100,6 +100,7 @@ window.RSO_CONFIG = {
     dragSensitivity: 1.0, // 四元数拖动灵敏度；越大移动越快
     poleGuardEnterDegrees: 10, // 欧拉角中轴约束：进入极区保护的角距离阈值
     poleGuardExitDegrees: 12, // 欧拉角中轴约束：退出极区保护的滞回阈值，略大于进入阈值避免边界抖动
+    poleGuardPointerEnabled: true, // 鼠标靠近当前坐标系极点时，禁止危险的横向旋转
     keyboardPanDegrees: 4, // 方向键单次按下的即时平移角度
     keyboardPanDegreesPerSecond: 72, // 方向键长按时按 requestAnimationFrame 连续平移的角速度
     minZoom: 1.0,
