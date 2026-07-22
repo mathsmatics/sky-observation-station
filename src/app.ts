@@ -641,6 +641,11 @@ import {
     debugCopyStatus = "idle",
     debugCopyTimer = null,
     debugFramePending = false,
+    mapBoxSyncFramePending = false,
+    pendingMapBoxSyncMetrics = null,
+    canvasResizeFramePending = false,
+    pendingCanvasResizeMetrics = null,
+    pendingCanvasResizeReason = "scheduled resize",
     layoutResizeGeneration = 0;
   const timeRenderDebug = {
     inputStatus: "valid",
@@ -735,7 +740,9 @@ import {
     return Number(cfg("mapScale.min", cfg("interaction.minZoom", 1))) || 1;
   }
   function mapScaleMax() {
-    return Number(cfg("mapScale.max", cfg("interaction.maxZoom", 12))) || 12;
+    // 5.3.5 统一把应用层星图最大缩放限制为配置中的 8x；这里仍保留
+    // fallback，是为了兼容旧配置文件，但不会再把 12x 写散到交互逻辑里。
+    return Number(cfg("mapScale.max", cfg("interaction.maxZoom", 8))) || 8;
   }
   function mapScaleButtonFactor() {
     return (
@@ -2506,17 +2513,27 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
    */
   function syncRenderedMapBox(fallback = projectionCanvasMetrics()) {
     const metrics = applyMapBoxMetrics(fallback);
-    updateDebugOverlay(true);
+    queueDebugOverlayUpdate();
     return metrics;
   }
 
   function syncMapBoxAfterRedraw(metrics = projectionCanvasMetrics()) {
     applyMapBoxMetrics(metrics);
-    updateDebugOverlay(true);
+    pendingMapBoxSyncMetrics = metrics;
+    // 高倍缩放时 wheel / resize / redraw 可能在同一帧内连续触发。
+    // 这里把后续 mapBox 尺寸校正合并到一个 requestAnimationFrame，避免
+    // 每次滚轮都重复写 canvas/svg 尺寸并同步刷新 debug 面板。
+    if (mapBoxSyncFramePending) {
+      queueDebugOverlayUpdate();
+      return;
+    }
+    mapBoxSyncFramePending = true;
     requestAnimationFrame(() => {
-      const latest = projectionCanvasMetrics();
+      mapBoxSyncFramePending = false;
+      const latest = pendingMapBoxSyncMetrics || projectionCanvasMetrics();
+      pendingMapBoxSyncMetrics = null;
       applyMapBoxMetrics(latest);
-      updateDebugOverlay(true);
+      queueDebugOverlayUpdate();
     });
   }
 
@@ -2572,20 +2589,43 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     return ok;
   }
 
-  function resizeCelestialCanvas(metrics = projectionCanvasMetrics()) {
+  function resizeCelestialCanvas(metrics = projectionCanvasMetrics(), reason = "resize") {
     applyMapBoxMetrics(metrics);
     let redrew = false;
     try {
       if (skyReady && window.Celestial) {
         Celestial.resize(metrics.width);
         resetInternalZoom();
-        redrawAndSyncMapBox("resize", metrics);
+        redrawAndSyncMapBox(reason, metrics);
         redrew = true;
       }
     } catch (err) {
       console.warn("Canvas resize failed", err);
     }
     if (!redrew) syncMapBoxAfterRedraw(metrics);
+    return metrics;
+  }
+
+  function scheduleCelestialCanvasResize(metrics = projectionCanvasMetrics(), reason = "scheduled resize") {
+    pendingCanvasResizeMetrics = metrics;
+    pendingCanvasResizeReason = reason;
+    applyMapBoxMetrics(metrics);
+    // 滚轮高频缩放只需要在下一帧执行一次 Celestial.resize/redraw；
+    // 直接每个 wheel 事件完整重绘会在 4x 以上明显卡顿。
+    if (canvasResizeFramePending) {
+      queueDebugOverlayUpdate();
+      return metrics;
+    }
+    canvasResizeFramePending = true;
+    requestAnimationFrame(() => {
+      canvasResizeFramePending = false;
+      const latest = pendingCanvasResizeMetrics || projectionCanvasMetrics();
+      const latestReason = pendingCanvasResizeReason || "scheduled resize";
+      pendingCanvasResizeMetrics = null;
+      pendingCanvasResizeReason = "scheduled resize";
+      resizeCelestialCanvas(latest, latestReason);
+      queueDebugOverlayUpdate();
+    });
     return metrics;
   }
   function viewKey(
@@ -2633,7 +2673,11 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     const next = clampMapScale(value);
     state.mapScale = next;
     const metrics = projectionCanvasMetrics(state.projection, next);
-    resizeCelestialCanvas(metrics);
+    if (options.deferRedraw) {
+      scheduleCelestialCanvasResize(metrics, options.reason || "scheduled map scale");
+    } else {
+      resizeCelestialCanvas(metrics, options.reason || "map scale");
+    }
     if (options.saveView) {
       saveCurrentProjectionView();
       save();
@@ -2641,9 +2685,9 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     return metrics;
   }
 
-  function scaleMapByFactor(factor) {
+  function scaleMapByFactor(factor, options = {}) {
     const next = getMapScale() * Number(factor || 1);
-    setMapScale(next, { saveView: true });
+    setMapScale(next, { saveView: true, ...options });
   }
   function restoreView(view = desiredView(), attempt = 0) {
     if (!skyReady || !view) return;
@@ -5687,7 +5731,7 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     event.stopPropagation();
     if (typeof event.stopImmediatePropagation === "function")
       event.stopImmediatePropagation();
-    scaleMapByFactor(factor);
+    scaleMapByFactor(factor, { deferRedraw: true, reason: "wheel zoom" });
     queueDebugOverlayUpdate();
     return true;
   }
@@ -5811,8 +5855,10 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     if (!Array.isArray(center)) return false;
     const step = Number(cfg("interaction.keyboardPanDegrees", 4)) || 4;
     const next = center.slice();
-    if (key === "ArrowLeft") next[0] -= step;
-    else if (key === "ArrowRight") next[0] += step;
+    // 键盘左右表示“去看左/右边的天区”，和鼠标“抓住画面拖动”方向相反：
+    // 按 ← 等价于鼠标向右拖，按 → 等价于鼠标向左拖。
+    if (key === "ArrowLeft") next[0] += step;
+    else if (key === "ArrowRight") next[0] -= step;
     else if (key === "ArrowUp") next[1] = clamp(next[1] + step, -89.5, 89.5);
     else if (key === "ArrowDown") next[1] = clamp(next[1] - step, -89.5, 89.5);
     else return false;

@@ -1,5 +1,5 @@
 /**
- * 真实星空观测台 5.3.4 —— 用户可配置文件
+ * 真实星空观测台 5.3.5 —— 用户可配置文件
  * ------------------------------------------------------------
  * 修改本文件后，运行 npm run build 并刷新 index.html 即可生效。
  * 建议每次只修改一个参数，并保留原值，便于出现问题时恢复。
@@ -90,7 +90,7 @@ window.RSO_CONFIG = {
   /** 应用层星图画布缩放：缩放会改变 #celestial-map / canvas 的 CSS 尺寸 */
   mapScale: {
     min: 1,
-    max: 12,
+    max: 8, // 5.3.5 统一为 8x：保留高倍细节，同时避免过高缩放导致连续重绘明显卡顿
     buttonFactor: 1.25,
   },
 
@@ -107,7 +107,7 @@ window.RSO_CONFIG = {
     poleLatitudeJumpLimitDegrees: 5, // 极区单次纬向异常变化上限
     poleGuardDelayMs: 0, // 原生拖动完成后再检查，0 表示下一事件循环
     minZoom: 1.0,
-    maxZoom: 12.0,
+    maxZoom: 8.0,
     zoomButtonFactor: 1.25,
     viewRestoreDelayMs: 70,
     resizeDebounceMs: 140,

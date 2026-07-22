@@ -99,7 +99,8 @@
     /** 应用层星图画布缩放：缩放会改变 #celestial-map / canvas 的 CSS 尺寸 */
     mapScale: {
       min: 1,
-      max: 12,
+      max: 8,
+      // 5.3.5 统一为 8x：保留高倍细节，同时避免过高缩放导致连续重绘明显卡顿
       buttonFactor: 1.25
     },
     /** 鼠标、触摸和视图稳定性 */
@@ -125,7 +126,7 @@
       poleGuardDelayMs: 0,
       // 原生拖动完成后再检查，0 表示下一事件循环
       minZoom: 1,
-      maxZoom: 12,
+      maxZoom: 8,
       zoomButtonFactor: 1.25,
       viewRestoreDelayMs: 70,
       resizeDebounceMs: 140
@@ -1720,17 +1721,31 @@
       },
       {
         id: "accuracy-boundaries",
-        title: "12. \u7CBE\u5EA6\u8FB9\u754C",
+        title: "12. \u7CBE\u5EA6\u4E0E\u9002\u7528\u8303\u56F4",
         blocks: [
-          { type: "table", headers: ["\u5BF9\u8C61/\u56FE\u5C42", "\u53EF\u9760\u6027", "\u6CE8\u610F\u4E8B\u9879"], rows: [
-            ["\u6052\u661F\u3001\u661F\u5EA7\u3001\u661F\u5B98", "\u73B0\u4EE3\u548C\u5386\u53F2\u8FD1\u4F3C\u663E\u793A\u8F83\u7A33\u5B9A", "\u4E0D\u8003\u8651\u6052\u661F\u81EA\u884C\u65F6\uFF0C\u6781\u957F\u65F6\u95F4\u540E\u4E2A\u522B\u8FD1\u661F\u4F1A\u504F\u3002"],
-            ["\u8D64\u9053\u7F51\u548C\u5317\u5929\u6781", "\u5C81\u5DEE\u8D8B\u52BF\u53EF\u89C6\u5316\u5408\u7406", "\u4E0D\u5305\u542B\u7AE0\u52A8\u7B49\u5C0F\u5E45\u9879\u3002"],
-            ["\u592A\u9633", "Meeus lightweight \u53EF\u89C6\u5316\u6A21\u578B", "\u4E0D\u542B\u4E13\u4E1A\u661F\u5386\u3001\u5C0F\u5E45\u7AE0\u52A8\u5168\u9879\u548C\u5927\u6C14\u6298\u5C04\u3002"],
-            ["\u6708\u4EAE\u4E0E\u6708\u76F8", "Meeus \u4E3B\u8981\u5468\u671F\u9879\u548C\u6708\u76F8\u8FD1\u4F3C", "\u53EF\u663E\u793A\u6708\u76F8\u3001\u7167\u660E\u6BD4\u4F8B\u3001\u6708\u9F84\u548C\u8DDD\u79BB\uFF0C\u4F46\u4E0D\u7528\u4E8E\u65E5\u6708\u98DF\u3002"],
-            ["\u884C\u661F", "simple orbital model", "\u672C\u8F6E\u672A\u5F15\u5165 VSOP87\uFF0C\u8FDC\u65E5\u671F\u4E0D\u627F\u8BFA\u4E13\u4E1A\u7CBE\u5EA6\u3002"],
-            ["\u4F20\u7EDF\u5929\u533A", "\u6587\u5316\u53EF\u89C6\u5316\u53C2\u8003", "\u4E0D\u662F\u552F\u4E00\u5386\u53F2\u8FB9\u754C\uFF0C\u4E5F\u4E0D\u662F\u73B0\u4EE3 IAU \u6CD5\u5B9A\u8FB9\u754C\u3002"],
-            ["\u5730\u5E73\u7EBF", "\u51E0\u4F55\u5730\u5E73\u7EBF", "\u4E0D\u542B\u5927\u6C14\u6298\u5C04\u3001\u5C71\u8109\u3001\u5EFA\u7B51\u7269\u548C\u771F\u5B9E\u5730\u5F62\u906E\u6321\u3002"]
-          ] }
+          { type: "paragraph", html: "\u672C\u8F6F\u4EF6\u5B9A\u4F4D\u662F\u8F7B\u91CF\u7EA7\u672C\u5730\u5386\u53F2\u661F\u7A7A\u53EF\u89C6\u5316\u5DE5\u5177\uFF0C\u76EE\u6807\u662F\u8BA9\u7528\u6237\u76F4\u89C2\u770B\u5230\u4E0D\u540C\u65F6\u95F4\u3001\u5730\u70B9\u548C\u5750\u6807\u7CFB\u7EDF\u4E0B\u7684\u661F\u7A7A\u5173\u7CFB\u3002\u5B83\u53EF\u4EE5\u63A5\u8FD1 Stellarium \u7684\u5386\u53F2\u661F\u7A7A\u89C6\u89C9\u53C2\u8003\u6548\u679C\uFF0C\u4F46\u4E0D\u7B49\u540C\u4E8E Stellarium\u3001JPL DE \u661F\u5386\u6216\u4E13\u4E1A\u89C2\u6D4B\u8F6F\u4EF6\u7684\u7CBE\u5BC6\u661F\u5386\u7CBE\u5EA6\u3002" },
+          { type: "table", headers: ["\u5BF9\u8C61/\u56FE\u5C42", "\u5F53\u524D\u6A21\u578B", "\u9002\u7528\u8BF4\u660E"], rows: [
+            ["\u6052\u661F\u3001\u661F\u5EA7\u3001\u661F\u5B98", "\u661F\u8868\u5750\u6807 + \u8F7B\u91CF\u5C81\u5DEE\u6846\u67B6", "\u591A\u6570\u6052\u661F\u5728\u51E0\u767E\u5230\u4E00\u4E24\u5343\u5E74\u5C3A\u5EA6\u5185\u7528\u4E8E\u89C6\u89C9\u53C2\u8003\u901A\u5E38\u53EF\u63A5\u53D7\uFF1B\u4F46\u5F53\u524D\u6CA1\u6709\u5B8C\u6574\u4F20\u64AD\u6BCF\u9897\u6052\u661F\u7684\u81EA\u884C\u3001\u89C6\u5DEE\u548C\u5F84\u5411\u901F\u5EA6\uFF0C\u4E2A\u522B\u9AD8\u81EA\u884C\u6052\u661F\u4F1A\u968F\u5E74\u4EE3\u504F\u79BB\u3002"],
+            ["\u8D64\u9053\u7F51\u548C\u5317\u5929\u6781", "J2000 \u2192 epoch-of-date \u8F7B\u91CF\u5C81\u5DEE", "\u53EF\u5C55\u793A\u5317\u5929\u6781\u3001\u8D64\u9053\u7F51\u548C\u6625\u5206\u70B9\u968F\u5E74\u4EE3\u53D8\u5316\u7684\u5927\u8D8B\u52BF\uFF1B\u4E0D\u5305\u542B\u5B8C\u6574\u7AE0\u52A8\u7B49\u5C0F\u5E45\u5468\u671F\u9879\u3002"],
+            ["\u592A\u9633", "Meeus lightweight solar model", "\u9002\u5408\u663E\u793A\u592A\u9633\u5728\u9EC4\u9053\u9644\u8FD1\u7684\u5468\u5E74\u8FD0\u52A8\u548C\u4E00\u822C\u89C2\u661F\u53C2\u8003\uFF1B\u4E0D\u7528\u4E8E\u7CBE\u5BC6\u65E5\u98DF\u3001\u7CBE\u786E\u65E5\u51FA\u65E5\u843D\u3001\u5BFC\u822A\u6216\u79D1\u7814\u7EA7\u592A\u9633\u4F4D\u7F6E\u3002"],
+            ["\u6708\u4EAE\u4E0E\u6708\u76F8", "Meeus lunar periodic terms + phase approximation", "\u9002\u5408\u663E\u793A\u6708\u76F8\u3001\u7167\u660E\u6BD4\u4F8B\u3001\u6708\u9F84\u3001\u8DDD\u79BB\u548C\u5927\u81F4\u4F4D\u7F6E\uFF1B\u4E0D\u7528\u4E8E\u6708\u98DF\u3001\u63A9\u661F\u3001\u7CBE\u786E\u5408\u6708\u6216\u89D2\u5206\u7EA7\u89C2\u6D4B\u3002"],
+            ["\u884C\u661F", "JPL 1800\u20132050 \u8FD1\u4F3C\u8F68\u9053\u6839\u6570 / simple orbital model", "1800\u20132050 \u5E74\u5185\u9002\u5408\u89C6\u89C9\u661F\u56FE\u53C2\u8003\uFF1B\u8D85\u51FA\u8BE5\u533A\u95F4\u4ECD\u53EF\u663E\u793A\u5927\u81F4\u8FD0\u52A8\u8D8B\u52BF\uFF0C\u4F46\u4E0D\u627F\u8BFA\u4E0E Stellarium \u6216\u4E13\u4E1A\u661F\u5386\u4E00\u81F4\u3002"],
+            ["\u5730\u5E73\u7EBF", "\u51E0\u4F55\u5730\u5E73\u7EBF", "\u4E0D\u542B\u5927\u6C14\u6298\u5C04\u3001\u5C71\u8109\u3001\u5EFA\u7B51\u7269\u548C\u771F\u5B9E\u5730\u5F62\u906E\u6321\uFF1B\u63A5\u8FD1\u5730\u5E73\u7EBF\u7684\u89C6\u9AD8\u5EA6\u53EF\u80FD\u548C\u771F\u5B9E\u89C2\u6D4B\u4E0D\u540C\u3002"],
+            ["\u4F20\u7EDF\u5929\u533A", "\u6587\u5316\u53EF\u89C6\u5316\u53C2\u8003", "\u7528\u4E8E\u5E2E\u52A9\u7406\u89E3\u4E09\u57A3\u3001\u56DB\u8C61\u3001\u4E8C\u5341\u516B\u5BBF\u7B49\u4F20\u7EDF\u7ED3\u6784\uFF1B\u4E0D\u662F\u552F\u4E00\u5386\u53F2\u8FB9\u754C\uFF0C\u4E5F\u4E0D\u662F\u73B0\u4EE3 IAU \u6CD5\u5B9A\u8FB9\u754C\u3002"]
+          ] },
+          { type: "paragraph", html: "\u884C\u661F\u8BEF\u5DEE\u8981\u533A\u5206\u201C1800\u20132050 \u533A\u95F4\u5185\u7684\u8FD1\u4F3C\u91CF\u7EA7\u201D\u548C\u201C\u5411\u53E4\u4EE3\u6216\u672A\u6765\u5916\u63A8\u201D\u3002\u5F53\u524D\u884C\u661F\u6CA1\u6709\u4F7F\u7528 VSOP87\uFF0C\u4E5F\u6CA1\u6709\u63A5\u5165 JPL DE \u4E13\u4E1A\u661F\u5386\u3002\u4E0B\u8868\u8BEF\u5DEE\u91CF\u7EA7\u53EA\u9002\u7528\u4E8E 1800\u20132050 \u8FD1\u4F3C\u6839\u6570\u533A\u95F4\u5185\uFF0C\u4E0D\u80FD\u7406\u89E3\u4E3A\u5168\u5386\u53F2\u8303\u56F4\u627F\u8BFA\u3002" },
+          { type: "table", headers: ["\u884C\u661F", "1800\u20132050 \u8FD1\u4F3C\u8BEF\u5DEE\u91CF\u7EA7", "\u89E3\u91CA"], rows: [
+            ["\u6C34\u661F", "\u7EA6 15\u2033", "\u5185\u884C\u661F\u8FD0\u52A8\u5FEB\uFF0C\u8D85\u51FA\u533A\u95F4\u4E0D\u5EFA\u8BAE\u627F\u8BFA\u4F4D\u7F6E\u7CBE\u5EA6\u3002"],
+            ["\u91D1\u661F", "\u7EA6 20\u2033", "\u533A\u95F4\u5185\u89C6\u89C9\u4F4D\u7F6E\u901A\u5E38\u5F88\u7A33\u3002"],
+            ["\u706B\u661F", "\u7EA6 40\u2033", "\u533A\u95F4\u5185\u89C6\u89C9\u4F4D\u7F6E\u901A\u5E38\u5F88\u7A33\uFF1B\u51B2\u65E5\u524D\u540E\u82E5\u505A\u7CBE\u786E\u5BF9\u6BD4\u66F4\u5BB9\u6613\u770B\u51FA\u6A21\u578B\u5DEE\u5F02\u3002"],
+            ["\u6728\u661F", "\u7EA6 400\u2033", "\u7EA6 0.11\xB0\uFF0C\u4F4E\u4E8E 1\xB0 \u89C6\u89C9\u9608\u503C\uFF0C\u4F46\u4E0D\u662F VSOP87 \u7EA7\u3002"],
+            ["\u571F\u661F", "\u7EA6 600\u2033", "\u7EA6 0.17\xB0\uFF0C\u662F\u672C\u7EC4\u4E2D\u8BEF\u5DEE\u8F83\u5927\u7684\u884C\u661F\u4E4B\u4E00\uFF0C\u4F46\u533A\u95F4\u5185\u89C6\u89C9\u661F\u56FE\u4ECD\u53EF\u63A5\u53D7\u3002"],
+            ["\u5929\u738B\u661F", "\u7EA6 50\u2033", "\u533A\u95F4\u5185\u89C6\u89C9\u4F4D\u7F6E\u53EF\u7528\u3002"],
+            ["\u6D77\u738B\u661F", "\u7EA6 10\u2033", "\u533A\u95F4\u5185\u89C6\u89C9\u4F4D\u7F6E\u53EF\u7528\u3002"]
+          ] },
+          { type: "note", html: "\u7F51\u9875\u661F\u56FE\u91CC\u7684\u201C\u8089\u773C\u51E0\u4E4E\u4E0D\u53EF\u89C1\u201D\u901A\u5E38\u66F4\u63A5\u8FD1 0.5\xB0\u20131\xB0 \u7684\u89C6\u89C9\u9608\u503C\uFF1B\u771F\u6B63\u5929\u6587\u89C2\u6D4B\u4E2D\u7684\u8089\u773C\u89D2\u5206\u8FA8\u7387\u53EF\u63A5\u8FD1 1\u2032\uFF0C\u6807\u51C6\u66F4\u4E25\u683C\u3002\u4E0D\u8981\u628A\u9875\u9762\u4E0A\u770B\u8D77\u6765\u63A5\u8FD1\u8BEF\u89E3\u4E3A\u4E13\u4E1A\u661F\u5386\u7EA7\u7CBE\u5EA6\u3002" },
+          { type: "warning", html: "1582 \u5E74\u683C\u91CC\u9AD8\u5229\u5386\u6539\u9769\u4EE5\u524D\uFF0C\u5112\u7565\u5386 / \u683C\u91CC\u9AD8\u5229\u5386\u65E5\u671F\u5DEE\u5F02\u53EF\u80FD\u6BD4\u7B97\u6CD5\u8BEF\u5DEE\u66F4\u5F71\u54CD\u7ED3\u679C\u3002\u4E2D\u56FD\u53E4\u4EE3\u65E5\u671F\u8FD8\u6D89\u53CA\u519C\u5386\u3001\u8282\u6C14\u3001\u5730\u65B9\u65F6\u548C\u5386\u6CD5\u6362\u7B97\uFF1B\u8F93\u5165\u73B0\u4EE3\u516C\u5386\u5F0F\u65E5\u671F\u65F6\uFF0C\u5E94\u5148\u786E\u8BA4\u4F60\u548C\u5BF9\u7167\u8F6F\u4EF6\u4F7F\u7528\u7684\u662F\u540C\u4E00\u79CD\u65E5\u671F\u4F53\u7CFB\u3002" },
+          { type: "warning", html: "\u5F53\u524D\u672A\u5B8C\u6574\u5B9E\u73B0\u7AE0\u52A8\u3001\u6BCF\u9897\u6052\u661F\u7684\u957F\u671F\u81EA\u884C\u4F20\u64AD\u3001\u5927\u6C14\u6298\u5C04\u3001\u5730\u5F62\u5730\u5E73\u7EBF\u3001VSOP87 \u884C\u661F\u7406\u8BBA\u6216 JPL DE \u661F\u5386\u3002\u56E0\u6B64\u672C\u9879\u76EE\u9002\u5408\u6559\u5B66\u3001\u5386\u53F2\u661F\u7A7A\u89C6\u89C9\u53C2\u8003\u548C\u672C\u5730\u79BB\u7EBF\u6F14\u793A\uFF0C\u4E0D\u9002\u5408\u65E5\u98DF/\u6708\u98DF/\u63A9\u661F\u5224\u5B9A\u3001\u5BFC\u822A\u3001\u79D1\u7814\u7EA7\u53E4\u5929\u6587\u590D\u539F\u6216\u7CBE\u5BC6\u89C2\u6D4B\u8BA1\u5212\u3002" }
         ]
       },
       {
@@ -3406,7 +3421,7 @@
     let traditionalRegionsReady = false, traditionalLabelsReady = false;
     let rebuildInProgress = false, suppressResizeUntil = 0, rebuildGeneration = 0;
     let resizeObserver = null, clickStart = null, pointerMoved = false, paneDrag = null, poleCustomDrag = null;
-    let currentSelected = null, customViewRestoreTimer = null, lastRenderedSize = null, debugVisible = !!cfg("debug.enabled", false) && !!cfg("debug.defaultOpen", false), lastDebugUpdate = 0, lastDebugPlainText = "", debugCopyStatus = "idle", debugCopyTimer = null, debugFramePending = false, layoutResizeGeneration = 0;
+    let currentSelected = null, customViewRestoreTimer = null, lastRenderedSize = null, debugVisible = !!cfg("debug.enabled", false) && !!cfg("debug.defaultOpen", false), lastDebugUpdate = 0, lastDebugPlainText = "", debugCopyStatus = "idle", debugCopyTimer = null, debugFramePending = false, mapBoxSyncFramePending = false, pendingMapBoxSyncMetrics = null, canvasResizeFramePending = false, pendingCanvasResizeMetrics = null, pendingCanvasResizeReason = "scheduled resize", layoutResizeGeneration = 0;
     const timeRenderDebug = {
       inputStatus: "valid",
       activeField: "year",
@@ -3492,7 +3507,7 @@
       return Number(cfg("mapScale.min", cfg("interaction.minZoom", 1))) || 1;
     }
     function mapScaleMax() {
-      return Number(cfg("mapScale.max", cfg("interaction.maxZoom", 12))) || 12;
+      return Number(cfg("mapScale.max", cfg("interaction.maxZoom", 8))) || 8;
     }
     function mapScaleButtonFactor() {
       return Number(
@@ -4984,16 +4999,23 @@
     }
     function syncRenderedMapBox(fallback = projectionCanvasMetrics2()) {
       const metrics = applyMapBoxMetrics2(fallback);
-      updateDebugOverlay(true);
+      queueDebugOverlayUpdate();
       return metrics;
     }
     function syncMapBoxAfterRedraw(metrics = projectionCanvasMetrics2()) {
       applyMapBoxMetrics2(metrics);
-      updateDebugOverlay(true);
+      pendingMapBoxSyncMetrics = metrics;
+      if (mapBoxSyncFramePending) {
+        queueDebugOverlayUpdate();
+        return;
+      }
+      mapBoxSyncFramePending = true;
       requestAnimationFrame(() => {
-        const latest = projectionCanvasMetrics2();
+        mapBoxSyncFramePending = false;
+        const latest = pendingMapBoxSyncMetrics || projectionCanvasMetrics2();
+        pendingMapBoxSyncMetrics = null;
         applyMapBoxMetrics2(latest);
-        updateDebugOverlay(true);
+        queueDebugOverlayUpdate();
       });
     }
     function redrawAndSyncMapBox(reason = "redraw", metrics = projectionCanvasMetrics2()) {
@@ -5044,20 +5066,40 @@
       }
       return ok;
     }
-    function resizeCelestialCanvas(metrics = projectionCanvasMetrics2()) {
+    function resizeCelestialCanvas(metrics = projectionCanvasMetrics2(), reason = "resize") {
       applyMapBoxMetrics2(metrics);
       let redrew = false;
       try {
         if (skyReady && window.Celestial) {
           Celestial.resize(metrics.width);
           resetInternalZoom();
-          redrawAndSyncMapBox("resize", metrics);
+          redrawAndSyncMapBox(reason, metrics);
           redrew = true;
         }
       } catch (err) {
         console.warn("Canvas resize failed", err);
       }
       if (!redrew) syncMapBoxAfterRedraw(metrics);
+      return metrics;
+    }
+    function scheduleCelestialCanvasResize(metrics = projectionCanvasMetrics2(), reason = "scheduled resize") {
+      pendingCanvasResizeMetrics = metrics;
+      pendingCanvasResizeReason = reason;
+      applyMapBoxMetrics2(metrics);
+      if (canvasResizeFramePending) {
+        queueDebugOverlayUpdate();
+        return metrics;
+      }
+      canvasResizeFramePending = true;
+      requestAnimationFrame(() => {
+        canvasResizeFramePending = false;
+        const latest = pendingCanvasResizeMetrics || projectionCanvasMetrics2();
+        const latestReason = pendingCanvasResizeReason || "scheduled resize";
+        pendingCanvasResizeMetrics = null;
+        pendingCanvasResizeReason = "scheduled resize";
+        resizeCelestialCanvas(latest, latestReason);
+        queueDebugOverlayUpdate();
+      });
       return metrics;
     }
     function viewKey2(projection = state.projection, coord = state.coordinateSystem) {
@@ -5099,16 +5141,20 @@
       const next = clampMapScale2(value);
       state.mapScale = next;
       const metrics = projectionCanvasMetrics2(state.projection, next);
-      resizeCelestialCanvas(metrics);
+      if (options.deferRedraw) {
+        scheduleCelestialCanvasResize(metrics, options.reason || "scheduled map scale");
+      } else {
+        resizeCelestialCanvas(metrics, options.reason || "map scale");
+      }
       if (options.saveView) {
         saveCurrentProjectionView();
         save();
       }
       return metrics;
     }
-    function scaleMapByFactor(factor) {
+    function scaleMapByFactor(factor, options = {}) {
       const next = getMapScale() * Number(factor || 1);
-      setMapScale(next, { saveView: true });
+      setMapScale(next, { saveView: true, ...options });
     }
     function restoreView(view = desiredView2(), attempt = 0) {
       if (!skyReady || !view) return;
@@ -7682,7 +7728,7 @@
       event.stopPropagation();
       if (typeof event.stopImmediatePropagation === "function")
         event.stopImmediatePropagation();
-      scaleMapByFactor(factor);
+      scaleMapByFactor(factor, { deferRedraw: true, reason: "wheel zoom" });
       queueDebugOverlayUpdate();
       return true;
     }
@@ -7787,8 +7833,8 @@
       if (!Array.isArray(center)) return false;
       const step = Number(cfg("interaction.keyboardPanDegrees", 4)) || 4;
       const next = center.slice();
-      if (key === "ArrowLeft") next[0] -= step;
-      else if (key === "ArrowRight") next[0] += step;
+      if (key === "ArrowLeft") next[0] += step;
+      else if (key === "ArrowRight") next[0] -= step;
       else if (key === "ArrowUp") next[1] = clampNumber(next[1] + step, -89.5, 89.5);
       else if (key === "ArrowDown") next[1] = clampNumber(next[1] - step, -89.5, 89.5);
       else return false;

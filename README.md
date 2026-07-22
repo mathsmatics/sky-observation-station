@@ -10,6 +10,7 @@
 - 中文和 English 双语界面。
 - 西方星座、中国星官、两者同时显示三种星空体系。
 - 14 种天球投影和 4 种坐标系统：地平、赤道、黄道、银河。
+- 星图支持应用层缩放，5.3.5 起最大缩放统一为 8x。
 - 可调星等阈值、恒星大小、网格、黄道、天赤道、地平线、银河、深空天体和日光背景。
 - 太阳、月球和主要行星的本地图层、点击拾取和信息框。
 - 轻量岁差显示：J2000 源坐标运行时转换到当前日期显示历元，北天极、天球赤道和赤道网会随年份合理变化。
@@ -22,7 +23,7 @@
 
 左侧菜单用于控制星图。`观测地点` 可通过城市搜索、经纬度输入或“使用我的位置”设置；选择城市后会同步经纬度、IANA 时区和星图。`观测时间` 外观看起来是一个完整时间框，内部可分别编辑年、月、日、时、分；点击字段后可直接输入数字，按 Enter 提交；年份输入负号表示公元前，例如 `-500`。字段聚焦时可用上下键即时调整当前字段并自动进位退位，也可使用 `−1月 / −1天 / −1时 / +1时 / +1天 / +1月` 或任意步长控件。
 
-`视图与投影` 可切换地平、赤道、黄道、银河坐标视角和不同天球投影；时间或地点变化后会按当前坐标视图刷新，不重置当前缩放。`显示设置` 控制恒星名称、星座/星官、网格、黄道、天赤道、地平线、银河、行星、深空天体和浮窗。点击星体可查看精简浮窗和左侧详细信息；天体搜索可用于快速定位对象。
+`视图与投影` 可切换地平、赤道、黄道、银河坐标视角和不同天球投影；时间或地点变化后会按当前坐标视图刷新，不重置当前缩放。`显示设置` 控制恒星名称、星座/星官、网格、黄道、天赤道、地平线、银河、行星、深空天体和浮窗。点击星体可查看精简浮窗和左侧详细信息；天体搜索可用于快速定位对象。方向键用于平移视野：按 ← 是去看左边的天区，效果等价于鼠标向右拖；按 → 是去看右边的天区，效果等价于鼠标向左拖。
 
 左上角 `DBG` 是调试面板，用于排查布局、数据加载、时间输入、skyview、fallback、redraw、rollback、时区偏移、行星计算和天文模型状态；普通使用时可以关闭。遇到刷新或布局异常时，可以复制 debug 面板内容给维护者排查。远古或远未来日期允许输入，项目支持轻量岁差近似：北天极、天球赤道和赤道网会随年份变化，恒星、星座和星官相对形状保持不变。当前项目仍不提供章动、恒星自行、大气折射和高精度行星历表，因此远日期仍属于近似天文馆效果，不等同于科研级古天文历表。早期年份的 UTC 换算会遵循 IANA 历史时区规则，可能出现不是现代固定东八区的偏移。
 
@@ -60,7 +61,7 @@ docs/       架构、构建、数据来源和第三方声明文档。
 
 ## 科学限制
 
-本项目用于教育和一般天文馆式显示。当前实现的是轻量岁差与历元一致性，并用 Meeus lightweight 方法显示太阳、月亮和月相；不提供科研级天体测量、任意历元恒星自行传播、章动全项、大气折射/消光、本地地形地平线、天气、光污染、月光天光、VSOP87 或 JPL 级行星历表。
+本项目用于教育和一般天文馆式显示。当前实现的是轻量岁差与历元一致性，并用 Meeus lightweight 方法显示太阳、月亮和月相；行星仍使用 1800–2050 近似轨道根数 / simple orbital model，不使用 VSOP87 或 JPL DE 星历。1800–2050 年内适合视觉星图参考，超出该范围只显示运动趋势，不承诺与 Stellarium 或专业星历一致。本项目不提供科研级天体测量、任意历元恒星自行传播、章动全项、大气折射/消光、本地地形地平线、天气、光污染或月光天光。
 
 中国传统天区和战场主题区域是用于比较和教学的现代可视化复原，不是唯一的历史法定边界。
 
@@ -72,6 +73,6 @@ Commercial use is not permitted without prior permission.
 
 ## Source layout note
 
-Version 5.3.4 keeps the 5.3.3 functional source layout and adds Meeus lightweight astronomy modules. `src/state/` contains state/storage helpers, `src/ui/` contains controls, help, panels and layout helpers, `src/sky/` contains renderer, projection, layer and interaction helpers, and `src/astronomy/` contains reusable angle, time, sidereal-time, coordinate, precession, Meeus Sun, Meeus Moon and moon-phase utilities. `src/app.ts` remains the application assembly layer that connects state, UI, D3-Celestial and data. Build outputs in `assets/` are generated artifacts and should not be edited by hand.
+Version 5.3.5 keeps the 5.3.3 functional source layout and the 5.3.4 Meeus Sun/Moon modules. `src/state/` contains state/storage helpers, `src/ui/` contains controls, help, panels and layout helpers, `src/sky/` contains renderer, projection, layer and interaction helpers, and `src/astronomy/` contains reusable angle, time, sidereal-time, coordinate, precession, Meeus Sun, Meeus Moon and moon-phase utilities. `src/app.ts` remains the application assembly layer that connects state, UI, D3-Celestial and data. Build outputs in `assets/` are generated artifacts and should not be edited by hand.
 
-5.3.4 upgrades the Sun to a Meeus lightweight solar model and the Moon to Meeus lunar periodic terms with phase name, illumination, age and distance in the object information panel. Planets remain on the existing simple orbital model; VSOP87 and professional ephemerides are not included.
+5.3.5 fixes the keyboard left/right pan direction, unifies the maximum application zoom at 8x, coalesces high-frequency zoom/mapBox/debug refresh work to reduce high-zoom stutter, and expands the in-page help manual with concrete accuracy ranges and planetary error magnitudes. It does not add quaternion camera control, VSOP87 or professional ephemerides.
