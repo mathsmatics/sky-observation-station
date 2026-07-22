@@ -56,6 +56,30 @@ export function normalizeVec3(v: Vec3, fallback: Vec3 = [1, 0, 0]): Vec3 {
   return [v[0] / n, v[1] / n, v[2] / n];
 }
 
+
+export function angleBetweenVec3(a: Vec3, b: Vec3): number {
+  const av = normalizeVec3(a, [1, 0, 0]);
+  const bv = normalizeVec3(b, [1, 0, 0]);
+  return Math.acos(Math.max(-1, Math.min(1, dotVec3(av, bv))));
+}
+
+export function quaternionBetweenVectors(from: Vec3, to: Vec3, fallbackAxis: Vec3 = [0, 0, 1]): Quaternion {
+  const a = normalizeVec3(from, [1, 0, 0]);
+  const b = normalizeVec3(to, [1, 0, 0]);
+  const d = Math.max(-1, Math.min(1, dotVec3(a, b)));
+  if (d > 1 - 1e-10) return identityQuaternion();
+  if (d < -1 + 1e-10) {
+    // 两个点几乎正相反时，叉乘轴会退化；使用当前视图给出的备用轴保证旋转仍连续。
+    let axis = crossVec3(a, fallbackAxis);
+    if (dotVec3(axis, axis) < 1e-10) axis = crossVec3(a, [0, 1, 0]);
+    if (dotVec3(axis, axis) < 1e-10) axis = crossVec3(a, [1, 0, 0]);
+    return quaternionFromAxisAngle(axis, Math.PI);
+  }
+  const c = crossVec3(a, b);
+  // 最短弧四元数：把 from 方向旋到 to 方向，用于“抓住某个天球点并让它跟随鼠标”。
+  return normalizeQuaternion({ w: 1 + d, x: c[0], y: c[1], z: c[2] });
+}
+
 export function quaternionFromAxisAngle(axis: Vec3, angleRad: number): Quaternion {
   const a = normalizeVec3(axis, [0, 0, 1]);
   const half = angleRad / 2;

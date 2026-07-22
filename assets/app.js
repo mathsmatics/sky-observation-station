@@ -2741,6 +2741,25 @@
     if (!Number.isFinite(n) || n < 1e-12) return fallback.slice();
     return [v[0] / n, v[1] / n, v[2] / n];
   }
+  function angleBetweenVec3(a, b) {
+    const av = normalizeVec3(a, [1, 0, 0]);
+    const bv = normalizeVec3(b, [1, 0, 0]);
+    return Math.acos(Math.max(-1, Math.min(1, dotVec3(av, bv))));
+  }
+  function quaternionBetweenVectors(from, to, fallbackAxis = [0, 0, 1]) {
+    const a = normalizeVec3(from, [1, 0, 0]);
+    const b = normalizeVec3(to, [1, 0, 0]);
+    const d = Math.max(-1, Math.min(1, dotVec3(a, b)));
+    if (d > 1 - 1e-10) return identityQuaternion();
+    if (d < -1 + 1e-10) {
+      let axis = crossVec3(a, fallbackAxis);
+      if (dotVec3(axis, axis) < 1e-10) axis = crossVec3(a, [0, 1, 0]);
+      if (dotVec3(axis, axis) < 1e-10) axis = crossVec3(a, [1, 0, 0]);
+      return quaternionFromAxisAngle(axis, Math.PI);
+    }
+    const c = crossVec3(a, b);
+    return normalizeQuaternion({ w: 1 + d, x: c[0], y: c[1], z: c[2] });
+  }
   function quaternionFromAxisAngle(axis, angleRad) {
     const a = normalizeVec3(axis, [0, 0, 1]);
     const half = angleRad / 2;
@@ -2860,6 +2879,13 @@
       Number.isFinite(Number(center && center[2])) ? Number(center[2]) : 0
     ];
   }
+  function finiteCoord(coord) {
+    if (!Array.isArray(coord)) return null;
+    const lon = Number(coord[0]);
+    const lat = Number(coord[1]);
+    if (!Number.isFinite(lon) || !Number.isFinite(lat)) return null;
+    return [(lon % 360 + 360) % 360, Math.max(-90, Math.min(90, lat))];
+  }
   function centerFromQuaternion(q, fallbackCenter) {
     const forward = rotateVectorByQuaternion([1, 0, 0], q);
     const [lon, lat] = vectorToLongitudeLatitude(forward, fallbackCenter[0]);
@@ -2872,10 +2898,18 @@
     let lastPointerDelta = { dx: 0, dy: 0 };
     let lastAngleDelta = { x: 0, y: 0 };
     let lastSyncReason = "startup";
+    let dragMode = "idle";
+    let grabAnchor = null;
+    let grabCurrent = null;
+    let grabAngleDeg = 0;
     function syncFromCenter(inputCenter, reason = "sync") {
       center = finiteCenter(inputCenter);
       orientation = normalizeQuaternion(eulerToQuaternion(center));
       lastSyncReason = reason;
+      dragMode = "idle";
+      grabAnchor = null;
+      grabCurrent = null;
+      grabAngleDeg = 0;
       return center.slice();
     }
     function applyPointerDelta(options) {
@@ -2894,7 +2928,31 @@
       center = centerFromQuaternion(orientation, center);
       lastPointerDelta = { dx, dy };
       lastAngleDelta = { x: angleX * 180 / Math.PI, y: angleY * 180 / Math.PI };
-      lastSyncReason = "pointer-delta";
+      lastSyncReason = "pointer-delta-fallback";
+      dragMode = "delta";
+      grabAnchor = null;
+      grabCurrent = null;
+      grabAngleDeg = Math.hypot(lastAngleDelta.x, lastAngleDelta.y);
+      return center.slice();
+    }
+    function applyGrabDrag(options) {
+      const anchor = finiteCoord(options.anchorCoord);
+      const current = finiteCoord(options.currentCoord);
+      if (!anchor || !current) return null;
+      const from = longitudeLatitudeToVector(current[0], current[1]);
+      const to = longitudeLatitudeToVector(anchor[0], anchor[1]);
+      const fallbackAxis = rotateVectorByQuaternion([0, 0, 1], orientation);
+      const qDelta = quaternionBetweenVectors(from, to, fallbackAxis);
+      orientation = normalizeQuaternion(multiplyQuaternions(qDelta, orientation));
+      center = centerFromQuaternion(orientation, center);
+      lastPointerDelta = { dx: Number(options.dx) || 0, dy: Number(options.dy) || 0 };
+      const angle = angleBetweenVec3(from, to);
+      lastAngleDelta = { x: 0, y: angle * 180 / Math.PI };
+      lastSyncReason = "pointer-grab";
+      dragMode = "grab";
+      grabAnchor = anchor;
+      grabCurrent = current;
+      grabAngleDeg = angle * 180 / Math.PI;
       return center.slice();
     }
     function debugState() {
@@ -2905,7 +2963,7 @@
       const northPoleDistance = Math.max(0, 90 - c[1]);
       const southPoleDistance = Math.max(0, c[1] + 90);
       return {
-        mode: "QUATERNION",
+        mode: "QUATERNION_GRAB",
         quaternion: { ...orientation },
         norm,
         normalized,
@@ -2916,12 +2974,17 @@
         southPoleDistance,
         lastPointerDelta: { ...lastPointerDelta },
         lastAngleDelta: { ...lastAngleDelta },
-        lastSyncReason
+        lastSyncReason,
+        dragMode,
+        grabAnchor: grabAnchor ? grabAnchor.slice() : null,
+        grabCurrent: grabCurrent ? grabCurrent.slice() : null,
+        grabAngleDeg
       };
     }
     return {
       syncFromCenter,
       applyPointerDelta,
+      applyGrabDrag,
       debugState
     };
   }
@@ -4673,7 +4736,7 @@
       rotationController.syncFromCenter(center, reason);
       return true;
     }
-    function applyQuaternionPointerDelta(dx, dy, rect, reason = "quaternion drag") {
+    function applyQuaternionPointerDelta(dx, dy, rect, reason = "quaternion drag fallback") {
       if (!window.Celestial || !rect) return false;
       const nextCenter = rotationController.applyPointerDelta({
         dx,
@@ -4687,10 +4750,46 @@
       queueDebugOverlayUpdate();
       return true;
     }
+    function finiteSkyCoord(coord) {
+      if (!Array.isArray(coord)) return null;
+      const lon = Number(coord[0]);
+      const lat = Number(coord[1]);
+      if (!Number.isFinite(lon) || !Number.isFinite(lat)) return null;
+      return [(lon % 360 + 360) % 360, Math.max(-90, Math.min(90, lat))];
+    }
+    function invertSkyCoordinateAtClient(clientX, clientY, canvas = null) {
+      try {
+        if (!window.Celestial || !Celestial.mapProjection || !Celestial.mapProjection.invert) return null;
+        const targetCanvas = canvas || document.querySelector("#celestial-map canvas");
+        if (!targetCanvas) return null;
+        const rect = targetCanvas.getBoundingClientRect();
+        const x = Number(clientX) - rect.left;
+        const y = Number(clientY) - rect.top;
+        const coord = Celestial.mapProjection.invert([x, y]);
+        return finiteSkyCoord(coord);
+      } catch (_) {
+        return null;
+      }
+    }
+    function applyQuaternionGrabDrag(anchorCoord, currentCoord, dx, dy, reason = "quaternion grab drag") {
+      if (!window.Celestial || !anchorCoord || !currentCoord) return false;
+      const nextCenter = rotationController.applyGrabDrag({
+        anchorCoord,
+        currentCoord,
+        dx,
+        dy
+      });
+      if (!Array.isArray(nextCenter)) return false;
+      Celestial.rotate({ center: nextCenter });
+      redrawAndSyncMapBox(reason);
+      queueDebugOverlayUpdate();
+      return true;
+    }
     function debugCurrentView() {
       try {
         const center = Celestial.rotate();
-        if (Array.isArray(center)) rotationController.syncFromCenter(center, "debug-read");
+        if (Array.isArray(center) && !rotationPointerDrag && !paneDrag)
+          rotationController.syncFromCenter(center, "debug-read");
         return {
           center: Array.isArray(center) ? center : null,
           mapScale: getMapScale(),
@@ -4702,8 +4801,8 @@
     }
     function debugDragMode(zh) {
       const map = $("celestial-map"), dragging = !!(map && map.classList.contains("dragging"));
-      if (paneDrag) return zh ? "\u661F\u56FE\u7559\u767D\u56DB\u5143\u6570\u62D6\u52A8" : "pane-margin quaternion drag";
-      if (rotationPointerDrag) return zh ? "Canvas \u56DB\u5143\u6570\u62D6\u52A8" : "canvas quaternion drag";
+      if (paneDrag) return zh ? "\u661F\u56FE\u7559\u767D\u6293\u70B9\u5F0F\u62D6\u52A8" : "pane-margin grab drag";
+      if (rotationPointerDrag) return zh ? "Canvas \u6293\u70B9\u5F0F\u62D6\u52A8" : "canvas grab drag";
       if (dragging) return zh ? "Canvas \u62D6\u52A8" : "canvas drag";
       if (clickStart) return zh ? "\u7B49\u5F85\u533A\u5206\u70B9\u51FB/\u62D6\u52A8" : "click-or-drag pending";
       return zh ? "\u7A7A\u95F2" : "idle";
@@ -4792,6 +4891,10 @@
         dragThreshold: "\u70B9\u51FB/\u62D6\u52A8\u9608\u503C",
         dragSensitivity: "\u56DB\u5143\u6570\u62D6\u52A8\u7075\u654F\u5EA6",
         rotationMode: "\u65CB\u8F6C\u6A21\u5F0F",
+        rotationDragMode: "\u62D6\u52A8\u7B97\u6CD5",
+        grabAnchor: "\u6293\u53D6\u951A\u70B9",
+        grabCurrent: "\u5F53\u524D\u9F20\u6807\u5929\u7403\u70B9",
+        grabAngle: "\u6293\u53D6\u65CB\u8F6C\u89D2\u8DDD\u79BB",
         quaternion: "Quaternion",
         quaternionNorm: "Quaternion \u957F\u5EA6",
         quaternionNormalized: "\u662F\u5426\u5F52\u4E00\u5316",
@@ -4885,6 +4988,10 @@
         dragThreshold: "click/drag threshold",
         dragSensitivity: "quaternion drag sensitivity",
         rotationMode: "rotation mode",
+        rotationDragMode: "drag algorithm",
+        grabAnchor: "grab anchor",
+        grabCurrent: "current pointer sky coord",
+        grabAngle: "grab angular distance",
         quaternion: "Quaternion",
         quaternionNorm: "Quaternion norm",
         quaternionNormalized: "normalized",
@@ -5234,6 +5341,20 @@
         debugBlankLine(),
         debugGroup(label.rotationGroup),
         debugLine(label.rotationMode, [debugValue(rotationStats.mode)]),
+        debugLine(label.rotationDragMode, [debugValue(rotationStats.dragMode || "-")]),
+        debugLine(label.grabAnchor, [
+          debugSep("lon="),
+          debugValue(rotationStats.grabAnchor ? formatAngle(rotationStats.grabAnchor[0]) : "-"),
+          debugSep(" lat="),
+          debugValue(rotationStats.grabAnchor ? formatAngle(rotationStats.grabAnchor[1]) : "-")
+        ]),
+        debugLine(label.grabCurrent, [
+          debugSep("lon="),
+          debugValue(rotationStats.grabCurrent ? formatAngle(rotationStats.grabCurrent[0]) : "-"),
+          debugSep(" lat="),
+          debugValue(rotationStats.grabCurrent ? formatAngle(rotationStats.grabCurrent[1]) : "-")
+        ]),
+        debugLine(label.grabAngle, [debugValue(formatAngle(rotationStats.grabAngleDeg || 0))]),
         debugLine(label.quaternion, [
           debugSep("w="),
           debugValue(Number(rotationStats.quaternion.w).toFixed(6)),
@@ -7842,10 +7963,12 @@
           pointerMoved = false;
           map.classList.add("dragging");
           const center = syncRotationFromCurrentView("pointerdown");
+          const anchorCoord = invertSkyCoordinateAtClient(event.clientX, event.clientY, canvas);
           rotationPointerDrag = center ? {
             id: event.pointerId,
             lastX: event.clientX,
-            lastY: event.clientY
+            lastY: event.clientY,
+            anchorCoord
           } : null;
           try {
             canvas.setPointerCapture(event.pointerId);
@@ -7874,7 +7997,16 @@
             if (pointerMoved) {
               const dx = event.clientX - rotationPointerDrag.lastX, dy = event.clientY - rotationPointerDrag.lastY;
               const rect = canvas.getBoundingClientRect();
-              applyQuaternionPointerDelta(dx, dy, rect, "quaternion drag");
+              const currentCoord = invertSkyCoordinateAtClient(event.clientX, event.clientY, canvas);
+              const grabbed = rotationPointerDrag.anchorCoord && currentCoord ? applyQuaternionGrabDrag(
+                rotationPointerDrag.anchorCoord,
+                currentCoord,
+                dx,
+                dy,
+                "quaternion grab drag"
+              ) : false;
+              if (!grabbed)
+                applyQuaternionPointerDelta(dx, dy, rect, "quaternion drag fallback");
               rotationPointerDrag.lastX = event.clientX;
               rotationPointerDrag.lastY = event.clientY;
             }
@@ -8122,6 +8254,7 @@
         y: event.clientY,
         lastX: event.clientX,
         lastY: event.clientY,
+        anchorCoord: invertSkyCoordinateAtClient(event.clientX, event.clientY),
         center: center.slice(),
         moved: false
       };
@@ -8141,12 +8274,23 @@
       const rect = canvasRect2();
       if (!rect) return;
       try {
-        applyQuaternionPointerDelta(
-          event.clientX - paneDrag.lastX,
-          event.clientY - paneDrag.lastY,
-          rect,
-          "pane margin quaternion drag"
-        );
+        const stepDx = event.clientX - paneDrag.lastX;
+        const stepDy = event.clientY - paneDrag.lastY;
+        const currentCoord = invertSkyCoordinateAtClient(event.clientX, event.clientY);
+        const grabbed = paneDrag.anchorCoord && currentCoord ? applyQuaternionGrabDrag(
+          paneDrag.anchorCoord,
+          currentCoord,
+          stepDx,
+          stepDy,
+          "pane margin quaternion grab drag"
+        ) : false;
+        if (!grabbed)
+          applyQuaternionPointerDelta(
+            stepDx,
+            stepDy,
+            rect,
+            "pane margin quaternion drag fallback"
+          );
         paneDrag.lastX = event.clientX;
         paneDrag.lastY = event.clientY;
       } catch (_) {

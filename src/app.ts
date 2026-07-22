@@ -1871,7 +1871,7 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     return true;
   }
 
-  function applyQuaternionPointerDelta(dx, dy, rect, reason = "quaternion drag") {
+  function applyQuaternionPointerDelta(dx, dy, rect, reason = "quaternion drag fallback") {
     if (!window.Celestial || !rect) return false;
     const nextCenter = rotationController.applyPointerDelta({
       dx,
@@ -1886,10 +1886,49 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     return true;
   }
 
+  function finiteSkyCoord(coord) {
+    if (!Array.isArray(coord)) return null;
+    const lon = Number(coord[0]);
+    const lat = Number(coord[1]);
+    if (!Number.isFinite(lon) || !Number.isFinite(lat)) return null;
+    return [((lon % 360) + 360) % 360, Math.max(-90, Math.min(90, lat))];
+  }
+
+  function invertSkyCoordinateAtClient(clientX, clientY, canvas = null) {
+    try {
+      if (!window.Celestial || !Celestial.mapProjection || !Celestial.mapProjection.invert) return null;
+      const targetCanvas = canvas || document.querySelector("#celestial-map canvas");
+      if (!targetCanvas) return null;
+      const rect = targetCanvas.getBoundingClientRect();
+      const x = Number(clientX) - rect.left;
+      const y = Number(clientY) - rect.top;
+      const coord = Celestial.mapProjection.invert([x, y]);
+      return finiteSkyCoord(coord);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function applyQuaternionGrabDrag(anchorCoord, currentCoord, dx, dy, reason = "quaternion grab drag") {
+    if (!window.Celestial || !anchorCoord || !currentCoord) return false;
+    const nextCenter = rotationController.applyGrabDrag({
+      anchorCoord,
+      currentCoord,
+      dx,
+      dy,
+    });
+    if (!Array.isArray(nextCenter)) return false;
+    Celestial.rotate({ center: nextCenter });
+    redrawAndSyncMapBox(reason);
+    queueDebugOverlayUpdate();
+    return true;
+  }
+
   function debugCurrentView() {
     try {
       const center = Celestial.rotate();
-      if (Array.isArray(center)) rotationController.syncFromCenter(center, "debug-read");
+      if (Array.isArray(center) && !rotationPointerDrag && !paneDrag)
+        rotationController.syncFromCenter(center, "debug-read");
       return {
         center: Array.isArray(center) ? center : null,
         mapScale: getMapScale(),
@@ -1903,8 +1942,8 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
   function debugDragMode(zh) {
     const map = $("celestial-map"),
       dragging = !!(map && map.classList.contains("dragging"));
-    if (paneDrag) return zh ? "星图留白四元数拖动" : "pane-margin quaternion drag";
-    if (rotationPointerDrag) return zh ? "Canvas 四元数拖动" : "canvas quaternion drag";
+    if (paneDrag) return zh ? "星图留白抓点式拖动" : "pane-margin grab drag";
+    if (rotationPointerDrag) return zh ? "Canvas 抓点式拖动" : "canvas grab drag";
     if (dragging) return zh ? "Canvas 拖动" : "canvas drag";
     if (clickStart) return zh ? "等待区分点击/拖动" : "click-or-drag pending";
     return zh ? "空闲" : "idle";
@@ -2011,6 +2050,10 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
             dragThreshold: "点击/拖动阈值",
             dragSensitivity: "四元数拖动灵敏度",
             rotationMode: "旋转模式",
+            rotationDragMode: "拖动算法",
+            grabAnchor: "抓取锚点",
+            grabCurrent: "当前鼠标天球点",
+            grabAngle: "抓取旋转角距离",
             quaternion: "Quaternion",
             quaternionNorm: "Quaternion 长度",
             quaternionNormalized: "是否归一化",
@@ -2105,6 +2148,10 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
             dragThreshold: "click/drag threshold",
             dragSensitivity: "quaternion drag sensitivity",
             rotationMode: "rotation mode",
+            rotationDragMode: "drag algorithm",
+            grabAnchor: "grab anchor",
+            grabCurrent: "current pointer sky coord",
+            grabAngle: "grab angular distance",
             quaternion: "Quaternion",
             quaternionNorm: "Quaternion norm",
             quaternionNormalized: "normalized",
@@ -2499,6 +2546,16 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
       debugBlankLine(),
       debugGroup(label.rotationGroup),
       debugLine(label.rotationMode, [debugValue(rotationStats.mode)]),
+      debugLine(label.rotationDragMode, [debugValue(rotationStats.dragMode || "-")]),
+      debugLine(label.grabAnchor, [
+        debugSep("lon="), debugValue(rotationStats.grabAnchor ? formatAngle(rotationStats.grabAnchor[0]) : "-"),
+        debugSep(" lat="), debugValue(rotationStats.grabAnchor ? formatAngle(rotationStats.grabAnchor[1]) : "-"),
+      ]),
+      debugLine(label.grabCurrent, [
+        debugSep("lon="), debugValue(rotationStats.grabCurrent ? formatAngle(rotationStats.grabCurrent[0]) : "-"),
+        debugSep(" lat="), debugValue(rotationStats.grabCurrent ? formatAngle(rotationStats.grabCurrent[1]) : "-"),
+      ]),
+      debugLine(label.grabAngle, [debugValue(formatAngle(rotationStats.grabAngleDeg || 0))]),
       debugLine(label.quaternion, [
         debugSep("w="), debugValue(Number(rotationStats.quaternion.w).toFixed(6)),
         debugSep(" x="), debugValue(Number(rotationStats.quaternion.x).toFixed(6)),
@@ -5564,11 +5621,13 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
         pointerMoved = false;
         map.classList.add("dragging");
         const center = syncRotationFromCurrentView("pointerdown");
+        const anchorCoord = invertSkyCoordinateAtClient(event.clientX, event.clientY, canvas);
         rotationPointerDrag = center
           ? {
               id: event.pointerId,
               lastX: event.clientX,
               lastY: event.clientY,
+              anchorCoord,
             }
           : null;
         try {
@@ -5602,9 +5661,20 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
             const dx = event.clientX - rotationPointerDrag.lastX,
               dy = event.clientY - rotationPointerDrag.lastY;
             const rect = canvas.getBoundingClientRect();
-            // 四元数作为内部主旋转状态：拖动只生成本帧局部旋转增量，
-            // 不再在极区附近反复用欧拉角累积，避免中心接近 ±90° 时方向跳变。
-            applyQuaternionPointerDelta(dx, dy, rect, "quaternion drag");
+            const currentCoord = invertSkyCoordinateAtClient(event.clientX, event.clientY, canvas);
+            // 5.3.8：优先使用抓点式拖动。鼠标按下时抓住一个天球点，移动时
+            // 用四元数把当前鼠标下的天球点旋回锚点，恢复“星图被鼠标抓住”的手感。
+            const grabbed = rotationPointerDrag.anchorCoord && currentCoord
+              ? applyQuaternionGrabDrag(
+                  rotationPointerDrag.anchorCoord,
+                  currentCoord,
+                  dx,
+                  dy,
+                  "quaternion grab drag",
+                )
+              : false;
+            if (!grabbed)
+              applyQuaternionPointerDelta(dx, dy, rect, "quaternion drag fallback");
             rotationPointerDrag.lastX = event.clientX;
             rotationPointerDrag.lastY = event.clientY;
           }
@@ -5891,6 +5961,7 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
       y: event.clientY,
       lastX: event.clientX,
       lastY: event.clientY,
+      anchorCoord: invertSkyCoordinateAtClient(event.clientX, event.clientY),
       center: center.slice(),
       moved: false,
     };
@@ -5910,12 +5981,25 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     const rect = canvasRect();
     if (!rect) return;
     try {
-      applyQuaternionPointerDelta(
-        event.clientX - paneDrag.lastX,
-        event.clientY - paneDrag.lastY,
-        rect,
-        "pane margin quaternion drag",
-      );
+      const stepDx = event.clientX - paneDrag.lastX;
+      const stepDy = event.clientY - paneDrag.lastY;
+      const currentCoord = invertSkyCoordinateAtClient(event.clientX, event.clientY);
+      const grabbed = paneDrag.anchorCoord && currentCoord
+        ? applyQuaternionGrabDrag(
+            paneDrag.anchorCoord,
+            currentCoord,
+            stepDx,
+            stepDy,
+            "pane margin quaternion grab drag",
+          )
+        : false;
+      if (!grabbed)
+        applyQuaternionPointerDelta(
+          stepDx,
+          stepDy,
+          rect,
+          "pane margin quaternion drag fallback",
+        );
       paneDrag.lastX = event.clientX;
       paneDrag.lastY = event.clientY;
     } catch (_) {}
