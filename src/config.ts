@@ -1,5 +1,5 @@
 /**
- * 真实星空观测台 5.3.8 —— 用户可配置文件
+ * 真实星空观测台 5.3.9 —— 用户可配置文件
  * ------------------------------------------------------------
  * 修改本文件后，运行 npm run build 并刷新 index.html 即可生效。
  * 建议每次只修改一个参数，并保留原值，便于出现问题时恢复。
@@ -98,6 +98,10 @@ window.RSO_CONFIG = {
   interaction: {
     dragThreshold: 5, // 小于该像素距离视为“点击”，大于才视为“拖动”
     dragSensitivity: 1.0, // 四元数拖动灵敏度；越大移动越快
+    poleGuardEnterDegrees: 10, // 欧拉角中轴约束：进入极区保护的角距离阈值
+    poleGuardExitDegrees: 12, // 欧拉角中轴约束：退出极区保护的滞回阈值，略大于进入阈值避免边界抖动
+    keyboardPanDegrees: 4, // 方向键单次按下的即时平移角度
+    keyboardPanDegreesPerSecond: 72, // 方向键长按时按 requestAnimationFrame 连续平移的角速度
     minZoom: 1.0,
     maxZoom: 8.0,
     zoomButtonFactor: 1.25,
@@ -143,6 +147,7 @@ window.RSO_CONFIG = {
     showDeepSky: false,
     timeSpeed: 3600,
     panelOpen: true,
+    poleAxisConstraintEnabled: true,
     menuCollapsed: ["observer", "time", "viewProjection", "display"],
     projection: "airy",
     coordinateSystem: "horizontal", // 坐标视角：horizontal / equatorial / ecliptic / galactic
