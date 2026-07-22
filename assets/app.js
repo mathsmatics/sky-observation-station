@@ -1422,11 +1422,11 @@
   function normalizeObjectSearchText(value) {
     return String(value || "").toLowerCase().replace(/^hip\s*/i, "hip").replace(/\s+/g, "");
   }
-  function uniqueSearchNames(names, simplifyChinese) {
-    return names.map((name) => simplifyChinese(String(name || ""))).filter(Boolean).filter((name, index, list) => list.indexOf(name) === index);
+  function uniqueSearchNames(names, simplifyChinese2) {
+    return names.map((name) => simplifyChinese2(String(name || ""))).filter(Boolean).filter((name, index, list) => list.indexOf(name) === index);
   }
-  function createSearchEntrySeed(type, d, coord, names, simplifyChinese, extra = {}) {
-    const cleanNames = uniqueSearchNames(names, simplifyChinese);
+  function createSearchEntrySeed(type, d, coord, names, simplifyChinese2, extra = {}) {
+    const cleanNames = uniqueSearchNames(names, simplifyChinese2);
     if (!coord || !cleanNames.length) return null;
     return {
       type,
@@ -1436,6 +1436,106 @@
       terms: cleanNames.map(normalizeObjectSearchText),
       ...extra
     };
+  }
+  function candidateCoord(d) {
+    if (d && d.geometry && d.geometry.type === "Point")
+      return d.geometry.coordinates;
+    return null;
+  }
+  function addSearchEntry(entries, type, d, coord, names, simplifyChinese2, extra = {}) {
+    const entry = createSearchEntrySeed(
+      type,
+      d,
+      coord,
+      names,
+      simplifyChinese2,
+      extra
+    );
+    if (entry) entries.push(entry);
+  }
+  function buildObjectSearchIndexFromSources(options) {
+    const entries = [];
+    const label = options.labelObject;
+    const simplify = options.simplifyChinese;
+    options.stars.forEach((feature) => {
+      const coord = candidateCoord(feature);
+      const names = options.starNames[String(feature.id)] || {};
+      addSearchEntry(entries, "star", feature, coord, [
+        label("star", feature),
+        names.name,
+        names.zh,
+        names.bayer,
+        names.flam,
+        names.hip,
+        names.hd,
+        feature.id ? `HIP ${feature.id}` : ""
+      ], simplify);
+    });
+    options.deepSkyFeatures.forEach((feature) => {
+      const coord = candidateCoord(feature);
+      const names = options.deepSkyNames[String(feature.id)] || {};
+      const props = feature.properties || {};
+      addSearchEntry(entries, "dso", feature, coord, [
+        label("dso", feature),
+        names.name,
+        names.zh,
+        props.desig,
+        feature.id
+      ], simplify);
+    });
+    options.constellationNameFeatures.forEach((feature) => {
+      const props = feature.properties || {};
+      addSearchEntry(entries, "constellation", feature, candidateCoord(feature), [
+        label("constellation", feature),
+        props.zh,
+        props.en,
+        props.name,
+        props.desig,
+        feature.id
+      ], simplify);
+    });
+    options.asterismNameFeatures.forEach((feature) => {
+      const props = feature.properties || {};
+      addSearchEntry(entries, "asterism", feature, candidateCoord(feature), [
+        label("asterism", feature),
+        props.name,
+        props.en,
+        props.pinyin,
+        props.desig,
+        feature.id
+      ], simplify);
+    });
+    options.planets.forEach((item) => {
+      addSearchEntry(
+        entries,
+        "planet",
+        item.body,
+        item.coord,
+        [
+          label("planet", item.body),
+          item.body.zh,
+          item.body.en,
+          item.body.name,
+          item.id
+        ],
+        simplify,
+        { planetId: item.id, displayCoord: item.displayCoord, epochCoord: item.epochCoord }
+      );
+    });
+    return entries;
+  }
+  function searchObjectEntries(query, entries, simplifyChinese2) {
+    const needle = normalizeObjectSearchText(simplifyChinese2(query || ""));
+    if (!needle) return [];
+    return entries.map((entry) => {
+      const exact = entry.terms.some((term) => term === needle);
+      const starts = entry.terms.some((term) => term.startsWith(needle));
+      const includes = entry.terms.some((term) => term.includes(needle));
+      if (!exact && !starts && !includes) return null;
+      return { entry, score: exact ? 0 : starts ? 1 : 2 };
+    }).filter(Boolean).sort(
+      (a, b) => a.score - b.score || a.entry.names[0].localeCompare(b.entry.names[0])
+    ).slice(0, 24).map((item) => item.entry);
   }
 
   // src/data/stars/index.ts
@@ -1880,6 +1980,59 @@
     const base = `${y}/${String(dt.month).padStart(2, "0")}/${String(dt.day).padStart(2, "0")} ${String(dt.hour).padStart(2, "0")}:${String(dt.minute).padStart(2, "0")}`;
     return includeSeconds ? `${base}:${String(dt.second).padStart(2, "0")}` : base;
   }
+  function precisionStatusForYear(year) {
+    const y = Number(year);
+    if (!Number.isFinite(y)) return "unknown";
+    if (y >= 1900 && y <= 2100) return "normal";
+    if (y >= 1600 && y <= 2600) return "historical approximation";
+    return "far-date approximation";
+  }
+
+  // src/astronomy/timezone.ts
+  var ZONE_ALIASES = {
+    "Asia/Calcutta": "Asia/Kolkata",
+    "Asia/Katmandu": "Asia/Kathmandu",
+    "US/Eastern": "America/New_York",
+    "US/Central": "America/Chicago",
+    "US/Mountain": "America/Denver",
+    "US/Pacific": "America/Los_Angeles",
+    GMT: "UTC",
+    "Etc/UTC": "UTC"
+  };
+  function isValidZone(zone) {
+    if (!zone || typeof zone !== "string") return false;
+    try {
+      new Intl.DateTimeFormat("en-US", { timeZone: zone }).format(/* @__PURE__ */ new Date());
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+  function normalizeZone(zone) {
+    const raw = typeof zone === "string" ? zone.trim() : "";
+    const mapped = ZONE_ALIASES[raw] || raw;
+    return isValidZone(mapped) ? mapped : null;
+  }
+  function lookupZone(lat, lon, tzlookup = window.tzlookup) {
+    try {
+      if (typeof tzlookup === "function") {
+        const found = normalizeZone(tzlookup(Number(lat), Number(lon)));
+        if (found) return found;
+      }
+    } catch (err) {
+      console.warn("Timezone lookup failed", err);
+    }
+    return null;
+  }
+  function longitudeFallbackZone(lon) {
+    const hours = Math.max(-14, Math.min(14, Math.round(Number(lon) / 15)));
+    if (!Number.isFinite(hours) || hours === 0) return "UTC";
+    const candidate = `Etc/GMT${hours > 0 ? "-" : "+"}${Math.abs(hours)}`;
+    return normalizeZone(candidate) || "UTC";
+  }
+  function safeZoneForCoordinates(lat, lon, preferred, tzlookup = window.tzlookup) {
+    return normalizeZone(preferred) || lookupZone(lat, lon, tzlookup) || longitudeFallbackZone(lon);
+  }
 
   // src/astronomy/sidereal.ts
   function localSiderealDegrees(date, longitude) {
@@ -2310,6 +2463,50 @@
     }
   }
 
+  // src/state/defaults.ts
+  function createDefaultState(cfg, storageSchemaVersion, astronomyModelVersion) {
+    return {
+      lat: Number(cfg("defaults.latitude", 39.9042)),
+      lon: Number(cfg("defaults.longitude", 116.4074)),
+      zone: cfg("defaults.timezone", "Asia/Shanghai"),
+      cityZh: cfg("defaults.cityZh", "\u5317\u4EAC"),
+      cityEn: cfg("defaults.cityEn", "Beijing"),
+      instant: cfg("defaults.instant", "1949-10-01T14:00:00.000Z"),
+      lang: cfg("defaults.language", "zh"),
+      cultureMode: cfg("defaults.cultureMode", "western"),
+      magnitude: Number(cfg("defaults.magnitudeLimit", 5.5)),
+      starSize: Number(cfg("defaults.starSize", 7)),
+      starNames: !!cfg("defaults.showStarNames", true),
+      cultureLines: !!cfg("defaults.showCultureLines", true),
+      cultureNames: !!cfg("defaults.showCultureNames", true),
+      planets: !!cfg("defaults.showPlanets", true),
+      milkyWay: !!cfg("defaults.showMilkyWay", true),
+      grid: !!cfg("defaults.showGrid", true),
+      horizontalGrid: !!cfg("defaults.showHorizontalGrid", false),
+      ecliptic: !!cfg("defaults.showEcliptic", true),
+      equator: !!cfg("defaults.showCelestialEquator", true),
+      horizon: !!cfg("defaults.showHorizon", true),
+      floatingObjectInfo: !!cfg("defaults.showFloatingObjectInfo", true),
+      fontScale: Number(cfg("defaults.fontScale", 1)),
+      nightVision: !!cfg("defaults.nightVision", false),
+      deepSky: !!cfg("defaults.showDeepSky", false),
+      speed: Number(cfg("defaults.timeSpeed", 3600)),
+      panelOpen: !!cfg("defaults.panelOpen", true),
+      poleAxisConstraintEnabled: !!cfg("defaults.poleAxisConstraintEnabled", true),
+      projection: cfg("defaults.projection", "airy"),
+      coordinateSystem: cfg("defaults.coordinateSystem", "horizontal"),
+      menuCollapsed: Array.isArray(cfg("defaults.menuCollapsed", [])) ? cfg("defaults.menuCollapsed", []).slice() : [],
+      regionBoundaries: !!cfg("defaults.showRegionBoundaries", true),
+      traditionalDetail: cfg("defaults.traditionalDetail", "battlefields"),
+      mapScale: Number(cfg("defaults.mapScale", 1)),
+      projectionViews: {},
+      coordinateViewSemantics: 7,
+      storageSchemaVersion,
+      astronomyModelVersion,
+      selectedObject: null
+    };
+  }
+
   // src/state/storage.ts
   var storageAvailable = null;
   function getProjectStorage() {
@@ -2578,6 +2775,642 @@
     };
   }
 
+  // src/ui/i18n.ts
+  var I18N = {
+    zh: {
+      brandSub: "\u771F\u5B9E\u5730\u70B9 \xD7 \u771F\u5B9E\u65F6\u95F4 \xD7 \u771F\u5B9E\u661F\u8868 \xD7 \u53CC\u5929\u6587\u6587\u5316",
+      language: "\u8BED\u8A00",
+      skyCulture: "\u661F\u7A7A\u4F53\u7CFB",
+      topInfo: "\u9876\u90E8\u4FE1\u606F",
+      topInfoHint: "\u9879\u76EE\u4E0E\u5F53\u524D\u72B6\u6001",
+      cultureSettings: "\u8BED\u8A00\u4E0E\u661F\u7A7A\u4F53\u7CFB",
+      cultureSettingsHint: "\u754C\u9762\u8BED\u8A00\u4E0E\u6587\u5316\u56FE\u5C42",
+      observer: "\u89C2\u6D4B\u5730\u70B9",
+      wgs: "WGS84 \u7ECF\u7EAC\u5EA6",
+      latitude: "\u7EAC\u5EA6 Latitude",
+      longitude: "\u7ECF\u5EA6 Longitude",
+      timezone: "\u89C2\u6D4B\u65F6\u533A",
+      applyLocation: "\u5E94\u7528\u5750\u6807\u5E76\u5339\u914D\u65F6\u533A",
+      useMyLocation: "\u4F7F\u7528\u6211\u7684\u4F4D\u7F6E",
+      observationTime: "\u89C2\u6D4B\u65F6\u95F4",
+      now: "\u56DE\u5230\u73B0\u5728",
+      minusMonth: "\u22121 \u6708",
+      minusDay: "\u22121 \u5929",
+      minusHour: "\u22121 \u65F6",
+      plusHour: "+1 \u65F6",
+      plusDay: "+1 \u5929",
+      plusMonth: "+1 \u6708",
+      play: "\u25B6 \u64AD\u653E",
+      pause: "\u275A\u275A \u6682\u505C",
+      timeSpeed: "\u65F6\u95F4\u6D41\u901F",
+      timeStepMinutes: "\u5206\u949F",
+      timeStepHours: "\u5C0F\u65F6",
+      timeStepDays: "\u5929",
+      timeStepYears: "\u5E74",
+      invalidTimeStep: "\u8BF7\u8F93\u5165\u5927\u4E8E 0 \u7684\u6574\u6570\u65F6\u95F4\u6B65\u957F",
+      speed1: "\xD71 \u5B9E\u65F6",
+      speed60: "\xD760\uFF1A1 \u79D2 = 1 \u5206\u949F",
+      speed600: "\xD7600\uFF1A1 \u79D2 = 10 \u5206\u949F",
+      speed3600: "\xD73600\uFF1A1 \u79D2 = 1 \u5C0F\u65F6",
+      speed86400: "\xD786400\uFF1A1 \u79D2 = 1 \u5929",
+      displaySettings: "\u663E\u793A\u53C2\u6570",
+      liveApply: "\u5B9E\u65F6\u5E94\u7528",
+      displayObjects: "\u5BF9\u8C61\u663E\u793A",
+      displayCultureLayers: "\u6587\u5316\u56FE\u5C42",
+      displayReferenceLines: "\u53C2\u8003\u7EBF",
+      displayVisual: "\u89C6\u89C9",
+      magnitudeThreshold: "\u6052\u661F\u663E\u793A\u661F\u7B49\u9608\u503C",
+      starSize: "\u6052\u661F\u5927\u5C0F",
+      starNames: "\u91CD\u8981\u6052\u661F\u540D\u79F0",
+      cultureLines: "\u661F\u5EA7/\u661F\u5B98\u8FDE\u7EBF",
+      cultureNames: "\u661F\u5EA7/\u661F\u5B98\u540D\u79F0",
+      planets: "\u592A\u9633\u3001\u6708\u7403\u4E0E\u884C\u661F",
+      milkyWay: "\u94F6\u6CB3\u8F6E\u5ED3",
+      grid: "\u8D64\u9053\u5750\u6807\u7F51",
+      horizontalGrid: "\u5730\u5E73\u5750\u6807\u7F51",
+      ecliptic: "\u9EC4\u9053",
+      equator: "\u5929\u7403\u8D64\u9053",
+      horizon: "\u5730\u5E73\u7EBF",
+      nightVision: "\u591C\u89C6\u7EA2\u5149",
+      deepSky: "\u4EAE\u6DF1\u7A7A\u5929\u4F53",
+      floatingObjectInfo: "\u661F\u4F53\u4FE1\u606F\u6D6E\u7A97",
+      objectSearch: "\u5929\u4F53\u641C\u7D22",
+      objectSearchHint: "\u6052\u661F / \u884C\u661F / \u661F\u5EA7 / \u661F\u5B98 / \u6DF1\u7A7A",
+      objectSearchPlaceholder: "\u8F93\u5165\u540D\u79F0\u6216 HIP \u7F16\u53F7",
+      noObjectSearchResult: "\u6CA1\u6709\u627E\u5230\u5339\u914D\u7684\u5929\u4F53",
+      searchResultStar: "\u6052\u661F",
+      searchResultPlanet: "\u884C\u661F",
+      searchResultConstellation: "\u661F\u5EA7",
+      searchResultAsterism: "\u661F\u5B98",
+      searchResultDso: "\u6DF1\u7A7A",
+      currentState: "\u5F53\u524D\u72B6\u6001",
+      utcInternal: "\u5185\u90E8\u7EDF\u4E00 UTC",
+      localTime: "\u5F53\u5730\u65F6\u95F4\uFF1A",
+      zoneOffset: "\u65F6\u533A\u504F\u79FB\uFF1A",
+      mapMode: "\u661F\u56FE\u4F53\u7CFB\uFF1A",
+      coordinateNote: "\u5750\u6807\u8BF4\u660E\uFF1A",
+      coordinateValue: "\u6052\u661F\u6570\u636E\u4E3A\u8D64\u9053\u5750\u6807\uFF1B\u89C6\u56FE\u6309\u5730\u70B9\u548C\u65F6\u523B\u65CB\u8F6C\u5230\u672C\u5730\u5730\u5E73\u5929\u7A7A\u3002",
+      technicalGuide: "\u4EE3\u7801\u4E0E\u8BA1\u7B97\u8BF4\u660E",
+      resetView: "\u91CD\u7F6E\u89C6\u56FE",
+      fullscreen: "\u5168\u5C4F",
+      loadingTitle: "\u6B63\u5728\u8F7D\u5165\u771F\u5B9E\u661F\u7A7A\u4E0E\u661F\u5B98\u6570\u636E",
+      loadingText: "\u52A0\u8F7D\u6052\u661F\u76EE\u5F55\u3001\u592A\u9633\u7CFB\u5929\u4F53\u3001\u94F6\u6CB3\u8F6E\u5ED3\u4EE5\u53CA\u4E2D\u897F\u4E24\u5957\u5929\u6587\u6587\u5316\u6570\u636E\u3002\u6240\u6709\u6838\u5FC3\u8D44\u6E90\u5747\u5DF2\u672C\u5730\u6253\u5305\u3002",
+      technicalGuideTitle: "\u4EE3\u7801\u3001\u5929\u6587\u8BA1\u7B97\u4E0E\u6570\u636E\u6765\u6E90\u8BF4\u660E",
+      copyGuide: "\u590D\u5236\u8BF4\u660E",
+      close: "\u5173\u95ED",
+      guideNextPage: "\u4E0B\u4E00\u7AE0",
+      guideSelectLabel: "\u9009\u62E9\u8BF4\u660E\u7AE0\u8282",
+      chinese: "\u4E2D\u6587",
+      english: "English",
+      western: "\u897F\u65B9\u661F\u5EA7",
+      chineseCulture: "\u4E2D\u56FD\u661F\u5B98",
+      bothCultures: "\u4E24\u8005\u540C\u65F6\u663E\u793A",
+      paused: "\u6682\u505C",
+      running: "\u8FD0\u884C\u4E2D",
+      manualLocation: "\u81EA\u5B9A\u4E49\u5730\u70B9",
+      myLocation: "\u6211\u7684\u4F4D\u7F6E",
+      autoZone: "\u65F6\u533A\u5DF2\u81EA\u52A8\u5339\u914D",
+      invalidZone: "\u89C2\u6D4B\u5730\u70B9\u7684\u65F6\u533A\u65E0\u6CD5\u8BC6\u522B\uFF0C\u5DF2\u56DE\u9000\u5230\u5B89\u5168\u65F6\u533A",
+      invalidDateTime: "\u65E5\u671F\u6216\u65F6\u95F4\u65E0\u6548\uFF0C\u8BF7\u68C0\u67E5\u8F93\u5165",
+      invalidCoordinate: "\u8BF7\u8F93\u5165\u6709\u6548\u7ECF\u7EAC\u5EA6\uFF1A\u7EAC\u5EA6 \u221290\uFF5E90\uFF0C\u7ECF\u5EA6 \u2212180\uFF5E180",
+      locationApplied: "\u89C2\u6D4B\u5730\u70B9\u5DF2\u66F4\u65B0",
+      geoRequest: "\u6B63\u5728\u8BF7\u6C42\u6D4F\u89C8\u5668\u5B9A\u4F4D\u6743\u9650\u2026",
+      geoFail: "\u5B9A\u4F4D\u5931\u8D25\u6216\u6743\u9650\u88AB\u62D2\u7EDD\u3002\u5EFA\u8BAE\u901A\u8FC7 localhost/HTTPS \u6253\u5F00\uFF0C\u6216\u624B\u52A8\u8F93\u5165\u7ECF\u7EAC\u5EA6\u3002",
+      geoFileNote: "\u5F53\u524D\u4E3A\u76F4\u63A5\u6253\u5F00\u6A21\u5F0F\uFF1A\u661F\u56FE\u53EF\u6B63\u5E38\u4F7F\u7528\uFF1B\u6D4F\u89C8\u5668\u5B9A\u4F4D\u82E5\u5B9A\u4F4D\u53D7\u9650\uFF0C\u8BF7\u5728\u9879\u76EE\u76EE\u5F55\u8FD0\u884C python -m http.server 8000\u3002",
+      nowApplied: "\u5DF2\u56DE\u5230\u5F53\u524D\u65F6\u523B",
+      cultureReady: "\u661F\u7A7A\u4F53\u7CFB\u5DF2\u5207\u6362\uFF1B\u89C6\u89D2\u3001\u7F29\u653E\u3001\u5730\u70B9\u548C\u65F6\u95F4\u4FDD\u6301\u4E0D\u53D8",
+      loadFail: "\u661F\u56FE\u6838\u5FC3\u6216\u672C\u5730\u6570\u636E\u52A0\u8F7D\u5931\u8D25\u3002\u8BF7\u786E\u8BA4\u538B\u7F29\u5305\u5DF2\u5B8C\u6574\u89E3\u538B\uFF1B\u9700\u8981\u5B9A\u4F4D\u65F6\u53EF\u901A\u8FC7\u9644\u5E26\u542F\u52A8\u811A\u672C\u6253\u5F00\u3002",
+      copied: "\u8BF4\u660E\u5DF2\u590D\u5236\u5230\u526A\u8D34\u677F",
+      copyFail: "\u590D\u5236\u5931\u8D25\uFF0C\u8BF7\u5728\u8BF4\u660E\u7A97\u53E3\u4E2D\u624B\u52A8\u9009\u62E9\u6587\u672C",
+      nightOn: "\u591C\u89C6\u7EA2\u5149\u5DF2\u5F00\u542F",
+      nightOff: "\u591C\u89C6\u7EA2\u5149\u5DF2\u5173\u95ED",
+      localServerHint: "\u5F53\u524D\u4E3A\u76F4\u63A5\u6253\u5F00\u6A21\u5F0F\uFF1A\u661F\u56FE\u53EF\u6B63\u5E38\u4F7F\u7528\uFF1B\u5B9A\u4F4D\u82E5\u5B9A\u4F4D\u53D7\u9650\uFF0C\u8BF7\u5728\u9879\u76EE\u76EE\u5F55\u8FD0\u884C python -m http.server 8000\u3002",
+      timezoneEstimated: "\u81EA\u52A8\u4F30\u8BA1\uFF1B\u8FB9\u754C\u5730\u533A\u8BF7\u6838\u5BF9",
+      zoneAutoNote: "\u65F6\u533A\u7531\u7ECF\u7EAC\u5EA6\u81EA\u52A8\u5339\u914D\uFF1B\u4FEE\u6539\u5730\u70B9\u540E\u4F1A\u81EA\u52A8\u66F4\u65B0\u3002",
+      sameInstant: "\u5730\u70B9\u5207\u6362\u4FDD\u7559\u540C\u4E00 UTC \u65F6\u523B",
+      eastConvention: "\u4EF0\u89C6\u56FE\uFF1A\u5317\u4E0A\u3001\u4E1C\u5DE6\u3001\u897F\u53F3"
+    },
+    en: {
+      brandSub: "Real location \xD7 real time \xD7 real catalogs \xD7 two sky cultures",
+      language: "Language",
+      skyCulture: "Sky system",
+      topInfo: "Top info",
+      topInfoHint: "project and current state",
+      cultureSettings: "Language & sky system",
+      cultureSettingsHint: "UI language and culture layers",
+      observer: "Observer location",
+      wgs: "WGS84 coordinates",
+      latitude: "Latitude",
+      longitude: "Longitude",
+      timezone: "Observer time zone",
+      applyLocation: "Apply coordinates & match zone",
+      useMyLocation: "Use my location",
+      observationTime: "Observation time",
+      now: "Now",
+      minusMonth: "\u22121 month",
+      minusDay: "\u22121 day",
+      minusHour: "\u22121 hr",
+      plusHour: "+1 hr",
+      plusDay: "+1 day",
+      plusMonth: "+1 month",
+      play: "\u25B6 Play",
+      pause: "\u275A\u275A Pause",
+      timeSpeed: "Time speed",
+      timeStepMinutes: "min",
+      timeStepHours: "hour",
+      timeStepDays: "day",
+      timeStepYears: "year",
+      invalidTimeStep: "Enter a positive integer time step",
+      speed1: "\xD71 real time",
+      speed60: "\xD760: 1 sec = 1 min",
+      speed600: "\xD7600: 1 sec = 10 min",
+      speed3600: "\xD73600: 1 sec = 1 hr",
+      speed86400: "\xD786400: 1 sec = 1 day",
+      displaySettings: "Display settings",
+      liveApply: "applied live",
+      displayObjects: "Objects",
+      displayCultureLayers: "Culture layers",
+      displayReferenceLines: "Reference lines",
+      displayVisual: "Visual",
+      magnitudeThreshold: "Stellar magnitude display limit",
+      starSize: "Star size",
+      starNames: "Important star names",
+      cultureLines: "Constellation/asterism lines",
+      cultureNames: "Constellation/asterism names",
+      planets: "Sun, Moon & planets",
+      milkyWay: "Milky Way outline",
+      grid: "Equatorial grid",
+      horizontalGrid: "Horizontal grid",
+      ecliptic: "Ecliptic",
+      equator: "Celestial equator",
+      horizon: "Horizon",
+      nightVision: "Red night vision",
+      deepSky: "Bright deep-sky objects",
+      floatingObjectInfo: "Floating object info",
+      objectSearch: "Object search",
+      objectSearchHint: "Stars / planets / constellations / asterisms / deep sky",
+      objectSearchPlaceholder: "Enter a name or HIP number",
+      noObjectSearchResult: "No matching object found",
+      searchResultStar: "Star",
+      searchResultPlanet: "Planet",
+      searchResultConstellation: "Constellation",
+      searchResultAsterism: "Asterism",
+      searchResultDso: "Deep sky",
+      currentState: "Current state",
+      utcInternal: "UTC internally",
+      localTime: "Local time: ",
+      zoneOffset: "UTC offset: ",
+      mapMode: "Sky culture: ",
+      coordinateNote: "Coordinates: ",
+      coordinateValue: "Catalog stars use equatorial coordinates; the view is rotated to the local horizon for the observer and instant.",
+      technicalGuide: "Code & calculation guide",
+      resetView: "Reset view",
+      fullscreen: "Full screen",
+      loadingTitle: "Loading real-sky and asterism data",
+      loadingText: "Reading the bundled stellar catalog, Solar System objects, Milky Way outline and both sky-culture datasets from local files. No internet connection is required.",
+      technicalGuideTitle: "Code, astronomical calculations and data sources",
+      copyGuide: "Copy guide",
+      close: "Close",
+      guideNextPage: "Next",
+      guideSelectLabel: "Choose guide section",
+      chinese: "\u4E2D\u6587",
+      english: "English",
+      western: "Western constellations",
+      chineseCulture: "Chinese asterisms",
+      bothCultures: "Show both",
+      paused: "Paused",
+      running: "Running",
+      manualLocation: "Custom location",
+      myLocation: "My location",
+      autoZone: "Time zone matched automatically",
+      invalidZone: "The observer time zone could not be recognized; a safe fallback was used",
+      invalidDateTime: "Invalid date or time",
+      invalidCoordinate: "Enter valid coordinates: latitude \u221290 to 90 and longitude \u2212180 to 180",
+      locationApplied: "Observer location updated",
+      geoRequest: "Requesting browser geolocation permission\u2026",
+      geoFail: "Geolocation failed or permission was denied. Open over localhost/HTTPS, or enter coordinates manually.",
+      geoFileNote: "Direct-open mode: the sky map works normally. For browser geolocation, run python -m http.server 8000 in the project folder.",
+      nowApplied: "Returned to the current instant",
+      cultureReady: "Sky system changed; view, zoom, location and time were preserved",
+      loadFail: "The sky engine or catalog data failed to load. Check that the extracted package is complete; use the included local-server launcher for browser geolocation.",
+      copied: "Guide copied to clipboard",
+      copyFail: "Copy failed; select the text manually in the guide",
+      nightOn: "Red night vision enabled",
+      nightOff: "Red night vision disabled",
+      localServerHint: "Direct-open mode is active. The sky map works normally; for geolocation, run python -m http.server 8000 in the project folder.",
+      timezoneEstimated: "Automatic estimate; verify near borders",
+      zoneAutoNote: "The IANA zone follows the observer coordinates automatically.",
+      sameInstant: "Location changes preserve the same UTC instant",
+      eastConvention: "Looking-up chart: north up, east left, west right"
+    }
+  };
+  Object.assign(I18N.zh, {
+    citySearch: "\u641C\u7D22\u57CE\u5E02",
+    citySearchPlaceholder: "\u8F93\u5165\u4E2D\u6587\u6216\u82F1\u6587\u57CE\u5E02\u540D",
+    viewProjection: "\u89C6\u56FE\u4E0E\u6295\u5F71",
+    viewPreserved: "\u72EC\u7ACB\u4FDD\u5B58\u89C6\u89D2",
+    viewTools: "\u89C6\u56FE\u63A7\u5236",
+    viewToolsHint: "\u4E0D\u6539\u53D8\u5730\u70B9\u4E0E\u65F6\u95F4",
+    projectionLabel: "\u5929\u7403\u6295\u5F71\uFF1A",
+    coordinateSystemLabel: "\u5750\u6807\u89C6\u89D2\uFF1A",
+    projection: "\u5929\u7403\u6295\u5F71",
+    coordinateSystem: "\u5750\u6807\u89C6\u89D2",
+    poleAxisConstraint: "\u5929\u6781\u4E2D\u8F74\u7EA6\u675F",
+    horizontalCoordinates: "\u5730\u5E73\u5750\u6807\u89C6\u89D2\uFF08\u5F53\u5730\u5929\u7A7A\uFF09",
+    equatorialCoordinates: "\u8D64\u9053\u5750\u6807\u89C6\u89D2",
+    eclipticCoordinates: "\u9EC4\u9053\u5750\u6807\u89C6\u89D2",
+    galacticCoordinates: "\u94F6\u6CB3\u5750\u6807\u89C6\u89D2",
+    traditionalRegions: "\u4E2D\u56FD\u4F20\u7EDF\u5929\u533A\u5C42\u7EA7",
+    majorRegions: "\u4E09\u57A3 / \u56DB\u8C61 / \u8FD1\u5357\u6781\u661F\u533A",
+    withBattlefields: "\u4E09\u57A3\u56DB\u8C61 + \u4E09\u5927\u6218\u573A",
+    withMansions: "\u4E09\u57A3\u56DB\u8C61 + \u4E09\u5927\u6218\u573A + \u4E8C\u5341\u516B\u5BBF\u7EC6\u5206",
+    traditionalRegionCaveat: "\u4E09\u5927\u6218\u573A\u4E3A\u57FA\u4E8E\u76F8\u5173\u661F\u5B98\u4F4D\u7F6E\u751F\u6210\u7684\u6587\u5316\u4E3B\u9898\u793A\u610F\u8303\u56F4\uFF1B\u4E09\u57A3\u4E0E\u56DB\u8C61\u4E5F\u5C5E\u4E8E\u73B0\u4EE3\u6570\u5B57\u5316\u590D\u539F\uFF0C\u4E0D\u7B49\u540C\u4E8E IAU \u6CD5\u5B9A\u8FB9\u754C\u3002",
+    regionBoundaries: "\u533A\u57DF\u8FB9\u754C / \u4F20\u7EDF\u5929\u533A",
+    selectedObject: "\u9009\u4E2D\u5929\u4F53",
+    clickSkyHint: "\u5355\u51FB\u661F\u4F53\u6216\u7A7A\u767D\u5929\u533A",
+    copy: "\u590D\u5236",
+    clear: "\u6E05\u9664",
+    objectInfoEmpty: "\u5355\u51FB\u6052\u661F\u3001\u592A\u9633\u7CFB\u5929\u4F53\u3001\u6DF1\u7A7A\u5929\u4F53\u3001\u661F\u5EA7\u3001\u661F\u5B98\u6216\u7A7A\u767D\u5929\u533A\uFF0C\u67E5\u770B\u540D\u79F0\u3001\u5750\u6807\u548C\u5F53\u524D\u5730\u5E73\u4F4D\u7F6E\u3002",
+    objectType: "\u7C7B\u578B",
+    otherNames: "\u5176\u4ED6\u540D\u79F0",
+    magnitude: "\u89C6\u661F\u7B49",
+    rightAscension: "\u8D64\u7ECF RA",
+    declination: "\u8D64\u7EAC Dec",
+    altitude: "\u9AD8\u5EA6\u89D2 Alt",
+    azimuth: "\u65B9\u4F4D\u89D2 Az",
+    observerPlace: "\u89C2\u6D4B\u5730\u70B9",
+    observerTime: "\u89C2\u6D4B\u65F6\u95F4",
+    catalogId: "\u76EE\u5F55\u7F16\u53F7",
+    spectralInfo: "\u989C\u8272\u6307\u6570 B\u2212V",
+    illumination: "\u7167\u660E\u6BD4\u4F8B",
+    moonAge: "\u6708\u9F84",
+    moonPhase: "\u6708\u76F8",
+    algorithm: "\u7B97\u6CD5",
+    precisionBoundary: "\u7CBE\u5EA6",
+    visualReferencePrecision: "\u89C6\u89C9\u53C2\u8003\uFF0C\u975E\u4E13\u4E1A\u661F\u5386",
+    distance: "\u8DDD\u79BB",
+    star: "\u6052\u661F",
+    deepSkyObject: "\u6DF1\u7A7A\u5929\u4F53",
+    westernConstellation: "\u897F\u65B9\u661F\u5EA7",
+    chineseAsterism: "\u4E2D\u56FD\u661F\u5B98",
+    solarSystemObject: "\u592A\u9633\u7CFB\u5929\u4F53",
+    skyPosition: "\u7A7A\u767D\u5929\u533A",
+    regionLegendTitle: "\u4E2D\u56FD\u4F20\u7EDF\u5929\u533A",
+    regionLegendMajor: "\u4E09\u57A3 / \u56DB\u8C61 / \u8FD1\u5357\u6781\u661F\u533A",
+    regionLegendBattle: "\u4E09\u5927\u6218\u573A\uFF08\u6587\u5316\u4E3B\u9898\u793A\u610F\u8303\u56F4\uFF09",
+    copiedObject: "\u5929\u4F53\u4FE1\u606F\u5DF2\u590D\u5236",
+    westernCultureMeaning: "\u897F\u65B9\u6587\u5316",
+    chineseCultureMeaning: "\u4E2D\u56FD\u6587\u5316",
+    noReliableTraditionalBoundary: "\u5F53\u524D\u6570\u636E\u4E0D\u628A\u6BCF\u4E2A\u661F\u5B98\u5F3A\u884C\u5C01\u95ED\uFF1B\u4EC5\u663E\u793A\u4E09\u57A3\u3001\u56DB\u8C61\u3001\u8FD1\u5357\u6781\u661F\u533A\u53CA\u53EF\u9009\u4E3B\u9898\u533A\u3002",
+    resetDefaults: "\u6062\u590D\u9ED8\u8BA4\u914D\u7F6E",
+    resetDefaultsConfirm: "\u786E\u5B9A\u6062\u590D\u9ED8\u8BA4\u914D\u7F6E\u5417\uFF1F\u8FD9\u4F1A\u91CD\u7F6E\u5730\u70B9\u3001\u65F6\u95F4\u3001\u89C6\u56FE\u3001\u5B57\u4F53\u548C\u6240\u6709\u663E\u793A\u53C2\u6570\u3002"
+  });
+  Object.assign(I18N.en, {
+    citySearch: "Search city",
+    citySearchPlaceholder: "Type a Chinese or English city name",
+    viewProjection: "View & projection",
+    viewPreserved: "view saved per projection",
+    viewTools: "View controls",
+    viewToolsHint: "location and time unchanged",
+    projectionLabel: "Projection: ",
+    coordinateSystemLabel: "Coordinate view: ",
+    projection: "Celestial projection",
+    coordinateSystem: "Coordinate View",
+    poleAxisConstraint: "Pole-axis centerline constraint",
+    horizontalCoordinates: "Horizontal Coordinate View (Local Sky)",
+    equatorialCoordinates: "Equatorial Coordinate View",
+    eclipticCoordinates: "Ecliptic Coordinate View",
+    galacticCoordinates: "Galactic Coordinate View",
+    traditionalRegions: "Chinese traditional region level",
+    majorRegions: "Three Enclosures / Four Symbols / near-south-polar",
+    withBattlefields: "Major regions + three battlefields",
+    withMansions: "Major regions + battlefields + 28 mansions",
+    traditionalRegionCaveat: "The three battlefields are thematic visualization envelopes generated from related asterisms. The enclosure and symbol regions are modern digital reconstructions, not IAU legal boundaries.",
+    regionBoundaries: "Region boundaries / traditional regions",
+    selectedObject: "Selected object",
+    clickSkyHint: "Click an object or empty sky",
+    copy: "Copy",
+    clear: "Clear",
+    objectInfoEmpty: "Click a star, Solar System body, deep-sky object, constellation, asterism, or empty sky to inspect names, coordinates, and current horizontal position.",
+    objectType: "Type",
+    otherNames: "Other names",
+    magnitude: "Magnitude",
+    rightAscension: "Right ascension",
+    declination: "Declination",
+    altitude: "Altitude",
+    azimuth: "Azimuth",
+    observerPlace: "Observer",
+    observerTime: "Observation time",
+    catalogId: "Catalog ID",
+    spectralInfo: "B\u2212V colour index",
+    illumination: "Illumination",
+    moonAge: "Moon age",
+    moonPhase: "Moon phase",
+    algorithm: "Model",
+    precisionBoundary: "Precision",
+    visualReferencePrecision: "visual reference, not precision ephemeris",
+    distance: "Distance",
+    star: "Star",
+    deepSkyObject: "Deep-sky object",
+    westernConstellation: "Western constellation",
+    chineseAsterism: "Chinese asterism",
+    solarSystemObject: "Solar System object",
+    skyPosition: "Empty sky position",
+    regionLegendTitle: "Chinese traditional sky regions",
+    regionLegendMajor: "Three Enclosures / Four Symbols / near-south-polar zone",
+    regionLegendBattle: "Three battlefields (thematic visualization)",
+    copiedObject: "Object information copied",
+    westernCultureMeaning: "Western culture",
+    chineseCultureMeaning: "Chinese culture",
+    noReliableTraditionalBoundary: "Individual asterisms are not forced into fake closed polygons; only higher-level traditional regions and optional thematic zones are shown.",
+    resetDefaults: "Reset to defaults",
+    resetDefaultsConfirm: "Reset all settings to defaults? This will reset location, time, view, font size, and all display options."
+  });
+
+  // src/ui/text.ts
+  var TRAD_TO_SIMP = {
+    "\u81FA": "\u53F0",
+    "\u842C": "\u4E07",
+    "\u9F8D": "\u9F99",
+    "\u9B25": "\u6597",
+    "\u9580": "\u95E8",
+    "\u9EDE": "\u70B9",
+    "\u986F": "\u663E",
+    "\u64C7": "\u62E9",
+    "\u64CA": "\u51FB",
+    "\u6642": "\u65F6",
+    "\u9593": "\u95F4",
+    "\u908A": "\u8FB9",
+    "\u8655": "\u5904",
+    "\u88CF": "\u91CC",
+    "\u8457": "\u7740",
+    "\u89C0": "\u89C2",
+    "\u5BE6": "\u5B9E",
+    "\u8AAA": "\u8BF4",
+    "\u8A9E": "\u8BED",
+    "\u7576": "\u5F53",
+    "\u5F8C": "\u540E",
+    "\u958B": "\u5F00",
+    "\u95DC": "\u5173",
+    "\u7121": "\u65E0",
+    "\u6578": "\u6570",
+    "\u64DA": "\u636E",
+    "\u8F49": "\u8F6C",
+    "\u63DB": "\u6362",
+    "\u7DAD": "\u7EF4",
+    "\u985E": "\u7C7B",
+    "\u5C64": "\u5C42",
+    "\u8996": "\u89C6",
+    "\u570D": "\u56F4",
+    "\u6A19": "\u6807",
+    "\u66C6": "\u5386",
+    "\u5EE3": "\u5E7F",
+    "\u570B": "\u56FD",
+    "\u5B78": "\u5B66",
+    "\u8853": "\u672F",
+    "\u70BA": "\u4E3A",
+    "\u8207": "\u4E0E",
+    "\u9019": "\u8FD9",
+    "\u500B": "\u4E2A",
+    "\u5011": "\u4EEC",
+    "\u5F9E": "\u4ECE",
+    "\u4F86": "\u6765",
+    "\u9084": "\u8FD8",
+    "\u6703": "\u4F1A",
+    "\u61C9": "\u5E94",
+    "\u8A72": "\u8BE5",
+    "\u5C0E": "\u5BFC",
+    "\u8B80": "\u8BFB",
+    "\u5BEB": "\u5199",
+    "\u756B": "\u753B",
+    "\u98DB": "\u98DE",
+    "\u99AC": "\u9A6C",
+    "\u96D9": "\u53CC",
+    "\u9B5A": "\u9C7C",
+    "\u5BF6": "\u5B9D",
+    "\u7345": "\u72EE",
+    "\u9F9C": "\u9F9F",
+    "\u9CF3": "\u51E4",
+    "\u9DB4": "\u9E64",
+    "\u96DE": "\u9E21",
+    "\u9CE5": "\u9E1F",
+    "\u7378": "\u517D",
+    "\u71DF": "\u8425",
+    "\u8ECD": "\u519B",
+    "\u9663": "\u9635",
+    "\u5C07": "\u5C06",
+    "\u885B": "\u536B",
+    "\u58D8": "\u5792",
+    "\u95A3": "\u9601",
+    "\u5EAB": "\u5E93",
+    "\u5BAE": "\u5BAB",
+    "\u5EDF": "\u5E99",
+    "\u6A13": "\u697C",
+    "\u8ECA": "\u8F66",
+    "\u8F26": "\u8F87",
+    "\u8F14": "\u8F85",
+    "\u8FB2": "\u519C",
+    "\u96E2": "\u79BB",
+    "\u7F85": "\u7F57",
+    "\u7DB2": "\u7F51",
+    "\u7E54": "\u7EC7",
+    "\u528D": "\u5251",
+    "\u9264": "\u94A9",
+    "\u9435": "\u94C1",
+    "\u9285": "\u94DC",
+    "\u9280": "\u94F6",
+    "\u9418": "\u949F",
+    "\u6B0A": "\u6743",
+    "\u6A1E": "\u67A2",
+    "\u74A3": "\u7391",
+    "\u9AD4": "\u4F53",
+    "\u50B3": "\u4F20",
+    "\u7D71": "\u7EDF",
+    "\u5340": "\u533A",
+    "\u8CC7": "\u8D44",
+    "\u8A0A": "\u8BAF",
+    "\u6A94": "\u6863",
+    "\u5132": "\u50A8",
+    "\u8F09": "\u8F7D",
+    "\u9801": "\u9875",
+    "\u9023": "\u8FDE",
+    "\u555F": "\u542F",
+    "\u9589": "\u95ED",
+    "\u91CB": "\u91CA",
+    "\u89F8": "\u89E6",
+    "\u700F": "\u6D4F",
+    "\u89BD": "\u89C8",
+    "\u7570": "\u5F02",
+    "\u78BA": "\u786E",
+    "\u6E96": "\u51C6",
+    "\u7E8C": "\u7EED",
+    "\u7A2E": "\u79CD",
+    "\u8F03": "\u8F83",
+    "\u9805": "\u9879",
+    "\u9810": "\u9884",
+    "\u8A2D": "\u8BBE",
+    "\u5FA9": "\u590D",
+    "\u7DDA": "\u7EBF",
+    "\u689D": "\u6761",
+    "\u7A31": "\u79F0",
+    "\u7DE8": "\u7F16",
+    "\u865F": "\u53F7",
+    "\u8ABF": "\u8C03",
+    "\u8F38": "\u8F93",
+    "\u8B8A": "\u53D8",
+    "\u8AA4": "\u8BEF",
+    "\u6771": "\u4E1C",
+    "\u73FE": "\u73B0",
+    "\u7522": "\u4EA7",
+    "\u7FA9": "\u4E49",
+    "\u52D9": "\u52A1",
+    "\u72C0": "\u72B6",
+    "\u614B": "\u6001",
+    "\u5167": "\u5185",
+    "\u5834": "\u573A",
+    "\u7D93": "\u7ECF",
+    "\u7DEF": "\u7EAC",
+    "\u6E2C": "\u6D4B",
+    "\u96F2": "\u4E91",
+    "\u6C23": "\u6C14",
+    "\u98A8": "\u98CE",
+    "\u9060": "\u8FDC",
+    "\u7E3D": "\u603B",
+    "\u6B78": "\u5F52",
+    "\u6AA2": "\u68C0",
+    "\u9A57": "\u9A8C",
+    "\u5C0D": "\u5BF9",
+    "\u9078": "\u9009",
+    "\u55AE": "\u5355",
+    "\u512A": "\u4F18",
+    "\u7D1A": "\u7EA7",
+    "\u58D3": "\u538B",
+    "\u7E2E": "\u7F29",
+    "\u984F": "\u989C",
+    "\u9EBC": "\u4E48",
+    "\u96BB": "\u53EA",
+    "\u96A8": "\u968F",
+    "\u5E36": "\u5E26",
+    "\u88E1": "\u91CC",
+    "\u65BC": "\u4E8E",
+    "\u8ACB": "\u8BF7",
+    "\u5C0B": "\u5BFB",
+    "\u4F48": "\u5E03",
+    "\u4F54": "\u5360",
+    "\u4F75": "\u5E76",
+    "\u63A1": "\u91C7",
+    "\u69CB": "\u6784",
+    "\u64F4": "\u6269",
+    "\u5283": "\u5212",
+    "\u66AB": "\u6682",
+    "\u9846": "\u9897"
+  };
+  function simplifyChinese(value) {
+    return String(value == null ? "" : value).replace(
+      /[\u3400-\u9fff]/g,
+      (ch) => TRAD_TO_SIMP[ch] || ch
+    );
+  }
+
+  // src/ui/theme.ts
+  function applyConfigCssVariables(cfg, rootStyle = document.documentElement.style) {
+    const vars = {
+      "--bg": cfg("theme.pageBackground", "#02050d"),
+      "--panel": cfg("theme.panelBackground", "#07101f"),
+      "--panel-solid": cfg("theme.panelBackground", "#07101f"),
+      "--panel-2": cfg("theme.panelSecondaryBackground", "#0d192d"),
+      "--line": cfg("theme.border", "rgba(159,211,255,.22)"),
+      "--line-soft": cfg("theme.borderSoft", "rgba(159,211,255,.10)"),
+      "--text": cfg("theme.text", "#eef7ff"),
+      "--muted": cfg("theme.mutedText", "#9db1c8"),
+      "--cyan": cfg("theme.accent", "#77dcff"),
+      "--blue": cfg("theme.accentSecondary", "#8eabff"),
+      "--gold": cfg("theme.gold", "#ffd477"),
+      "--danger": cfg("theme.danger", "#ff8b8b"),
+      "--shadow": cfg("theme.shadow", "0 22px 75px rgba(0,0,0,.52)"),
+      "--sidebar-w": `${cfg("layout.sidebarWidth", 360)}px`,
+      "--mobile-sidebar-w": `${cfg("layout.mobileSidebarWidth", 350)}px`,
+      "--sky-meta-top": `${cfg("layout.skyMetaTop", 10)}px`,
+      "--sky-meta-right": `${cfg("layout.skyMetaRight", 12)}px`,
+      "--sky-meta-font": `${cfg("layout.skyMetaFontSize", 12)}px`,
+      "--sky-meta-color": cfg("layout.skyMetaColor", "rgba(228,241,255,.88)"),
+      "--panel-toggle-left": `${cfg("layout.panelToggleLeft", 8)}px`,
+      "--panel-toggle-top": `${cfg("layout.panelToggleTop", 8)}px`,
+      "--panel-toggle-size": `${cfg("layout.panelToggleSize", 36)}px`,
+      "--reset-toggle-left": `calc(${cfg("layout.panelToggleLeft", 8)}px + (${cfg("layout.panelToggleSize", 36)}px + 6px) * 2)`,
+      "--panel-toggle-bg": cfg(
+        "components.panelToggleBackground",
+        "rgba(8,19,36,.94)"
+      ),
+      "--tool-button-bg": cfg(
+        "components.toolButtonBackground",
+        "rgba(255,255,255,.045)"
+      ),
+      "--info-card-bg": cfg(
+        "components.infoCardBackground",
+        "linear-gradient(145deg,rgba(11,27,48,.94),rgba(7,16,31,.96))"
+      ),
+      "--info-card-border": cfg(
+        "components.infoCardBorder",
+        "rgba(119,220,255,.22)"
+      ),
+      "--info-title": cfg("components.infoTitleColor", "#f4fbff"),
+      "--info-text": cfg("components.infoTextColor", "#d8e8f5"),
+      "--info-muted": cfg("components.infoMutedColor", "#8da4bb")
+    };
+    Object.entries(vars).forEach(([key, value]) => rootStyle.setProperty(key, value));
+  }
+  function applyRootFontScale(fontScale, rootStyle = document.documentElement.style) {
+    const scale = Number(fontScale);
+    rootStyle.setProperty(
+      "--rso-font-scale",
+      Number.isFinite(scale) && scale > 0 ? String(scale) : "1"
+    );
+  }
+
+  // src/ui/time-fields.ts
+  var TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
+  var TIME_FIELD_TO_ID = {
+    year: "time-year",
+    month: "time-month",
+    day: "time-day",
+    hour: "time-hour",
+    minute: "time-minute"
+  };
+  var TIME_FIELD_ID_TO_KEY = Object.fromEntries(
+    Object.entries(TIME_FIELD_TO_ID).map(([key, id]) => [id, key])
+  );
+  var TIME_FIELD_IDS = Object.values(TIME_FIELD_TO_ID);
+  function timeFieldByKey($, key) {
+    const id = TIME_FIELD_TO_ID[key];
+    return id ? $(id) : null;
+  }
+  function timeFieldDebugText($) {
+    return TIME_FIELD_KEYS.map((key) => `${key}=${timeFieldByKey($, key)?.value || ""}`).join(" ");
+  }
+  function displayTimeParts(dt) {
+    return {
+      year: astronomicalYearToInput(dt.year),
+      month: String(dt.month).padStart(2, "0"),
+      day: String(dt.day).padStart(2, "0"),
+      hour: String(dt.hour).padStart(2, "0"),
+      minute: String(dt.minute).padStart(2, "0")
+    };
+  }
+  function setTimeFieldWidths($) {
+    TIME_FIELD_IDS.forEach((id) => {
+      const el = $(id);
+      if (!el) return;
+      const raw = String(el.value || "");
+      if (id === "time-year") {
+        const len = Math.max(3, raw.length || 4);
+        el.style.width = `${len + 0.8}ch`;
+      } else {
+        el.style.width = "2.4ch";
+      }
+    });
+  }
+
   // src/sky/renderer.ts
   function skyPaneSize(element) {
     if (!element) {
@@ -2681,7 +3514,217 @@
     return canvas ? canvas.getBoundingClientRect() : null;
   }
 
+  // src/sky/view-control.ts
+  function normalizeControlCenter(center, constrained) {
+    const source = Array.isArray(center) ? center.slice() : [0, 0, 0];
+    const next = [
+      Number.isFinite(Number(source[0])) ? normalizeCelestialLongitude2(Number(source[0])) : 0,
+      Number.isFinite(Number(source[1])) ? Math.max(-89.5, Math.min(89.5, Number(source[1]))) : 0,
+      Number.isFinite(Number(source[2])) ? Number(source[2]) : 0
+    ];
+    if (constrained) next[2] = 0;
+    return next;
+  }
+  function normalizeCelestialLongitude2(deg) {
+    return ((Number(deg) + 180) % 360 + 360) % 360 - 180;
+  }
+  function normalizeSkyLongitude(deg) {
+    return ((Number(deg) || 0) % 360 + 360) % 360;
+  }
+  function finiteSkyCoord(coord) {
+    if (!Array.isArray(coord)) return null;
+    const lon = Number(coord[0]);
+    const lat = Number(coord[1]);
+    if (!Number.isFinite(lon) || !Number.isFinite(lat)) return null;
+    return [normalizeSkyLongitude(lon), Math.max(-90, Math.min(90, lat))];
+  }
+  function angularDistanceDeg(a, b) {
+    if (!a || !b) return NaN;
+    const lon1 = degToRad(Number(a[0]) || 0), lat1 = degToRad(Number(a[1]) || 0), lon2 = degToRad(Number(b[0]) || 0), lat2 = degToRad(Number(b[1]) || 0), sin1 = Math.sin(lat1), sin2 = Math.sin(lat2), cos1 = Math.cos(lat1), cos2 = Math.cos(lat2), cosD = sin1 * sin2 + cos1 * cos2 * Math.cos(lon1 - lon2);
+    return radToDeg(Math.acos(Math.max(-1, Math.min(1, cosD))));
+  }
+  function currentCoordinatePoles(coordinateSystem, lang) {
+    const en = lang === "en";
+    if (coordinateSystem === "horizontal" || coordinateSystem === "equatorial") {
+      return {
+        positiveName: en ? "North celestial pole" : "\u5317\u5929\u6781",
+        negativeName: en ? "South celestial pole" : "\u5357\u5929\u6781",
+        positiveCoord: [0, 90],
+        negativeCoord: [0, -90]
+      };
+    }
+    if (coordinateSystem === "ecliptic") {
+      return {
+        positiveName: en ? "North ecliptic pole" : "\u9EC4\u9053\u5317\u6781",
+        negativeName: en ? "South ecliptic pole" : "\u9EC4\u9053\u5357\u6781",
+        positiveCoord: [0, 90],
+        negativeCoord: [0, -90]
+      };
+    }
+    if (coordinateSystem === "galactic") {
+      return {
+        positiveName: en ? "North galactic pole" : "\u94F6\u5317\u6781",
+        negativeName: en ? "South galactic pole" : "\u94F6\u5357\u6781",
+        positiveCoord: [0, 90],
+        negativeCoord: [0, -90]
+      };
+    }
+    return null;
+  }
+  function projectCurrentCoordinatePoint(celestial, coord) {
+    try {
+      if (!celestial || !celestial.mapProjection || !coord) return null;
+      const safe = finiteSkyCoord(coord);
+      if (!safe) return null;
+      if (celestial.clip && !celestial.clip(safe)) return null;
+      const point = celestial.mapProjection(safe);
+      return point && Number.isFinite(point[0]) && Number.isFinite(point[1]) ? { x: point[0], y: point[1], visible: true } : null;
+    } catch (_) {
+      return null;
+    }
+  }
+  function updatePoleAxisDiagnostics(options) {
+    const {
+      debug,
+      coordinateSystem,
+      lang,
+      pointerCoord,
+      center,
+      currentCenter,
+      celestial,
+      metrics,
+      canvasRect: canvasRect2,
+      status,
+      constrained
+    } = options;
+    const poles = currentCoordinatePoles(coordinateSystem, lang);
+    debug.status = status || (constrained ? "euler-constrained" : "quaternion-free");
+    if (!poles) {
+      Object.assign(debug, {
+        guardActive: false,
+        guardReason: "undefined",
+        pointerPositiveDeg: NaN,
+        pointerNegativeDeg: NaN,
+        centerPositiveDeg: NaN,
+        centerNegativeDeg: NaN,
+        positiveName: "undefined",
+        negativeName: "undefined",
+        polesDefined: false,
+        positivePoint: null,
+        negativePoint: null,
+        centerlineX: NaN,
+        positiveDx: NaN,
+        negativeDx: NaN,
+        axisAngleDeg: NaN
+      });
+      return debug;
+    }
+    const viewCenter = finiteSkyCoord(center || currentCenter);
+    const pointer = finiteSkyCoord(pointerCoord);
+    const centerlineX = canvasRect2 && Number.isFinite(canvasRect2.width) ? canvasRect2.width / 2 : metrics.width / 2, positivePoint = projectCurrentCoordinatePoint(celestial, poles.positiveCoord), negativePoint = projectCurrentCoordinatePoint(celestial, poles.negativeCoord), positiveDx = positivePoint ? positivePoint.x - centerlineX : NaN, negativeDx = negativePoint ? negativePoint.x - centerlineX : NaN;
+    let axisAngleDeg = NaN;
+    if (positivePoint && negativePoint) {
+      const dx = positivePoint.x - negativePoint.x, dy = positivePoint.y - negativePoint.y;
+      axisAngleDeg = radToDeg(Math.atan2(Math.abs(dx), Math.abs(dy)));
+    }
+    Object.assign(debug, {
+      positiveName: poles.positiveName,
+      negativeName: poles.negativeName,
+      polesDefined: true,
+      pointerPositiveDeg: pointer ? angularDistanceDeg(pointer, poles.positiveCoord) : NaN,
+      pointerNegativeDeg: pointer ? angularDistanceDeg(pointer, poles.negativeCoord) : NaN,
+      centerPositiveDeg: viewCenter ? angularDistanceDeg(viewCenter, poles.positiveCoord) : NaN,
+      centerNegativeDeg: viewCenter ? angularDistanceDeg(viewCenter, poles.negativeCoord) : NaN,
+      positivePoint,
+      negativePoint,
+      centerlineX,
+      positiveDx,
+      negativeDx,
+      axisAngleDeg
+    });
+    return debug;
+  }
+  function evaluatePointerPoleGuard(options) {
+    const { debug, pointerCoord, center, enterDeg, exitDeg, pointerGuardEnabled, updateDiagnostics } = options;
+    const threshold = debug.guardActive ? exitDeg : enterDeg;
+    const diag = updateDiagnostics(pointerCoord, center);
+    const candidates = (pointerGuardEnabled ? [
+      ["pointer-near-positive-pole", diag.pointerPositiveDeg],
+      ["pointer-near-negative-pole", diag.pointerNegativeDeg]
+    ] : []).filter((item) => Number.isFinite(Number(item[1]))).sort((a, b) => Number(a[1]) - Number(b[1]));
+    const nearest = candidates[0];
+    const active = !!nearest && Number(nearest[1]) <= threshold;
+    debug.guardActive = active;
+    debug.guardReason = active ? nearest[0] : candidates.length ? "none" : "undefined";
+    debug.status = active ? "guard-active" : debug.status;
+    return debug;
+  }
+
+  // src/sky/celestial-view.ts
+  function getInternalZoom(celestial = window.Celestial) {
+    try {
+      return Number(celestial.zoomBy()) || 1;
+    } catch (_) {
+      return 1;
+    }
+  }
+  function syncInternalZoomForMetrics(metrics, celestial = window.Celestial) {
+    try {
+      const target = Math.max(1, Number(metrics && metrics.internalZoom) || 1);
+      const current = getInternalZoom(celestial);
+      if (Math.abs(current - target) > 2e-3)
+        celestial.zoomBy(target / Math.max(1e-4, current));
+    } catch (_) {
+    }
+  }
+  function resetInternalZoom(celestial = window.Celestial) {
+    try {
+      const current = getInternalZoom(celestial);
+      if (Math.abs(current - 1) > 2e-3) celestial.zoomBy(1 / current);
+    } catch (_) {
+    }
+  }
+  function currentCelestialCenter(celestial = window.Celestial) {
+    try {
+      const center = celestial && celestial.rotate && celestial.rotate();
+      return Array.isArray(center) ? center.slice() : null;
+    } catch (_) {
+      return null;
+    }
+  }
+  function invertSkyCoordinateAtClient(clientX, clientY, canvas = null, celestial = window.Celestial) {
+    try {
+      if (!celestial || !celestial.mapProjection || !celestial.mapProjection.invert)
+        return null;
+      const targetCanvas = canvas || document.querySelector("#celestial-map canvas");
+      if (!targetCanvas) return null;
+      const rect = targetCanvas.getBoundingClientRect();
+      const x = Number(clientX) - rect.left;
+      const y = Number(clientY) - rect.top;
+      const coord = celestial.mapProjection.invert([x, y]);
+      return finiteSkyCoord(coord);
+    } catch (_) {
+      return null;
+    }
+  }
+
   // src/sky/projection.ts
+  var PROJECTION_DEFAULTS = {
+    airy: { center: [0, 0, 0], mapScale: 1 },
+    orthographic: { center: [0, 0, 0], mapScale: 1 },
+    stereographic: { center: [0, 0, 0], mapScale: 1 },
+    azimuthalEquidistant: { center: [0, 0, 0], mapScale: 1 },
+    azimuthalEqualArea: { center: [0, 0, 0], mapScale: 1 },
+    aitoff: { center: [0, 0, 0], mapScale: 1 },
+    hammer: { center: [0, 0, 0], mapScale: 1 },
+    mollweide: { center: [0, 0, 0], mapScale: 1 },
+    winkel3: { center: [0, 0, 0], mapScale: 1 },
+    equirectangular: { center: [0, 0, 0], mapScale: 1 },
+    healpix: { center: [0, 0, 0], mapScale: 1 },
+    mercator: { center: [0, 0, 0], mapScale: 1 },
+    robinson: { center: [0, 0, 0], mapScale: 1 },
+    sinusoidal: { center: [0, 0, 0], mapScale: 1 }
+  };
   function clampMapScale(value, min, max) {
     const safeMin = Number.isFinite(min) ? min : 1;
     const safeMax = Math.max(safeMin, Number.isFinite(max) ? max : safeMin);
@@ -3000,6 +4043,36 @@
     };
   }
 
+  // src/sky/keyboard-pan.ts
+  var ARROW_KEY_LABELS = [
+    ["ArrowUp", "\u2191"],
+    ["ArrowDown", "\u2193"],
+    ["ArrowLeft", "\u2190"],
+    ["ArrowRight", "\u2192"]
+  ];
+  function pressedArrowKeysLabel(keys) {
+    const labels = ARROW_KEY_LABELS.filter(([key]) => keys.has(key)).map(([, label]) => label);
+    return labels.length ? labels.join(" ") : "none";
+  }
+  function keyboardPanDeltaForKey(key, step) {
+    if (key === "ArrowLeft") return { lon: step, lat: 0 };
+    if (key === "ArrowRight") return { lon: -step, lat: 0 };
+    if (key === "ArrowUp") return { lon: 0, lat: step };
+    if (key === "ArrowDown") return { lon: 0, lat: -step };
+    return null;
+  }
+  function keyboardPanUnitVector(keys) {
+    let lonDir = 0;
+    let latDir = 0;
+    if (keys.has("ArrowLeft")) lonDir += 1;
+    if (keys.has("ArrowRight")) lonDir -= 1;
+    if (keys.has("ArrowUp")) latDir += 1;
+    if (keys.has("ArrowDown")) latDir -= 1;
+    if (!lonDir && !latDir) return null;
+    const length = Math.hypot(lonDir, latDir) || 1;
+    return { lon: lonDir / length, lat: latDir / length };
+  }
+
   // src/sky/layers.ts
   function drawReferenceText(context, text, point, style, align = "center") {
     if (!context || !point) return;
@@ -3097,6 +4170,127 @@
   }
   function infoSingleLine(a, b) {
     return `<div class="floating-info-single"><b>${a}\uFF1A</b><em>${b || "\u2014"}</em></div>`;
+  }
+
+  // src/ui/debug-panel.ts
+  function debugSpan(text, className) {
+    const span = document.createElement("span");
+    span.className = className;
+    span.textContent = String(text);
+    return span;
+  }
+  function debugValue(text) {
+    return debugSpan(text, "debug-value");
+  }
+  function debugSep(text) {
+    return debugSpan(text, "debug-sep");
+  }
+  function debugUnit(text) {
+    return debugSpan(text, "debug-unit");
+  }
+  function debugGroup(title) {
+    const el = document.createElement("div");
+    el.className = "debug-group";
+    el.textContent = title;
+    return el;
+  }
+  function debugLine(label, parts = []) {
+    const el = document.createElement("div");
+    el.className = "debug-line";
+    el.append(
+      debugSpan(label, "debug-key"),
+      debugSep(": "),
+      ...Array.isArray(parts) ? parts : [debugValue(parts)]
+    );
+    return el;
+  }
+  function debugBlankLine() {
+    const el = document.createElement("div");
+    el.className = "debug-blank";
+    return el;
+  }
+  function debugSizeParts(width, height) {
+    return [
+      debugValue(Math.round(Number(width) || 0)),
+      debugSep("x"),
+      debugValue(Math.round(Number(height) || 0))
+    ];
+  }
+  function debugRectParts(rect) {
+    if (!rect) return [debugValue("-")];
+    return [
+      ...debugSizeParts(rect.width, rect.height),
+      debugSep(" @ "),
+      debugValue(Math.round(rect.left)),
+      debugSep(","),
+      debugValue(Math.round(rect.top))
+    ];
+  }
+  function debugPointParts(point) {
+    if (!point) return [debugValue("-")];
+    return [
+      debugValue(Math.round(point.x)),
+      debugSep(","),
+      debugValue(Math.round(point.y))
+    ];
+  }
+  function debugCenterDeltaParts(delta, formatSigned2) {
+    if (!delta) return [debugValue("-")];
+    return [
+      debugSep("X="),
+      debugValue(formatSigned2(delta.x)),
+      debugUnit("px"),
+      debugSep(" Y="),
+      debugValue(formatSigned2(delta.y)),
+      debugUnit("px")
+    ];
+  }
+  function debugScaleParts(value) {
+    return [debugValue(Number(value || 0).toFixed(3)), debugUnit("x")];
+  }
+  function debugBoolParts(value) {
+    return [debugValue(value ? "true" : "false")];
+  }
+  function debugMetricStatus(ok, zh) {
+    return debugSpan(
+      ok ? "OK" : zh ? "MISMATCH \u5C3A\u5BF8\u4E0D\u4E00\u81F4" : "MISMATCH",
+      ok ? "debug-ok" : "debug-warn"
+    );
+  }
+  function formatAngle(value) {
+    const number = Number(value);
+    return Number.isFinite(number) ? `${number.toFixed(2)}\xB0` : "-";
+  }
+  function formatAngleOrUnavailable(value) {
+    const number = Number(value);
+    return Number.isFinite(number) ? `${number.toFixed(2)}\xB0` : "unavailable";
+  }
+  function formatSigned(value) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return "-";
+    return `${number >= 0 ? "+" : ""}${number.toFixed(1)}`;
+  }
+  function debugOffsetNoteValue(note, zh) {
+    if (note === "iana-historical")
+      return zh ? "\u4F7F\u7528 IANA \u5386\u53F2\u504F\u79FB" : "using IANA historical offset";
+    if (note === "zone-rule")
+      return zh ? "\u4F7F\u7528\u5F53\u524D\u65F6\u533A\u89C4\u5219" : "using current zone rule";
+    return "-";
+  }
+  function debugRefreshHealthValue(value, zh) {
+    if (value === "recovered") return zh ? "fallback \u5DF2\u6062\u590D" : "recovered by fallback";
+    if (value === "failed") return zh ? "\u5931\u8D25" : "failed";
+    if (value === "pending") return zh ? "\u5237\u65B0\u4E2D" : "pending";
+    return zh ? "\u6B63\u5E38" : "healthy";
+  }
+  function debugErrorText(err) {
+    if (!err) return "-";
+    if (err && err.message) return String(err.message);
+    return String(err);
+  }
+  function debugStackText(err) {
+    if (!err || !err.stack) return "-";
+    return String(err.stack).split("\n").slice(0, 3).join(" | ");
   }
 
   // src/ui/controls.ts
@@ -3255,465 +4449,21 @@
       return value == null ? fallback : value;
     };
     function applyConfigCss() {
-      const root = document.documentElement.style;
-      const vars = {
-        "--bg": cfg("theme.pageBackground", "#02050d"),
-        "--panel": cfg("theme.panelBackground", "#07101f"),
-        "--panel-solid": cfg("theme.panelBackground", "#07101f"),
-        "--panel-2": cfg("theme.panelSecondaryBackground", "#0d192d"),
-        "--line": cfg("theme.border", "rgba(159,211,255,.22)"),
-        "--line-soft": cfg("theme.borderSoft", "rgba(159,211,255,.10)"),
-        "--text": cfg("theme.text", "#eef7ff"),
-        "--muted": cfg("theme.mutedText", "#9db1c8"),
-        "--cyan": cfg("theme.accent", "#77dcff"),
-        "--blue": cfg("theme.accentSecondary", "#8eabff"),
-        "--gold": cfg("theme.gold", "#ffd477"),
-        "--danger": cfg("theme.danger", "#ff8b8b"),
-        "--shadow": cfg("theme.shadow", "0 22px 75px rgba(0,0,0,.52)"),
-        "--sidebar-w": `${cfg("layout.sidebarWidth", 360)}px`,
-        "--mobile-sidebar-w": `${cfg("layout.mobileSidebarWidth", 350)}px`,
-        "--sky-meta-top": `${cfg("layout.skyMetaTop", 10)}px`,
-        "--sky-meta-right": `${cfg("layout.skyMetaRight", 12)}px`,
-        "--sky-meta-font": `${cfg("layout.skyMetaFontSize", 12)}px`,
-        "--sky-meta-color": cfg("layout.skyMetaColor", "rgba(228,241,255,.88)"),
-        "--panel-toggle-left": `${cfg("layout.panelToggleLeft", 8)}px`,
-        "--panel-toggle-top": `${cfg("layout.panelToggleTop", 8)}px`,
-        "--panel-toggle-size": `${cfg("layout.panelToggleSize", 36)}px`,
-        "--reset-toggle-left": `calc(${cfg("layout.panelToggleLeft", 8)}px + (${cfg("layout.panelToggleSize", 36)}px + 6px) * 2)`,
-        "--panel-toggle-bg": cfg(
-          "components.panelToggleBackground",
-          "rgba(8,19,36,.94)"
-        ),
-        "--tool-button-bg": cfg(
-          "components.toolButtonBackground",
-          "rgba(255,255,255,.045)"
-        ),
-        "--info-card-bg": cfg(
-          "components.infoCardBackground",
-          "linear-gradient(145deg,rgba(11,27,48,.94),rgba(7,16,31,.96))"
-        ),
-        "--info-card-border": cfg(
-          "components.infoCardBorder",
-          "rgba(119,220,255,.22)"
-        ),
-        "--info-title": cfg("components.infoTitleColor", "#f4fbff"),
-        "--info-text": cfg("components.infoTextColor", "#d8e8f5"),
-        "--info-muted": cfg("components.infoMutedColor", "#8da4bb")
-      };
-      Object.entries(vars).forEach(([k, v]) => root.setProperty(k, v));
+      applyConfigCssVariables(cfg);
     }
     function applyFontScale() {
-      const scale = Number(state.fontScale);
-      document.documentElement.style.setProperty(
-        "--rso-font-scale",
-        Number.isFinite(scale) && scale > 0 ? String(scale) : "1"
-      );
+      applyRootFontScale(state.fontScale);
     }
     applyConfigCss();
     const DateTime = window.luxon && window.luxon.DateTime;
     const STORAGE_KEY = "real-sky-observatory-v48";
     const STORAGE_SCHEMA_VERSION = "5.3.2";
     const ASTRONOMY_MODEL_VERSION = "epoch-date-precession-v1";
-    const I18N = {
-      zh: {
-        brandSub: "\u771F\u5B9E\u5730\u70B9 \xD7 \u771F\u5B9E\u65F6\u95F4 \xD7 \u771F\u5B9E\u661F\u8868 \xD7 \u53CC\u5929\u6587\u6587\u5316",
-        language: "\u8BED\u8A00",
-        skyCulture: "\u661F\u7A7A\u4F53\u7CFB",
-        topInfo: "\u9876\u90E8\u4FE1\u606F",
-        topInfoHint: "\u9879\u76EE\u4E0E\u5F53\u524D\u72B6\u6001",
-        cultureSettings: "\u8BED\u8A00\u4E0E\u661F\u7A7A\u4F53\u7CFB",
-        cultureSettingsHint: "\u754C\u9762\u8BED\u8A00\u4E0E\u6587\u5316\u56FE\u5C42",
-        observer: "\u89C2\u6D4B\u5730\u70B9",
-        wgs: "WGS84 \u7ECF\u7EAC\u5EA6",
-        latitude: "\u7EAC\u5EA6 Latitude",
-        longitude: "\u7ECF\u5EA6 Longitude",
-        timezone: "\u89C2\u6D4B\u65F6\u533A",
-        applyLocation: "\u5E94\u7528\u5750\u6807\u5E76\u5339\u914D\u65F6\u533A",
-        useMyLocation: "\u4F7F\u7528\u6211\u7684\u4F4D\u7F6E",
-        observationTime: "\u89C2\u6D4B\u65F6\u95F4",
-        now: "\u56DE\u5230\u73B0\u5728",
-        minusMonth: "\u22121 \u6708",
-        minusDay: "\u22121 \u5929",
-        minusHour: "\u22121 \u65F6",
-        plusHour: "+1 \u65F6",
-        plusDay: "+1 \u5929",
-        plusMonth: "+1 \u6708",
-        play: "\u25B6 \u64AD\u653E",
-        pause: "\u275A\u275A \u6682\u505C",
-        timeSpeed: "\u65F6\u95F4\u6D41\u901F",
-        timeStepMinutes: "\u5206\u949F",
-        timeStepHours: "\u5C0F\u65F6",
-        timeStepDays: "\u5929",
-        timeStepYears: "\u5E74",
-        invalidTimeStep: "\u8BF7\u8F93\u5165\u5927\u4E8E 0 \u7684\u6574\u6570\u65F6\u95F4\u6B65\u957F",
-        speed1: "\xD71 \u5B9E\u65F6",
-        speed60: "\xD760\uFF1A1 \u79D2 = 1 \u5206\u949F",
-        speed600: "\xD7600\uFF1A1 \u79D2 = 10 \u5206\u949F",
-        speed3600: "\xD73600\uFF1A1 \u79D2 = 1 \u5C0F\u65F6",
-        speed86400: "\xD786400\uFF1A1 \u79D2 = 1 \u5929",
-        displaySettings: "\u663E\u793A\u53C2\u6570",
-        liveApply: "\u5B9E\u65F6\u5E94\u7528",
-        displayObjects: "\u5BF9\u8C61\u663E\u793A",
-        displayCultureLayers: "\u6587\u5316\u56FE\u5C42",
-        displayReferenceLines: "\u53C2\u8003\u7EBF",
-        displayVisual: "\u89C6\u89C9",
-        magnitudeThreshold: "\u6052\u661F\u663E\u793A\u661F\u7B49\u9608\u503C",
-        starSize: "\u6052\u661F\u5927\u5C0F",
-        starNames: "\u91CD\u8981\u6052\u661F\u540D\u79F0",
-        cultureLines: "\u661F\u5EA7/\u661F\u5B98\u8FDE\u7EBF",
-        cultureNames: "\u661F\u5EA7/\u661F\u5B98\u540D\u79F0",
-        planets: "\u592A\u9633\u3001\u6708\u7403\u4E0E\u884C\u661F",
-        milkyWay: "\u94F6\u6CB3\u8F6E\u5ED3",
-        grid: "\u8D64\u9053\u5750\u6807\u7F51",
-        horizontalGrid: "\u5730\u5E73\u5750\u6807\u7F51",
-        ecliptic: "\u9EC4\u9053",
-        equator: "\u5929\u7403\u8D64\u9053",
-        horizon: "\u5730\u5E73\u7EBF",
-        nightVision: "\u591C\u89C6\u7EA2\u5149",
-        deepSky: "\u4EAE\u6DF1\u7A7A\u5929\u4F53",
-        floatingObjectInfo: "\u661F\u4F53\u4FE1\u606F\u6D6E\u7A97",
-        objectSearch: "\u5929\u4F53\u641C\u7D22",
-        objectSearchHint: "\u6052\u661F / \u884C\u661F / \u661F\u5EA7 / \u661F\u5B98 / \u6DF1\u7A7A",
-        objectSearchPlaceholder: "\u8F93\u5165\u540D\u79F0\u6216 HIP \u7F16\u53F7",
-        noObjectSearchResult: "\u6CA1\u6709\u627E\u5230\u5339\u914D\u7684\u5929\u4F53",
-        searchResultStar: "\u6052\u661F",
-        searchResultPlanet: "\u884C\u661F",
-        searchResultConstellation: "\u661F\u5EA7",
-        searchResultAsterism: "\u661F\u5B98",
-        searchResultDso: "\u6DF1\u7A7A",
-        currentState: "\u5F53\u524D\u72B6\u6001",
-        utcInternal: "\u5185\u90E8\u7EDF\u4E00 UTC",
-        localTime: "\u5F53\u5730\u65F6\u95F4\uFF1A",
-        zoneOffset: "\u65F6\u533A\u504F\u79FB\uFF1A",
-        mapMode: "\u661F\u56FE\u4F53\u7CFB\uFF1A",
-        coordinateNote: "\u5750\u6807\u8BF4\u660E\uFF1A",
-        coordinateValue: "\u6052\u661F\u6570\u636E\u4E3A\u8D64\u9053\u5750\u6807\uFF1B\u89C6\u56FE\u6309\u5730\u70B9\u548C\u65F6\u523B\u65CB\u8F6C\u5230\u672C\u5730\u5730\u5E73\u5929\u7A7A\u3002",
-        technicalGuide: "\u4EE3\u7801\u4E0E\u8BA1\u7B97\u8BF4\u660E",
-        resetView: "\u91CD\u7F6E\u89C6\u56FE",
-        fullscreen: "\u5168\u5C4F",
-        loadingTitle: "\u6B63\u5728\u8F7D\u5165\u771F\u5B9E\u661F\u7A7A\u4E0E\u661F\u5B98\u6570\u636E",
-        loadingText: "\u52A0\u8F7D\u6052\u661F\u76EE\u5F55\u3001\u592A\u9633\u7CFB\u5929\u4F53\u3001\u94F6\u6CB3\u8F6E\u5ED3\u4EE5\u53CA\u4E2D\u897F\u4E24\u5957\u5929\u6587\u6587\u5316\u6570\u636E\u3002\u6240\u6709\u6838\u5FC3\u8D44\u6E90\u5747\u5DF2\u672C\u5730\u6253\u5305\u3002",
-        technicalGuideTitle: "\u4EE3\u7801\u3001\u5929\u6587\u8BA1\u7B97\u4E0E\u6570\u636E\u6765\u6E90\u8BF4\u660E",
-        copyGuide: "\u590D\u5236\u8BF4\u660E",
-        close: "\u5173\u95ED",
-        guideNextPage: "\u4E0B\u4E00\u7AE0",
-        guideSelectLabel: "\u9009\u62E9\u8BF4\u660E\u7AE0\u8282",
-        chinese: "\u4E2D\u6587",
-        english: "English",
-        western: "\u897F\u65B9\u661F\u5EA7",
-        chineseCulture: "\u4E2D\u56FD\u661F\u5B98",
-        bothCultures: "\u4E24\u8005\u540C\u65F6\u663E\u793A",
-        paused: "\u6682\u505C",
-        running: "\u8FD0\u884C\u4E2D",
-        manualLocation: "\u81EA\u5B9A\u4E49\u5730\u70B9",
-        myLocation: "\u6211\u7684\u4F4D\u7F6E",
-        autoZone: "\u65F6\u533A\u5DF2\u81EA\u52A8\u5339\u914D",
-        invalidZone: "\u89C2\u6D4B\u5730\u70B9\u7684\u65F6\u533A\u65E0\u6CD5\u8BC6\u522B\uFF0C\u5DF2\u56DE\u9000\u5230\u5B89\u5168\u65F6\u533A",
-        invalidDateTime: "\u65E5\u671F\u6216\u65F6\u95F4\u65E0\u6548\uFF0C\u8BF7\u68C0\u67E5\u8F93\u5165",
-        invalidCoordinate: "\u8BF7\u8F93\u5165\u6709\u6548\u7ECF\u7EAC\u5EA6\uFF1A\u7EAC\u5EA6 \u221290\uFF5E90\uFF0C\u7ECF\u5EA6 \u2212180\uFF5E180",
-        locationApplied: "\u89C2\u6D4B\u5730\u70B9\u5DF2\u66F4\u65B0",
-        geoRequest: "\u6B63\u5728\u8BF7\u6C42\u6D4F\u89C8\u5668\u5B9A\u4F4D\u6743\u9650\u2026",
-        geoFail: "\u5B9A\u4F4D\u5931\u8D25\u6216\u6743\u9650\u88AB\u62D2\u7EDD\u3002\u5EFA\u8BAE\u901A\u8FC7 localhost/HTTPS \u6253\u5F00\uFF0C\u6216\u624B\u52A8\u8F93\u5165\u7ECF\u7EAC\u5EA6\u3002",
-        geoFileNote: "\u5F53\u524D\u4E3A\u76F4\u63A5\u6253\u5F00\u6A21\u5F0F\uFF1A\u661F\u56FE\u53EF\u6B63\u5E38\u4F7F\u7528\uFF1B\u6D4F\u89C8\u5668\u5B9A\u4F4D\u82E5\u5B9A\u4F4D\u53D7\u9650\uFF0C\u8BF7\u5728\u9879\u76EE\u76EE\u5F55\u8FD0\u884C python -m http.server 8000\u3002",
-        nowApplied: "\u5DF2\u56DE\u5230\u5F53\u524D\u65F6\u523B",
-        cultureReady: "\u661F\u7A7A\u4F53\u7CFB\u5DF2\u5207\u6362\uFF1B\u89C6\u89D2\u3001\u7F29\u653E\u3001\u5730\u70B9\u548C\u65F6\u95F4\u4FDD\u6301\u4E0D\u53D8",
-        loadFail: "\u661F\u56FE\u6838\u5FC3\u6216\u672C\u5730\u6570\u636E\u52A0\u8F7D\u5931\u8D25\u3002\u8BF7\u786E\u8BA4\u538B\u7F29\u5305\u5DF2\u5B8C\u6574\u89E3\u538B\uFF1B\u9700\u8981\u5B9A\u4F4D\u65F6\u53EF\u901A\u8FC7\u9644\u5E26\u542F\u52A8\u811A\u672C\u6253\u5F00\u3002",
-        copied: "\u8BF4\u660E\u5DF2\u590D\u5236\u5230\u526A\u8D34\u677F",
-        copyFail: "\u590D\u5236\u5931\u8D25\uFF0C\u8BF7\u5728\u8BF4\u660E\u7A97\u53E3\u4E2D\u624B\u52A8\u9009\u62E9\u6587\u672C",
-        nightOn: "\u591C\u89C6\u7EA2\u5149\u5DF2\u5F00\u542F",
-        nightOff: "\u591C\u89C6\u7EA2\u5149\u5DF2\u5173\u95ED",
-        localServerHint: "\u5F53\u524D\u4E3A\u76F4\u63A5\u6253\u5F00\u6A21\u5F0F\uFF1A\u661F\u56FE\u53EF\u6B63\u5E38\u4F7F\u7528\uFF1B\u5B9A\u4F4D\u82E5\u5B9A\u4F4D\u53D7\u9650\uFF0C\u8BF7\u5728\u9879\u76EE\u76EE\u5F55\u8FD0\u884C python -m http.server 8000\u3002",
-        timezoneEstimated: "\u81EA\u52A8\u4F30\u8BA1\uFF1B\u8FB9\u754C\u5730\u533A\u8BF7\u6838\u5BF9",
-        zoneAutoNote: "\u65F6\u533A\u7531\u7ECF\u7EAC\u5EA6\u81EA\u52A8\u5339\u914D\uFF1B\u4FEE\u6539\u5730\u70B9\u540E\u4F1A\u81EA\u52A8\u66F4\u65B0\u3002",
-        sameInstant: "\u5730\u70B9\u5207\u6362\u4FDD\u7559\u540C\u4E00 UTC \u65F6\u523B",
-        eastConvention: "\u4EF0\u89C6\u56FE\uFF1A\u5317\u4E0A\u3001\u4E1C\u5DE6\u3001\u897F\u53F3"
-      },
-      en: {
-        brandSub: "Real location \xD7 real time \xD7 real catalogs \xD7 two sky cultures",
-        language: "Language",
-        skyCulture: "Sky system",
-        topInfo: "Top info",
-        topInfoHint: "project and current state",
-        cultureSettings: "Language & sky system",
-        cultureSettingsHint: "UI language and culture layers",
-        observer: "Observer location",
-        wgs: "WGS84 coordinates",
-        latitude: "Latitude",
-        longitude: "Longitude",
-        timezone: "Observer time zone",
-        applyLocation: "Apply coordinates & match zone",
-        useMyLocation: "Use my location",
-        observationTime: "Observation time",
-        now: "Now",
-        minusMonth: "\u22121 month",
-        minusDay: "\u22121 day",
-        minusHour: "\u22121 hr",
-        plusHour: "+1 hr",
-        plusDay: "+1 day",
-        plusMonth: "+1 month",
-        play: "\u25B6 Play",
-        pause: "\u275A\u275A Pause",
-        timeSpeed: "Time speed",
-        timeStepMinutes: "min",
-        timeStepHours: "hour",
-        timeStepDays: "day",
-        timeStepYears: "year",
-        invalidTimeStep: "Enter a positive integer time step",
-        speed1: "\xD71 real time",
-        speed60: "\xD760: 1 sec = 1 min",
-        speed600: "\xD7600: 1 sec = 10 min",
-        speed3600: "\xD73600: 1 sec = 1 hr",
-        speed86400: "\xD786400: 1 sec = 1 day",
-        displaySettings: "Display settings",
-        liveApply: "applied live",
-        displayObjects: "Objects",
-        displayCultureLayers: "Culture layers",
-        displayReferenceLines: "Reference lines",
-        displayVisual: "Visual",
-        magnitudeThreshold: "Stellar magnitude display limit",
-        starSize: "Star size",
-        starNames: "Important star names",
-        cultureLines: "Constellation/asterism lines",
-        cultureNames: "Constellation/asterism names",
-        planets: "Sun, Moon & planets",
-        milkyWay: "Milky Way outline",
-        grid: "Equatorial grid",
-        horizontalGrid: "Horizontal grid",
-        ecliptic: "Ecliptic",
-        equator: "Celestial equator",
-        horizon: "Horizon",
-        nightVision: "Red night vision",
-        deepSky: "Bright deep-sky objects",
-        floatingObjectInfo: "Floating object info",
-        objectSearch: "Object search",
-        objectSearchHint: "Stars / planets / constellations / asterisms / deep sky",
-        objectSearchPlaceholder: "Enter a name or HIP number",
-        noObjectSearchResult: "No matching object found",
-        searchResultStar: "Star",
-        searchResultPlanet: "Planet",
-        searchResultConstellation: "Constellation",
-        searchResultAsterism: "Asterism",
-        searchResultDso: "Deep sky",
-        currentState: "Current state",
-        utcInternal: "UTC internally",
-        localTime: "Local time: ",
-        zoneOffset: "UTC offset: ",
-        mapMode: "Sky culture: ",
-        coordinateNote: "Coordinates: ",
-        coordinateValue: "Catalog stars use equatorial coordinates; the view is rotated to the local horizon for the observer and instant.",
-        technicalGuide: "Code & calculation guide",
-        resetView: "Reset view",
-        fullscreen: "Full screen",
-        loadingTitle: "Loading real-sky and asterism data",
-        loadingText: "Reading the bundled stellar catalog, Solar System objects, Milky Way outline and both sky-culture datasets from local files. No internet connection is required.",
-        technicalGuideTitle: "Code, astronomical calculations and data sources",
-        copyGuide: "Copy guide",
-        close: "Close",
-        guideNextPage: "Next",
-        guideSelectLabel: "Choose guide section",
-        chinese: "\u4E2D\u6587",
-        english: "English",
-        western: "Western constellations",
-        chineseCulture: "Chinese asterisms",
-        bothCultures: "Show both",
-        paused: "Paused",
-        running: "Running",
-        manualLocation: "Custom location",
-        myLocation: "My location",
-        autoZone: "Time zone matched automatically",
-        invalidZone: "The observer time zone could not be recognized; a safe fallback was used",
-        invalidDateTime: "Invalid date or time",
-        invalidCoordinate: "Enter valid coordinates: latitude \u221290 to 90 and longitude \u2212180 to 180",
-        locationApplied: "Observer location updated",
-        geoRequest: "Requesting browser geolocation permission\u2026",
-        geoFail: "Geolocation failed or permission was denied. Open over localhost/HTTPS, or enter coordinates manually.",
-        geoFileNote: "Direct-open mode: the sky map works normally. For browser geolocation, run python -m http.server 8000 in the project folder.",
-        nowApplied: "Returned to the current instant",
-        cultureReady: "Sky system changed; view, zoom, location and time were preserved",
-        loadFail: "The sky engine or catalog data failed to load. Check that the extracted package is complete; use the included local-server launcher for browser geolocation.",
-        copied: "Guide copied to clipboard",
-        copyFail: "Copy failed; select the text manually in the guide",
-        nightOn: "Red night vision enabled",
-        nightOff: "Red night vision disabled",
-        localServerHint: "Direct-open mode is active. The sky map works normally; for geolocation, run python -m http.server 8000 in the project folder.",
-        timezoneEstimated: "Automatic estimate; verify near borders",
-        zoneAutoNote: "The IANA zone follows the observer coordinates automatically.",
-        sameInstant: "Location changes preserve the same UTC instant",
-        eastConvention: "Looking-up chart: north up, east left, west right"
-      }
-    };
-    Object.assign(I18N.zh, {
-      citySearch: "\u641C\u7D22\u57CE\u5E02",
-      citySearchPlaceholder: "\u8F93\u5165\u4E2D\u6587\u6216\u82F1\u6587\u57CE\u5E02\u540D",
-      viewProjection: "\u89C6\u56FE\u4E0E\u6295\u5F71",
-      viewPreserved: "\u72EC\u7ACB\u4FDD\u5B58\u89C6\u89D2",
-      viewTools: "\u89C6\u56FE\u63A7\u5236",
-      viewToolsHint: "\u4E0D\u6539\u53D8\u5730\u70B9\u4E0E\u65F6\u95F4",
-      projectionLabel: "\u5929\u7403\u6295\u5F71\uFF1A",
-      coordinateSystemLabel: "\u5750\u6807\u89C6\u89D2\uFF1A",
-      projection: "\u5929\u7403\u6295\u5F71",
-      coordinateSystem: "\u5750\u6807\u89C6\u89D2",
-      poleAxisConstraint: "\u5929\u6781\u4E2D\u8F74\u7EA6\u675F",
-      horizontalCoordinates: "\u5730\u5E73\u5750\u6807\u89C6\u89D2\uFF08\u5F53\u5730\u5929\u7A7A\uFF09",
-      equatorialCoordinates: "\u8D64\u9053\u5750\u6807\u89C6\u89D2",
-      eclipticCoordinates: "\u9EC4\u9053\u5750\u6807\u89C6\u89D2",
-      galacticCoordinates: "\u94F6\u6CB3\u5750\u6807\u89C6\u89D2",
-      traditionalRegions: "\u4E2D\u56FD\u4F20\u7EDF\u5929\u533A\u5C42\u7EA7",
-      majorRegions: "\u4E09\u57A3 / \u56DB\u8C61 / \u8FD1\u5357\u6781\u661F\u533A",
-      withBattlefields: "\u4E09\u57A3\u56DB\u8C61 + \u4E09\u5927\u6218\u573A",
-      withMansions: "\u4E09\u57A3\u56DB\u8C61 + \u4E09\u5927\u6218\u573A + \u4E8C\u5341\u516B\u5BBF\u7EC6\u5206",
-      traditionalRegionCaveat: "\u4E09\u5927\u6218\u573A\u4E3A\u57FA\u4E8E\u76F8\u5173\u661F\u5B98\u4F4D\u7F6E\u751F\u6210\u7684\u6587\u5316\u4E3B\u9898\u793A\u610F\u8303\u56F4\uFF1B\u4E09\u57A3\u4E0E\u56DB\u8C61\u4E5F\u5C5E\u4E8E\u73B0\u4EE3\u6570\u5B57\u5316\u590D\u539F\uFF0C\u4E0D\u7B49\u540C\u4E8E IAU \u6CD5\u5B9A\u8FB9\u754C\u3002",
-      regionBoundaries: "\u533A\u57DF\u8FB9\u754C / \u4F20\u7EDF\u5929\u533A",
-      selectedObject: "\u9009\u4E2D\u5929\u4F53",
-      clickSkyHint: "\u5355\u51FB\u661F\u4F53\u6216\u7A7A\u767D\u5929\u533A",
-      copy: "\u590D\u5236",
-      clear: "\u6E05\u9664",
-      objectInfoEmpty: "\u5355\u51FB\u6052\u661F\u3001\u592A\u9633\u7CFB\u5929\u4F53\u3001\u6DF1\u7A7A\u5929\u4F53\u3001\u661F\u5EA7\u3001\u661F\u5B98\u6216\u7A7A\u767D\u5929\u533A\uFF0C\u67E5\u770B\u540D\u79F0\u3001\u5750\u6807\u548C\u5F53\u524D\u5730\u5E73\u4F4D\u7F6E\u3002",
-      objectType: "\u7C7B\u578B",
-      otherNames: "\u5176\u4ED6\u540D\u79F0",
-      magnitude: "\u89C6\u661F\u7B49",
-      rightAscension: "\u8D64\u7ECF RA",
-      declination: "\u8D64\u7EAC Dec",
-      altitude: "\u9AD8\u5EA6\u89D2 Alt",
-      azimuth: "\u65B9\u4F4D\u89D2 Az",
-      observerPlace: "\u89C2\u6D4B\u5730\u70B9",
-      observerTime: "\u89C2\u6D4B\u65F6\u95F4",
-      catalogId: "\u76EE\u5F55\u7F16\u53F7",
-      spectralInfo: "\u989C\u8272\u6307\u6570 B\u2212V",
-      illumination: "\u7167\u660E\u6BD4\u4F8B",
-      moonAge: "\u6708\u9F84",
-      moonPhase: "\u6708\u76F8",
-      algorithm: "\u7B97\u6CD5",
-      precisionBoundary: "\u7CBE\u5EA6",
-      visualReferencePrecision: "\u89C6\u89C9\u53C2\u8003\uFF0C\u975E\u4E13\u4E1A\u661F\u5386",
-      distance: "\u8DDD\u79BB",
-      star: "\u6052\u661F",
-      deepSkyObject: "\u6DF1\u7A7A\u5929\u4F53",
-      westernConstellation: "\u897F\u65B9\u661F\u5EA7",
-      chineseAsterism: "\u4E2D\u56FD\u661F\u5B98",
-      solarSystemObject: "\u592A\u9633\u7CFB\u5929\u4F53",
-      skyPosition: "\u7A7A\u767D\u5929\u533A",
-      regionLegendTitle: "\u4E2D\u56FD\u4F20\u7EDF\u5929\u533A",
-      regionLegendMajor: "\u4E09\u57A3 / \u56DB\u8C61 / \u8FD1\u5357\u6781\u661F\u533A",
-      regionLegendBattle: "\u4E09\u5927\u6218\u573A\uFF08\u6587\u5316\u4E3B\u9898\u793A\u610F\u8303\u56F4\uFF09",
-      copiedObject: "\u5929\u4F53\u4FE1\u606F\u5DF2\u590D\u5236",
-      westernCultureMeaning: "\u897F\u65B9\u6587\u5316",
-      chineseCultureMeaning: "\u4E2D\u56FD\u6587\u5316",
-      noReliableTraditionalBoundary: "\u5F53\u524D\u6570\u636E\u4E0D\u628A\u6BCF\u4E2A\u661F\u5B98\u5F3A\u884C\u5C01\u95ED\uFF1B\u4EC5\u663E\u793A\u4E09\u57A3\u3001\u56DB\u8C61\u3001\u8FD1\u5357\u6781\u661F\u533A\u53CA\u53EF\u9009\u4E3B\u9898\u533A\u3002",
-      resetDefaults: "\u6062\u590D\u9ED8\u8BA4\u914D\u7F6E",
-      resetDefaultsConfirm: "\u786E\u5B9A\u6062\u590D\u9ED8\u8BA4\u914D\u7F6E\u5417\uFF1F\u8FD9\u4F1A\u91CD\u7F6E\u5730\u70B9\u3001\u65F6\u95F4\u3001\u89C6\u56FE\u3001\u5B57\u4F53\u548C\u6240\u6709\u663E\u793A\u53C2\u6570\u3002"
-    });
-    Object.assign(I18N.en, {
-      citySearch: "Search city",
-      citySearchPlaceholder: "Type a Chinese or English city name",
-      viewProjection: "View & projection",
-      viewPreserved: "view saved per projection",
-      viewTools: "View controls",
-      viewToolsHint: "location and time unchanged",
-      projectionLabel: "Projection: ",
-      coordinateSystemLabel: "Coordinate view: ",
-      projection: "Celestial projection",
-      coordinateSystem: "Coordinate View",
-      poleAxisConstraint: "Pole-axis centerline constraint",
-      horizontalCoordinates: "Horizontal Coordinate View (Local Sky)",
-      equatorialCoordinates: "Equatorial Coordinate View",
-      eclipticCoordinates: "Ecliptic Coordinate View",
-      galacticCoordinates: "Galactic Coordinate View",
-      traditionalRegions: "Chinese traditional region level",
-      majorRegions: "Three Enclosures / Four Symbols / near-south-polar",
-      withBattlefields: "Major regions + three battlefields",
-      withMansions: "Major regions + battlefields + 28 mansions",
-      traditionalRegionCaveat: "The three battlefields are thematic visualization envelopes generated from related asterisms. The enclosure and symbol regions are modern digital reconstructions, not IAU legal boundaries.",
-      regionBoundaries: "Region boundaries / traditional regions",
-      selectedObject: "Selected object",
-      clickSkyHint: "Click an object or empty sky",
-      copy: "Copy",
-      clear: "Clear",
-      objectInfoEmpty: "Click a star, Solar System body, deep-sky object, constellation, asterism, or empty sky to inspect names, coordinates, and current horizontal position.",
-      objectType: "Type",
-      otherNames: "Other names",
-      magnitude: "Magnitude",
-      rightAscension: "Right ascension",
-      declination: "Declination",
-      altitude: "Altitude",
-      azimuth: "Azimuth",
-      observerPlace: "Observer",
-      observerTime: "Observation time",
-      catalogId: "Catalog ID",
-      spectralInfo: "B\u2212V colour index",
-      illumination: "Illumination",
-      moonAge: "Moon age",
-      moonPhase: "Moon phase",
-      algorithm: "Model",
-      precisionBoundary: "Precision",
-      visualReferencePrecision: "visual reference, not precision ephemeris",
-      distance: "Distance",
-      star: "Star",
-      deepSkyObject: "Deep-sky object",
-      westernConstellation: "Western constellation",
-      chineseAsterism: "Chinese asterism",
-      solarSystemObject: "Solar System object",
-      skyPosition: "Empty sky position",
-      regionLegendTitle: "Chinese traditional sky regions",
-      regionLegendMajor: "Three Enclosures / Four Symbols / near-south-polar zone",
-      regionLegendBattle: "Three battlefields (thematic visualization)",
-      copiedObject: "Object information copied",
-      westernCultureMeaning: "Western culture",
-      chineseCultureMeaning: "Chinese culture",
-      noReliableTraditionalBoundary: "Individual asterisms are not forced into fake closed polygons; only higher-level traditional regions and optional thematic zones are shown.",
-      resetDefaults: "Reset to defaults",
-      resetDefaultsConfirm: "Reset all settings to defaults? This will reset location, time, view, font size, and all display options."
-    });
-    const defaults = {
-      lat: Number(cfg("defaults.latitude", 39.9042)),
-      lon: Number(cfg("defaults.longitude", 116.4074)),
-      zone: cfg("defaults.timezone", "Asia/Shanghai"),
-      cityZh: cfg("defaults.cityZh", "\u5317\u4EAC"),
-      cityEn: cfg("defaults.cityEn", "Beijing"),
-      instant: cfg("defaults.instant", "1949-10-01T14:00:00.000Z"),
-      lang: cfg("defaults.language", "zh"),
-      cultureMode: cfg("defaults.cultureMode", "western"),
-      magnitude: Number(cfg("defaults.magnitudeLimit", 5.5)),
-      starSize: Number(cfg("defaults.starSize", 7)),
-      starNames: !!cfg("defaults.showStarNames", true),
-      cultureLines: !!cfg("defaults.showCultureLines", true),
-      cultureNames: !!cfg("defaults.showCultureNames", true),
-      planets: !!cfg("defaults.showPlanets", true),
-      milkyWay: !!cfg("defaults.showMilkyWay", true),
-      grid: !!cfg("defaults.showGrid", true),
-      horizontalGrid: !!cfg("defaults.showHorizontalGrid", false),
-      ecliptic: !!cfg("defaults.showEcliptic", true),
-      equator: !!cfg("defaults.showCelestialEquator", true),
-      horizon: !!cfg("defaults.showHorizon", true),
-      floatingObjectInfo: !!cfg("defaults.showFloatingObjectInfo", true),
-      fontScale: Number(cfg("defaults.fontScale", 1)),
-      nightVision: !!cfg("defaults.nightVision", false),
-      deepSky: !!cfg("defaults.showDeepSky", false),
-      speed: Number(cfg("defaults.timeSpeed", 3600)),
-      panelOpen: !!cfg("defaults.panelOpen", true),
-      poleAxisConstraintEnabled: !!cfg("defaults.poleAxisConstraintEnabled", true),
-      projection: cfg("defaults.projection", "airy"),
-      coordinateSystem: cfg("defaults.coordinateSystem", "horizontal"),
-      menuCollapsed: Array.isArray(cfg("defaults.menuCollapsed", [])) ? cfg("defaults.menuCollapsed", []).slice() : [],
-      regionBoundaries: !!cfg("defaults.showRegionBoundaries", true),
-      traditionalDetail: cfg("defaults.traditionalDetail", "battlefields"),
-      mapScale: Number(cfg("defaults.mapScale", 1)),
-      projectionViews: {},
-      coordinateViewSemantics: 7,
-      storageSchemaVersion: STORAGE_SCHEMA_VERSION,
-      astronomyModelVersion: ASTRONOMY_MODEL_VERSION,
-      selectedObject: null
-    };
-    const ZONE_ALIASES = {
-      "Asia/Calcutta": "Asia/Kolkata",
-      "Asia/Katmandu": "Asia/Kathmandu",
-      "US/Eastern": "America/New_York",
-      "US/Central": "America/Chicago",
-      "US/Mountain": "America/Denver",
-      "US/Pacific": "America/Los_Angeles",
-      GMT: "UTC",
-      "Etc/UTC": "UTC"
-    };
+    const defaults = createDefaultState(
+      cfg,
+      STORAGE_SCHEMA_VERSION,
+      ASTRONOMY_MODEL_VERSION
+    );
     let state = { ...defaults };
     let skyReady = false;
     let playing = false;
@@ -3859,39 +4609,8 @@
     function viewMapScale2(view, fallback = state.mapScale) {
       return viewMapScale(view, fallback, clampMapScale2);
     }
-    function isValidZone(zone) {
-      if (!zone || typeof zone !== "string") return false;
-      try {
-        new Intl.DateTimeFormat("en-US", { timeZone: zone }).format(/* @__PURE__ */ new Date());
-        return true;
-      } catch (_) {
-        return false;
-      }
-    }
-    function normalizeZone(zone) {
-      const raw = typeof zone === "string" ? zone.trim() : "";
-      const mapped = ZONE_ALIASES[raw] || raw;
-      return isValidZone(mapped) ? mapped : null;
-    }
-    function lookupZone(lat, lon) {
-      try {
-        if (typeof window.tzlookup === "function") {
-          const found = normalizeZone(window.tzlookup(Number(lat), Number(lon)));
-          if (found) return found;
-        }
-      } catch (err) {
-        console.warn("Timezone lookup failed", err);
-      }
-      return null;
-    }
-    function longitudeFallbackZone(lon) {
-      const hours = Math.max(-14, Math.min(14, Math.round(Number(lon) / 15)));
-      if (!Number.isFinite(hours) || hours === 0) return "UTC";
-      const candidate = `Etc/GMT${hours > 0 ? "-" : "+"}${Math.abs(hours)}`;
-      return normalizeZone(candidate) || "UTC";
-    }
-    function safeZoneForCoordinates(lat = state.lat, lon = state.lon, preferred = state.zone) {
-      return normalizeZone(preferred) || lookupZone(lat, lon) || longitudeFallbackZone(lon);
+    function safeZoneForCoordinates2(lat = state.lat, lon = state.lon, preferred = state.zone) {
+      return safeZoneForCoordinates(lat, lon, preferred);
     }
     function safeLoad() {
       const storage = getStorage();
@@ -3977,13 +4696,13 @@
       });
       state.regionBoundaries = !!state.regionBoundaries;
       state.poleAxisConstraintEnabled = state.poleAxisConstraintEnabled !== false;
-      state.zone = safeZoneForCoordinates(state.lat, state.lon, state.zone);
+      state.zone = safeZoneForCoordinates2(state.lat, state.lon, state.zone);
     }
     function save() {
       writeJsonToStorage(STORAGE_KEY, state);
     }
     function observerDT() {
-      const zone = safeZoneForCoordinates();
+      const zone = safeZoneForCoordinates2();
       if (zone !== state.zone) {
         state.zone = zone;
         save();
@@ -4002,38 +4721,9 @@
         utcOffsetNote: historicalYear || hasHistoricalSeconds ? "iana-historical" : "zone-rule"
       };
     }
-    function debugOffsetNoteValue(note, zh) {
-      if (note === "iana-historical")
-        return zh ? "\u4F7F\u7528 IANA \u5386\u53F2\u504F\u79FB" : "using IANA historical offset";
-      if (note === "zone-rule")
-        return zh ? "\u4F7F\u7528\u5F53\u524D\u65F6\u533A\u89C4\u5219" : "using current zone rule";
-      return "-";
-    }
-    function debugRefreshHealthValue(value, zh) {
-      if (value === "recovered") return zh ? "fallback \u5DF2\u6062\u590D" : "recovered by fallback";
-      if (value === "failed") return zh ? "\u5931\u8D25" : "failed";
-      if (value === "pending") return zh ? "\u5237\u65B0\u4E2D" : "pending";
-      return zh ? "\u6B63\u5E38" : "healthy";
-    }
     function currentInstantDate() {
       const dt = DateTime.fromISO(String(state.instant || ""), { zone: "utc" });
       return (dt.isValid ? dt : DateTime.fromISO(defaults.instant, { zone: "utc" })).toJSDate();
-    }
-    function precisionStatusForYear(year) {
-      const y = Number(year);
-      if (!Number.isFinite(y)) return "unknown";
-      if (y >= 1900 && y <= 2100) return "normal";
-      if (y >= 1600 && y <= 2600) return "historical approximation";
-      return "far-date approximation";
-    }
-    function debugErrorText(err) {
-      if (!err) return "-";
-      if (err && err.message) return String(err.message);
-      return String(err);
-    }
-    function debugStackText(err) {
-      if (!err || !err.stack) return "-";
-      return String(err.stack).split("\n").slice(0, 3).join(" | ");
     }
     function renderDebugFromDateTime(dt, date = null) {
       if (!dt || !dt.isValid) {
@@ -4048,7 +4738,7 @@
           utcOffsetNote: "unknown"
         };
       }
-      const utc = dt.toUTC(), jsDate = date || renderableDateForDateTime(utc), local = utc.setZone(safeZoneForCoordinates()), jd = jsDate ? julianDateFromDate2(jsDate) : null, zoneDebug = timeZoneOffsetDebug(local);
+      const utc = dt.toUTC(), jsDate = date || renderableDateForDateTime(utc), local = utc.setZone(safeZoneForCoordinates2()), jd = jsDate ? julianDateFromDate2(jsDate) : null, zoneDebug = timeZoneOffsetDebug(local);
       return {
         display: formatCivilDateTime(local, false),
         utc: utc.toISO() || "-",
@@ -4081,21 +4771,8 @@
       Object.assign(timeRenderDebug, patch);
       if (debugVisible) updateDebugOverlay(true);
     }
-    const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
-    const TIME_FIELD_TO_ID = {
-      year: "time-year",
-      month: "time-month",
-      day: "time-day",
-      hour: "time-hour",
-      minute: "time-minute"
-    };
-    const TIME_FIELD_ID_TO_KEY = Object.fromEntries(
-      Object.entries(TIME_FIELD_TO_ID).map(([key, id]) => [id, key])
-    );
-    const TIME_FIELD_IDS = Object.values(TIME_FIELD_TO_ID);
-    function timeFieldByKey(key) {
-      const id = TIME_FIELD_TO_ID[key];
-      return id ? $(id) : null;
+    function timeFieldByKey2(key) {
+      return timeFieldByKey($, key);
     }
     function markTimeFieldSelected(field) {
       if (!field) return;
@@ -4108,11 +4785,11 @@
       noteTimeRenderDebug({
         inputStatus: "draft",
         activeField: TIME_FIELD_ID_TO_KEY[field.id] || "-",
-        fields: timeFieldDebugText()
+        fields: timeFieldDebugText2()
       });
     }
     function focusTimeField(key) {
-      const field = timeFieldByKey(key);
+      const field = timeFieldByKey2(key);
       if (!field) return;
       requestAnimationFrame(() => {
         field.focus({ preventScroll: true });
@@ -4126,33 +4803,17 @@
       const next = TIME_FIELD_KEYS[Math.max(0, Math.min(TIME_FIELD_KEYS.length - 1, index + delta))];
       focusTimeField(next);
     }
-    function timeFieldDebugText() {
-      return TIME_FIELD_KEYS.map((key) => `${key}=${timeFieldByKey(key)?.value || ""}`).join(" ");
+    function timeFieldDebugText2() {
+      return timeFieldDebugText($);
     }
-    function displayTimeParts(dt = observerDT()) {
-      return {
-        year: astronomicalYearToInput(dt.year),
-        month: String(dt.month).padStart(2, "0"),
-        day: String(dt.day).padStart(2, "0"),
-        hour: String(dt.hour).padStart(2, "0"),
-        minute: String(dt.minute).padStart(2, "0")
-      };
+    function displayTimeParts2(dt = observerDT()) {
+      return displayTimeParts(dt);
     }
-    function setTimeFieldWidths() {
-      TIME_FIELD_IDS.forEach((id) => {
-        const el = $(id);
-        if (!el) return;
-        const raw = String(el.value || "");
-        if (id === "time-year") {
-          const len = Math.max(3, raw.length || 4);
-          el.style.width = `${len + 0.8}ch`;
-        } else {
-          el.style.width = "2.4ch";
-        }
-      });
+    function setTimeFieldWidths2() {
+      setTimeFieldWidths($);
     }
     function syncTimeInputs(dt = observerDT()) {
-      const parts = displayTimeParts(dt);
+      const parts = displayTimeParts2(dt);
       if ($("time-year")) $("time-year").value = parts.year;
       if ($("time-month")) $("time-month").value = parts.month;
       if ($("time-day")) $("time-day").value = parts.day;
@@ -4162,10 +4823,10 @@
         const field = $(id);
         if (field) field.dataset.replaceOnType = "1";
       });
-      setTimeFieldWidths();
+      setTimeFieldWidths2();
       updateActiveTimeDebug({
         inputStatus: "valid",
-        fields: timeFieldDebugText(),
+        fields: timeFieldDebugText2(),
         candidate: "-",
         candidateUtc: "-",
         candidateJsDateYear: "-"
@@ -4201,7 +4862,7 @@
         minute,
         second: 0
       };
-      const dt = DateTime.fromObject(parts, { zone: safeZoneForCoordinates() });
+      const dt = DateTime.fromObject(parts, { zone: safeZoneForCoordinates2() });
       if (!dt.isValid) return null;
       if (dt.year !== parts.year || dt.month !== parts.month || dt.day !== parts.day || dt.hour !== parts.hour || dt.minute !== parts.minute)
         return null;
@@ -4287,7 +4948,7 @@
       }
       noteTimeRenderDebug({
         inputStatus: "valid",
-        fields: timeFieldDebugText(),
+        fields: timeFieldDebugText2(),
         candidate: candidateData.display,
         candidateUtc: candidateData.utc,
         candidateJsDateYear: candidateData.jsDateYear,
@@ -4327,7 +4988,7 @@
       updateActiveTimeDebug({
         inputStatus: "valid",
         activeField: timeRenderDebug.activeField,
-        fields: timeFieldDebugText(),
+        fields: timeFieldDebugText2(),
         lastFailedCandidate: timeRenderDebug.lastFailedCandidate || "-",
         rollbackStatus: "unused",
         refreshHealth: usedFallback ? "recovered" : "healthy",
@@ -4460,29 +5121,6 @@
       updateProjectionHelp();
       updateBoundaryUI();
     }
-    const HORIZON_PROJECTIONS = /* @__PURE__ */ new Set([
-      "airy",
-      "orthographic",
-      "stereographic",
-      "azimuthalEquidistant",
-      "azimuthalEqualArea"
-    ]);
-    const PROJECTION_DEFAULTS = {
-      airy: { center: [0, 0, 0], mapScale: 1 },
-      orthographic: { center: [0, 0, 0], mapScale: 1 },
-      stereographic: { center: [0, 0, 0], mapScale: 1 },
-      azimuthalEquidistant: { center: [0, 0, 0], mapScale: 1 },
-      azimuthalEqualArea: { center: [0, 0, 0], mapScale: 1 },
-      aitoff: { center: [0, 0, 0], mapScale: 1 },
-      hammer: { center: [0, 0, 0], mapScale: 1 },
-      mollweide: { center: [0, 0, 0], mapScale: 1 },
-      winkel3: { center: [0, 0, 0], mapScale: 1 },
-      equirectangular: { center: [0, 0, 0], mapScale: 1 },
-      healpix: { center: [0, 0, 0], mapScale: 1 },
-      mercator: { center: [0, 0, 0], mapScale: 1 },
-      robinson: { center: [0, 0, 0], mapScale: 1 },
-      sinusoidal: { center: [0, 0, 0], mapScale: 1 }
-    };
     function createSectionShell2(id, titleKey, hintKey, contentClass = "") {
       return createSectionShell({ id, titleKey, hintKey, contentClass, t });
     }
@@ -4555,19 +5193,6 @@
       button.title = title;
       button.setAttribute("aria-label", title);
     }
-    function formatAngle(value) {
-      const number = Number(value);
-      return Number.isFinite(number) ? `${number.toFixed(2)}\xB0` : "-";
-    }
-    function formatAngleOrUnavailable(value) {
-      const number = Number(value);
-      return Number.isFinite(number) ? `${number.toFixed(2)}\xB0` : "unavailable";
-    }
-    function formatSigned(value) {
-      const number = Number(value);
-      if (!Number.isFinite(number)) return "-";
-      return `${number >= 0 ? "+" : ""}${number.toFixed(1)}`;
-    }
     function debugRefreshIntervalMs() {
       const configured = Number(cfg("debug.refreshMs", 200));
       return Math.max(100, Math.min(500, Number.isFinite(configured) ? configured : 200));
@@ -4578,14 +5203,8 @@
     function currentViewControlMode() {
       return poleAxisConstraintEnabled() ? "Euler constrained" : "Quaternion free";
     }
-    function pressedArrowKeysLabel() {
-      const keys = [
-        ["ArrowUp", "\u2191"],
-        ["ArrowDown", "\u2193"],
-        ["ArrowLeft", "\u2190"],
-        ["ArrowRight", "\u2192"]
-      ].filter(([key]) => skyPanKeys.has(key)).map(([, label]) => label);
-      return keys.length ? keys.join(" ") : "none";
+    function pressedArrowKeysLabel2() {
+      return pressedArrowKeysLabel(skyPanKeys);
     }
     function debugResponsiveMode() {
       const coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches, hover = window.matchMedia && window.matchMedia("(hover: hover)").matches, narrow = window.innerWidth <= 800, veryNarrow = window.innerWidth <= 520;
@@ -4600,84 +5219,6 @@
         hover: hover ? zh ? "hover \u652F\u6301" : "hover" : zh ? "\u65E0 hover" : "none"
       };
     }
-    function debugSpan(text, className) {
-      const span = document.createElement("span");
-      span.className = className;
-      span.textContent = String(text);
-      return span;
-    }
-    function debugValue(text) {
-      return debugSpan(text, "debug-value");
-    }
-    function debugSep(text) {
-      return debugSpan(text, "debug-sep");
-    }
-    function debugUnit(text) {
-      return debugSpan(text, "debug-unit");
-    }
-    function debugGroup(title) {
-      const el = document.createElement("div");
-      el.className = "debug-group";
-      el.textContent = title;
-      return el;
-    }
-    function debugLine(label, parts = []) {
-      const el = document.createElement("div");
-      el.className = "debug-line";
-      el.append(
-        debugSpan(label, "debug-key"),
-        debugSep(": "),
-        ...Array.isArray(parts) ? parts : [debugValue(parts)]
-      );
-      return el;
-    }
-    function debugBlankLine() {
-      const el = document.createElement("div");
-      el.className = "debug-blank";
-      return el;
-    }
-    function debugSizeParts(width, height) {
-      return [
-        debugValue(Math.round(Number(width) || 0)),
-        debugSep("x"),
-        debugValue(Math.round(Number(height) || 0))
-      ];
-    }
-    function debugRectParts(rect) {
-      if (!rect) return [debugValue("-")];
-      return [
-        ...debugSizeParts(rect.width, rect.height),
-        debugSep(" @ "),
-        debugValue(Math.round(rect.left)),
-        debugSep(","),
-        debugValue(Math.round(rect.top))
-      ];
-    }
-    function debugPointParts(point) {
-      if (!point) return [debugValue("-")];
-      return [
-        debugValue(Math.round(point.x)),
-        debugSep(","),
-        debugValue(Math.round(point.y))
-      ];
-    }
-    function debugCenterDeltaParts(delta) {
-      if (!delta) return [debugValue("-")];
-      return [
-        debugSep("X="),
-        debugValue(formatSigned(delta.x)),
-        debugUnit("px"),
-        debugSep(" Y="),
-        debugValue(formatSigned(delta.y)),
-        debugUnit("px")
-      ];
-    }
-    function debugScaleParts(value) {
-      return [debugValue(Number(value || 0).toFixed(3)), debugUnit("x")];
-    }
-    function debugBoolParts(value) {
-      return [debugValue(value ? "true" : "false")];
-    }
     function currentStarMagnitudeStats() {
       const loadedStars = Array.isArray(ORIGINAL_STARS) ? ORIGINAL_STARS.length : 0;
       const threshold = Number(state.magnitude);
@@ -4690,12 +5231,6 @@
         threshold,
         starsWithinMagnitude
       };
-    }
-    function debugMetricStatus(ok, zh) {
-      return debugSpan(
-        ok ? "OK" : zh ? "MISMATCH \u5C3A\u5BF8\u4E0D\u4E00\u81F4" : "MISMATCH",
-        ok ? "debug-ok" : "debug-warn"
-      );
     }
     function debugCopyText(status = "idle") {
       const zh = state.lang !== "en";
@@ -4756,35 +5291,17 @@
       copy.textContent = debugCopyText(debugCopyStatus);
       return content;
     }
-    function getInternalZoom() {
-      try {
-        return Number(Celestial.zoomBy()) || 1;
-      } catch (_) {
-        return 1;
-      }
+    function syncInternalZoomForMetrics2(metrics = projectionCanvasMetrics2()) {
+      syncInternalZoomForMetrics(metrics, window.Celestial);
     }
-    function syncInternalZoomForMetrics(metrics = projectionCanvasMetrics2()) {
-      try {
-        const target = Math.max(1, Number(metrics && metrics.internalZoom) || 1);
-        const current = getInternalZoom();
-        if (Math.abs(current - target) > 2e-3) Celestial.zoomBy(target / Math.max(1e-4, current));
-      } catch (_) {
-      }
+    function getInternalZoom2() {
+      return getInternalZoom(window.Celestial);
     }
-    function resetInternalZoom() {
-      try {
-        const current = getInternalZoom();
-        if (Math.abs(current - 1) > 2e-3) Celestial.zoomBy(1 / current);
-      } catch (_) {
-      }
+    function resetInternalZoom2() {
+      resetInternalZoom(window.Celestial);
     }
-    function currentCelestialCenter() {
-      try {
-        const center = window.Celestial && Celestial.rotate && Celestial.rotate();
-        return Array.isArray(center) ? center.slice() : null;
-      } catch (_) {
-        return null;
-      }
+    function currentCelestialCenter2() {
+      return currentCelestialCenter(window.Celestial);
     }
     function poleAxisConstraintEnabled() {
       return state.poleAxisConstraintEnabled !== false;
@@ -4800,135 +5317,37 @@
       return cfg("interaction.poleGuardPointerEnabled", true) !== false;
     }
     function normalizeCenterForControlMode(center) {
-      const source = Array.isArray(center) ? center.slice() : [0, 0, 0];
-      const next = [
-        Number.isFinite(Number(source[0])) ? normalizeCelestialLongitude2(Number(source[0])) : 0,
-        Number.isFinite(Number(source[1])) ? Math.max(-89.5, Math.min(89.5, Number(source[1]))) : 0,
-        Number.isFinite(Number(source[2])) ? Number(source[2]) : 0
-      ];
-      if (poleAxisConstraintEnabled()) {
-        next[2] = 0;
-      }
-      return next;
-    }
-    function angularDistanceDeg(a, b) {
-      if (!a || !b) return NaN;
-      const lon1 = degToRad(Number(a[0]) || 0), lat1 = degToRad(Number(a[1]) || 0), lon2 = degToRad(Number(b[0]) || 0), lat2 = degToRad(Number(b[1]) || 0), sin1 = Math.sin(lat1), sin2 = Math.sin(lat2), cos1 = Math.cos(lat1), cos2 = Math.cos(lat2), cosD = sin1 * sin2 + cos1 * cos2 * Math.cos(lon1 - lon2);
-      return radToDeg(Math.acos(Math.max(-1, Math.min(1, cosD))));
-    }
-    function currentCoordinatePoles() {
-      try {
-        if (state.coordinateSystem === "horizontal") {
-          return {
-            positiveName: state.lang === "en" ? "North celestial pole" : "\u5317\u5929\u6781",
-            negativeName: state.lang === "en" ? "South celestial pole" : "\u5357\u5929\u6781",
-            positiveCoord: [0, 90],
-            negativeCoord: [0, -90]
-          };
-        }
-        if (state.coordinateSystem === "equatorial") {
-          return {
-            positiveName: state.lang === "en" ? "North celestial pole" : "\u5317\u5929\u6781",
-            negativeName: state.lang === "en" ? "South celestial pole" : "\u5357\u5929\u6781",
-            positiveCoord: [0, 90],
-            negativeCoord: [0, -90]
-          };
-        }
-        if (state.coordinateSystem === "ecliptic") {
-          return {
-            positiveName: state.lang === "en" ? "North ecliptic pole" : "\u9EC4\u9053\u5317\u6781",
-            negativeName: state.lang === "en" ? "South ecliptic pole" : "\u9EC4\u9053\u5357\u6781",
-            positiveCoord: [0, 90],
-            negativeCoord: [0, -90]
-          };
-        }
-        if (state.coordinateSystem === "galactic") {
-          return {
-            positiveName: state.lang === "en" ? "North galactic pole" : "\u94F6\u5317\u6781",
-            negativeName: state.lang === "en" ? "South galactic pole" : "\u94F6\u5357\u6781",
-            positiveCoord: [0, 90],
-            negativeCoord: [0, -90]
-          };
-        }
-      } catch (_) {
-      }
-      return null;
-    }
-    function projectCurrentCoordinatePoint(coord) {
-      try {
-        if (!window.Celestial || !Celestial.mapProjection || !coord) return null;
-        const safe = finiteSkyCoord(coord);
-        if (!safe) return null;
-        if (Celestial.clip && !Celestial.clip(safe)) return null;
-        const point = Celestial.mapProjection(safe);
-        return point && Number.isFinite(point[0]) && Number.isFinite(point[1]) ? { x: point[0], y: point[1], visible: true } : null;
-      } catch (_) {
-        return null;
-      }
+      return normalizeControlCenter(center, poleAxisConstraintEnabled());
     }
     function updatePoleAxisDebug(pointerCoord = null, center = null, status = null) {
-      const poles = currentCoordinatePoles();
-      poleAxisDebug.status = status || (poleAxisConstraintEnabled() ? "euler-constrained" : "quaternion-free");
-      if (!poles) {
-        Object.assign(poleAxisDebug, {
-          guardActive: false,
-          guardReason: "undefined",
-          pointerPositiveDeg: NaN,
-          pointerNegativeDeg: NaN,
-          centerPositiveDeg: NaN,
-          centerNegativeDeg: NaN,
-          positiveName: "undefined",
-          negativeName: "undefined",
-          polesDefined: false,
-          positivePoint: null,
-          negativePoint: null,
-          centerlineX: NaN,
-          positiveDx: NaN,
-          negativeDx: NaN,
-          axisAngleDeg: NaN
-        });
-        return poleAxisDebug;
-      }
-      const viewCenter = finiteSkyCoord(center || currentCelestialCenter());
-      const pointer = finiteSkyCoord(pointerCoord);
-      const canvas = document.querySelector("#celestial-map canvas"), rect = canvas ? canvas.getBoundingClientRect() : null, metrics = projectionCanvasMetrics2(), centerlineX = rect && Number.isFinite(rect.width) ? rect.width / 2 : metrics.width / 2, positivePoint = projectCurrentCoordinatePoint(poles.positiveCoord), negativePoint = projectCurrentCoordinatePoint(poles.negativeCoord), positiveDx = positivePoint ? positivePoint.x - centerlineX : NaN, negativeDx = negativePoint ? negativePoint.x - centerlineX : NaN;
-      let axisAngleDeg = NaN;
-      if (positivePoint && negativePoint) {
-        const dx = positivePoint.x - negativePoint.x, dy = positivePoint.y - negativePoint.y;
-        axisAngleDeg = radToDeg(Math.atan2(Math.abs(dx), Math.abs(dy)));
-      }
-      Object.assign(poleAxisDebug, {
-        positiveName: poles.positiveName,
-        negativeName: poles.negativeName,
-        polesDefined: true,
-        pointerPositiveDeg: pointer ? angularDistanceDeg(pointer, poles.positiveCoord) : NaN,
-        pointerNegativeDeg: pointer ? angularDistanceDeg(pointer, poles.negativeCoord) : NaN,
-        centerPositiveDeg: viewCenter ? angularDistanceDeg(viewCenter, poles.positiveCoord) : NaN,
-        centerNegativeDeg: viewCenter ? angularDistanceDeg(viewCenter, poles.negativeCoord) : NaN,
-        positivePoint,
-        negativePoint,
-        centerlineX,
-        positiveDx,
-        negativeDx,
-        axisAngleDeg
+      const canvas = document.querySelector("#celestial-map canvas"), rect = canvas ? canvas.getBoundingClientRect() : null;
+      return updatePoleAxisDiagnostics({
+        debug: poleAxisDebug,
+        coordinateSystem: state.coordinateSystem,
+        lang: state.lang,
+        pointerCoord,
+        center,
+        currentCenter: currentCelestialCenter2(),
+        celestial: window.Celestial,
+        metrics: projectionCanvasMetrics2(),
+        canvasRect: rect,
+        status,
+        constrained: poleAxisConstraintEnabled()
       });
-      return poleAxisDebug;
     }
     function evaluatePoleGuard(pointerCoord = null, center = null) {
-      const enter = poleGuardEnterDeg(), exit = poleGuardExitDeg(), threshold = poleAxisDebug.guardActive ? exit : enter, diag = updatePoleAxisDebug(pointerCoord, center);
-      const candidates = (poleGuardPointerEnabled() ? [
-        ["pointer-near-positive-pole", diag.pointerPositiveDeg],
-        ["pointer-near-negative-pole", diag.pointerNegativeDeg]
-      ] : []).filter((item) => Number.isFinite(Number(item[1]))).sort((a, b) => Number(a[1]) - Number(b[1]));
-      const nearest = candidates[0];
-      const active = !!nearest && Number(nearest[1]) <= threshold;
-      poleAxisDebug.guardActive = active;
-      poleAxisDebug.guardReason = active ? nearest[0] : candidates.length ? "none" : "undefined";
-      poleAxisDebug.status = active ? "guard-active" : poleAxisDebug.status;
-      return poleAxisDebug;
+      return evaluatePointerPoleGuard({
+        debug: poleAxisDebug,
+        pointerCoord,
+        center,
+        enterDeg: poleGuardEnterDeg(),
+        exitDeg: poleGuardExitDeg(),
+        pointerGuardEnabled: poleGuardPointerEnabled(),
+        updateDiagnostics: updatePoleAxisDebug
+      });
     }
     function syncRotationFromCurrentView(reason = "sync") {
-      const center = currentCelestialCenter();
+      const center = currentCelestialCenter2();
       if (center) rotationController.syncFromCenter(center, reason);
       updatePoleAxisDebug(null, center, poleAxisConstraintEnabled() ? "euler-constrained" : "quaternion-free");
       return center;
@@ -4956,26 +5375,8 @@
       queueDebugOverlayUpdate();
       return true;
     }
-    function finiteSkyCoord(coord) {
-      if (!Array.isArray(coord)) return null;
-      const lon = Number(coord[0]);
-      const lat = Number(coord[1]);
-      if (!Number.isFinite(lon) || !Number.isFinite(lat)) return null;
-      return [(lon % 360 + 360) % 360, Math.max(-90, Math.min(90, lat))];
-    }
-    function invertSkyCoordinateAtClient(clientX, clientY, canvas = null) {
-      try {
-        if (!window.Celestial || !Celestial.mapProjection || !Celestial.mapProjection.invert) return null;
-        const targetCanvas = canvas || document.querySelector("#celestial-map canvas");
-        if (!targetCanvas) return null;
-        const rect = targetCanvas.getBoundingClientRect();
-        const x = Number(clientX) - rect.left;
-        const y = Number(clientY) - rect.top;
-        const coord = Celestial.mapProjection.invert([x, y]);
-        return finiteSkyCoord(coord);
-      } catch (_) {
-        return null;
-      }
+    function invertSkyCoordinateAtClient2(clientX, clientY, canvas = null) {
+      return invertSkyCoordinateAtClient(clientX, clientY, canvas, window.Celestial);
     }
     function applyQuaternionGrabDrag(anchorCoord, currentCoord, dx, dy, reason = "quaternion grab drag") {
       if (!window.Celestial || !anchorCoord || !currentCoord) return false;
@@ -4994,7 +5395,7 @@
     }
     function applyEulerConstrainedPointerDelta(dx, dy, rect, currentCoord = null, reason = "euler constrained drag") {
       if (!window.Celestial || !rect) return false;
-      const center = normalizeCenterForControlMode(currentCelestialCenter());
+      const center = normalizeCenterForControlMode(currentCelestialCenter2());
       const metrics = projectionCanvasMetrics2();
       const shortSide = Math.max(180, Math.min(Number(metrics.virtualWidth) || Number(rect.width) || 0, Number(metrics.virtualHeight) || Number(rect.height) || 0));
       const sensitivity = Number(cfg("interaction.dragSensitivity", 1)) || 1;
@@ -5025,7 +5426,7 @@
         return {
           center: Array.isArray(center) ? center : null,
           mapScale: getMapScale(),
-          internalZoom: getInternalZoom()
+          internalZoom: getInternalZoom2()
         };
       } catch (_) {
         return { center: null, mapScale: getMapScale(), internalZoom: 1 };
@@ -5456,11 +5857,11 @@
         ]),
         debugLine(label.paneCenter, debugPointParts(paneCenter)),
         debugLine(label.mapCenter, debugPointParts(mapCenter)),
-        debugLine(label.centerDelta, debugCenterDeltaParts(centerDelta)),
+        debugLine(label.centerDelta, debugCenterDeltaParts(centerDelta, formatSigned)),
         debugLine(label.canvasCenter, debugPointParts(canvasCenter)),
         debugLine(
           label.canvasCenterDelta,
-          debugCenterDeltaParts(canvasCenterDelta)
+          debugCenterDeltaParts(canvasCenterDelta, formatSigned)
         ),
         debugLine(label.map, debugRectParts(mapRect)),
         debugLine(label.mapComputedMinWidth, [
@@ -5527,7 +5928,7 @@
           debugValue(timeRenderDebug.activeField || "-")
         ]),
         debugLine(zh ? "\u8F93\u5165\u5B57\u6BB5" : "input fields", [
-          debugValue(timeRenderDebug.fields || timeFieldDebugText())
+          debugValue(timeRenderDebug.fields || timeFieldDebugText2())
         ]),
         debugLine(zh ? "\u5F53\u524D\u6709\u6548\u65F6\u95F4" : "active time", [
           debugValue(timeRenderDebug.activeDisplay || "-")
@@ -5700,7 +6101,7 @@
         // 方向键长按只显示 active/idle 和当前按键，不显示每帧移动量；
         // 每帧 delta 太快且难截图，真正有价值的是动画帧循环是否启动和是否释放。
         debugLine(label.keyboardPan, [debugValue(skyPanKeys.size ? "active" : "idle")]),
-        debugLine(label.pressedArrowKeys, [debugValue(pressedArrowKeysLabel())]),
+        debugLine(label.pressedArrowKeys, [debugValue(pressedArrowKeysLabel2())]),
         debugLine(label.poleGuard, [debugValue(poleStats.guardActive ? "ON" : "OFF")]),
         debugLine(label.poleGuardReason, [debugValue(poleStats.guardReason || "none")]),
         debugLine(label.poleGuardThreshold, [
@@ -5928,7 +6329,7 @@
           if (metrics.renderMode === "VIEWPORT_CANVAS" && Celestial.mapProjection && Celestial.mapProjection.translate) {
             Celestial.mapProjection.translate([metrics.width / 2, metrics.height / 2]);
           }
-          syncInternalZoomForMetrics(metrics);
+          syncInternalZoomForMetrics2(metrics);
           redrawAndSyncMapBox(reason, metrics);
           redrew = true;
         }
@@ -6026,7 +6427,7 @@
             if (Array.isArray(view.center))
               setCelestialCenter(view.center.slice(), "restore view");
             setMapScale(viewMapScale2(view, state.mapScale));
-            syncInternalZoomForMetrics(projectionCanvasMetrics2());
+            syncInternalZoomForMetrics2(projectionCanvasMetrics2());
             redrawAndSyncMapBox("restore view");
           } catch (err) {
             if (attempt < 4) restoreView(view, attempt + 1);
@@ -6449,192 +6850,6 @@
       return selectionNodes(Celestial, selector);
     }
     const PLANET_STYLE = cfg("planets", {});
-    const TRAD_TO_SIMP = {
-      "\u81FA": "\u53F0",
-      "\u842C": "\u4E07",
-      "\u9F8D": "\u9F99",
-      "\u9B25": "\u6597",
-      "\u9580": "\u95E8",
-      "\u9EDE": "\u70B9",
-      "\u986F": "\u663E",
-      "\u64C7": "\u62E9",
-      "\u64CA": "\u51FB",
-      "\u6642": "\u65F6",
-      "\u9593": "\u95F4",
-      "\u908A": "\u8FB9",
-      "\u8655": "\u5904",
-      "\u88CF": "\u91CC",
-      "\u8457": "\u7740",
-      "\u89C0": "\u89C2",
-      "\u5BE6": "\u5B9E",
-      "\u8AAA": "\u8BF4",
-      "\u8A9E": "\u8BED",
-      "\u7576": "\u5F53",
-      "\u5F8C": "\u540E",
-      "\u958B": "\u5F00",
-      "\u95DC": "\u5173",
-      "\u7121": "\u65E0",
-      "\u6578": "\u6570",
-      "\u64DA": "\u636E",
-      "\u8F49": "\u8F6C",
-      "\u63DB": "\u6362",
-      "\u7DAD": "\u7EF4",
-      "\u985E": "\u7C7B",
-      "\u5C64": "\u5C42",
-      "\u8996": "\u89C6",
-      "\u570D": "\u56F4",
-      "\u6A19": "\u6807",
-      "\u66C6": "\u5386",
-      "\u5EE3": "\u5E7F",
-      "\u570B": "\u56FD",
-      "\u5B78": "\u5B66",
-      "\u8853": "\u672F",
-      "\u70BA": "\u4E3A",
-      "\u8207": "\u4E0E",
-      "\u9019": "\u8FD9",
-      "\u500B": "\u4E2A",
-      "\u5011": "\u4EEC",
-      "\u5F9E": "\u4ECE",
-      "\u4F86": "\u6765",
-      "\u9084": "\u8FD8",
-      "\u6703": "\u4F1A",
-      "\u61C9": "\u5E94",
-      "\u8A72": "\u8BE5",
-      "\u5C0E": "\u5BFC",
-      "\u8B80": "\u8BFB",
-      "\u5BEB": "\u5199",
-      "\u756B": "\u753B",
-      "\u98DB": "\u98DE",
-      "\u99AC": "\u9A6C",
-      "\u96D9": "\u53CC",
-      "\u9B5A": "\u9C7C",
-      "\u5BF6": "\u5B9D",
-      "\u7345": "\u72EE",
-      "\u9F9C": "\u9F9F",
-      "\u9CF3": "\u51E4",
-      "\u9DB4": "\u9E64",
-      "\u96DE": "\u9E21",
-      "\u9CE5": "\u9E1F",
-      "\u7378": "\u517D",
-      "\u71DF": "\u8425",
-      "\u8ECD": "\u519B",
-      "\u9663": "\u9635",
-      "\u5C07": "\u5C06",
-      "\u885B": "\u536B",
-      "\u58D8": "\u5792",
-      "\u95A3": "\u9601",
-      "\u5EAB": "\u5E93",
-      "\u5BAE": "\u5BAB",
-      "\u5EDF": "\u5E99",
-      "\u6A13": "\u697C",
-      "\u8ECA": "\u8F66",
-      "\u8F26": "\u8F87",
-      "\u8F14": "\u8F85",
-      "\u8FB2": "\u519C",
-      "\u96E2": "\u79BB",
-      "\u7F85": "\u7F57",
-      "\u7DB2": "\u7F51",
-      "\u7E54": "\u7EC7",
-      "\u528D": "\u5251",
-      "\u9264": "\u94A9",
-      "\u9435": "\u94C1",
-      "\u9285": "\u94DC",
-      "\u9280": "\u94F6",
-      "\u9418": "\u949F",
-      "\u6B0A": "\u6743",
-      "\u6A1E": "\u67A2",
-      "\u74A3": "\u7391",
-      "\u9AD4": "\u4F53",
-      "\u50B3": "\u4F20",
-      "\u7D71": "\u7EDF",
-      "\u5340": "\u533A",
-      "\u8CC7": "\u8D44",
-      "\u8A0A": "\u8BAF",
-      "\u6A94": "\u6863",
-      "\u5132": "\u50A8",
-      "\u8F09": "\u8F7D",
-      "\u9801": "\u9875",
-      "\u9023": "\u8FDE",
-      "\u555F": "\u542F",
-      "\u9589": "\u95ED",
-      "\u91CB": "\u91CA",
-      "\u89F8": "\u89E6",
-      "\u700F": "\u6D4F",
-      "\u89BD": "\u89C8",
-      "\u7570": "\u5F02",
-      "\u78BA": "\u786E",
-      "\u6E96": "\u51C6",
-      "\u7E8C": "\u7EED",
-      "\u7A2E": "\u79CD",
-      "\u8F03": "\u8F83",
-      "\u9805": "\u9879",
-      "\u9810": "\u9884",
-      "\u8A2D": "\u8BBE",
-      "\u5FA9": "\u590D",
-      "\u7DDA": "\u7EBF",
-      "\u689D": "\u6761",
-      "\u7A31": "\u79F0",
-      "\u7DE8": "\u7F16",
-      "\u865F": "\u53F7",
-      "\u8ABF": "\u8C03",
-      "\u8F38": "\u8F93",
-      "\u8B8A": "\u53D8",
-      "\u8AA4": "\u8BEF",
-      "\u6771": "\u4E1C",
-      "\u73FE": "\u73B0",
-      "\u7522": "\u4EA7",
-      "\u7FA9": "\u4E49",
-      "\u52D9": "\u52A1",
-      "\u72C0": "\u72B6",
-      "\u614B": "\u6001",
-      "\u5167": "\u5185",
-      "\u5834": "\u573A",
-      "\u7D93": "\u7ECF",
-      "\u7DEF": "\u7EAC",
-      "\u6E2C": "\u6D4B",
-      "\u96F2": "\u4E91",
-      "\u6C23": "\u6C14",
-      "\u98A8": "\u98CE",
-      "\u9060": "\u8FDC",
-      "\u7E3D": "\u603B",
-      "\u6B78": "\u5F52",
-      "\u6AA2": "\u68C0",
-      "\u9A57": "\u9A8C",
-      "\u5C0D": "\u5BF9",
-      "\u9078": "\u9009",
-      "\u55AE": "\u5355",
-      "\u512A": "\u4F18",
-      "\u7D1A": "\u7EA7",
-      "\u58D3": "\u538B",
-      "\u7E2E": "\u7F29",
-      "\u984F": "\u989C",
-      "\u9EBC": "\u4E48",
-      "\u96BB": "\u53EA",
-      "\u96A8": "\u968F",
-      "\u5E36": "\u5E26",
-      "\u88E1": "\u91CC",
-      "\u65BC": "\u4E8E",
-      "\u8ACB": "\u8BF7",
-      "\u5C0B": "\u5BFB",
-      "\u4F48": "\u5E03",
-      "\u4F54": "\u5360",
-      "\u4F75": "\u5E76",
-      "\u63A1": "\u91C7",
-      "\u69CB": "\u6784",
-      "\u64F4": "\u6269",
-      "\u5283": "\u5212",
-      "\u66AB": "\u6682",
-      "\u9846": "\u9897"
-    };
-    function simplifyChinese(value) {
-      return String(value == null ? "" : value).replace(
-        /[\u3400-\u9fff]/g,
-        (ch) => TRAD_TO_SIMP[ch] || ch
-      );
-    }
-    function normalizeCelestialLongitude2(deg) {
-      return ((Number(deg) + 180) % 360 + 360) % 360 - 180;
-    }
     function astronomyModelEnabled() {
       return !!cfg("astronomyModel.precession", true);
     }
@@ -6856,114 +7071,29 @@
         return state.lang === "zh" ? simplifyChinese(d.zh || d.name || d.id) : d.en || d.name || d.id;
       return p.name || p.en || p.desig || d.id || t("skyPosition");
     }
-    function candidateCoord(d) {
-      if (d && d.geometry && d.geometry.type === "Point")
-        return d.geometry.coordinates;
-      return null;
-    }
-    function normalizeSearchText(value) {
-      return normalizeObjectSearchText(simplifyChinese(value || ""));
-    }
     function objectSearchTypeLabel(type) {
       return t(
         type === "star" ? "searchResultStar" : type === "planet" ? "searchResultPlanet" : type === "constellation" ? "searchResultConstellation" : type === "asterism" ? "searchResultAsterism" : "searchResultDso"
       );
     }
-    function addSearchEntry(entries, type, d, coord, names, extra = {}) {
-      const entry = createSearchEntrySeed(
-        type,
-        d,
-        coord,
-        names,
-        simplifyChinese,
-        extra
-      );
-      if (entry) entries.push(entry);
-    }
     function buildObjectSearchIndex() {
       if (objectSearchIndex) return objectSearchIndex;
-      const entries = [];
-      ORIGINAL_STARS.forEach((feature) => {
-        const coord = candidateCoord(feature), n = STAR_NAMES[String(feature.id)] || {}, names = [
-          objectLabel("star", feature),
-          n.name,
-          n.zh,
-          n.bayer,
-          n.flam,
-          n.hip,
-          n.hd,
-          feature.id ? `HIP ${feature.id}` : ""
-        ];
-        addSearchEntry(entries, "star", feature, coord, names);
+      objectSearchIndex = buildObjectSearchIndexFromSources({
+        stars: ORIGINAL_STARS,
+        starNames: STAR_NAMES,
+        deepSkyFeatures: deepSkyFeatures(),
+        deepSkyNames: DSO_NAMES,
+        constellationNameFeatures: westernConstellationNameFeatures(),
+        asterismNameFeatures: chineseAsterismNameFeatures(),
+        planets: currentPlanetPositions(),
+        simplifyChinese,
+        labelObject: objectLabel
       });
-      deepSkyFeatures().forEach((feature) => {
-        const coord = candidateCoord(feature), names = DSO_NAMES[String(feature.id)] || {}, p = feature.properties || {};
-        addSearchEntry(entries, "dso", feature, coord, [
-          objectLabel("dso", feature),
-          names.name,
-          names.zh,
-          p.desig,
-          feature.id
-        ]);
-      });
-      westernConstellationNameFeatures().forEach((feature) => {
-        const p = feature.properties || {};
-        addSearchEntry(
-          entries,
-          "constellation",
-          feature,
-          candidateCoord(feature),
-          [
-            objectLabel("constellation", feature),
-            p.zh,
-            p.en,
-            p.name,
-            p.desig,
-            feature.id
-          ]
-        );
-      });
-      chineseAsterismNameFeatures().forEach((feature) => {
-        const p = feature.properties || {};
-        addSearchEntry(entries, "asterism", feature, candidateCoord(feature), [
-          objectLabel("asterism", feature),
-          p.name,
-          p.en,
-          p.pinyin,
-          p.desig,
-          feature.id
-        ]);
-      });
-      currentPlanetPositions().forEach((item) => {
-        addSearchEntry(
-          entries,
-          "planet",
-          item.body,
-          item.coord,
-          [
-            objectLabel("planet", item.body),
-            item.body.zh,
-            item.body.en,
-            item.body.name,
-            item.id
-          ],
-          { planetId: item.id, displayCoord: item.displayCoord, epochCoord: item.epochCoord }
-        );
-      });
-      objectSearchIndex = entries;
-      return entries;
+      return objectSearchIndex;
     }
     function searchObjects(query) {
-      const needle = normalizeSearchText(query);
-      if (!needle) return [];
       objectSearchIndex = null;
-      return buildObjectSearchIndex().map((entry) => {
-        const exact = entry.terms.some((term) => term === needle), starts = entry.terms.some((term) => term.startsWith(needle)), includes = entry.terms.some((term) => term.includes(needle));
-        if (!exact && !starts && !includes) return null;
-        return { entry, score: exact ? 0 : starts ? 1 : 2 };
-      }).filter(Boolean).sort(
-        (a, b) => a.score - b.score || a.entry.names[0].localeCompare(b.entry.names[0])
-      ).slice(0, 24).map((item) => item.entry);
+      return searchObjectEntries(query, buildObjectSearchIndex(), simplifyChinese);
     }
     let objectSearchResults = [], objectSearchActiveIndex = -1;
     function setObjectSearchActive(index) {
@@ -8109,7 +8239,7 @@
               timezone: dt.offset
             });
             if (poleAxisConstraintEnabled()) {
-              const skyviewCenter = currentCelestialCenter();
+              const skyviewCenter = currentCelestialCenter2();
               if (skyviewCenter) setCelestialCenter(skyviewCenter, "horizontal skyview constrained");
             }
             syncRotationFromCurrentView("horizontal skyview");
@@ -8190,7 +8320,7 @@
       if (!dt) {
         noteTimeRenderDebug({
           inputStatus: "invalid",
-          fields: timeFieldDebugText(),
+          fields: timeFieldDebugText2(),
           updateSource: source,
           errorStage: "input",
           refreshHealth: "failed",
@@ -8204,7 +8334,7 @@
       return applyObserverDateTime(dt, true, source);
     }
     function adjustTimeField(field, delta) {
-      const base = observerDT().setZone(safeZoneForCoordinates());
+      const base = observerDT().setZone(safeZoneForCoordinates2());
       const units = {
         year: "years",
         month: "months",
@@ -8306,7 +8436,7 @@
           pointerMoved = false;
           map.classList.add("dragging");
           const center = syncRotationFromCurrentView("pointerdown");
-          const anchorCoord = invertSkyCoordinateAtClient(event.clientX, event.clientY, canvas);
+          const anchorCoord = invertSkyCoordinateAtClient2(event.clientX, event.clientY, canvas);
           debugPointerActive = true;
           debugPointerSkyCoord = anchorCoord;
           rotationPointerDrag = center ? {
@@ -8342,7 +8472,7 @@
             if (pointerMoved) {
               const dx = event.clientX - rotationPointerDrag.lastX, dy = event.clientY - rotationPointerDrag.lastY;
               const rect = canvas.getBoundingClientRect();
-              const currentCoord = invertSkyCoordinateAtClient(event.clientX, event.clientY, canvas);
+              const currentCoord = invertSkyCoordinateAtClient2(event.clientX, event.clientY, canvas);
               debugPointerActive = true;
               debugPointerSkyCoord = currentCoord;
               if (poleAxisConstraintEnabled()) {
@@ -8372,7 +8502,7 @@
             pointerMoved = true;
           }
           debugPointerActive = true;
-          debugPointerSkyCoord = invertSkyCoordinateAtClient(event.clientX, event.clientY, canvas);
+          debugPointerSkyCoord = invertSkyCoordinateAtClient2(event.clientX, event.clientY, canvas);
           queueDebugOverlayUpdate();
         },
         { capture: true }
@@ -8437,7 +8567,7 @@
       try {
         return {
           mapScale: getMapScale(),
-          internalZoom: getInternalZoom(),
+          internalZoom: getInternalZoom2(),
           center: Celestial.rotate()
         };
       } catch (_) {
@@ -8520,7 +8650,7 @@
       state.mapScale = viewMapScale2(target, state.mapScale);
       applyMapBoxMetrics2(projectionCanvasMetrics2(next));
       try {
-        syncInternalZoomForMetrics(projectionCanvasMetrics2(next));
+        syncInternalZoomForMetrics2(projectionCanvasMetrics2(next));
         suppressResizeUntil = performance.now() + 520;
         Celestial.reproject({ projection: next, projectionRatio: null });
         syncRotationFromCurrentView("projection switch");
@@ -8532,13 +8662,13 @@
             if (nextMetrics.renderMode === "VIEWPORT_CANVAS" && Celestial.mapProjection && Celestial.mapProjection.translate) {
               Celestial.mapProjection.translate([nextMetrics.width / 2, nextMetrics.height / 2]);
             }
-            syncInternalZoomForMetrics(nextMetrics);
+            syncInternalZoomForMetrics2(nextMetrics);
             syncRenderedMapBox(nextMetrics);
             syncRotationFromCurrentView("projection resized");
             if (isHorizontalView()) {
               updateSkyView(true);
               setMapScale(viewMapScale2(target, state.mapScale));
-              syncInternalZoomForMetrics(projectionCanvasMetrics2());
+              syncInternalZoomForMetrics2(projectionCanvasMetrics2());
               state.projectionViews[viewKey2()] = { mapScale: state.mapScale };
               save();
             } else {
@@ -8612,7 +8742,7 @@
       if (!Array.isArray(center)) return;
       rotationController.syncFromCenter(center, "pane margin pointerdown");
       debugPointerActive = true;
-      debugPointerSkyCoord = invertSkyCoordinateAtClient(event.clientX, event.clientY);
+      debugPointerSkyCoord = invertSkyCoordinateAtClient2(event.clientX, event.clientY);
       updatePoleAxisDebug(debugPointerSkyCoord, center, poleAxisConstraintEnabled() ? "euler-constrained" : "quaternion-free");
       paneDrag = {
         id: event.pointerId,
@@ -8620,7 +8750,7 @@
         y: event.clientY,
         lastX: event.clientX,
         lastY: event.clientY,
-        anchorCoord: invertSkyCoordinateAtClient(event.clientX, event.clientY),
+        anchorCoord: invertSkyCoordinateAtClient2(event.clientX, event.clientY),
         center: center.slice(),
         moved: false
       };
@@ -8642,7 +8772,7 @@
       try {
         const stepDx = event.clientX - paneDrag.lastX;
         const stepDy = event.clientY - paneDrag.lastY;
-        const currentCoord = invertSkyCoordinateAtClient(event.clientX, event.clientY);
+        const currentCoord = invertSkyCoordinateAtClient2(event.clientX, event.clientY);
         debugPointerActive = true;
         debugPointerSkyCoord = currentCoord;
         if (poleAxisConstraintEnabled()) {
@@ -8703,7 +8833,7 @@
           customViewRestoreTimer = setTimeout(() => {
             try {
               setMapScale(targetScale);
-              syncInternalZoomForMetrics(projectionCanvasMetrics2());
+              syncInternalZoomForMetrics2(projectionCanvasMetrics2());
               redrawAndSyncMapBox("horizontal reset");
               state.projectionViews[viewKey2()] = { mapScale: targetScale };
               save();
@@ -8756,11 +8886,8 @@
       return true;
     }
     function panSkyByKeyboard(key, step = Number(cfg("interaction.keyboardPanDegrees", 4)) || 4) {
-      if (key === "ArrowLeft") return applyKeyboardPanDelta(step, 0, "keyboard pan");
-      if (key === "ArrowRight") return applyKeyboardPanDelta(-step, 0, "keyboard pan");
-      if (key === "ArrowUp") return applyKeyboardPanDelta(0, step, "keyboard pan");
-      if (key === "ArrowDown") return applyKeyboardPanDelta(0, -step, "keyboard pan");
-      return false;
+      const delta = keyboardPanDeltaForKey(key, step);
+      return delta ? applyKeyboardPanDelta(delta.lon, delta.lat, "keyboard pan") : false;
     }
     function flushKeyboardPanView() {
       if (!keyboardPanDirty || !skyReady) return;
@@ -8784,14 +8911,9 @@
       const dt = Math.max(0, Math.min(0.05, (now - last) / 1e3));
       if (dt <= 0) return;
       const speed = Number(cfg("interaction.keyboardPanDegreesPerSecond", 72)) || 72;
-      let lonDir = 0, latDir = 0;
-      if (skyPanKeys.has("ArrowLeft")) lonDir += 1;
-      if (skyPanKeys.has("ArrowRight")) lonDir -= 1;
-      if (skyPanKeys.has("ArrowUp")) latDir += 1;
-      if (skyPanKeys.has("ArrowDown")) latDir -= 1;
-      if (!lonDir && !latDir) return;
-      const length = Math.hypot(lonDir, latDir) || 1;
-      applyKeyboardPanDelta(lonDir / length * speed * dt, latDir / length * speed * dt, "keyboard pan frame");
+      const vector = keyboardPanUnitVector(skyPanKeys);
+      if (!vector) return;
+      applyKeyboardPanDelta(vector.lon * speed * dt, vector.lat * speed * dt, "keyboard pan frame");
     }
     function switchPoleAxisConstraint(enabled) {
       const next = !!enabled;
@@ -8807,7 +8929,7 @@
       poleAxisDebug.guardActive = false;
       poleAxisDebug.guardReason = "none";
       syncControls();
-      const center = currentCelestialCenter();
+      const center = currentCelestialCenter2();
       if (center) setCelestialCenter(center, "pole axis constraint toggle");
       else syncRotationFromCurrentView("pole axis constraint toggle");
       save();
@@ -8939,11 +9061,11 @@
         field.addEventListener("input", () => {
           field.value = field.value.replace(id === "time-year" ? /[^0-9-]/g : /\D/g, "");
           if (id === "time-year") field.value = field.value.replace(/(?!^)-/g, "");
-          setTimeFieldWidths();
+          setTimeFieldWidths2();
           noteTimeRenderDebug({
             inputStatus: "draft",
             activeField: TIME_FIELD_ID_TO_KEY[id] || "-",
-            fields: timeFieldDebugText()
+            fields: timeFieldDebugText2()
           });
         });
         field.addEventListener("blur", (event) => {
@@ -8982,13 +9104,13 @@
             }
             if (e.key === "-" && field.value.includes("-")) return;
             field.value += e.key;
-            setTimeFieldWidths();
+            setTimeFieldWidths2();
             markTimeFieldSelected(field);
             field.dataset.replaceOnType = "0";
             noteTimeRenderDebug({
               inputStatus: "draft",
               activeField: key || "-",
-              fields: timeFieldDebugText()
+              fields: timeFieldDebugText2()
             });
             return;
           }
@@ -8996,11 +9118,11 @@
             e.preventDefault();
             field.value = "";
             field.dataset.replaceOnType = "0";
-            setTimeFieldWidths();
+            setTimeFieldWidths2();
             noteTimeRenderDebug({
               inputStatus: "draft",
               activeField: key || "-",
-              fields: timeFieldDebugText()
+              fields: timeFieldDebugText2()
             });
           }
         });
@@ -9262,7 +9384,7 @@
             jsDateYear: String(renderDate.getUTCFullYear()),
             julianDate: (julianDateFromDate2(renderDate) || 0).toFixed(5),
             updateSource: "playback",
-            precision: precisionStatusForYear(nextInstant.setZone(safeZoneForCoordinates()).year),
+            precision: precisionStatusForYear(nextInstant.setZone(safeZoneForCoordinates2()).year),
             refreshHealth: "healthy",
             currentFatalError: "-",
             recoveredOriginalError: "-",

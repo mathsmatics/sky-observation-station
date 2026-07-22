@@ -7,6 +7,31 @@
  * 这样可以避免投影模块反向依赖 UI、debug 和数据图层。
  */
 
+export const HORIZON_PROJECTIONS = new Set([
+  "airy",
+  "orthographic",
+  "stereographic",
+  "azimuthalEquidistant",
+  "azimuthalEqualArea",
+]);
+
+export const PROJECTION_DEFAULTS = {
+  airy: { center: [0, 0, 0], mapScale: 1 },
+  orthographic: { center: [0, 0, 0], mapScale: 1 },
+  stereographic: { center: [0, 0, 0], mapScale: 1 },
+  azimuthalEquidistant: { center: [0, 0, 0], mapScale: 1 },
+  azimuthalEqualArea: { center: [0, 0, 0], mapScale: 1 },
+  aitoff: { center: [0, 0, 0], mapScale: 1 },
+  hammer: { center: [0, 0, 0], mapScale: 1 },
+  mollweide: { center: [0, 0, 0], mapScale: 1 },
+  winkel3: { center: [0, 0, 0], mapScale: 1 },
+  equirectangular: { center: [0, 0, 0], mapScale: 1 },
+  healpix: { center: [0, 0, 0], mapScale: 1 },
+  mercator: { center: [0, 0, 0], mapScale: 1 },
+  robinson: { center: [0, 0, 0], mapScale: 1 },
+  sinusoidal: { center: [0, 0, 0], mapScale: 1 },
+};
+
 export function clampMapScale(value: number, min: number, max: number): number {
   const safeMin = Number.isFinite(min) ? min : 1;
   const safeMax = Math.max(safeMin, Number.isFinite(max) ? max : safeMin);

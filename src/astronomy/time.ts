@@ -60,3 +60,11 @@ export function formatCivilDateTime(dt: any, includeSeconds = false): string {
   const base = `${y}/${String(dt.month).padStart(2, "0")}/${String(dt.day).padStart(2, "0")} ${String(dt.hour).padStart(2, "0")}:${String(dt.minute).padStart(2, "0")}`;
   return includeSeconds ? `${base}:${String(dt.second).padStart(2, "0")}` : base;
 }
+
+export function precisionStatusForYear(year: number): string {
+  const y = Number(year);
+  if (!Number.isFinite(y)) return "unknown";
+  if (y >= 1900 && y <= 2100) return "normal";
+  if (y >= 1600 && y <= 2600) return "historical approximation";
+  return "far-date approximation";
+}

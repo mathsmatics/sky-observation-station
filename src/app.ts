@@ -20,8 +20,9 @@ import {
   deepSkyNames,
 } from "./data/deep-sky";
 import {
-  createSearchEntrySeed,
-  normalizeObjectSearchText,
+  buildObjectSearchIndexFromSources,
+  candidateCoord,
+  searchObjectEntries,
 } from "./data/object-search-index";
 import { starCoordinateMap, starFeatures, starNames } from "./data/stars";
 import {
@@ -36,20 +37,39 @@ import {
   precessEquatorialJ2000ToDate,
 } from "./astronomy/precession";
 import { helpManualForLanguage } from "./data/content/help-manual";
-import { degToRad, radToDeg, normalizeDegrees, clampNumber as clamp } from "./astronomy/angle";
+import { normalizeDegrees, clampNumber as clamp } from "./astronomy/angle";
 import {
   astronomicalYearToDisplay,
-  astronomicalYearToInput,
   formatCivilDateTime,
   formatOffset,
   formatOffsetDetailed,
   julianDateFromDate,
+  precisionStatusForYear,
 } from "./astronomy/time";
+import {
+  longitudeFallbackZone,
+  lookupZone,
+  normalizeZone,
+  safeZoneForCoordinates as safeTimezoneForCoordinates,
+} from "./astronomy/timezone";
 import { localSiderealDegrees } from "./astronomy/sidereal";
 import { equatorialFromHorizontal as equatorialFromHorizontalPure, formatDec, formatRA } from "./astronomy/coordinates";
 import { calculateCurrentPlanetPositions } from "./astronomy/bodies-simple";
+import { createDefaultState } from "./state/defaults";
 import { getProjectStorage, readJsonFromStorage, removeStorageKey, writeJsonToStorage } from "./state/storage";
 import { createHelpRenderer } from "./ui/help";
+import { I18N } from "./ui/i18n";
+import { simplifyChinese } from "./ui/text";
+import { applyConfigCssVariables, applyRootFontScale } from "./ui/theme";
+import {
+  displayTimeParts as buildDisplayTimeParts,
+  setTimeFieldWidths as applyTimeFieldWidths,
+  TIME_FIELD_ID_TO_KEY,
+  TIME_FIELD_IDS,
+  TIME_FIELD_KEYS,
+  timeFieldByKey as getTimeFieldByKey,
+  timeFieldDebugText as buildTimeFieldDebugText,
+} from "./ui/time-fields";
 import {
   applyMapBoxMetrics as applySkyMapBoxMetrics,
   canvasRect as skyCanvasRect,
@@ -58,13 +78,33 @@ import {
   skyPaneSize as computeSkyPaneSize,
 } from "./sky/renderer";
 import {
+  currentCelestialCenter as readCurrentCelestialCenter,
+  getInternalZoom as readInternalZoom,
+  invertSkyCoordinateAtClient as invertSkyCoordinateFromClient,
+  resetInternalZoom as resetCelestialInternalZoom,
+  syncInternalZoomForMetrics as syncCelestialInternalZoomForMetrics,
+} from "./sky/celestial-view";
+import {
   clampMapScale as clampProjectionMapScale,
   coordinateViewDefault as computeCoordinateViewDefault,
   desiredView as computeDesiredView,
+  HORIZON_PROJECTIONS,
+  PROJECTION_DEFAULTS,
   viewKey as projectionViewKey,
   viewMapScale as projectionViewMapScale,
 } from "./sky/projection";
 import { createRotationController } from "./sky/rotation-controller";
+import {
+  keyboardPanDeltaForKey,
+  keyboardPanUnitVector,
+  pressedArrowKeysLabel as formatPressedArrowKeys,
+} from "./sky/keyboard-pan";
+import {
+  evaluatePointerPoleGuard,
+  normalizeCelestialLongitude,
+  normalizeControlCenter,
+  updatePoleAxisDiagnostics,
+} from "./sky/view-control";
 import {
   drawProjectedLine as drawLayerProjectedLine,
   drawReferenceText as drawLayerReferenceText,
@@ -81,6 +121,28 @@ import {
   isTextEditingTarget as isUiTextEditingTarget,
 } from "./ui/layout";
 import { debugSpan as panelDebugSpan, infoPairLine, infoSingleLine } from "./ui/panels";
+import {
+  debugBlankLine,
+  debugBoolParts,
+  debugCenterDeltaParts,
+  debugErrorText,
+  debugGroup,
+  debugLine,
+  debugMetricStatus,
+  debugOffsetNoteValue,
+  debugPointParts,
+  debugRectParts,
+  debugRefreshHealthValue,
+  debugScaleParts,
+  debugSep,
+  debugSizeParts,
+  debugStackText,
+  debugUnit,
+  debugValue,
+  formatAngle,
+  formatAngleOrUnavailable,
+  formatSigned,
+} from "./ui/debug-panel";
 import {
   applyMenuSectionOrder as applyMenuSectionOrderToPanel,
   createSectionShell as createMenuSectionShell,
@@ -110,503 +172,23 @@ import {
     }
     return value == null ? fallback : value;
   };
-  /**
-   * 将用户可编辑的视觉配置写入 CSS 变量。
-   * 输入来自 `src/config.ts`，输出是 document 根节点上的 CSS 自定义属性。
-   */
   function applyConfigCss() {
-    const root = document.documentElement.style;
-    const vars = {
-      "--bg": cfg("theme.pageBackground", "#02050d"),
-      "--panel": cfg("theme.panelBackground", "#07101f"),
-      "--panel-solid": cfg("theme.panelBackground", "#07101f"),
-      "--panel-2": cfg("theme.panelSecondaryBackground", "#0d192d"),
-      "--line": cfg("theme.border", "rgba(159,211,255,.22)"),
-      "--line-soft": cfg("theme.borderSoft", "rgba(159,211,255,.10)"),
-      "--text": cfg("theme.text", "#eef7ff"),
-      "--muted": cfg("theme.mutedText", "#9db1c8"),
-      "--cyan": cfg("theme.accent", "#77dcff"),
-      "--blue": cfg("theme.accentSecondary", "#8eabff"),
-      "--gold": cfg("theme.gold", "#ffd477"),
-      "--danger": cfg("theme.danger", "#ff8b8b"),
-      "--shadow": cfg("theme.shadow", "0 22px 75px rgba(0,0,0,.52)"),
-      "--sidebar-w": `${cfg("layout.sidebarWidth", 360)}px`,
-      "--mobile-sidebar-w": `${cfg("layout.mobileSidebarWidth", 350)}px`,
-      "--sky-meta-top": `${cfg("layout.skyMetaTop", 10)}px`,
-      "--sky-meta-right": `${cfg("layout.skyMetaRight", 12)}px`,
-      "--sky-meta-font": `${cfg("layout.skyMetaFontSize", 12)}px`,
-      "--sky-meta-color": cfg("layout.skyMetaColor", "rgba(228,241,255,.88)"),
-      "--panel-toggle-left": `${cfg("layout.panelToggleLeft", 8)}px`,
-      "--panel-toggle-top": `${cfg("layout.panelToggleTop", 8)}px`,
-      "--panel-toggle-size": `${cfg("layout.panelToggleSize", 36)}px`,
-      "--reset-toggle-left": `calc(${cfg("layout.panelToggleLeft", 8)}px + (${cfg("layout.panelToggleSize", 36)}px + 6px) * 2)`,
-      "--panel-toggle-bg": cfg(
-        "components.panelToggleBackground",
-        "rgba(8,19,36,.94)",
-      ),
-      "--tool-button-bg": cfg(
-        "components.toolButtonBackground",
-        "rgba(255,255,255,.045)",
-      ),
-      "--info-card-bg": cfg(
-        "components.infoCardBackground",
-        "linear-gradient(145deg,rgba(11,27,48,.94),rgba(7,16,31,.96))",
-      ),
-      "--info-card-border": cfg(
-        "components.infoCardBorder",
-        "rgba(119,220,255,.22)",
-      ),
-      "--info-title": cfg("components.infoTitleColor", "#f4fbff"),
-      "--info-text": cfg("components.infoTextColor", "#d8e8f5"),
-      "--info-muted": cfg("components.infoMutedColor", "#8da4bb"),
-    };
-    Object.entries(vars).forEach(([k, v]) => root.setProperty(k, v));
+    applyConfigCssVariables(cfg);
   }
 
   function applyFontScale() {
-    const scale = Number(state.fontScale);
-    document.documentElement.style.setProperty(
-      "--rso-font-scale",
-      Number.isFinite(scale) && scale > 0 ? String(scale) : "1",
-    );
+    applyRootFontScale(state.fontScale);
   }
   applyConfigCss();
   const DateTime = window.luxon && window.luxon.DateTime;
   const STORAGE_KEY = "real-sky-observatory-v48";
   const STORAGE_SCHEMA_VERSION = "5.3.2";
   const ASTRONOMY_MODEL_VERSION = "epoch-date-precession-v1";
-
-  const I18N = {
-    zh: {
-      brandSub: "真实地点 × 真实时间 × 真实星表 × 双天文文化",
-      language: "语言",
-      skyCulture: "星空体系",
-      topInfo: "顶部信息",
-      topInfoHint: "项目与当前状态",
-      cultureSettings: "语言与星空体系",
-      cultureSettingsHint: "界面语言与文化图层",
-      observer: "观测地点",
-      wgs: "WGS84 经纬度",
-      latitude: "纬度 Latitude",
-      longitude: "经度 Longitude",
-      timezone: "观测时区",
-      applyLocation: "应用坐标并匹配时区",
-      useMyLocation: "使用我的位置",
-      observationTime: "观测时间",
-      now: "回到现在",
-      minusMonth: "−1 月",
-      minusDay: "−1 天",
-      minusHour: "−1 时",
-      plusHour: "+1 时",
-      plusDay: "+1 天",
-      plusMonth: "+1 月",
-      play: "▶ 播放",
-      pause: "❚❚ 暂停",
-      timeSpeed: "时间流速",
-      timeStepMinutes: "分钟",
-      timeStepHours: "小时",
-      timeStepDays: "天",
-      timeStepYears: "年",
-      invalidTimeStep: "请输入大于 0 的整数时间步长",
-      speed1: "×1 实时",
-      speed60: "×60：1 秒 = 1 分钟",
-      speed600: "×600：1 秒 = 10 分钟",
-      speed3600: "×3600：1 秒 = 1 小时",
-      speed86400: "×86400：1 秒 = 1 天",
-      displaySettings: "显示参数",
-      liveApply: "实时应用",
-      displayObjects: "对象显示",
-      displayCultureLayers: "文化图层",
-      displayReferenceLines: "参考线",
-      displayVisual: "视觉",
-      magnitudeThreshold: "恒星显示星等阈值",
-      starSize: "恒星大小",
-      starNames: "重要恒星名称",
-      cultureLines: "星座/星官连线",
-      cultureNames: "星座/星官名称",
-      planets: "太阳、月球与行星",
-      milkyWay: "银河轮廓",
-      grid: "赤道坐标网",
-      horizontalGrid: "地平坐标网",
-      ecliptic: "黄道",
-      equator: "天球赤道",
-      horizon: "地平线",
-      nightVision: "夜视红光",
-      deepSky: "亮深空天体",
-      floatingObjectInfo: "星体信息浮窗",
-      objectSearch: "天体搜索",
-      objectSearchHint: "恒星 / 行星 / 星座 / 星官 / 深空",
-      objectSearchPlaceholder: "输入名称或 HIP 编号",
-      noObjectSearchResult: "没有找到匹配的天体",
-      searchResultStar: "恒星",
-      searchResultPlanet: "行星",
-      searchResultConstellation: "星座",
-      searchResultAsterism: "星官",
-      searchResultDso: "深空",
-      currentState: "当前状态",
-      utcInternal: "内部统一 UTC",
-      localTime: "当地时间：",
-      zoneOffset: "时区偏移：",
-      mapMode: "星图体系：",
-      coordinateNote: "坐标说明：",
-      coordinateValue:
-        "恒星数据为赤道坐标；视图按地点和时刻旋转到本地地平天空。",
-      technicalGuide: "代码与计算说明",
-      resetView: "重置视图",
-      fullscreen: "全屏",
-      loadingTitle: "正在载入真实星空与星官数据",
-      loadingText:
-        "加载恒星目录、太阳系天体、银河轮廓以及中西两套天文文化数据。所有核心资源均已本地打包。",
-      technicalGuideTitle: "代码、天文计算与数据来源说明",
-      copyGuide: "复制说明",
-      close: "关闭",
-      guideNextPage: "下一章",
-      guideSelectLabel: "选择说明章节",
-      chinese: "中文",
-      english: "English",
-      western: "西方星座",
-      chineseCulture: "中国星官",
-      bothCultures: "两者同时显示",
-      paused: "暂停",
-      running: "运行中",
-      manualLocation: "自定义地点",
-      myLocation: "我的位置",
-      autoZone: "时区已自动匹配",
-      invalidZone: "观测地点的时区无法识别，已回退到安全时区",
-      invalidDateTime: "日期或时间无效，请检查输入",
-      invalidCoordinate: "请输入有效经纬度：纬度 −90～90，经度 −180～180",
-      locationApplied: "观测地点已更新",
-      geoRequest: "正在请求浏览器定位权限…",
-      geoFail:
-        "定位失败或权限被拒绝。建议通过 localhost/HTTPS 打开，或手动输入经纬度。",
-      geoFileNote:
-        "当前为直接打开模式：星图可正常使用；浏览器定位若定位受限，请在项目目录运行 python -m http.server 8000。",
-      nowApplied: "已回到当前时刻",
-      cultureReady: "星空体系已切换；视角、缩放、地点和时间保持不变",
-      loadFail:
-        "星图核心或本地数据加载失败。请确认压缩包已完整解压；需要定位时可通过附带启动脚本打开。",
-      copied: "说明已复制到剪贴板",
-      copyFail: "复制失败，请在说明窗口中手动选择文本",
-      nightOn: "夜视红光已开启",
-      nightOff: "夜视红光已关闭",
-      localServerHint:
-        "当前为直接打开模式：星图可正常使用；定位若定位受限，请在项目目录运行 python -m http.server 8000。",
-      timezoneEstimated: "自动估计；边界地区请核对",
-      zoneAutoNote: "时区由经纬度自动匹配；修改地点后会自动更新。",
-      sameInstant: "地点切换保留同一 UTC 时刻",
-      eastConvention: "仰视图：北上、东左、西右",
-    },
-    en: {
-      brandSub: "Real location × real time × real catalogs × two sky cultures",
-      language: "Language",
-      skyCulture: "Sky system",
-      topInfo: "Top info",
-      topInfoHint: "project and current state",
-      cultureSettings: "Language & sky system",
-      cultureSettingsHint: "UI language and culture layers",
-      observer: "Observer location",
-      wgs: "WGS84 coordinates",
-      latitude: "Latitude",
-      longitude: "Longitude",
-      timezone: "Observer time zone",
-      applyLocation: "Apply coordinates & match zone",
-      useMyLocation: "Use my location",
-      observationTime: "Observation time",
-      now: "Now",
-      minusMonth: "−1 month",
-      minusDay: "−1 day",
-      minusHour: "−1 hr",
-      plusHour: "+1 hr",
-      plusDay: "+1 day",
-      plusMonth: "+1 month",
-      play: "▶ Play",
-      pause: "❚❚ Pause",
-      timeSpeed: "Time speed",
-      timeStepMinutes: "min",
-      timeStepHours: "hour",
-      timeStepDays: "day",
-      timeStepYears: "year",
-      invalidTimeStep: "Enter a positive integer time step",
-      speed1: "×1 real time",
-      speed60: "×60: 1 sec = 1 min",
-      speed600: "×600: 1 sec = 10 min",
-      speed3600: "×3600: 1 sec = 1 hr",
-      speed86400: "×86400: 1 sec = 1 day",
-      displaySettings: "Display settings",
-      liveApply: "applied live",
-      displayObjects: "Objects",
-      displayCultureLayers: "Culture layers",
-      displayReferenceLines: "Reference lines",
-      displayVisual: "Visual",
-      magnitudeThreshold: "Stellar magnitude display limit",
-      starSize: "Star size",
-      starNames: "Important star names",
-      cultureLines: "Constellation/asterism lines",
-      cultureNames: "Constellation/asterism names",
-      planets: "Sun, Moon & planets",
-      milkyWay: "Milky Way outline",
-      grid: "Equatorial grid",
-      horizontalGrid: "Horizontal grid",
-      ecliptic: "Ecliptic",
-      equator: "Celestial equator",
-      horizon: "Horizon",
-      nightVision: "Red night vision",
-      deepSky: "Bright deep-sky objects",
-      floatingObjectInfo: "Floating object info",
-      objectSearch: "Object search",
-      objectSearchHint:
-        "Stars / planets / constellations / asterisms / deep sky",
-      objectSearchPlaceholder: "Enter a name or HIP number",
-      noObjectSearchResult: "No matching object found",
-      searchResultStar: "Star",
-      searchResultPlanet: "Planet",
-      searchResultConstellation: "Constellation",
-      searchResultAsterism: "Asterism",
-      searchResultDso: "Deep sky",
-      currentState: "Current state",
-      utcInternal: "UTC internally",
-      localTime: "Local time: ",
-      zoneOffset: "UTC offset: ",
-      mapMode: "Sky culture: ",
-      coordinateNote: "Coordinates: ",
-      coordinateValue:
-        "Catalog stars use equatorial coordinates; the view is rotated to the local horizon for the observer and instant.",
-      technicalGuide: "Code & calculation guide",
-      resetView: "Reset view",
-      fullscreen: "Full screen",
-      loadingTitle: "Loading real-sky and asterism data",
-      loadingText:
-        "Reading the bundled stellar catalog, Solar System objects, Milky Way outline and both sky-culture datasets from local files. No internet connection is required.",
-      technicalGuideTitle: "Code, astronomical calculations and data sources",
-      copyGuide: "Copy guide",
-      close: "Close",
-      guideNextPage: "Next",
-      guideSelectLabel: "Choose guide section",
-      chinese: "中文",
-      english: "English",
-      western: "Western constellations",
-      chineseCulture: "Chinese asterisms",
-      bothCultures: "Show both",
-      paused: "Paused",
-      running: "Running",
-      manualLocation: "Custom location",
-      myLocation: "My location",
-      autoZone: "Time zone matched automatically",
-      invalidZone:
-        "The observer time zone could not be recognized; a safe fallback was used",
-      invalidDateTime: "Invalid date or time",
-      invalidCoordinate:
-        "Enter valid coordinates: latitude −90 to 90 and longitude −180 to 180",
-      locationApplied: "Observer location updated",
-      geoRequest: "Requesting browser geolocation permission…",
-      geoFail:
-        "Geolocation failed or permission was denied. Open over localhost/HTTPS, or enter coordinates manually.",
-      geoFileNote:
-        "Direct-open mode: the sky map works normally. For browser geolocation, run python -m http.server 8000 in the project folder.",
-      nowApplied: "Returned to the current instant",
-      cultureReady:
-        "Sky system changed; view, zoom, location and time were preserved",
-      loadFail:
-        "The sky engine or catalog data failed to load. Check that the extracted package is complete; use the included local-server launcher for browser geolocation.",
-      copied: "Guide copied to clipboard",
-      copyFail: "Copy failed; select the text manually in the guide",
-      nightOn: "Red night vision enabled",
-      nightOff: "Red night vision disabled",
-      localServerHint:
-        "Direct-open mode is active. The sky map works normally; for geolocation, run python -m http.server 8000 in the project folder.",
-      timezoneEstimated: "Automatic estimate; verify near borders",
-      zoneAutoNote:
-        "The IANA zone follows the observer coordinates automatically.",
-      sameInstant: "Location changes preserve the same UTC instant",
-      eastConvention: "Looking-up chart: north up, east left, west right",
-    },
-  };
-
-  Object.assign(I18N.zh, {
-    citySearch: "搜索城市",
-    citySearchPlaceholder: "输入中文或英文城市名",
-    viewProjection: "视图与投影",
-    viewPreserved: "独立保存视角",
-    viewTools: "视图控制",
-    viewToolsHint: "不改变地点与时间",
-    projectionLabel: "天球投影：",
-    coordinateSystemLabel: "坐标视角：",
-    projection: "天球投影",
-    coordinateSystem: "坐标视角",
-    poleAxisConstraint: "天极中轴约束",
-    horizontalCoordinates: "地平坐标视角（当地天空）",
-    equatorialCoordinates: "赤道坐标视角",
-    eclipticCoordinates: "黄道坐标视角",
-    galacticCoordinates: "银河坐标视角",
-    traditionalRegions: "中国传统天区层级",
-    majorRegions: "三垣 / 四象 / 近南极星区",
-    withBattlefields: "三垣四象 + 三大战场",
-    withMansions: "三垣四象 + 三大战场 + 二十八宿细分",
-    traditionalRegionCaveat:
-      "三大战场为基于相关星官位置生成的文化主题示意范围；三垣与四象也属于现代数字化复原，不等同于 IAU 法定边界。",
-    regionBoundaries: "区域边界 / 传统天区",
-    selectedObject: "选中天体",
-    clickSkyHint: "单击星体或空白天区",
-    copy: "复制",
-    clear: "清除",
-    objectInfoEmpty:
-      "单击恒星、太阳系天体、深空天体、星座、星官或空白天区，查看名称、坐标和当前地平位置。",
-    objectType: "类型",
-    otherNames: "其他名称",
-    magnitude: "视星等",
-    rightAscension: "赤经 RA",
-    declination: "赤纬 Dec",
-    altitude: "高度角 Alt",
-    azimuth: "方位角 Az",
-    observerPlace: "观测地点",
-    observerTime: "观测时间",
-    catalogId: "目录编号",
-    spectralInfo: "颜色指数 B−V",
-    illumination: "照明比例",
-    moonAge: "月龄",
-    moonPhase: "月相",
-    algorithm: "算法",
-    precisionBoundary: "精度",
-    visualReferencePrecision: "视觉参考，非专业星历",
-    distance: "距离",
-    star: "恒星",
-    deepSkyObject: "深空天体",
-    westernConstellation: "西方星座",
-    chineseAsterism: "中国星官",
-    solarSystemObject: "太阳系天体",
-    skyPosition: "空白天区",
-    regionLegendTitle: "中国传统天区",
-    regionLegendMajor: "三垣 / 四象 / 近南极星区",
-    regionLegendBattle: "三大战场（文化主题示意范围）",
-    copiedObject: "天体信息已复制",
-    westernCultureMeaning: "西方文化",
-    chineseCultureMeaning: "中国文化",
-    noReliableTraditionalBoundary:
-      "当前数据不把每个星官强行封闭；仅显示三垣、四象、近南极星区及可选主题区。",
-    resetDefaults: "恢复默认配置",
-    resetDefaultsConfirm:
-      "确定恢复默认配置吗？这会重置地点、时间、视图、字体和所有显示参数。",
-  });
-  Object.assign(I18N.en, {
-    citySearch: "Search city",
-    citySearchPlaceholder: "Type a Chinese or English city name",
-    viewProjection: "View & projection",
-    viewPreserved: "view saved per projection",
-    viewTools: "View controls",
-    viewToolsHint: "location and time unchanged",
-    projectionLabel: "Projection: ",
-    coordinateSystemLabel: "Coordinate view: ",
-    projection: "Celestial projection",
-    coordinateSystem: "Coordinate View",
-    poleAxisConstraint: "Pole-axis centerline constraint",
-    horizontalCoordinates: "Horizontal Coordinate View (Local Sky)",
-    equatorialCoordinates: "Equatorial Coordinate View",
-    eclipticCoordinates: "Ecliptic Coordinate View",
-    galacticCoordinates: "Galactic Coordinate View",
-    traditionalRegions: "Chinese traditional region level",
-    majorRegions: "Three Enclosures / Four Symbols / near-south-polar",
-    withBattlefields: "Major regions + three battlefields",
-    withMansions: "Major regions + battlefields + 28 mansions",
-    traditionalRegionCaveat:
-      "The three battlefields are thematic visualization envelopes generated from related asterisms. The enclosure and symbol regions are modern digital reconstructions, not IAU legal boundaries.",
-    regionBoundaries: "Region boundaries / traditional regions",
-    selectedObject: "Selected object",
-    clickSkyHint: "Click an object or empty sky",
-    copy: "Copy",
-    clear: "Clear",
-    objectInfoEmpty:
-      "Click a star, Solar System body, deep-sky object, constellation, asterism, or empty sky to inspect names, coordinates, and current horizontal position.",
-    objectType: "Type",
-    otherNames: "Other names",
-    magnitude: "Magnitude",
-    rightAscension: "Right ascension",
-    declination: "Declination",
-    altitude: "Altitude",
-    azimuth: "Azimuth",
-    observerPlace: "Observer",
-    observerTime: "Observation time",
-    catalogId: "Catalog ID",
-    spectralInfo: "B−V colour index",
-    illumination: "Illumination",
-    moonAge: "Moon age",
-    moonPhase: "Moon phase",
-    algorithm: "Model",
-    precisionBoundary: "Precision",
-    visualReferencePrecision: "visual reference, not precision ephemeris",
-    distance: "Distance",
-    star: "Star",
-    deepSkyObject: "Deep-sky object",
-    westernConstellation: "Western constellation",
-    chineseAsterism: "Chinese asterism",
-    solarSystemObject: "Solar System object",
-    skyPosition: "Empty sky position",
-    regionLegendTitle: "Chinese traditional sky regions",
-    regionLegendMajor:
-      "Three Enclosures / Four Symbols / near-south-polar zone",
-    regionLegendBattle: "Three battlefields (thematic visualization)",
-    copiedObject: "Object information copied",
-    westernCultureMeaning: "Western culture",
-    chineseCultureMeaning: "Chinese culture",
-    noReliableTraditionalBoundary:
-      "Individual asterisms are not forced into fake closed polygons; only higher-level traditional regions and optional thematic zones are shown.",
-    resetDefaults: "Reset to defaults",
-    resetDefaultsConfirm:
-      "Reset all settings to defaults? This will reset location, time, view, font size, and all display options.",
-  });
-
-  const defaults = {
-    lat: Number(cfg("defaults.latitude", 39.9042)),
-    lon: Number(cfg("defaults.longitude", 116.4074)),
-    zone: cfg("defaults.timezone", "Asia/Shanghai"),
-    cityZh: cfg("defaults.cityZh", "北京"),
-    cityEn: cfg("defaults.cityEn", "Beijing"),
-    instant: cfg("defaults.instant", "1949-10-01T14:00:00.000Z"),
-    lang: cfg("defaults.language", "zh"),
-    cultureMode: cfg("defaults.cultureMode", "western"),
-    magnitude: Number(cfg("defaults.magnitudeLimit", 5.5)),
-    starSize: Number(cfg("defaults.starSize", 7)),
-    starNames: !!cfg("defaults.showStarNames", true),
-    cultureLines: !!cfg("defaults.showCultureLines", true),
-    cultureNames: !!cfg("defaults.showCultureNames", true),
-    planets: !!cfg("defaults.showPlanets", true),
-    milkyWay: !!cfg("defaults.showMilkyWay", true),
-    grid: !!cfg("defaults.showGrid", true),
-    horizontalGrid: !!cfg("defaults.showHorizontalGrid", false),
-    ecliptic: !!cfg("defaults.showEcliptic", true),
-    equator: !!cfg("defaults.showCelestialEquator", true),
-    horizon: !!cfg("defaults.showHorizon", true),
-    floatingObjectInfo: !!cfg("defaults.showFloatingObjectInfo", true),
-    fontScale: Number(cfg("defaults.fontScale", 1)),
-    nightVision: !!cfg("defaults.nightVision", false),
-    deepSky: !!cfg("defaults.showDeepSky", false),
-    speed: Number(cfg("defaults.timeSpeed", 3600)),
-    panelOpen: !!cfg("defaults.panelOpen", true),
-    poleAxisConstraintEnabled: !!cfg("defaults.poleAxisConstraintEnabled", true),
-    projection: cfg("defaults.projection", "airy"),
-    coordinateSystem: cfg("defaults.coordinateSystem", "horizontal"),
-    menuCollapsed: Array.isArray(cfg("defaults.menuCollapsed", []))
-      ? cfg("defaults.menuCollapsed", []).slice()
-      : [],
-    regionBoundaries: !!cfg("defaults.showRegionBoundaries", true),
-    traditionalDetail: cfg("defaults.traditionalDetail", "battlefields"),
-    mapScale: Number(cfg("defaults.mapScale", 1)),
-    projectionViews: {},
-    coordinateViewSemantics: 7,
-    storageSchemaVersion: STORAGE_SCHEMA_VERSION,
-    astronomyModelVersion: ASTRONOMY_MODEL_VERSION,
-    selectedObject: null,
-  };
-
-  const ZONE_ALIASES = {
-    "Asia/Calcutta": "Asia/Kolkata",
-    "Asia/Katmandu": "Asia/Kathmandu",
-    "US/Eastern": "America/New_York",
-    "US/Central": "America/Chicago",
-    "US/Mountain": "America/Denver",
-    "US/Pacific": "America/Los_Angeles",
-    GMT: "UTC",
-    "Etc/UTC": "UTC",
-  };
+  const defaults = createDefaultState(
+    cfg,
+    STORAGE_SCHEMA_VERSION,
+    ASTRONOMY_MODEL_VERSION,
+  );
 
   let state = { ...defaults };
   let skyReady = false;
@@ -790,48 +372,12 @@ import {
   function viewMapScale(view, fallback = state.mapScale) {
     return projectionViewMapScale(view, fallback, clampMapScale);
   }
-  function isValidZone(zone) {
-    if (!zone || typeof zone !== "string") return false;
-    try {
-      new Intl.DateTimeFormat("en-US", { timeZone: zone }).format(new Date());
-      return true;
-    } catch (_) {
-      return false;
-    }
-  }
-  function normalizeZone(zone) {
-    const raw = typeof zone === "string" ? zone.trim() : "";
-    const mapped = ZONE_ALIASES[raw] || raw;
-    return isValidZone(mapped) ? mapped : null;
-  }
-  function lookupZone(lat, lon) {
-    try {
-      if (typeof window.tzlookup === "function") {
-        const found = normalizeZone(window.tzlookup(Number(lat), Number(lon)));
-        if (found) return found;
-      }
-    } catch (err) {
-      console.warn("Timezone lookup failed", err);
-    }
-    return null;
-  }
-  function longitudeFallbackZone(lon) {
-    const hours = Math.max(-14, Math.min(14, Math.round(Number(lon) / 15)));
-    if (!Number.isFinite(hours) || hours === 0) return "UTC";
-    // IANA 的 Etc/GMT 符号约定是反向的：GMT-9 表示 UTC+9。
-    const candidate = `Etc/GMT${hours > 0 ? "-" : "+"}${Math.abs(hours)}`;
-    return normalizeZone(candidate) || "UTC";
-  }
   function safeZoneForCoordinates(
     lat = state.lat,
     lon = state.lon,
     preferred = state.zone,
   ) {
-    return (
-      normalizeZone(preferred) ||
-      lookupZone(lat, lon) ||
-      longitudeFallbackZone(lon)
-    );
+    return safeTimezoneForCoordinates(lat, lon, preferred);
   }
   /**
    * 读取持久化状态，迁移已知旧字段，并校验数值范围。
@@ -974,42 +520,9 @@ import {
     };
   }
 
-  function debugOffsetNoteValue(note, zh) {
-    if (note === "iana-historical")
-      return zh ? "使用 IANA 历史偏移" : "using IANA historical offset";
-    if (note === "zone-rule")
-      return zh ? "使用当前时区规则" : "using current zone rule";
-    return "-";
-  }
-
-  function debugRefreshHealthValue(value, zh) {
-    if (value === "recovered") return zh ? "fallback 已恢复" : "recovered by fallback";
-    if (value === "failed") return zh ? "失败" : "failed";
-    if (value === "pending") return zh ? "刷新中" : "pending";
-    return zh ? "正常" : "healthy";
-  }
   function currentInstantDate() {
     const dt = DateTime.fromISO(String(state.instant || ""), { zone: "utc" });
     return (dt.isValid ? dt : DateTime.fromISO(defaults.instant, { zone: "utc" })).toJSDate();
-  }
-
-  function precisionStatusForYear(year) {
-    const y = Number(year);
-    if (!Number.isFinite(y)) return "unknown";
-    if (y >= 1900 && y <= 2100) return "normal";
-    if (y >= 1600 && y <= 2600) return "historical approximation";
-    return "far-date approximation";
-  }
-
-  function debugErrorText(err) {
-    if (!err) return "-";
-    if (err && err.message) return String(err.message);
-    return String(err);
-  }
-
-  function debugStackText(err) {
-    if (!err || !err.stack) return "-";
-    return String(err.stack).split("\n").slice(0, 3).join(" | ");
   }
 
   function renderDebugFromDateTime(dt, date = null) {
@@ -1064,22 +577,8 @@ import {
     Object.assign(timeRenderDebug, patch);
     if (debugVisible) updateDebugOverlay(true);
   }
-const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
-  const TIME_FIELD_TO_ID = {
-    year: "time-year",
-    month: "time-month",
-    day: "time-day",
-    hour: "time-hour",
-    minute: "time-minute",
-  };
-  const TIME_FIELD_ID_TO_KEY = Object.fromEntries(
-    Object.entries(TIME_FIELD_TO_ID).map(([key, id]) => [id, key]),
-  );
-  const TIME_FIELD_IDS = Object.values(TIME_FIELD_TO_ID);
-
   function timeFieldByKey(key) {
-    const id = TIME_FIELD_TO_ID[key];
-    return id ? $(id) : null;
+    return getTimeFieldByKey($, key);
   }
 
   function markTimeFieldSelected(field) {
@@ -1114,31 +613,15 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
   }
 
   function timeFieldDebugText() {
-    return TIME_FIELD_KEYS.map((key) => `${key}=${timeFieldByKey(key)?.value || ""}`).join(" ");
+    return buildTimeFieldDebugText($);
   }
 
   function displayTimeParts(dt = observerDT()) {
-    return {
-      year: astronomicalYearToInput(dt.year),
-      month: String(dt.month).padStart(2, "0"),
-      day: String(dt.day).padStart(2, "0"),
-      hour: String(dt.hour).padStart(2, "0"),
-      minute: String(dt.minute).padStart(2, "0"),
-    };
+    return buildDisplayTimeParts(dt);
   }
 
   function setTimeFieldWidths() {
-    TIME_FIELD_IDS.forEach((id) => {
-      const el = $(id);
-      if (!el) return;
-      const raw = String(el.value || "");
-      if (id === "time-year") {
-        const len = Math.max(3, raw.length || 4);
-        el.style.width = `${len + 0.8}ch`;
-      } else {
-        el.style.width = "2.4ch";
-      }
-    });
+    applyTimeFieldWidths($);
   }
 
   function syncTimeInputs(dt = observerDT()) {
@@ -1502,30 +985,6 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     updateBoundaryUI();
   }
 
-  const HORIZON_PROJECTIONS = new Set([
-    "airy",
-    "orthographic",
-    "stereographic",
-    "azimuthalEquidistant",
-    "azimuthalEqualArea",
-  ]);
-  const PROJECTION_DEFAULTS = {
-    airy: { center: [0, 0, 0], mapScale: 1 },
-    orthographic: { center: [0, 0, 0], mapScale: 1 },
-    stereographic: { center: [0, 0, 0], mapScale: 1 },
-    azimuthalEquidistant: { center: [0, 0, 0], mapScale: 1 },
-    azimuthalEqualArea: { center: [0, 0, 0], mapScale: 1 },
-    aitoff: { center: [0, 0, 0], mapScale: 1 },
-    hammer: { center: [0, 0, 0], mapScale: 1 },
-    mollweide: { center: [0, 0, 0], mapScale: 1 },
-    winkel3: { center: [0, 0, 0], mapScale: 1 },
-    equirectangular: { center: [0, 0, 0], mapScale: 1 },
-    healpix: { center: [0, 0, 0], mapScale: 1 },
-    mercator: { center: [0, 0, 0], mapScale: 1 },
-    robinson: { center: [0, 0, 0], mapScale: 1 },
-    sinusoidal: { center: [0, 0, 0], mapScale: 1 },
-  };
-
   function createSectionShell(id, titleKey, hintKey, contentClass = "") {
     return createMenuSectionShell({ id, titleKey, hintKey, contentClass, t });
   }
@@ -1631,22 +1090,6 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     button.setAttribute("aria-label", title);
   }
 
-  function formatAngle(value) {
-    const number = Number(value);
-    return Number.isFinite(number) ? `${number.toFixed(2)}°` : "-";
-  }
-
-  function formatAngleOrUnavailable(value) {
-    const number = Number(value);
-    return Number.isFinite(number) ? `${number.toFixed(2)}°` : "unavailable";
-  }
-
-  function formatSigned(value) {
-    const number = Number(value);
-    if (!Number.isFinite(number)) return "-";
-    return `${number >= 0 ? "+" : ""}${number.toFixed(1)}`;
-  }
-
   function debugRefreshIntervalMs() {
     const configured = Number(cfg("debug.refreshMs", 200));
     return Math.max(100, Math.min(500, Number.isFinite(configured) ? configured : 200));
@@ -1661,15 +1104,7 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
   }
 
   function pressedArrowKeysLabel() {
-    const keys = [
-      ["ArrowUp", "↑"],
-      ["ArrowDown", "↓"],
-      ["ArrowLeft", "←"],
-      ["ArrowRight", "→"],
-    ]
-      .filter(([key]) => skyPanKeys.has(key))
-      .map(([, label]) => label);
-    return keys.length ? keys.join(" ") : "none";
+    return formatPressedArrowKeys(skyPanKeys);
   }
 
   function debugResponsiveMode() {
@@ -1704,97 +1139,6 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     };
   }
 
-  function debugSpan(text, className) {
-    const span = document.createElement("span");
-    span.className = className;
-    span.textContent = String(text);
-    return span;
-  }
-
-  function debugValue(text) {
-    return debugSpan(text, "debug-value");
-  }
-
-  function debugSep(text) {
-    return debugSpan(text, "debug-sep");
-  }
-
-  function debugUnit(text) {
-    return debugSpan(text, "debug-unit");
-  }
-
-  function debugGroup(title) {
-    const el = document.createElement("div");
-    el.className = "debug-group";
-    el.textContent = title;
-    return el;
-  }
-
-  function debugLine(label, parts = []) {
-    const el = document.createElement("div");
-    el.className = "debug-line";
-    el.append(
-      debugSpan(label, "debug-key"),
-      debugSep(": "),
-      ...(Array.isArray(parts) ? parts : [debugValue(parts)]),
-    );
-    return el;
-  }
-
-  function debugBlankLine() {
-    const el = document.createElement("div");
-    el.className = "debug-blank";
-    return el;
-  }
-
-  function debugSizeParts(width, height) {
-    return [
-      debugValue(Math.round(Number(width) || 0)),
-      debugSep("x"),
-      debugValue(Math.round(Number(height) || 0)),
-    ];
-  }
-
-  function debugRectParts(rect) {
-    if (!rect) return [debugValue("-")];
-    return [
-      ...debugSizeParts(rect.width, rect.height),
-      debugSep(" @ "),
-      debugValue(Math.round(rect.left)),
-      debugSep(","),
-      debugValue(Math.round(rect.top)),
-    ];
-  }
-
-  function debugPointParts(point) {
-    if (!point) return [debugValue("-")];
-    return [
-      debugValue(Math.round(point.x)),
-      debugSep(","),
-      debugValue(Math.round(point.y)),
-    ];
-  }
-
-  function debugCenterDeltaParts(delta) {
-    if (!delta) return [debugValue("-")];
-    return [
-      debugSep("X="),
-      debugValue(formatSigned(delta.x)),
-      debugUnit("px"),
-      debugSep(" Y="),
-      debugValue(formatSigned(delta.y)),
-      debugUnit("px"),
-    ];
-  }
-
-  function debugScaleParts(value) {
-    return [debugValue(Number(value || 0).toFixed(3)), debugUnit("x")];
-  }
-
-  function debugBoolParts(value) {
-    return [debugValue(value ? "true" : "false")];
-  }
-
   function currentStarMagnitudeStats() {
     const loadedStars = Array.isArray(ORIGINAL_STARS) ? ORIGINAL_STARS.length : 0;
     const threshold = Number(state.magnitude);
@@ -1809,13 +1153,6 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
       threshold,
       starsWithinMagnitude,
     };
-  }
-
-  function debugMetricStatus(ok, zh) {
-    return debugSpan(
-      ok ? "OK" : zh ? "MISMATCH 尺寸不一致" : "MISMATCH",
-      ok ? "debug-ok" : "debug-warn",
-    );
   }
 
   function debugCopyText(status = "idle") {
@@ -1884,36 +1221,20 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     return content;
   }
 
-  function getInternalZoom() {
-    try {
-      return Number(Celestial.zoomBy()) || 1;
-    } catch (_) {
-      return 1;
-    }
+  function syncInternalZoomForMetrics(metrics = projectionCanvasMetrics()) {
+    syncCelestialInternalZoomForMetrics(metrics, window.Celestial);
   }
 
-  function syncInternalZoomForMetrics(metrics = projectionCanvasMetrics()) {
-    try {
-      const target = Math.max(1, Number(metrics && metrics.internalZoom) || 1);
-      const current = getInternalZoom();
-      if (Math.abs(current - target) > 0.002) Celestial.zoomBy(target / Math.max(0.0001, current));
-    } catch (_) {}
+  function getInternalZoom() {
+    return readInternalZoom(window.Celestial);
   }
 
   function resetInternalZoom() {
-    try {
-      const current = getInternalZoom();
-      if (Math.abs(current - 1) > 0.002) Celestial.zoomBy(1 / current);
-    } catch (_) {}
+    resetCelestialInternalZoom(window.Celestial);
   }
 
   function currentCelestialCenter() {
-    try {
-      const center = window.Celestial && Celestial.rotate && Celestial.rotate();
-      return Array.isArray(center) ? center.slice() : null;
-    } catch (_) {
-      return null;
-    }
+    return readCurrentCelestialCenter(window.Celestial);
   }
 
   function poleAxisConstraintEnabled() {
@@ -1934,171 +1255,37 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
   }
 
   function normalizeCenterForControlMode(center) {
-    const source = Array.isArray(center) ? center.slice() : [0, 0, 0];
-    const next = [
-      Number.isFinite(Number(source[0])) ? normalizeCelestialLongitude(Number(source[0])) : 0,
-      Number.isFinite(Number(source[1])) ? Math.max(-89.5, Math.min(89.5, Number(source[1]))) : 0,
-      Number.isFinite(Number(source[2])) ? Number(source[2]) : 0,
-    ];
-    if (poleAxisConstraintEnabled()) {
-      // “天极中轴约束”开启时走欧拉角路径；此时 roll 不是自由输入，
-      // 而是由“当前坐标视角极轴保持竖直”这一约束决定。这里固定为 0，
-      // 让 D3-Celestial 使用当前经纬中心的自然北向/极轴方向，避免把
-      // 关闭模式积累的自由 roll 带进约束模式。
-      next[2] = 0;
-    }
-    return next;
-  }
-
-  function angularDistanceDeg(a, b) {
-    if (!a || !b) return NaN;
-    const lon1 = degToRad(Number(a[0]) || 0),
-      lat1 = degToRad(Number(a[1]) || 0),
-      lon2 = degToRad(Number(b[0]) || 0),
-      lat2 = degToRad(Number(b[1]) || 0),
-      sin1 = Math.sin(lat1),
-      sin2 = Math.sin(lat2),
-      cos1 = Math.cos(lat1),
-      cos2 = Math.cos(lat2),
-      cosD = sin1 * sin2 + cos1 * cos2 * Math.cos(lon1 - lon2);
-    return radToDeg(Math.acos(Math.max(-1, Math.min(1, cosD))));
-  }
-
-  function currentCoordinatePoles() {
-    try {
-      if (state.coordinateSystem === "horizontal") {
-        return {
-          positiveName: state.lang === "en" ? "North celestial pole" : "北天极",
-          negativeName: state.lang === "en" ? "South celestial pole" : "南天极",
-          positiveCoord: [0, 90],
-          negativeCoord: [0, -90],
-        };
-      }
-      if (state.coordinateSystem === "equatorial") {
-        return {
-          positiveName: state.lang === "en" ? "North celestial pole" : "北天极",
-          negativeName: state.lang === "en" ? "South celestial pole" : "南天极",
-          positiveCoord: [0, 90],
-          negativeCoord: [0, -90],
-        };
-      }
-      if (state.coordinateSystem === "ecliptic") {
-        return {
-          positiveName: state.lang === "en" ? "North ecliptic pole" : "黄道北极",
-          negativeName: state.lang === "en" ? "South ecliptic pole" : "黄道南极",
-          positiveCoord: [0, 90],
-          negativeCoord: [0, -90],
-        };
-      }
-      if (state.coordinateSystem === "galactic") {
-        return {
-          positiveName: state.lang === "en" ? "North galactic pole" : "银北极",
-          negativeName: state.lang === "en" ? "South galactic pole" : "银南极",
-          positiveCoord: [0, 90],
-          negativeCoord: [0, -90],
-        };
-      }
-    } catch (_) {}
-    return null;
-  }
-
-  function projectCurrentCoordinatePoint(coord) {
-    try {
-      if (!window.Celestial || !Celestial.mapProjection || !coord) return null;
-      const safe = finiteSkyCoord(coord);
-      if (!safe) return null;
-      if (Celestial.clip && !Celestial.clip(safe)) return null;
-      // 极点屏幕坐标必须经过当前 projection 实际计算；理论经纬度无法反映投影、
-      // 缩放和 D3-Celestial 当前 translate 后的真实屏幕位置。
-      const point = Celestial.mapProjection(safe);
-      return point && Number.isFinite(point[0]) && Number.isFinite(point[1])
-        ? { x: point[0], y: point[1], visible: true }
-        : null;
-    } catch (_) {
-      return null;
-    }
+    return normalizeControlCenter(center, poleAxisConstraintEnabled());
   }
 
   function updatePoleAxisDebug(pointerCoord = null, center = null, status = null) {
-    const poles = currentCoordinatePoles();
-    poleAxisDebug.status = status || (poleAxisConstraintEnabled() ? "euler-constrained" : "quaternion-free");
-    if (!poles) {
-      Object.assign(poleAxisDebug, {
-        guardActive: false,
-        guardReason: "undefined",
-        pointerPositiveDeg: NaN,
-        pointerNegativeDeg: NaN,
-        centerPositiveDeg: NaN,
-        centerNegativeDeg: NaN,
-        positiveName: "undefined",
-        negativeName: "undefined",
-        polesDefined: false,
-        positivePoint: null,
-        negativePoint: null,
-        centerlineX: NaN,
-        positiveDx: NaN,
-        negativeDx: NaN,
-        axisAngleDeg: NaN,
-      });
-      return poleAxisDebug;
-    }
-    const viewCenter = finiteSkyCoord(center || currentCelestialCenter());
-    const pointer = finiteSkyCoord(pointerCoord);
     const canvas = document.querySelector("#celestial-map canvas"),
-      rect = canvas ? canvas.getBoundingClientRect() : null,
-      metrics = projectionCanvasMetrics(),
-      centerlineX = rect && Number.isFinite(rect.width) ? rect.width / 2 : metrics.width / 2,
-      positivePoint = projectCurrentCoordinatePoint(poles.positiveCoord),
-      negativePoint = projectCurrentCoordinatePoint(poles.negativeCoord),
-      positiveDx = positivePoint ? positivePoint.x - centerlineX : NaN,
-      negativeDx = negativePoint ? negativePoint.x - centerlineX : NaN;
-    let axisAngleDeg = NaN;
-    if (positivePoint && negativePoint) {
-      const dx = positivePoint.x - negativePoint.x,
-        dy = positivePoint.y - negativePoint.y;
-      // 极轴屏幕角度只看“偏离竖直多少”：0° 表示竖直，90° 表示水平。
-      axisAngleDeg = radToDeg(Math.atan2(Math.abs(dx), Math.abs(dy)));
-    }
-    Object.assign(poleAxisDebug, {
-      positiveName: poles.positiveName,
-      negativeName: poles.negativeName,
-      polesDefined: true,
-      pointerPositiveDeg: pointer ? angularDistanceDeg(pointer, poles.positiveCoord) : NaN,
-      pointerNegativeDeg: pointer ? angularDistanceDeg(pointer, poles.negativeCoord) : NaN,
-      centerPositiveDeg: viewCenter ? angularDistanceDeg(viewCenter, poles.positiveCoord) : NaN,
-      centerNegativeDeg: viewCenter ? angularDistanceDeg(viewCenter, poles.negativeCoord) : NaN,
-      positivePoint,
-      negativePoint,
-      centerlineX,
-      positiveDx,
-      negativeDx,
-      axisAngleDeg,
+      rect = canvas ? canvas.getBoundingClientRect() : null;
+    return updatePoleAxisDiagnostics({
+      debug: poleAxisDebug,
+      coordinateSystem: state.coordinateSystem,
+      lang: state.lang,
+      pointerCoord,
+      center,
+      currentCenter: currentCelestialCenter(),
+      celestial: window.Celestial,
+      metrics: projectionCanvasMetrics(),
+      canvasRect: rect,
+      status,
+      constrained: poleAxisConstraintEnabled(),
     });
-    return poleAxisDebug;
   }
 
   function evaluatePoleGuard(pointerCoord = null, center = null) {
-    const enter = poleGuardEnterDeg(),
-      exit = poleGuardExitDeg(),
-      threshold = poleAxisDebug.guardActive ? exit : enter,
-      diag = updatePoleAxisDebug(pointerCoord, center);
-    // 极区保护只保留“鼠标靠近当前坐标系极点”这一入口；它是实际拖动时
-    // 最直接的奇异区风险。画面中心靠近极点不再单独触发保护，避免正常扫过极点时
-    // 过早锁住横向移动。
-    const candidates = (poleGuardPointerEnabled()
-      ? [
-          ["pointer-near-positive-pole", diag.pointerPositiveDeg],
-          ["pointer-near-negative-pole", diag.pointerNegativeDeg],
-        ]
-      : [])
-      .filter((item) => Number.isFinite(Number(item[1])))
-      .sort((a, b) => Number(a[1]) - Number(b[1]));
-    const nearest = candidates[0];
-    const active = !!nearest && Number(nearest[1]) <= threshold;
-    poleAxisDebug.guardActive = active;
-    poleAxisDebug.guardReason = active ? nearest[0] : candidates.length ? "none" : "undefined";
-    poleAxisDebug.status = active ? "guard-active" : poleAxisDebug.status;
-    return poleAxisDebug;
+    return evaluatePointerPoleGuard({
+      debug: poleAxisDebug,
+      pointerCoord,
+      center,
+      enterDeg: poleGuardEnterDeg(),
+      exitDeg: poleGuardExitDeg(),
+      pointerGuardEnabled: poleGuardPointerEnabled(),
+      updateDiagnostics: updatePoleAxisDebug,
+    });
   }
 
   function syncRotationFromCurrentView(reason = "sync") {
@@ -2136,27 +1323,8 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     return true;
   }
 
-  function finiteSkyCoord(coord) {
-    if (!Array.isArray(coord)) return null;
-    const lon = Number(coord[0]);
-    const lat = Number(coord[1]);
-    if (!Number.isFinite(lon) || !Number.isFinite(lat)) return null;
-    return [((lon % 360) + 360) % 360, Math.max(-90, Math.min(90, lat))];
-  }
-
   function invertSkyCoordinateAtClient(clientX, clientY, canvas = null) {
-    try {
-      if (!window.Celestial || !Celestial.mapProjection || !Celestial.mapProjection.invert) return null;
-      const targetCanvas = canvas || document.querySelector("#celestial-map canvas");
-      if (!targetCanvas) return null;
-      const rect = targetCanvas.getBoundingClientRect();
-      const x = Number(clientX) - rect.left;
-      const y = Number(clientY) - rect.top;
-      const coord = Celestial.mapProjection.invert([x, y]);
-      return finiteSkyCoord(coord);
-    } catch (_) {
-      return null;
-    }
+    return invertSkyCoordinateFromClient(clientX, clientY, canvas, window.Celestial);
   }
 
   function applyQuaternionGrabDrag(anchorCoord, currentCoord, dx, dy, reason = "quaternion grab drag") {
@@ -2708,11 +1876,11 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
       ]),
       debugLine(label.paneCenter, debugPointParts(paneCenter)),
       debugLine(label.mapCenter, debugPointParts(mapCenter)),
-      debugLine(label.centerDelta, debugCenterDeltaParts(centerDelta)),
+      debugLine(label.centerDelta, debugCenterDeltaParts(centerDelta, formatSigned)),
       debugLine(label.canvasCenter, debugPointParts(canvasCenter)),
       debugLine(
         label.canvasCenterDelta,
-        debugCenterDeltaParts(canvasCenterDelta),
+        debugCenterDeltaParts(canvasCenterDelta, formatSigned),
       ),
       debugLine(label.map, debugRectParts(mapRect)),
       debugLine(label.mapComputedMinWidth, [
@@ -3840,192 +3008,6 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     return getLayerSelectionNodes(Celestial, selector);
   }
   const PLANET_STYLE = cfg("planets", {});
-  const TRAD_TO_SIMP = {
-    "\u81fa": "台",
-    "\u842c": "万",
-    "\u9f8d": "龙",
-    "\u9b25": "斗",
-    "\u9580": "门",
-    "\u9ede": "点",
-    "\u986f": "显",
-    "\u64c7": "择",
-    "\u64ca": "击",
-    "\u6642": "时",
-    "\u9593": "间",
-    "\u908a": "边",
-    "\u8655": "处",
-    "\u88cf": "里",
-    "\u8457": "着",
-    "\u89c0": "观",
-    "\u5be6": "实",
-    "\u8aaa": "说",
-    "\u8a9e": "语",
-    "\u7576": "当",
-    "\u5f8c": "后",
-    "\u958b": "开",
-    "\u95dc": "关",
-    "\u7121": "无",
-    "\u6578": "数",
-    "\u64da": "据",
-    "\u8f49": "转",
-    "\u63db": "换",
-    "\u7dad": "维",
-    "\u985e": "类",
-    "\u5c64": "层",
-    "\u8996": "视",
-    "\u570d": "围",
-    "\u6a19": "标",
-    "\u66c6": "历",
-    "\u5ee3": "广",
-    "\u570b": "国",
-    "\u5b78": "学",
-    "\u8853": "术",
-    "\u70ba": "为",
-    "\u8207": "与",
-    "\u9019": "这",
-    "\u500b": "个",
-    "\u5011": "们",
-    "\u5f9e": "从",
-    "\u4f86": "来",
-    "\u9084": "还",
-    "\u6703": "会",
-    "\u61c9": "应",
-    "\u8a72": "该",
-    "\u5c0e": "导",
-    "\u8b80": "读",
-    "\u5beb": "写",
-    "\u756b": "画",
-    "\u98db": "飞",
-    "\u99ac": "马",
-    "\u96d9": "双",
-    "\u9b5a": "鱼",
-    "\u5bf6": "宝",
-    "\u7345": "狮",
-    "\u9f9c": "龟",
-    "\u9cf3": "凤",
-    "\u9db4": "鹤",
-    "\u96de": "鸡",
-    "\u9ce5": "鸟",
-    "\u7378": "兽",
-    "\u71df": "营",
-    "\u8ecd": "军",
-    "\u9663": "阵",
-    "\u5c07": "将",
-    "\u885b": "卫",
-    "\u58d8": "垒",
-    "\u95a3": "阁",
-    "\u5eab": "库",
-    "\u5bae": "宫",
-    "\u5edf": "庙",
-    "\u6a13": "楼",
-    "\u8eca": "车",
-    "\u8f26": "辇",
-    "\u8f14": "辅",
-    "\u8fb2": "农",
-    "\u96e2": "离",
-    "\u7f85": "罗",
-    "\u7db2": "网",
-    "\u7e54": "织",
-    "\u528d": "剑",
-    "\u9264": "钩",
-    "\u9435": "铁",
-    "\u9285": "铜",
-    "\u9280": "银",
-    "\u9418": "钟",
-    "\u6b0a": "权",
-    "\u6a1e": "枢",
-    "\u74a3": "玑",
-    "\u9ad4": "体",
-    "\u50b3": "传",
-    "\u7d71": "统",
-    "\u5340": "区",
-    "\u8cc7": "资",
-    "\u8a0a": "讯",
-    "\u6a94": "档",
-    "\u5132": "储",
-    "\u8f09": "载",
-    "\u9801": "页",
-    "\u9023": "连",
-    "\u555f": "启",
-    "\u9589": "闭",
-    "\u91cb": "释",
-    "\u89f8": "触",
-    "\u700f": "浏",
-    "\u89bd": "览",
-    "\u7570": "异",
-    "\u78ba": "确",
-    "\u6e96": "准",
-    "\u7e8c": "续",
-    "\u7a2e": "种",
-    "\u8f03": "较",
-    "\u9805": "项",
-    "\u9810": "预",
-    "\u8a2d": "设",
-    "\u5fa9": "复",
-    "\u7dda": "线",
-    "\u689d": "条",
-    "\u7a31": "称",
-    "\u7de8": "编",
-    "\u865f": "号",
-    "\u8abf": "调",
-    "\u8f38": "输",
-    "\u8b8a": "变",
-    "\u8aa4": "误",
-    "\u6771": "东",
-    "\u73fe": "现",
-    "\u7522": "产",
-    "\u7fa9": "义",
-    "\u52d9": "务",
-    "\u72c0": "状",
-    "\u614b": "态",
-    "\u5167": "内",
-    "\u5834": "场",
-    "\u7d93": "经",
-    "\u7def": "纬",
-    "\u6e2c": "测",
-    "\u96f2": "云",
-    "\u6c23": "气",
-    "\u98a8": "风",
-    "\u9060": "远",
-    "\u7e3d": "总",
-    "\u6b78": "归",
-    "\u6aa2": "检",
-    "\u9a57": "验",
-    "\u5c0d": "对",
-    "\u9078": "选",
-    "\u55ae": "单",
-    "\u512a": "优",
-    "\u7d1a": "级",
-    "\u58d3": "压",
-    "\u7e2e": "缩",
-    "\u984f": "颜",
-    "\u9ebc": "么",
-    "\u96bb": "只",
-    "\u96a8": "随",
-    "\u5e36": "带",
-    "\u88e1": "里",
-    "\u65bc": "于",
-    "\u8acb": "请",
-    "\u5c0b": "寻",
-    "\u4f48": "布",
-    "\u4f54": "占",
-    "\u4f75": "并",
-    "\u63a1": "采",
-    "\u69cb": "构",
-    "\u64f4": "扩",
-    "\u5283": "划",
-    "\u66ab": "暂",
-    "\u9846": "颗",
-  };
-  function simplifyChinese(value) {
-    return String(value == null ? "" : value).replace(
-      /[\u3400-\u9fff]/g,
-      (ch) => TRAD_TO_SIMP[ch] || ch,
-    );
-  }
-  function normalizeCelestialLongitude(deg) {
-    return ((((Number(deg) + 180) % 360) + 360) % 360) - 180;
-  }
 
   function astronomyModelEnabled() {
     return !!cfg("astronomyModel.precession", true);
@@ -4284,16 +3266,6 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
         : d.en || d.name || d.id;
     return p.name || p.en || p.desig || d.id || t("skyPosition");
   }
-  function candidateCoord(d) {
-    if (d && d.geometry && d.geometry.type === "Point")
-      return d.geometry.coordinates;
-    return null;
-  }
-
-  function normalizeSearchText(value) {
-    return normalizeObjectSearchText(simplifyChinese(value || ""));
-  }
-
   function objectSearchTypeLabel(type) {
     return t(
       type === "star"
@@ -4308,121 +3280,25 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     );
   }
 
-  function addSearchEntry(entries, type, d, coord, names, extra = {}) {
-    const entry = createSearchEntrySeed(
-      type,
-      d,
-      coord,
-      names,
-      simplifyChinese,
-      extra,
-    );
-    if (entry) entries.push(entry);
-  }
-
   function buildObjectSearchIndex() {
     if (objectSearchIndex) return objectSearchIndex;
-    const entries = [];
-
-    ORIGINAL_STARS.forEach((feature) => {
-      const coord = candidateCoord(feature),
-        n = STAR_NAMES[String(feature.id)] || {},
-        names = [
-          objectLabel("star", feature),
-          n.name,
-          n.zh,
-          n.bayer,
-          n.flam,
-          n.hip,
-          n.hd,
-          feature.id ? `HIP ${feature.id}` : "",
-        ];
-      addSearchEntry(entries, "star", feature, coord, names);
+    objectSearchIndex = buildObjectSearchIndexFromSources({
+      stars: ORIGINAL_STARS,
+      starNames: STAR_NAMES,
+      deepSkyFeatures: deepSkyFeatures(),
+      deepSkyNames: DSO_NAMES,
+      constellationNameFeatures: westernConstellationNameFeatures(),
+      asterismNameFeatures: chineseAsterismNameFeatures(),
+      planets: currentPlanetPositions(),
+      simplifyChinese,
+      labelObject: objectLabel,
     });
-
-    deepSkyFeatures().forEach((feature) => {
-      const coord = candidateCoord(feature),
-        names = DSO_NAMES[String(feature.id)] || {},
-        p = feature.properties || {};
-      addSearchEntry(entries, "dso", feature, coord, [
-        objectLabel("dso", feature),
-        names.name,
-        names.zh,
-        p.desig,
-        feature.id,
-      ]);
-    });
-
-    westernConstellationNameFeatures().forEach((feature) => {
-      const p = feature.properties || {};
-      addSearchEntry(
-        entries,
-        "constellation",
-        feature,
-        candidateCoord(feature),
-        [
-          objectLabel("constellation", feature),
-          p.zh,
-          p.en,
-          p.name,
-          p.desig,
-          feature.id,
-        ],
-      );
-    });
-
-    chineseAsterismNameFeatures().forEach((feature) => {
-      const p = feature.properties || {};
-      addSearchEntry(entries, "asterism", feature, candidateCoord(feature), [
-        objectLabel("asterism", feature),
-        p.name,
-        p.en,
-        p.pinyin,
-        p.desig,
-        feature.id,
-      ]);
-    });
-
-    currentPlanetPositions().forEach((item) => {
-      addSearchEntry(
-        entries,
-        "planet",
-        item.body,
-        item.coord,
-        [
-          objectLabel("planet", item.body),
-          item.body.zh,
-          item.body.en,
-          item.body.name,
-          item.id,
-        ],
-        { planetId: item.id, displayCoord: item.displayCoord, epochCoord: item.epochCoord },
-      );
-    });
-
-    objectSearchIndex = entries;
-    return entries;
+    return objectSearchIndex;
   }
 
   function searchObjects(query) {
-    const needle = normalizeSearchText(query);
-    if (!needle) return [];
     objectSearchIndex = null;
-    return buildObjectSearchIndex()
-      .map((entry) => {
-        const exact = entry.terms.some((term) => term === needle),
-          starts = entry.terms.some((term) => term.startsWith(needle)),
-          includes = entry.terms.some((term) => term.includes(needle));
-        if (!exact && !starts && !includes) return null;
-        return { entry, score: exact ? 0 : starts ? 1 : 2 };
-      })
-      .filter(Boolean)
-      .sort(
-        (a, b) =>
-          a.score - b.score || a.entry.names[0].localeCompare(b.entry.names[0]),
-      )
-      .slice(0, 24)
-      .map((item) => item.entry);
+    return searchObjectEntries(query, buildObjectSearchIndex(), simplifyChinese);
   }
 
   let objectSearchResults = [],
@@ -6549,13 +5425,8 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
   }
 
   function panSkyByKeyboard(key, step = Number(cfg("interaction.keyboardPanDegrees", 4)) || 4) {
-    // 键盘左右表示“去看左/右边的天区”，和鼠标“抓住画面拖动”方向相反：
-    // 按 ← 等价于鼠标向右拖，按 → 等价于鼠标向左拖。
-    if (key === "ArrowLeft") return applyKeyboardPanDelta(step, 0, "keyboard pan");
-    if (key === "ArrowRight") return applyKeyboardPanDelta(-step, 0, "keyboard pan");
-    if (key === "ArrowUp") return applyKeyboardPanDelta(0, step, "keyboard pan");
-    if (key === "ArrowDown") return applyKeyboardPanDelta(0, -step, "keyboard pan");
-    return false;
+    const delta = keyboardPanDeltaForKey(key, step);
+    return delta ? applyKeyboardPanDelta(delta.lon, delta.lat, "keyboard pan") : false;
   }
 
   function flushKeyboardPanView() {
@@ -6581,16 +5452,11 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     const dt = Math.max(0, Math.min(0.05, (now - last) / 1000));
     if (dt <= 0) return;
     const speed = Number(cfg("interaction.keyboardPanDegreesPerSecond", 72)) || 72;
-    let lonDir = 0, latDir = 0;
-    if (skyPanKeys.has("ArrowLeft")) lonDir += 1;
-    if (skyPanKeys.has("ArrowRight")) lonDir -= 1;
-    if (skyPanKeys.has("ArrowUp")) latDir += 1;
-    if (skyPanKeys.has("ArrowDown")) latDir -= 1;
-    if (!lonDir && !latDir) return;
-    const length = Math.hypot(lonDir, latDir) || 1;
+    const vector = keyboardPanUnitVector(skyPanKeys);
+    if (!vector) return;
     // 方向键长按不再依赖浏览器 keydown 自动重复事件。keydown 只维护按键集合，
     // 这里在动画帧里按当前方向移动一次，避免重复事件堆积大量同步 redraw 后卡死。
-    applyKeyboardPanDelta((lonDir / length) * speed * dt, (latDir / length) * speed * dt, "keyboard pan frame");
+    applyKeyboardPanDelta(vector.lon * speed * dt, vector.lat * speed * dt, "keyboard pan frame");
   }
 
   function switchPoleAxisConstraint(enabled) {
