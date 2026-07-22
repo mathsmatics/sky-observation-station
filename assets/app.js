@@ -1812,6 +1812,746 @@
     return lang === "en" ? HELP_MANUAL_EN : HELP_MANUAL_ZH;
   }
 
+  // src/astronomy/angle.ts
+  function degToRad(value) {
+    return Number(value) * Math.PI / 180;
+  }
+  function radToDeg(value) {
+    return Number(value) * 180 / Math.PI;
+  }
+  function normalizeDegrees(value) {
+    return (Number(value) % 360 + 360) % 360;
+  }
+  function clampNumber(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+  }
+
+  // src/astronomy/time.ts
+  function julianDateFromDate2(date) {
+    if (!(date instanceof Date) || !Number.isFinite(date.getTime())) return null;
+    return date.getTime() / 864e5 + 24405875e-1;
+  }
+  function astronomicalYearToDisplay(year) {
+    const n = Number(year);
+    if (!Number.isFinite(n)) return "";
+    const whole = Math.trunc(n);
+    if (whole <= 0) return `BC ${String(1 - whole).padStart(1, "0")}`;
+    return `AD ${String(whole).padStart(4, "0")}`;
+  }
+  function astronomicalYearToInput(year) {
+    const n = Number(year);
+    if (!Number.isFinite(n)) return "";
+    const whole = Math.trunc(n);
+    return whole <= 0 ? `-${1 - whole}` : String(whole);
+  }
+  function formatOffset(minutes) {
+    const sign = minutes >= 0 ? "+" : "\u2212";
+    const a = Math.abs(Math.trunc(minutes));
+    const h = Math.floor(a / 60);
+    const m = a % 60;
+    return `UTC${sign}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  }
+  function formatOffsetDetailed(minutes) {
+    const totalSeconds = Math.round(Number(minutes) * 60);
+    if (!Number.isFinite(totalSeconds)) return "-";
+    const sign = totalSeconds >= 0 ? "+" : "\u2212";
+    const abs = Math.abs(totalSeconds);
+    const h = Math.floor(abs / 3600);
+    const m = Math.floor(abs % 3600 / 60);
+    const sec = abs % 60;
+    return sec ? `UTC${sign}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}` : `UTC${sign}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+  }
+  function formatCivilDateTime(dt, includeSeconds = false) {
+    const y = astronomicalYearToDisplay(dt.year);
+    const base = `${y}/${String(dt.month).padStart(2, "0")}/${String(dt.day).padStart(2, "0")} ${String(dt.hour).padStart(2, "0")}:${String(dt.minute).padStart(2, "0")}`;
+    return includeSeconds ? `${base}:${String(dt.second).padStart(2, "0")}` : base;
+  }
+
+  // src/astronomy/sidereal.ts
+  function localSiderealDegrees(date, longitude) {
+    const jd = julianDateFromDate2(date);
+    const d = jd - 2451545;
+    const gmst = 280.46061837 + 360.98564736629 * d;
+    return normalizeDegrees(gmst + Number(longitude));
+  }
+
+  // src/astronomy/coordinates.ts
+  function formatRA(deg) {
+    const hRaw = (Number(deg) % 360 + 360) % 360 / 15;
+    const hh = Math.floor(hRaw);
+    const mm = Math.floor((hRaw - hh) * 60);
+    const ss = Math.round(((hRaw - hh) * 60 - mm) * 60);
+    return `${String(hh).padStart(2, "0")}h ${String(mm).padStart(2, "0")}m ${String(ss).padStart(2, "0")}s`;
+  }
+  function formatDec(deg) {
+    return `${Number(deg) >= 0 ? "+" : "\u2212"}${Math.abs(Number(deg)).toFixed(2)}\xB0`;
+  }
+  function equatorialFromHorizontal(options) {
+    const az = degToRad(options.azimuth);
+    const alt = degToRad(options.altitude);
+    const lat = degToRad(options.latitude);
+    const lst = degToRad(localSiderealDegrees(options.date, options.longitude));
+    const sinDec = Math.sin(alt) * Math.sin(lat) + Math.cos(alt) * Math.cos(lat) * Math.cos(az);
+    const dec = Math.asin(Math.max(-1, Math.min(1, sinDec)));
+    const hourAngle = Math.atan2(
+      -Math.sin(az) * Math.cos(alt),
+      Math.sin(alt) * Math.cos(lat) - Math.cos(alt) * Math.sin(lat) * Math.cos(az)
+    );
+    const ra = normalizeDegrees(radToDeg(lst - hourAngle));
+    const norm = options.normalizeLongitude || normalizeDegrees;
+    return [norm(ra), radToDeg(dec)];
+  }
+
+  // src/astronomy/bodies-simple.ts
+  function calculateCurrentPlanetPositions(options) {
+    const objects = options.objects || [];
+    const origin = options.origin;
+    if (!origin || !objects.length) {
+      options.noteTimeRenderDebug({ planetStatus: "skipped", planetCount: 0 });
+      return [];
+    }
+    try {
+      const observer = origin(options.date).spherical();
+      const planets = objects.map((fn) => {
+        const body = fn(options.date).equatorial(observer);
+        const ep = body && body.ephemeris || {};
+        const eq = ep.pos;
+        if (!eq || !Number.isFinite(eq[0]) || !Number.isFinite(eq[1])) return null;
+        const epochCoord = options.epochEquatorialFromJ2000(eq);
+        return {
+          id: fn.id(),
+          body,
+          coord: eq.slice(),
+          epochCoord,
+          displayCoord: options.displayCoordinateForEpochEquatorial(epochCoord)
+        };
+      }).filter(Boolean);
+      options.noteTimeRenderDebug({ planetStatus: "ok", planetCount: planets.length });
+      return planets;
+    } catch (err) {
+      console.warn("Planet position calculation failed", err);
+      options.noteTimeRenderDebug({
+        planetStatus: "failed",
+        planetCount: 0,
+        lastError: `planet calculation failed: ${options.debugErrorText(err)}`
+      });
+      return [];
+    }
+  }
+
+  // src/state/storage.ts
+  var storageAvailable = null;
+  function getProjectStorage() {
+    if (storageAvailable === false) return null;
+    try {
+      const storage = window.localStorage;
+      const probe = "__rso_storage_probe__";
+      storage.setItem(probe, "1");
+      storage.removeItem(probe);
+      storageAvailable = true;
+      return storage;
+    } catch (_) {
+      storageAvailable = false;
+      return null;
+    }
+  }
+  function writeJsonToStorage(key, value) {
+    const storage = getProjectStorage();
+    if (!storage) return false;
+    try {
+      storage.setItem(key, JSON.stringify(value));
+      return true;
+    } catch (err) {
+      console.warn("State save failed", err);
+      return false;
+    }
+  }
+  function removeStorageKey(key) {
+    const storage = getProjectStorage();
+    if (!storage) return;
+    try {
+      storage.removeItem(key);
+    } catch (_) {
+    }
+  }
+
+  // src/ui/help.ts
+  function createHelpRenderer(deps) {
+    const pageByLang = { zh: 0, en: 0 };
+    const $ = deps.$;
+    function guideLang() {
+      return deps.getLanguage() === "en" ? "en" : "zh";
+    }
+    function currentGuideArticle() {
+      return document.querySelector(`[data-doc-lang="${guideLang()}"]`);
+    }
+    function createGuideElement(block) {
+      if (block.type === "paragraph") {
+        const p2 = document.createElement("p");
+        p2.innerHTML = block.html;
+        return p2;
+      }
+      if (block.type === "subheading") {
+        const h = document.createElement("h4");
+        h.innerHTML = block.html;
+        return h;
+      }
+      if (block.type === "list") {
+        const ul = document.createElement("ul");
+        (block.items || []).forEach((item) => {
+          const li = document.createElement("li");
+          li.innerHTML = item;
+          ul.appendChild(li);
+        });
+        return ul;
+      }
+      if (block.type === "table") {
+        const table = document.createElement("table");
+        const thead = document.createElement("thead");
+        const headRow = document.createElement("tr");
+        (block.headers || []).forEach((header) => {
+          const th = document.createElement("th");
+          th.innerHTML = header;
+          headRow.appendChild(th);
+        });
+        thead.appendChild(headRow);
+        const tbody = document.createElement("tbody");
+        (block.rows || []).forEach((row) => {
+          const tr = document.createElement("tr");
+          row.forEach((cell) => {
+            const td = document.createElement("td");
+            td.innerHTML = cell;
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+        table.append(thead, tbody);
+        return table;
+      }
+      if (block.type === "formula") {
+        const div = document.createElement("div");
+        div.className = "doc-formula";
+        div.innerHTML = block.html;
+        return div;
+      }
+      if (block.type === "code") {
+        const pre = document.createElement("pre");
+        const code = document.createElement("code");
+        code.textContent = block.text || "";
+        pre.appendChild(code);
+        return pre;
+      }
+      if (block.type === "note" || block.type === "warning") {
+        const div = document.createElement("div");
+        div.className = block.type === "warning" ? "warn" : "doc-note";
+        div.innerHTML = block.html;
+        return div;
+      }
+      const p = document.createElement("p");
+      p.textContent = String(block.html || block.text || "");
+      return p;
+    }
+    function renderGuideArticle(article, manual) {
+      article.textContent = "";
+      article.dataset.copyText = "";
+      const title = document.createElement("h3");
+      title.textContent = manual.title;
+      article.appendChild(title);
+      const copyParts = [manual.title];
+      manual.sections.forEach((section) => {
+        const sectionEl = document.createElement("section");
+        sectionEl.className = "doc-section";
+        sectionEl.id = `guide-${section.id}`;
+        sectionEl.dataset.docSection = section.id;
+        const h = document.createElement("h3");
+        h.textContent = section.title;
+        sectionEl.appendChild(h);
+        copyParts.push(section.title);
+        (section.blocks || []).forEach((block) => {
+          sectionEl.appendChild(createGuideElement(block));
+          if (block.html) copyParts.push(String(block.html).replace(/<[^>]+>/g, ""));
+          if (block.text) copyParts.push(block.text);
+          if (block.items) copyParts.push(block.items.join("\n"));
+        });
+        article.appendChild(sectionEl);
+      });
+      article.dataset.copyText = copyParts.filter(Boolean).join("\n\n");
+    }
+    function initializeGuidePagination() {
+      document.querySelectorAll(".doc[data-doc-lang]").forEach((article) => {
+        const lang = article.dataset.docLang || "zh";
+        renderGuideArticle(article, deps.helpManualForLanguage(lang));
+      });
+    }
+    function guidePages(article) {
+      return Array.from(article.querySelectorAll(".doc-section"));
+    }
+    function guidePageTitle(page) {
+      const heading = page.querySelector("h3");
+      return String(heading?.textContent || (guideLang() === "zh" ? "\u8BF4\u660E" : "Guide")).trim();
+    }
+    function closeGuidePageDropdown() {
+      const dropdown = $("guide-page-dropdown");
+      const trigger = $("guide-page-trigger");
+      if (!dropdown || !trigger) return;
+      dropdown.classList.remove("open");
+      trigger.setAttribute("aria-expanded", "false");
+    }
+    function openGuidePageDropdown() {
+      const dropdown = $("guide-page-dropdown");
+      const trigger = $("guide-page-trigger");
+      const menu = $("guide-page-menu");
+      if (!dropdown || !trigger || !menu) return;
+      dropdown.classList.add("open");
+      trigger.setAttribute("aria-expanded", "true");
+      const active = menu.querySelector('[aria-selected="true"]');
+      active?.scrollIntoView({ block: "nearest" });
+    }
+    function toggleGuidePageDropdown() {
+      const dropdown = $("guide-page-dropdown");
+      if (!dropdown) return;
+      if (dropdown.classList.contains("open")) closeGuidePageDropdown();
+      else openGuidePageDropdown();
+    }
+    function focusGuidePageOption(offset) {
+      const menu = $("guide-page-menu");
+      if (!menu) return;
+      const options = Array.from(menu.querySelectorAll(".guide-page-option"));
+      if (!options.length) return;
+      const active = document.activeElement;
+      const current = Math.max(0, options.indexOf(active));
+      const next = Math.max(0, Math.min(current + offset, options.length - 1));
+      options[next].focus();
+    }
+    function renderGuidePageDropdown(sections, activeIndex) {
+      const trigger = $("guide-page-trigger");
+      const label = $("guide-page-label");
+      const menu = $("guide-page-menu");
+      if (!trigger || !label || !menu) return;
+      const ariaLabel = deps.t("guideSelectLabel");
+      trigger.setAttribute("aria-label", ariaLabel);
+      menu.setAttribute("aria-label", ariaLabel);
+      label.textContent = sections[activeIndex] ? guidePageTitle(sections[activeIndex]) : ariaLabel;
+      menu.textContent = "";
+      sections.forEach((section, index) => {
+        const option = document.createElement("button");
+        option.type = "button";
+        option.className = "guide-page-option";
+        option.setAttribute("role", "option");
+        option.setAttribute("aria-selected", String(index === activeIndex));
+        option.dataset.guideIndex = String(index);
+        option.textContent = guidePageTitle(section);
+        option.addEventListener("click", () => {
+          selectGuidePage(index);
+          closeGuidePageDropdown();
+          trigger.focus();
+        });
+        option.addEventListener("keydown", (e) => {
+          if (e.key === "ArrowDown") {
+            e.preventDefault();
+            focusGuidePageOption(1);
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            focusGuidePageOption(-1);
+          } else if (e.key === "Escape") {
+            e.preventDefault();
+            closeGuidePageDropdown();
+            trigger.focus();
+          }
+        });
+        menu.appendChild(option);
+      });
+    }
+    function updateGuidePaginationUI(scrollToTop = false) {
+      initializeGuidePagination();
+      const article = currentGuideArticle();
+      if (!article) return;
+      const sections = guidePages(article);
+      const lang = guideLang();
+      const index = Math.max(0, Math.min(pageByLang[lang], sections.length - 1));
+      pageByLang[lang] = index;
+      renderGuidePageDropdown(sections, index);
+      const next = $("guide-next-page");
+      if (next) next.disabled = index >= sections.length - 1;
+      if (scrollToTop) sections[index]?.scrollIntoView({ block: "start" });
+    }
+    function selectGuidePage(index) {
+      const article = currentGuideArticle();
+      if (!article) return;
+      const sections = guidePages(article);
+      const lang = guideLang();
+      pageByLang[lang] = Math.max(0, Math.min(index, Math.max(0, sections.length - 1)));
+      updateGuidePaginationUI(true);
+    }
+    function setGuidePage(offset) {
+      const article = currentGuideArticle();
+      if (!article) return;
+      const sections = guidePages(article);
+      const lang = guideLang();
+      pageByLang[lang] = Math.max(0, Math.min(pageByLang[lang] + offset, Math.max(0, sections.length - 1)));
+      updateGuidePaginationUI(true);
+    }
+    function openTechnicalGuide() {
+      $(deps.modalId || "tech-modal")?.classList.add("open");
+      updateGuidePaginationUI(true);
+    }
+    return {
+      closeGuidePageDropdown,
+      openGuidePageDropdown,
+      toggleGuidePageDropdown,
+      focusGuidePageOption,
+      updateGuidePaginationUI,
+      selectGuidePage,
+      setGuidePage,
+      openTechnicalGuide
+    };
+  }
+
+  // src/sky/renderer.ts
+  function skyPaneSize(element) {
+    if (!element) {
+      return {
+        width: window.innerWidth,
+        height: window.innerHeight,
+        ratio: window.innerWidth / Math.max(1, window.innerHeight)
+      };
+    }
+    const rect = element.getBoundingClientRect();
+    const width = Math.max(1, Math.round(rect.width));
+    const height = Math.max(1, Math.round(rect.height));
+    return { width, height, ratio: width / Math.max(1, height) };
+  }
+  function projectionNaturalRatio(celestial, projectionName) {
+    try {
+      const meta = celestial && celestial.projections ? celestial.projections()[projectionName] : null;
+      const ratio = meta && Number(meta.ratio);
+      return Number.isFinite(ratio) && ratio > 0 ? ratio : 1;
+    } catch (_) {
+      return 1;
+    }
+  }
+  function projectionCanvasMetrics(options) {
+    const pane = skyPaneSize(options.pane);
+    const ratio = projectionNaturalRatio(options.celestial, options.projection);
+    const fitPadding = 0.96;
+    const widthFactor = ratio >= 1 ? ratio : 1;
+    const heightFactor = ratio >= 1 ? 1 : 1 / Math.max(ratio, 1e-4);
+    const fitByWidth = pane.width / widthFactor;
+    const fitByHeight = pane.height / heightFactor;
+    const baseFitSide = Math.max(1, Math.min(fitByWidth, fitByHeight) * fitPadding);
+    const mapScale = options.clampMapScale(options.mapScale);
+    let width = baseFitSide * widthFactor * mapScale;
+    let height = baseFitSide * heightFactor * mapScale;
+    width = Math.max(1, Math.round(width));
+    height = Math.max(1, Math.round(height));
+    return {
+      paneWidth: pane.width,
+      paneHeight: pane.height,
+      paneCenterX: pane.width / 2,
+      paneCenterY: pane.height / 2,
+      baseShortSide: baseFitSide,
+      ratio,
+      scale: mapScale,
+      width,
+      height,
+      overflowX: Math.max(0, (width - pane.width) / 2),
+      overflowY: Math.max(0, (height - pane.height) / 2)
+    };
+  }
+  function applyMapBoxMetrics(map, metrics) {
+    if (!map) return metrics;
+    const forceSize = (node) => {
+      node.style.setProperty("width", `${metrics.width}px`, "important");
+      node.style.setProperty("height", `${metrics.height}px`, "important");
+      node.style.setProperty("min-width", "0px", "important");
+      node.style.setProperty("min-height", "0px", "important");
+      node.style.setProperty("max-width", "none", "important");
+      node.style.setProperty("max-height", "none", "important");
+      node.style.setProperty("box-sizing", "border-box");
+    };
+    forceSize(map);
+    map.querySelectorAll("canvas, svg").forEach((node) => forceSize(node));
+    return metrics;
+  }
+  function canvasRect(mapSelector = "#celestial-map canvas") {
+    const canvas = document.querySelector(mapSelector);
+    return canvas ? canvas.getBoundingClientRect() : null;
+  }
+
+  // src/sky/projection.ts
+  function clampMapScale(value, min, max) {
+    const safeMin = Number.isFinite(min) ? min : 1;
+    const safeMax = Math.max(safeMin, Number.isFinite(max) ? max : safeMin);
+    const number = Number(value);
+    return Math.max(safeMin, Math.min(safeMax, Number.isFinite(number) ? number : safeMin));
+  }
+  function viewMapScale(view, fallback, clamp) {
+    if (view && Object.prototype.hasOwnProperty.call(view, "mapScale")) return clamp(view.mapScale);
+    if (view && Object.prototype.hasOwnProperty.call(view, "zoom")) return clamp(view.zoom);
+    return clamp(fallback);
+  }
+  function viewKey(projection, coordinateSystem) {
+    return `${coordinateSystem}:${projection}`;
+  }
+  function coordinateViewDefault(options) {
+    const projectionDefault = options.projectionDefaults[options.projection] || {
+      center: [0, 0, 0],
+      mapScale: 1
+    };
+    const configured = options.configuredResetView || {};
+    return {
+      center: Array.isArray(configured.center) ? configured.center.slice() : projectionDefault.center.slice(),
+      mapScale: options.viewMapScale(configured, projectionDefault.mapScale)
+    };
+  }
+  function desiredView(options) {
+    if (options.isHorizontalView) {
+      return {
+        ...options.fallbackView,
+        mapScale: options.viewMapScale(options.savedView || options.fallbackView, options.fallbackView.mapScale)
+      };
+    }
+    return options.savedView || options.fallbackView;
+  }
+
+  // src/sky/layers.ts
+  function drawReferenceText(context, text, point, style, align = "center") {
+    if (!context || !point) return;
+    context.save();
+    context.globalAlpha = style.opacity;
+    context.fillStyle = style.fill;
+    context.font = style.font;
+    context.textAlign = align;
+    context.textBaseline = style.baseline || "middle";
+    context.fillText(text, point[0], point[1]);
+    context.restore();
+  }
+  function selectionNodes(celestial, selector) {
+    try {
+      const sel = celestial.container.selectAll(selector);
+      return sel && sel[0] ? sel[0].filter(Boolean) : [];
+    } catch (_) {
+      return [];
+    }
+  }
+
+  // src/sky/interactions.ts
+  function skyEventPoint(canvas, event) {
+    const rect = canvas.getBoundingClientRect();
+    return [event.clientX - rect.left, event.clientY - rect.top];
+  }
+  function drawFourArmReticle(context, point, style = {}) {
+    if (!context || !point) return;
+    const [x, y] = point;
+    const gap = Number.isFinite(style.gap) ? Number(style.gap) : 9;
+    const armLength = Number.isFinite(style.armLength) ? Number(style.armLength) : 13;
+    const outer = gap + armLength;
+    context.save();
+    context.strokeStyle = style.stroke || "#8eeaff";
+    context.globalAlpha = Number.isFinite(style.opacity) ? Number(style.opacity) : 0.88;
+    context.lineWidth = Number.isFinite(style.lineWidth) ? Number(style.lineWidth) : 1.5;
+    context.lineCap = "round";
+    context.beginPath();
+    context.moveTo(x - outer, y);
+    context.lineTo(x - gap, y);
+    context.moveTo(x + gap, y);
+    context.lineTo(x + outer, y);
+    context.moveTo(x, y - outer);
+    context.lineTo(x, y - gap);
+    context.moveTo(x, y + gap);
+    context.lineTo(x, y + outer);
+    context.stroke();
+    context.restore();
+  }
+  function drawSearchReticle(context, point) {
+    if (!context || !point) return;
+    context.save();
+    context.strokeStyle = "#ffe45c";
+    context.globalAlpha = 0.94;
+    context.lineWidth = 2;
+    context.beginPath();
+    context.arc(point[0], point[1], 16, 0, Math.PI * 2);
+    context.stroke();
+    context.restore();
+    drawFourArmReticle(context, point, {
+      stroke: "#ffe45c",
+      opacity: 0.94,
+      lineWidth: 2,
+      gap: 8,
+      armLength: 15
+    });
+  }
+  function drawSelectionReticle(context, point, style = {}) {
+    if (!context || !point) return;
+    drawFourArmReticle(context, point, {
+      stroke: style.stroke || "#8eeaff",
+      opacity: Number.isFinite(style.opacity) ? style.opacity : 0.9,
+      lineWidth: Number.isFinite(style.lineWidth) ? style.lineWidth : 1.45,
+      gap: Number.isFinite(style.gap) ? style.gap : 10,
+      armLength: Number.isFinite(style.armLength) ? style.armLength : 13
+    });
+  }
+
+  // src/ui/layout.ts
+  function isMobileLayout(width = window.innerWidth) {
+    return width <= 800;
+  }
+  function elementRect(selector) {
+    const element = document.querySelector(selector);
+    return element ? element.getBoundingClientRect() : null;
+  }
+  function isTextEditingTarget(target) {
+    if (!target || !target.closest) return false;
+    return !!target.closest("input,select,textarea,[contenteditable='true'],.modal,#debug-overlay");
+  }
+
+  // src/ui/panels.ts
+  function infoPairLine(a, b, c, d) {
+    return `<div class="floating-info-pair"><span class="floating-field"><b>${a}\uFF1A</b><em>${b || "\u2014"}</em></span><span class="floating-field"><b>${c}\uFF1A</b><em>${d || "\u2014"}</em></span></div>`;
+  }
+  function infoSingleLine(a, b) {
+    return `<div class="floating-info-single"><b>${a}\uFF1A</b><em>${b || "\u2014"}</em></div>`;
+  }
+
+  // src/ui/controls.ts
+  function readIntegerField(element) {
+    if (!element) return null;
+    const value = Number.parseInt(String(element.value || ""), 10);
+    return Number.isFinite(value) ? value : null;
+  }
+  function createSectionShell(options) {
+    const section = document.createElement("section");
+    section.className = `section ${options.contentClass || ""}`.trim();
+    section.dataset.menuId = options.id;
+    section.id = `${options.id.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`)}-section`;
+    const title = document.createElement("div");
+    title.className = "section-title";
+    const titleText = document.createElement("span");
+    titleText.dataset.i18n = options.titleKey;
+    titleText.textContent = options.t(options.titleKey);
+    const hint = document.createElement("span");
+    hint.dataset.i18n = options.hintKey;
+    hint.textContent = options.t(options.hintKey);
+    title.append(titleText, hint);
+    const body = document.createElement("div");
+    body.className = "section-body";
+    section.append(title, body);
+    return { section, body };
+  }
+  function applyMenuSectionOrder(panel, order) {
+    if (!panel || panel.dataset.menuOrderChecked === "true") return;
+    (Array.isArray(order) ? order : []).forEach((id) => {
+      const section = panel.querySelector(`[data-menu-id="${id}"]`);
+      if (section) panel.appendChild(section);
+    });
+    panel.dataset.menuOrderChecked = "true";
+  }
+  function initializeMenuSections(options) {
+    const panel = options.panel;
+    if (!panel || panel.dataset.menuSectionsReady === "true") return;
+    const collapsible = new Set(Array.isArray(options.collapsible) ? options.collapsible : []);
+    panel.querySelectorAll("[data-menu-id]").forEach((section) => {
+      const id = section.dataset.menuId;
+      const title = section.querySelector(".section-title");
+      if (!id || !collapsible.has(id) || !title) return;
+      section.classList.add("section-collapsible");
+      const collapsed = options.getCollapsedIds().includes(id);
+      section.classList.toggle("section-collapsed", collapsed);
+      title.setAttribute("role", "button");
+      title.setAttribute("tabindex", "0");
+      title.setAttribute("aria-expanded", String(!collapsed));
+      const toggle = () => {
+        const isCollapsed = section.classList.toggle("section-collapsed");
+        title.setAttribute("aria-expanded", String(!isCollapsed));
+        const ids = Array.from(panel.querySelectorAll(".section-collapsible.section-collapsed")).map((item) => item.dataset.menuId).filter(Boolean);
+        options.setCollapsedIds(ids);
+        options.save();
+        options.scheduleSkyResize("menu-section-toggle");
+      };
+      title.addEventListener("click", toggle);
+      title.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" && event.key !== " ") return;
+        event.preventDefault();
+        toggle();
+      });
+    });
+    panel.dataset.menuSectionsReady = "true";
+  }
+  function setupCitySearch(options) {
+    const input = options.input;
+    const box = options.box;
+    if (!input || !box) return;
+    let found = [];
+    let activeIndex = -1;
+    let composing = false;
+    const setActive = (index) => {
+      const buttons = Array.from(box.querySelectorAll(".city-option"));
+      activeIndex = buttons.length ? (index + buttons.length) % buttons.length : -1;
+      buttons.forEach((button, i) => {
+        button.classList.toggle("active", i === activeIndex);
+        button.setAttribute("aria-selected", String(i === activeIndex));
+      });
+      if (buttons[activeIndex]) buttons[activeIndex].scrollIntoView({ block: "nearest" });
+    };
+    const choose = (city) => {
+      if (!city) return;
+      input.value = options.getLanguage() === "zh" ? city.zh : city.en;
+      box.classList.remove("open");
+      options.setObserver(city.lat, city.lon, city.zone, city.zh, city.en, true);
+    };
+    const render = (query = "") => {
+      const q = String(query).trim().toLowerCase();
+      const max = Math.max(1, Math.floor(Number(options.getMaxResults()) || 60));
+      found = options.cities.filter((c) => !q || options.citySearchText(c).includes(q)).slice(0, max);
+      box.innerHTML = "";
+      found.forEach((city, index) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "city-option";
+        button.setAttribute("role", "option");
+        button.title = `${city.zh} / ${city.en} \xB7 ${city.zone}`;
+        button.innerHTML = `<span class="city-option-name">${options.getLanguage() === "zh" ? city.zh : city.en}</span><small class="city-option-zone">${city.zone}</small>`;
+        button.addEventListener("mouseenter", () => setActive(index));
+        button.addEventListener("mousedown", (event) => {
+          event.preventDefault();
+          choose(city);
+        });
+        box.appendChild(button);
+      });
+      box.classList.toggle("open", found.length > 0);
+      setActive(found.length ? 0 : -1);
+    };
+    input.addEventListener("compositionstart", () => composing = true);
+    input.addEventListener("compositionend", () => composing = false);
+    input.addEventListener("focus", () => render(input.value));
+    input.addEventListener("input", () => render(input.value));
+    input.addEventListener("keydown", (event) => {
+      if (composing || event.isComposing) return;
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        if (!box.classList.contains("open")) render(input.value);
+        else setActive(activeIndex + 1);
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        if (!box.classList.contains("open")) render(input.value);
+        else setActive(activeIndex - 1);
+      } else if (event.key === "Enter") {
+        const text = input.value.trim();
+        const city = found[activeIndex] || options.cities.find((x) => x.zh === text || x.en.toLowerCase() === text.toLowerCase());
+        if (city) {
+          event.preventDefault();
+          choose(city);
+          input.blur();
+        }
+      } else if (event.key === "Escape") {
+        box.classList.remove("open");
+      }
+    });
+    document.addEventListener("mousedown", (event) => {
+      if (!event.target.closest(".city-search-wrap")) box.classList.remove("open");
+    });
+  }
+
   // src/app.ts
   (() => {
     "use strict";
@@ -2288,14 +3028,12 @@
     let resizeTimer = null;
     let applyTimer = null;
     let loadTimer = null;
-    const guidePageByLang = { zh: 0, en: 0 };
     let chineseLinesReady = false;
     let chineseNamesReady = false;
     let westernDualLinesReady = false;
     let westernDualLineFeatures = [];
     let chineseLineFeatures = [];
     let sharedCultureSegments = /* @__PURE__ */ new Set();
-    let storageAvailable = null;
     let traditionalRegionsReady = false, traditionalLabelsReady = false;
     let rebuildInProgress = false, suppressResizeUntil = 0, rebuildGeneration = 0;
     let resizeObserver = null, clickStart = null, pointerMoved = false, paneDrag = null, poleCustomDrag = null;
@@ -2372,20 +3110,7 @@
     const CN_ASTERISM_NAMES = chineseAsterismNameMap();
     let chineseStarAsterismIndex = null;
     let chineseAsterismCoordinateEntries = [];
-    function getStorage() {
-      if (storageAvailable === false) return null;
-      try {
-        const storage = window.localStorage;
-        const probe = "__rso_storage_probe__";
-        storage.setItem(probe, "1");
-        storage.removeItem(probe);
-        storageAvailable = true;
-        return storage;
-      } catch (_) {
-        storageAvailable = false;
-        return null;
-      }
-    }
+    const getStorage = getProjectStorage;
     function t(key) {
       return I18N[state.lang] && I18N[state.lang][key] || key;
     }
@@ -2400,20 +3125,15 @@
         cfg("mapScale.buttonFactor", cfg("interaction.zoomButtonFactor", 1.25))
       ) || 1.25;
     }
-    function clampMapScale(value) {
-      const min = mapScaleMin(), max = Math.max(min, mapScaleMax()), number = Number(value);
-      return Math.max(min, Math.min(max, Number.isFinite(number) ? number : min));
+    function clampMapScale2(value) {
+      return clampMapScale(value, mapScaleMin(), mapScaleMax());
     }
     function getMapScale() {
-      state.mapScale = clampMapScale(state.mapScale);
+      state.mapScale = clampMapScale2(state.mapScale);
       return state.mapScale;
     }
-    function viewMapScale(view, fallback = state.mapScale) {
-      if (view && Object.prototype.hasOwnProperty.call(view, "mapScale"))
-        return clampMapScale(view.mapScale);
-      if (view && Object.prototype.hasOwnProperty.call(view, "zoom"))
-        return clampMapScale(view.zoom);
-      return clampMapScale(fallback);
+    function viewMapScale2(view, fallback = state.mapScale) {
+      return viewMapScale(view, fallback, clampMapScale2);
     }
     function isValidZone(zone) {
       if (!zone || typeof zone !== "string") return false;
@@ -2519,7 +3239,7 @@
       state.menuCollapsed = state.menuCollapsed.filter(
         (id) => allowedMenuSections.has(id)
       );
-      state.mapScale = viewMapScale(
+      state.mapScale = viewMapScale2(
         { mapScale: state.mapScale, zoom: state.zoom },
         defaults.mapScale
       );
@@ -2528,20 +3248,14 @@
       delete state.zoom;
       Object.values(state.projectionViews).forEach((view) => {
         if (!view || typeof view !== "object") return;
-        view.mapScale = viewMapScale(view, state.mapScale);
+        view.mapScale = viewMapScale2(view, state.mapScale);
         delete view.zoom;
       });
       state.regionBoundaries = !!state.regionBoundaries;
       state.zone = safeZoneForCoordinates(state.lat, state.lon, state.zone);
     }
     function save() {
-      const storage = getStorage();
-      if (!storage) return;
-      try {
-        storage.setItem(STORAGE_KEY, JSON.stringify(state));
-      } catch (err) {
-        console.warn("State save failed", err);
-      }
+      writeJsonToStorage(STORAGE_KEY, state);
     }
     function observerDT() {
       const zone = safeZoneForCoordinates();
@@ -2552,17 +3266,6 @@
       let instant = DateTime.fromISO(state.instant, { zone: "utc" });
       if (!instant.isValid) instant = DateTime.utc();
       return instant.setZone(zone);
-    }
-    function formatOffset(minutes) {
-      const sign = minutes >= 0 ? "+" : "\u2212";
-      const a = Math.abs(Math.trunc(minutes)), h = Math.floor(a / 60), m = a % 60;
-      return `UTC${sign}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-    }
-    function formatOffsetDetailed(minutes) {
-      const totalSeconds = Math.round(Number(minutes) * 60);
-      if (!Number.isFinite(totalSeconds)) return "-";
-      const sign = totalSeconds >= 0 ? "+" : "\u2212", abs = Math.abs(totalSeconds), h = Math.floor(abs / 3600), m = Math.floor(abs % 3600 / 60), sec = abs % 60;
-      return sec ? `UTC${sign}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}` : `UTC${sign}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
     }
     function timeZoneOffsetDebug(dt) {
       if (!dt || !dt.isValid)
@@ -2587,26 +3290,9 @@
       if (value === "pending") return zh ? "\u5237\u65B0\u4E2D" : "pending";
       return zh ? "\u6B63\u5E38" : "healthy";
     }
-    function astronomicalYearToDisplay(year) {
-      const n = Number(year);
-      if (!Number.isFinite(n)) return "";
-      const whole = Math.trunc(n);
-      if (whole <= 0) return `BC ${String(1 - whole).padStart(1, "0")}`;
-      return `AD ${String(whole).padStart(4, "0")}`;
-    }
-    function astronomicalYearToInput(year) {
-      const n = Number(year);
-      if (!Number.isFinite(n)) return "";
-      const whole = Math.trunc(n);
-      return whole <= 0 ? `-${1 - whole}` : String(whole);
-    }
     function currentInstantDate() {
       const dt = DateTime.fromISO(String(state.instant || ""), { zone: "utc" });
       return (dt.isValid ? dt : DateTime.fromISO(defaults.instant, { zone: "utc" })).toJSDate();
-    }
-    function julianDateFromDate2(date) {
-      if (!(date instanceof Date) || !Number.isFinite(date.getTime())) return null;
-      return date.getTime() / 864e5 + 24405875e-1;
     }
     function precisionStatusForYear(year) {
       const y = Number(year);
@@ -2669,11 +3355,6 @@
     function noteTimeRenderDebug(patch = {}) {
       Object.assign(timeRenderDebug, patch);
       if (debugVisible) updateDebugOverlay(true);
-    }
-    function formatCivilDateTime(dt, includeSeconds = false) {
-      const y = astronomicalYearToDisplay(dt.year);
-      const base = `${y}/${String(dt.month).padStart(2, "0")}/${String(dt.day).padStart(2, "0")} ${String(dt.hour).padStart(2, "0")}:${String(dt.minute).padStart(2, "0")}`;
-      return includeSeconds ? `${base}:${String(dt.second).padStart(2, "0")}` : base;
     }
     const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     const TIME_FIELD_TO_ID = {
@@ -2778,14 +3459,13 @@
         }, 1800);
       }
     }
-    function readIntegerField(id) {
+    function readIntegerField2(id) {
       const value = String($(id)?.value || "").trim();
       if (!/^[+-]?\d+$/.test(value)) return null;
-      const n = Number(value);
-      return Number.isSafeInteger(n) ? n : null;
+      return readIntegerField({ value });
     }
     function parseObserverTimeFields() {
-      const y = readIntegerField("time-year"), month = readIntegerField("time-month"), day = readIntegerField("time-day"), hour = readIntegerField("time-hour"), minute = readIntegerField("time-minute");
+      const y = readIntegerField2("time-year"), month = readIntegerField2("time-month"), day = readIntegerField2("time-day"), hour = readIntegerField2("time-hour"), minute = readIntegerField2("time-minute");
       if (y === null || y === 0 || month === null || day === null || hour === null || minute === null || month < 1 || month > 12 || day < 1 || day > 31 || hour < 0 || hour > 23 || minute < 0 || minute > 59)
         return null;
       const parts = {
@@ -2813,7 +3493,7 @@
         playing,
         mapScale: state.mapScale,
         center: null,
-        viewKey: viewKey()
+        viewKey: viewKey2()
       };
       try {
         const center = window.Celestial && Celestial.rotate && Celestial.rotate();
@@ -2826,7 +3506,7 @@
       if (!snapshot) return false;
       state.instant = snapshot.instant;
       playing = snapshot.playing;
-      state.mapScale = viewMapScale({ mapScale: snapshot.mapScale }, state.mapScale);
+      state.mapScale = viewMapScale2({ mapScale: snapshot.mapScale }, state.mapScale);
       let ok = true;
       try {
         if (window.Celestial && snapshot.center) {
@@ -2835,7 +3515,7 @@
         setMapScale(state.mapScale);
         updateHUD(true);
         ok = redrawAndSyncMapBox(`${source} rollback`);
-        syncMapBoxAfterRedraw(projectionCanvasMetrics());
+        syncMapBoxAfterRedraw(projectionCanvasMetrics2());
       } catch (err) {
         ok = false;
         console.warn("Render snapshot rollback failed", err);
@@ -2967,222 +3647,20 @@
       if (message) $("loading-text").textContent = message;
       el.classList.toggle("hidden", !on);
     }
-    function guideLang() {
-      return state.lang === "en" ? "en" : "zh";
-    }
-    function currentGuideArticle() {
-      return document.querySelector(`[data-doc-lang="${guideLang()}"]`);
-    }
-    function createGuideElement(block) {
-      if (block.type === "paragraph") {
-        const p2 = document.createElement("p");
-        p2.innerHTML = block.html;
-        return p2;
-      }
-      if (block.type === "subheading") {
-        const h = document.createElement("h4");
-        h.innerHTML = block.html;
-        return h;
-      }
-      if (block.type === "list") {
-        const ul = document.createElement("ul");
-        (block.items || []).forEach((item) => {
-          const li = document.createElement("li");
-          li.innerHTML = item;
-          ul.appendChild(li);
-        });
-        return ul;
-      }
-      if (block.type === "table") {
-        const table = document.createElement("table");
-        const thead = document.createElement("thead");
-        const headRow = document.createElement("tr");
-        (block.headers || []).forEach((header) => {
-          const th = document.createElement("th");
-          th.innerHTML = header;
-          headRow.appendChild(th);
-        });
-        thead.appendChild(headRow);
-        const tbody = document.createElement("tbody");
-        (block.rows || []).forEach((row) => {
-          const tr = document.createElement("tr");
-          row.forEach((cell) => {
-            const td = document.createElement("td");
-            td.innerHTML = cell;
-            tr.appendChild(td);
-          });
-          tbody.appendChild(tr);
-        });
-        table.append(thead, tbody);
-        return table;
-      }
-      if (block.type === "formula") {
-        const div = document.createElement("div");
-        div.className = "doc-formula";
-        div.innerHTML = block.html;
-        return div;
-      }
-      if (block.type === "code") {
-        const pre = document.createElement("pre");
-        const code = document.createElement("code");
-        code.textContent = block.text || "";
-        pre.appendChild(code);
-        return pre;
-      }
-      if (block.type === "note" || block.type === "warning") {
-        const div = document.createElement("div");
-        div.className = block.type === "warning" ? "warn" : "doc-note";
-        div.innerHTML = block.html;
-        return div;
-      }
-      const p = document.createElement("p");
-      p.textContent = String(block.html || block.text || "");
-      return p;
-    }
-    function renderGuideArticle(article, manual) {
-      article.textContent = "";
-      article.dataset.copyText = "";
-      const title = document.createElement("h3");
-      title.textContent = manual.title;
-      article.appendChild(title);
-      const copyParts = [manual.title];
-      manual.sections.forEach((section) => {
-        const sectionEl = document.createElement("section");
-        sectionEl.className = "doc-section";
-        sectionEl.id = `guide-${section.id}`;
-        sectionEl.dataset.docSection = section.id;
-        const h = document.createElement("h3");
-        h.textContent = section.title;
-        sectionEl.appendChild(h);
-        copyParts.push(section.title);
-        (section.blocks || []).forEach((block) => {
-          sectionEl.appendChild(createGuideElement(block));
-          if (block.html) copyParts.push(String(block.html).replace(/<[^>]+>/g, ""));
-          if (block.text) copyParts.push(block.text);
-          if (block.items) copyParts.push(block.items.join("\n"));
-        });
-        article.appendChild(sectionEl);
-      });
-      article.dataset.copyText = copyParts.filter(Boolean).join("\n\n");
-    }
-    function initializeGuidePagination() {
-      const manual = helpManualForLanguage(guideLang());
-      document.querySelectorAll(".doc[data-doc-lang]").forEach((article) => {
-        const lang = article.dataset.docLang || "zh";
-        renderGuideArticle(article, helpManualForLanguage(lang));
-      });
-    }
-    function guidePages(article) {
-      return Array.from(article.querySelectorAll(".doc-section"));
-    }
-    function guidePageTitle(page) {
-      const heading = page.querySelector("h3");
-      return String(heading?.textContent || (state.lang === "zh" ? "\u8BF4\u660E" : "Guide")).trim();
-    }
-    function closeGuidePageDropdown() {
-      const dropdown = $("guide-page-dropdown");
-      const trigger = $("guide-page-trigger");
-      const menu = $("guide-page-menu");
-      if (!dropdown || !trigger || !menu) return;
-      dropdown.classList.remove("open");
-      trigger.setAttribute("aria-expanded", "false");
-    }
-    function openGuidePageDropdown() {
-      const dropdown = $("guide-page-dropdown");
-      const trigger = $("guide-page-trigger");
-      const menu = $("guide-page-menu");
-      if (!dropdown || !trigger || !menu) return;
-      dropdown.classList.add("open");
-      trigger.setAttribute("aria-expanded", "true");
-      const active = menu.querySelector('[aria-selected="true"]');
-      active?.scrollIntoView({ block: "nearest" });
-    }
-    function toggleGuidePageDropdown() {
-      const dropdown = $("guide-page-dropdown");
-      if (!dropdown) return;
-      if (dropdown.classList.contains("open")) closeGuidePageDropdown();
-      else openGuidePageDropdown();
-    }
-    function focusGuidePageOption(offset) {
-      const menu = $("guide-page-menu");
-      if (!menu) return;
-      const options = Array.from(menu.querySelectorAll(".guide-page-option"));
-      if (!options.length) return;
-      const active = document.activeElement;
-      const current = Math.max(0, options.indexOf(active));
-      const next = Math.max(0, Math.min(current + offset, options.length - 1));
-      options[next].focus();
-    }
-    function renderGuidePageDropdown(sections, activeIndex) {
-      const trigger = $("guide-page-trigger");
-      const label = $("guide-page-label");
-      const menu = $("guide-page-menu");
-      if (!trigger || !label || !menu) return;
-      const ariaLabel = t("guideSelectLabel");
-      trigger.setAttribute("aria-label", ariaLabel);
-      menu.setAttribute("aria-label", ariaLabel);
-      label.textContent = sections[activeIndex] ? guidePageTitle(sections[activeIndex]) : ariaLabel;
-      menu.textContent = "";
-      sections.forEach((section, index) => {
-        const option = document.createElement("button");
-        option.type = "button";
-        option.className = "guide-page-option";
-        option.setAttribute("role", "option");
-        option.setAttribute("aria-selected", String(index === activeIndex));
-        option.dataset.guideIndex = String(index);
-        option.textContent = guidePageTitle(section);
-        option.addEventListener("click", () => {
-          selectGuidePage(index);
-          closeGuidePageDropdown();
-          trigger.focus();
-        });
-        option.addEventListener("keydown", (e) => {
-          if (e.key === "ArrowDown") {
-            e.preventDefault();
-            focusGuidePageOption(1);
-          } else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            focusGuidePageOption(-1);
-          } else if (e.key === "Escape") {
-            e.preventDefault();
-            closeGuidePageDropdown();
-            trigger.focus();
-          }
-        });
-        menu.appendChild(option);
-      });
-    }
-    function updateGuidePaginationUI(scrollToTop = false) {
-      initializeGuidePagination();
-      const article = currentGuideArticle();
-      if (!article) return;
-      const sections = guidePages(article);
-      const index = Math.max(0, Math.min(guidePageByLang[guideLang()], sections.length - 1));
-      guidePageByLang[guideLang()] = index;
-      renderGuidePageDropdown(sections, index);
-      $("guide-next-page").disabled = index >= sections.length - 1;
-      if (scrollToTop) sections[index]?.scrollIntoView({ block: "start" });
-    }
-    function selectGuidePage(index) {
-      const article = currentGuideArticle();
-      if (!article) return;
-      const sections = guidePages(article);
-      const lang = guideLang();
-      guidePageByLang[lang] = Math.max(0, Math.min(index, Math.max(0, sections.length - 1)));
-      updateGuidePaginationUI(true);
-    }
-    function setGuidePage(offset) {
-      const article = currentGuideArticle();
-      if (!article) return;
-      const sections = guidePages(article);
-      const lang = guideLang();
-      guidePageByLang[lang] = Math.max(0, Math.min(guidePageByLang[lang] + offset, Math.max(0, sections.length - 1)));
-      updateGuidePaginationUI(true);
-    }
-    function openTechnicalGuide() {
-      $("tech-modal").classList.add("open");
-      updateGuidePaginationUI(true);
-    }
+    const helpRenderer = createHelpRenderer({
+      $,
+      t,
+      getLanguage: () => state.lang === "en" ? "en" : "zh",
+      helpManualForLanguage
+    });
+    const {
+      closeGuidePageDropdown,
+      toggleGuidePageDropdown,
+      openGuidePageDropdown,
+      updateGuidePaginationUI,
+      setGuidePage,
+      openTechnicalGuide
+    } = helpRenderer;
     function applyI18n() {
       document.documentElement.lang = state.lang === "zh" ? "zh-CN" : "en";
       document.body.classList.toggle("lang-en", state.lang === "en");
@@ -3278,24 +3756,8 @@
       robinson: { center: [0, 0, 0], mapScale: 1 },
       sinusoidal: { center: [0, 0, 0], mapScale: 1 }
     };
-    function createSectionShell(id, titleKey, hintKey, contentClass = "") {
-      const section = document.createElement("section");
-      section.className = `section ${contentClass}`.trim();
-      section.dataset.menuId = id;
-      section.id = `${id.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`)}-section`;
-      const title = document.createElement("div");
-      title.className = "section-title";
-      const titleText = document.createElement("span");
-      titleText.dataset.i18n = titleKey;
-      titleText.textContent = t(titleKey);
-      const hint = document.createElement("span");
-      hint.dataset.i18n = hintKey;
-      hint.textContent = t(hintKey);
-      title.append(titleText, hint);
-      const body = document.createElement("div");
-      body.className = "section-body";
-      section.append(title, body);
-      return { section, body };
+    function createSectionShell2(id, titleKey, hintKey, contentClass = "") {
+      return createSectionShell({ id, titleKey, hintKey, contentClass, t });
     }
     function initializeIntegratedLayout() {
       if ($("app-shell")) return;
@@ -3314,17 +3776,17 @@
       head.id = "sidebar-head";
       if (brand) head.appendChild(brand);
       sidebar.appendChild(head);
-      const infoShell = createSectionShell("topInfo", "topInfo", "topInfoHint", "top-info-section");
+      const infoShell = createSectionShell2("topInfo", "topInfo", "topInfoHint", "top-info-section");
       if (hud) infoShell.body.appendChild(hud);
       panel.prepend(infoShell.section);
-      const cultureShell = createSectionShell("cultureSettings", "cultureSettings", "cultureSettingsHint", "culture-settings-section");
+      const cultureShell = createSectionShell2("cultureSettings", "cultureSettings", "cultureSettingsHint", "culture-settings-section");
       if (selector) cultureShell.body.appendChild(selector);
       const searchSection = panel.querySelector('[data-menu-id="search"]');
       if (searchSection && searchSection.nextSibling) panel.insertBefore(cultureShell.section, searchSection.nextSibling);
       else panel.appendChild(cultureShell.section);
       sidebar.appendChild(panel);
-      applyMenuSectionOrder(panel);
-      initializeMenuSections(panel);
+      applyMenuSectionOrder2(panel);
+      initializeMenuSections2(panel);
       pane.appendChild($("sky-stage"));
       const skyMeta = $("sky-meta");
       if (skyMeta) pane.appendChild(skyMeta);
@@ -3337,56 +3799,27 @@
         resizeObserver.observe(sidebar);
       }
     }
-    function applyMenuSectionOrder(panel = $("control-panel")) {
-      if (!panel || panel.dataset.menuOrderChecked === "true") return;
-      const configured = cfg("menu.order", []), order = Array.isArray(configured) ? configured : [];
-      order.forEach((id) => {
-        const section = panel.querySelector(`[data-menu-id="${id}"]`);
-        if (section) panel.appendChild(section);
-      });
-      panel.dataset.menuOrderChecked = "true";
+    function applyMenuSectionOrder2(panel = $("control-panel")) {
+      applyMenuSectionOrder(panel, cfg("menu.order", []));
     }
-    function initializeMenuSections(panel = $("control-panel")) {
-      if (!panel || panel.dataset.menuSectionsReady === "true") return;
-      const collapsible = new Set(
-        Array.isArray(cfg("menu.collapsible", [])) ? cfg("menu.collapsible", []) : []
-      );
-      panel.querySelectorAll("[data-menu-id]").forEach((section) => {
-        const id = section.dataset.menuId, title = section.querySelector(".section-title");
-        if (!collapsible.has(id) || !title) return;
-        section.classList.add("section-collapsible");
-        const collapsed = state.menuCollapsed.includes(id);
-        section.classList.toggle("section-collapsed", collapsed);
-        title.setAttribute("role", "button");
-        title.setAttribute("tabindex", "0");
-        title.setAttribute("aria-expanded", String(!collapsed));
-        const toggle = () => {
-          const collapsed2 = section.classList.toggle("section-collapsed");
-          title.setAttribute("aria-expanded", String(!collapsed2));
-          state.menuCollapsed = Array.from(
-            panel.querySelectorAll(".section-collapsible.section-collapsed")
-          ).map((item) => item.dataset.menuId).filter(Boolean);
-          save();
-          scheduleSkyResize("menu-section-toggle");
-        };
-        title.addEventListener("click", toggle);
-        title.addEventListener("keydown", (event) => {
-          if (event.key !== "Enter" && event.key !== " ") return;
-          event.preventDefault();
-          toggle();
-        });
+    function initializeMenuSections2(panel = $("control-panel")) {
+      initializeMenuSections({
+        panel,
+        collapsible: cfg("menu.collapsible", []),
+        getCollapsedIds: () => state.menuCollapsed,
+        setCollapsedIds: (ids) => state.menuCollapsed = ids,
+        save,
+        scheduleSkyResize
       });
-      panel.dataset.menuSectionsReady = "true";
     }
-    function isMobileLayout() {
-      return window.matchMedia && window.matchMedia("(max-width: 800px)").matches || window.innerWidth <= 800;
+    function isMobileLayout2() {
+      return window.matchMedia && window.matchMedia("(max-width: 800px)").matches || isMobileLayout(window.innerWidth);
     }
     function applyInitialResponsivePanelState() {
-      if (isMobileLayout()) state.panelOpen = false;
+      if (isMobileLayout2()) state.panelOpen = false;
     }
-    function elementRect(selector) {
-      const el = document.querySelector(selector);
-      return el ? el.getBoundingClientRect() : null;
+    function elementRect2(selector) {
+      return elementRect(selector);
     }
     function updateDebugToggleTitle() {
       const button = $("debug-toggle");
@@ -3766,21 +4199,21 @@
         skyReady: "skyReady",
         rebuild: "rebuild"
       };
-      const pane = $("sky-pane"), canvas = document.querySelector("#celestial-map canvas"), svg = document.querySelector("#celestial-map svg"), metrics = projectionCanvasMetrics(), celestialMetrics = window.Celestial && typeof Celestial.metrics === "function" ? Celestial.metrics() : null;
-      const paneRect = pane ? pane.getBoundingClientRect() : null, sidebarRect = elementRect("#sidebar"), panelToggleRect = elementRect("#panel-toggle"), overlayRect = overlay.getBoundingClientRect(), stageRect = elementRect("#sky-stage"), frameRect = elementRect("#celestial-frame"), mapRect = elementRect("#celestial-map"), canvasRect2 = canvas ? canvas.getBoundingClientRect() : null, svgRect = svg ? svg.getBoundingClientRect() : null, paneCenter = paneRect ? {
+      const pane = $("sky-pane"), canvas = document.querySelector("#celestial-map canvas"), svg = document.querySelector("#celestial-map svg"), metrics = projectionCanvasMetrics2(), celestialMetrics = window.Celestial && typeof Celestial.metrics === "function" ? Celestial.metrics() : null;
+      const paneRect = pane ? pane.getBoundingClientRect() : null, sidebarRect = elementRect2("#sidebar"), panelToggleRect = elementRect2("#panel-toggle"), overlayRect = overlay.getBoundingClientRect(), stageRect = elementRect2("#sky-stage"), frameRect = elementRect2("#celestial-frame"), mapRect = elementRect2("#celestial-map"), canvasRect3 = canvas ? canvas.getBoundingClientRect() : null, svgRect = svg ? svg.getBoundingClientRect() : null, paneCenter = paneRect ? {
         x: paneRect.left + paneRect.width / 2,
         y: paneRect.top + paneRect.height / 2
       } : null, mapCenter = mapRect ? {
         x: mapRect.left + mapRect.width / 2,
         y: mapRect.top + mapRect.height / 2
-      } : null, canvasCenter = canvasRect2 ? {
-        x: canvasRect2.left + canvasRect2.width / 2,
-        y: canvasRect2.top + canvasRect2.height / 2
+      } : null, canvasCenter = canvasRect3 ? {
+        x: canvasRect3.left + canvasRect3.width / 2,
+        y: canvasRect3.top + canvasRect3.height / 2
       } : null, centerDelta = paneCenter && mapCenter ? { x: mapCenter.x - paneCenter.x, y: mapCenter.y - paneCenter.y } : null, canvasCenterDelta = paneCenter && canvasCenter ? {
         x: canvasCenter.x - paneCenter.x,
         y: canvasCenter.y - paneCenter.y
       } : null;
-      const pointerInfo = debugPointerInfo(zh), mapStyle = mapRect ? getComputedStyle($("celestial-map")) : null, sameSize = (a, b) => !a || !b || Math.abs(a.width - b.width) <= 1 && Math.abs(a.height - b.height) <= 1, matchesTarget = (rect) => !rect || Math.abs(rect.width - metrics.width) <= 1 && Math.abs(rect.height - metrics.height) <= 1, sizesOk = matchesTarget(mapRect) && matchesTarget(canvasRect2) && matchesTarget(svgRect) && sameSize(mapRect, canvasRect2) && sameSize(canvasRect2, svgRect);
+      const pointerInfo = debugPointerInfo(zh), mapStyle = mapRect ? getComputedStyle($("celestial-map")) : null, sameSize = (a, b) => !a || !b || Math.abs(a.width - b.width) <= 1 && Math.abs(a.height - b.height) <= 1, matchesTarget = (rect) => !rect || Math.abs(rect.width - metrics.width) <= 1 && Math.abs(rect.height - metrics.height) <= 1, sizesOk = matchesTarget(mapRect) && matchesTarget(canvasRect3) && matchesTarget(svgRect) && sameSize(mapRect, canvasRect3) && sameSize(canvasRect3, svgRect);
       overlay.style.display = debugVisible ? "block" : "none";
       content.replaceChildren(
         debugGroup(label.viewportGroup),
@@ -3856,7 +4289,7 @@
         debugLine(label.mapComputedMinWidth, [
           debugValue(mapStyle ? mapStyle.minWidth : "-")
         ]),
-        debugLine(label.canvasCss, debugRectParts(canvasRect2)),
+        debugLine(label.canvasCss, debugRectParts(canvasRect3)),
         debugLine(
           label.canvasAttr,
           canvas ? debugSizeParts(canvas.width, canvas.height) : [debugValue("-")]
@@ -3880,7 +4313,7 @@
         debugLine(label.coords, [debugValue(coordName)]),
         debugLine(label.culture, [debugValue(cultureLabel)]),
         debugLine(label.language, [debugValue(languageName)]),
-        debugLine(label.viewKey, [debugValue(viewKey())]),
+        debugLine(label.viewKey, [debugValue(viewKey2())]),
         debugLine(label.viewCenter, [debugValue(viewCenter)]),
         debugLine(label.mapScale, debugScaleParts(view.mapScale)),
         debugLine(label.internalZoom, debugScaleParts(view.internalZoom)),
@@ -4144,79 +4577,39 @@
       }
       setDebugVisible(debugVisible);
     }
-    function skyPaneSize() {
-      const pane = $("sky-pane");
-      if (!pane)
-        return {
-          width: window.innerWidth,
-          height: window.innerHeight,
-          ratio: window.innerWidth / Math.max(1, window.innerHeight)
-        };
-      const r = pane.getBoundingClientRect();
-      const width = Math.max(1, Math.round(r.width)), height = Math.max(1, Math.round(r.height));
-      return { width, height, ratio: width / Math.max(1, height) };
+    function skyPaneSize2() {
+      return skyPaneSize($("sky-pane"));
     }
-    function projectionNaturalRatio(name = state.projection) {
-      try {
-        const meta = window.Celestial && Celestial.projections ? Celestial.projections()[name] : null;
-        const ratio = meta && Number(meta.ratio);
-        return Number.isFinite(ratio) && ratio > 0 ? ratio : 1;
-      } catch (_) {
-        return 1;
-      }
+    function projectionNaturalRatio2(name = state.projection) {
+      return projectionNaturalRatio(window.Celestial, name);
     }
-    function projectionCanvasMetrics(name = state.projection, scale = getMapScale()) {
-      const pane = skyPaneSize(), ratio = projectionNaturalRatio(name), fitPadding = 0.96, widthFactor = ratio >= 1 ? ratio : 1, heightFactor = ratio >= 1 ? 1 : 1 / Math.max(ratio, 1e-4), fitByWidth = pane.width / widthFactor, fitByHeight = pane.height / heightFactor, baseFitSide = Math.max(1, Math.min(fitByWidth, fitByHeight) * fitPadding), mapScale = clampMapScale(scale);
-      let width = baseFitSide * widthFactor * mapScale, height = baseFitSide * heightFactor * mapScale;
-      width = Math.max(1, Math.round(width));
-      height = Math.max(1, Math.round(height));
-      return {
-        paneWidth: pane.width,
-        paneHeight: pane.height,
-        paneCenterX: pane.width / 2,
-        paneCenterY: pane.height / 2,
-        baseShortSide: baseFitSide,
-        ratio,
-        scale: mapScale,
-        width,
-        height,
-        overflowX: Math.max(0, (width - pane.width) / 2),
-        overflowY: Math.max(0, (height - pane.height) / 2)
-      };
-    }
-    function applyMapBoxMetrics(metrics = projectionCanvasMetrics()) {
-      const map = $("celestial-map");
-      if (!map) return metrics;
-      const forceSize = (node) => {
-        node.style.setProperty("width", `${metrics.width}px`, "important");
-        node.style.setProperty("height", `${metrics.height}px`, "important");
-        node.style.setProperty("min-width", "0px", "important");
-        node.style.setProperty("min-height", "0px", "important");
-        node.style.setProperty("max-width", "none", "important");
-        node.style.setProperty("max-height", "none", "important");
-        node.style.setProperty("box-sizing", "border-box");
-      };
-      forceSize(map);
-      map.querySelectorAll("canvas, svg").forEach((node) => {
-        forceSize(node);
+    function projectionCanvasMetrics2(name = state.projection, scale = getMapScale()) {
+      return projectionCanvasMetrics({
+        pane: $("sky-pane"),
+        celestial: window.Celestial,
+        projection: name,
+        mapScale: scale,
+        clampMapScale: clampMapScale2
       });
-      return metrics;
     }
-    function syncRenderedMapBox(fallback = projectionCanvasMetrics()) {
-      const metrics = applyMapBoxMetrics(fallback);
+    function applyMapBoxMetrics2(metrics = projectionCanvasMetrics2()) {
+      return applyMapBoxMetrics($("celestial-map"), metrics);
+    }
+    function syncRenderedMapBox(fallback = projectionCanvasMetrics2()) {
+      const metrics = applyMapBoxMetrics2(fallback);
       updateDebugOverlay(true);
       return metrics;
     }
-    function syncMapBoxAfterRedraw(metrics = projectionCanvasMetrics()) {
-      applyMapBoxMetrics(metrics);
+    function syncMapBoxAfterRedraw(metrics = projectionCanvasMetrics2()) {
+      applyMapBoxMetrics2(metrics);
       updateDebugOverlay(true);
       requestAnimationFrame(() => {
-        const latest = projectionCanvasMetrics();
-        applyMapBoxMetrics(latest);
+        const latest = projectionCanvasMetrics2();
+        applyMapBoxMetrics2(latest);
         updateDebugOverlay(true);
       });
     }
-    function redrawAndSyncMapBox(reason = "redraw", metrics = projectionCanvasMetrics()) {
+    function redrawAndSyncMapBox(reason = "redraw", metrics = projectionCanvasMetrics2()) {
       let ok = true;
       try {
         updateLoadedCoordinateFrame();
@@ -4259,13 +4652,13 @@
               lastError: `follow-up redraw failed: ${debugErrorText(err)}`
             });
           }
-          syncMapBoxAfterRedraw(projectionCanvasMetrics());
+          syncMapBoxAfterRedraw(projectionCanvasMetrics2());
         });
       }
       return ok;
     }
-    function resizeCelestialCanvas(metrics = projectionCanvasMetrics()) {
-      applyMapBoxMetrics(metrics);
+    function resizeCelestialCanvas(metrics = projectionCanvasMetrics2()) {
+      applyMapBoxMetrics2(metrics);
       let redrew = false;
       try {
         if (skyReady && window.Celestial) {
@@ -4280,47 +4673,45 @@
       if (!redrew) syncMapBoxAfterRedraw(metrics);
       return metrics;
     }
-    function viewKey(projection = state.projection, coord = state.coordinateSystem) {
-      return `${coord}:${projection}`;
+    function viewKey2(projection = state.projection, coord = state.coordinateSystem) {
+      return viewKey(projection, coord);
     }
     function saveCurrentProjectionView() {
       if (!skyReady || !window.Celestial) return;
       const v = captureView();
       state.projectionViews = state.projectionViews || {};
       if (isHorizontalView()) {
-        state.projectionViews[viewKey()] = { mapScale: v.mapScale };
+        state.projectionViews[viewKey2()] = { mapScale: v.mapScale };
         return;
       }
-      state.projectionViews[viewKey()] = {
+      state.projectionViews[viewKey2()] = {
         mapScale: v.mapScale,
         center: Array.isArray(v.center) ? v.center.slice() : v.center
       };
     }
-    function desiredView() {
-      const fallback = coordinateViewDefault();
-      const saved = state.projectionViews && state.projectionViews[viewKey()];
-      if (isHorizontalView()) {
-        return {
-          ...fallback,
-          mapScale: viewMapScale(saved || fallback, fallback.mapScale)
-        };
-      }
-      return saved || fallback;
+    function desiredView2() {
+      const fallback = coordinateViewDefault2();
+      const saved = state.projectionViews && state.projectionViews[viewKey2()];
+      return desiredView({
+        savedView: saved,
+        fallbackView: fallback,
+        isHorizontalView: isHorizontalView(),
+        viewMapScale: viewMapScale2
+      });
     }
-    function coordinateViewDefault(coord = state.coordinateSystem, projection = state.projection) {
-      const projectionDefault = PROJECTION_DEFAULTS[projection] || {
-        center: [0, 0, 0],
-        mapScale: 1
-      }, configured = cfg(`resetViews.${coord}`, {});
-      return {
-        center: Array.isArray(configured.center) ? configured.center.slice() : projectionDefault.center.slice(),
-        mapScale: viewMapScale(configured, projectionDefault.mapScale)
-      };
+    function coordinateViewDefault2(coord = state.coordinateSystem, projection = state.projection) {
+      return coordinateViewDefault({
+        coordinateSystem: coord,
+        projection,
+        projectionDefaults: PROJECTION_DEFAULTS,
+        configuredResetView: cfg(`resetViews.${coord}`, {}),
+        viewMapScale: viewMapScale2
+      });
     }
     function setMapScale(value, options = {}) {
-      const next = clampMapScale(value);
+      const next = clampMapScale2(value);
       state.mapScale = next;
-      const metrics = projectionCanvasMetrics(state.projection, next);
+      const metrics = projectionCanvasMetrics2(state.projection, next);
       resizeCelestialCanvas(metrics);
       if (options.saveView) {
         saveCurrentProjectionView();
@@ -4332,7 +4723,7 @@
       const next = getMapScale() * Number(factor || 1);
       setMapScale(next, { saveView: true });
     }
-    function restoreView(view = desiredView(), attempt = 0) {
+    function restoreView(view = desiredView2(), attempt = 0) {
       if (!skyReady || !view) return;
       clearTimeout(customViewRestoreTimer);
       customViewRestoreTimer = setTimeout(
@@ -4345,7 +4736,7 @@
             }
             if (Array.isArray(view.center))
               Celestial.rotate({ center: view.center.slice() });
-            setMapScale(viewMapScale(view, state.mapScale));
+            setMapScale(viewMapScale2(view, state.mapScale));
             resetInternalZoom();
             redrawAndSyncMapBox("restore view");
           } catch (err) {
@@ -4369,14 +4760,14 @@
         () => {
           if (!skyReady || !window.Celestial || rebuildInProgress || performance.now() < suppressResizeUntil)
             return;
-          const pane = skyPaneSize();
+          const pane = skyPaneSize2();
           if (lastRenderedSize && Math.abs(pane.width - lastRenderedSize.width) < 2 && Math.abs(pane.height - lastRenderedSize.height) < 2) {
             mobileResizeDebug.lastAt = (/* @__PURE__ */ new Date()).toISOString();
             mobileResizeDebug.lastStatus = "skipped same size";
             updateDebugOverlay(true);
             return;
           }
-          const view = captureView(), generation = ++layoutResizeGeneration, metrics = projectionCanvasMetrics();
+          const view = captureView(), generation = ++layoutResizeGeneration, metrics = projectionCanvasMetrics2();
           try {
             suppressResizeUntil = performance.now() + 420;
             resizeCelestialCanvas(metrics);
@@ -4386,7 +4777,7 @@
             mobileResizeDebug.lastError = "-";
             setTimeout(() => {
               if (generation !== layoutResizeGeneration || !skyReady) return;
-              syncRenderedMapBox(projectionCanvasMetrics());
+              syncRenderedMapBox(projectionCanvasMetrics2());
               restoreView(view);
               updateDebugOverlay(true);
             }, 50);
@@ -4400,75 +4791,15 @@
         Number(cfg("interaction.resizeDebounceMs", 140)) || 140
       );
     }
-    function setupCitySearch() {
-      const input = $("city-search"), box = $("city-suggestions");
-      if (!input || !box) return;
-      let found = [], activeIndex = -1, composing = false;
-      const setActive = (index) => {
-        const buttons = Array.from(box.querySelectorAll(".city-option"));
-        activeIndex = buttons.length ? (index + buttons.length) % buttons.length : -1;
-        buttons.forEach((button, i) => {
-          button.classList.toggle("active", i === activeIndex);
-          button.setAttribute("aria-selected", String(i === activeIndex));
-        });
-        if (buttons[activeIndex]) buttons[activeIndex].scrollIntoView({ block: "nearest" });
-      };
-      const choose = (city) => {
-        if (!city) return;
-        input.value = state.lang === "zh" ? city.zh : city.en;
-        box.classList.remove("open");
-        setObserver(city.lat, city.lon, city.zone, city.zh, city.en, true);
-      };
-      const render = (query = "") => {
-        const q = String(query).trim().toLowerCase();
-        const cityMaxResults = Math.max(1, Math.floor(Number(cfg("search.cityMaxResults", 60)) || 60));
-        found = CITIES.filter((c) => !q || citySearchText(c).includes(q)).slice(
-          0,
-          cityMaxResults
-        );
-        box.innerHTML = "";
-        found.forEach((c, index) => {
-          const b = document.createElement("button");
-          b.type = "button";
-          b.className = "city-option";
-          b.setAttribute("role", "option");
-          b.title = `${c.zh} / ${c.en} \xB7 ${c.zone}`;
-          b.innerHTML = `<span class="city-option-name">${state.lang === "zh" ? c.zh : c.en}</span><small class="city-option-zone">${c.zone}</small>`;
-          b.addEventListener("mouseenter", () => setActive(index));
-          b.addEventListener("mousedown", (e) => {
-            e.preventDefault();
-            choose(c);
-          });
-          box.appendChild(b);
-        });
-        box.classList.toggle("open", found.length > 0);
-        setActive(found.length ? 0 : -1);
-      };
-      input.addEventListener("compositionstart", () => composing = true);
-      input.addEventListener("compositionend", () => composing = false);
-      input.addEventListener("focus", () => render(input.value));
-      input.addEventListener("input", () => render(input.value));
-      input.addEventListener("keydown", (e) => {
-        if (composing || e.isComposing) return;
-        if (e.key === "ArrowDown") {
-          e.preventDefault();
-          if (!box.classList.contains("open")) render(input.value);
-          else setActive(activeIndex + 1);
-        } else if (e.key === "ArrowUp") {
-          e.preventDefault();
-          if (!box.classList.contains("open")) render(input.value);
-          else setActive(activeIndex - 1);
-        } else if (e.key === "Enter") {
-          const city = found[activeIndex] || CITIES.find((x) => x.zh === input.value.trim() || x.en.toLowerCase() === input.value.trim().toLowerCase());
-          if (city) {
-            e.preventDefault();
-            choose(city);
-            input.blur();
-          }
-        } else if (e.key === "Escape") box.classList.remove("open");
-      });
-      document.addEventListener("mousedown", (e) => {
-        if (!e.target.closest(".city-search-wrap")) box.classList.remove("open");
+    function setupCitySearch2() {
+      setupCitySearch({
+        input: $("city-search"),
+        box: $("city-suggestions"),
+        cities: CITIES,
+        citySearchText,
+        getLanguage: () => state.lang,
+        getMaxResults: () => cfg("search.cityMaxResults", 60),
+        setObserver
       });
     }
     function updateBoundaryUI() {
@@ -4598,14 +4929,6 @@
     function isHorizontalView() {
       return state.coordinateSystem === "horizontal";
     }
-    function formatRA(deg) {
-      let h = (Number(deg) % 360 + 360) % 360 / 15;
-      const hh = Math.floor(h), mm = Math.floor((h - hh) * 60), ss = Math.round(((h - hh) * 60 - mm) * 60);
-      return `${String(hh).padStart(2, "0")}h ${String(mm).padStart(2, "0")}m ${String(ss).padStart(2, "0")}s`;
-    }
-    function formatDec(deg) {
-      return `${Number(deg) >= 0 ? "+" : "\u2212"}${Math.abs(Number(deg)).toFixed(2)}\xB0`;
-    }
     function horizontalFor(coord, options = {}) {
       try {
         const eq = options.alreadyEpoch ? coord : epochEquatorialFromJ2000(coord);
@@ -4618,29 +4941,15 @@
         return { alt: NaN, az: NaN };
       }
     }
-    function degToRad(value) {
-      return Number(value) * Math.PI / 180;
-    }
-    function radToDeg(value) {
-      return Number(value) * 180 / Math.PI;
-    }
-    function normalizeDegrees(value) {
-      return (Number(value) % 360 + 360) % 360;
-    }
-    function julianDate(date) {
-      return date.getTime() / 864e5 + 24405875e-1;
-    }
-    function localSiderealDegrees(date, longitude) {
-      const jd = julianDate(date), d = jd - 2451545, gmst = 280.46061837 + 360.98564736629 * d;
-      return normalizeDegrees(gmst + Number(longitude));
-    }
-    function equatorialFromHorizontal(azimuth, altitude) {
-      const az = degToRad(azimuth), alt = degToRad(altitude), lat = degToRad(state.lat), lst = degToRad(localSiderealDegrees(currentInstantDate(), state.lon));
-      const sinDec = Math.sin(alt) * Math.sin(lat) + Math.cos(alt) * Math.cos(lat) * Math.cos(az), dec = Math.asin(Math.max(-1, Math.min(1, sinDec))), hourAngle = Math.atan2(
-        -Math.sin(az) * Math.cos(alt),
-        Math.sin(alt) * Math.cos(lat) - Math.cos(alt) * Math.sin(lat) * Math.cos(az)
-      ), ra = normalizeDegrees(radToDeg(lst - hourAngle));
-      return [normalizeCelestialLongitude(ra), radToDeg(dec)];
+    function equatorialFromHorizontal2(azimuth, altitude) {
+      return equatorialFromHorizontal({
+        azimuth,
+        altitude,
+        latitude: state.lat,
+        longitude: state.lon,
+        date: currentInstantDate(),
+        normalizeLongitude: normalizeCelestialLongitude
+      });
     }
     function scaleFont(font) {
       const scale = Number(state.fontScale) || 1;
@@ -4662,7 +4971,7 @@
     }
     function projectHorizontalCoordinate(azimuth, altitude) {
       return projectEpochEquatorialCoordinate(
-        equatorialFromHorizontal(azimuth, altitude)
+        equatorialFromHorizontal2(azimuth, altitude)
       );
     }
     function drawProjectedLine(points, style) {
@@ -4690,17 +4999,15 @@
       ctx.stroke();
       ctx.restore();
     }
-    function drawReferenceText(text, point, style, align = "center") {
+    function drawReferenceText2(text, point, style, align = "center") {
       if (!point) return;
-      const ctx = Celestial.context;
-      ctx.save();
-      ctx.globalAlpha = Number(style.opacity ?? 1);
-      ctx.fillStyle = style.fill;
-      ctx.font = scaleFont(style.font);
-      ctx.textAlign = align;
-      ctx.textBaseline = style.baseline || "middle";
-      ctx.fillText(text, point[0], point[1]);
-      ctx.restore();
+      drawReferenceText(
+        Celestial.context,
+        text,
+        point,
+        { ...style, font: scaleFont(style.font), baseline: style.baseline || "middle" },
+        align
+      );
     }
     function drawHorizonLayer() {
       if (!state.horizon) return;
@@ -4725,7 +5032,7 @@
       labels.forEach(([label, az]) => {
         const point = labelAltitudes.map((alt) => projectHorizontalCoordinate(az, Number(alt))).find(Boolean);
         if (!point) return;
-        drawReferenceText(label, point, {
+        drawReferenceText2(label, point, {
           fill: cfg("sky.horizon.labelColor", "#ff5656"),
           font: cfg(
             "sky.horizon.labelFont",
@@ -4751,7 +5058,7 @@
         for (let az = 0; az <= 360; az += 3)
           points.push(projectHorizontalCoordinate(az, alt));
         drawProjectedLine(points, lineStyle);
-        drawReferenceText(
+        drawReferenceText2(
           `${alt}\xB0`,
           projectHorizontalCoordinate(8, alt),
           textStyle,
@@ -4763,7 +5070,7 @@
         for (let alt = 0; alt <= 90; alt += 2)
           points.push(projectHorizontalCoordinate(az, alt));
         drawProjectedLine(points, lineStyle);
-        drawReferenceText(
+        drawReferenceText2(
           `${az}\xB0`,
           projectHorizontalCoordinate(az, 10),
           textStyle
@@ -4781,14 +5088,14 @@
         opacity: Number(cfg("sky.gridLabels.opacity", 0.72))
       };
       for (let lon = 0; lon < 360; lon += 30)
-        drawReferenceText(
+        drawReferenceText2(
           `${lon}\xB0`,
           projectEpochEquatorialCoordinate([normalizeCelestialLongitude(lon), 0]),
           style
         );
       for (let lat = -60; lat <= 60; lat += 30) {
         if (lat === 0) continue;
-        drawReferenceText(
+        drawReferenceText2(
           `${lat > 0 ? "+" : ""}${lat}\xB0`,
           projectEpochEquatorialCoordinate([0, lat]),
           style,
@@ -4800,25 +5107,25 @@
       if (!searchHighlight || !searchHighlight.coord) return;
       const pt = projectEquatorialCoordinate(searchHighlight.coord);
       if (!pt) return;
-      const ctx = Celestial.context;
-      ctx.save();
-      ctx.strokeStyle = "#ffe45c";
-      ctx.globalAlpha = 0.94;
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(pt[0], pt[1], 16, 0, Math.PI * 2);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(pt[0] - 23, pt[1]);
-      ctx.lineTo(pt[0] - 8, pt[1]);
-      ctx.moveTo(pt[0] + 8, pt[1]);
-      ctx.lineTo(pt[0] + 23, pt[1]);
-      ctx.moveTo(pt[0], pt[1] - 23);
-      ctx.lineTo(pt[0], pt[1] - 8);
-      ctx.moveTo(pt[0], pt[1] + 8);
-      ctx.lineTo(pt[0], pt[1] + 23);
-      ctx.stroke();
-      ctx.restore();
+      drawSearchReticle(Celestial.context, pt);
+    }
+    function drawSelectionHighlight() {
+      if (!currentSelected) return;
+      let point = null;
+      const display = currentSelected.displayCoord || currentSelected.epochCoord;
+      if (display && Celestial.clip(display)) {
+        const pt = Celestial.mapProjection(display);
+        if (pt && Number.isFinite(pt[0]) && Number.isFinite(pt[1])) point = pt;
+      }
+      if (!point && currentSelected.coord) point = projectEquatorialCoordinate(currentSelected.coord);
+      if (!point) return;
+      drawSelectionReticle(Celestial.context, point, {
+        stroke: cfg("selectionMarker.stroke", "#8eeaff"),
+        opacity: Number(cfg("selectionMarker.opacity", 0.9)),
+        lineWidth: Number(cfg("selectionMarker.lineWidth", 1.45)),
+        gap: Number(cfg("selectionMarker.gap", 10)),
+        armLength: Number(cfg("selectionMarker.armLength", 13))
+      });
     }
     function drawEclipticLineLayer() {
       if (!state.ecliptic) return;
@@ -4845,16 +5152,12 @@
           drawEquatorialGridLabels();
           drawEclipticLineLayer();
           drawSearchHighlight();
+          drawSelectionHighlight();
         }
       });
     }
-    function selectionNodes(selector) {
-      try {
-        const sel = Celestial.container.selectAll(selector);
-        return sel && sel[0] ? sel[0].filter(Boolean) : [];
-      } catch (_) {
-        return [];
-      }
+    function selectionNodes2(selector) {
+      return selectionNodes(Celestial, selector);
     }
     const PLANET_STYLE = cfg("planets", {});
     const TRAD_TO_SIMP = {
@@ -5168,7 +5471,7 @@
       let transformed = 0;
       try {
         selectors.forEach((selector) => {
-          selectionNodes(selector).forEach((node) => {
+          selectionNodes2(selector).forEach((node) => {
             const d = node && node.__data__;
             if (applyFeatureGeometryFrame(d, mapper)) transformed += 1;
           });
@@ -5184,40 +5487,15 @@
       }
     }
     function currentPlanetPositions() {
-      const objects = window.__RSO_PLANET_OBJECTS__ || [], origin = window.__RSO_PLANET_ORIGIN__;
-      if (!origin || !objects.length) {
-        noteTimeRenderDebug({ planetStatus: "skipped", planetCount: 0 });
-        return [];
-      }
-      try {
-        const dt = currentInstantDate(), observer = origin(dt).spherical();
-        const planets = objects.map((fn) => {
-          const body = fn(dt).equatorial(observer), ep = body && body.ephemeris || {}, eq = ep.pos;
-          if (!eq || !Number.isFinite(eq[0]) || !Number.isFinite(eq[1]))
-            return null;
-          const epochCoord = epochEquatorialFromJ2000(eq);
-          return {
-            id: fn.id(),
-            body,
-            coord: eq.slice(),
-            epochCoord,
-            displayCoord: displayCoordinateForEpochEquatorial(epochCoord)
-          };
-        }).filter(Boolean);
-        noteTimeRenderDebug({
-          planetStatus: "ok",
-          planetCount: planets.length
-        });
-        return planets;
-      } catch (err) {
-        console.warn("Planet position calculation failed", err);
-        noteTimeRenderDebug({
-          planetStatus: "failed",
-          planetCount: 0,
-          lastError: `planet calculation failed: ${debugErrorText(err)}`
-        });
-        return [];
-      }
+      return calculateCurrentPlanetPositions({
+        objects: window.__RSO_PLANET_OBJECTS__ || [],
+        origin: window.__RSO_PLANET_ORIGIN__,
+        date: currentInstantDate(),
+        epochEquatorialFromJ2000,
+        displayCoordinateForEpochEquatorial,
+        noteTimeRenderDebug,
+        debugErrorText
+      });
     }
     function planetById(id) {
       return currentPlanetPositions().find((p) => p.id === id) || null;
@@ -5552,7 +5830,7 @@
         [".rso-cn-name", "asterism", 18]
       ];
       groups.forEach(([selector, type, limit]) => {
-        selectionNodes(selector).forEach((node) => {
+        selectionNodes2(selector).forEach((node) => {
           const d = node.__data__, c = candidateCoord(d);
           if (!c || !Number.isFinite(c[0]) || !Celestial.clip(c)) return;
           const pt = Celestial.mapProjection(c);
@@ -5879,6 +6157,7 @@
           };
       }
       showObjectInfo(currentSelected);
+      if (skyReady && window.Celestial) redrawAndSyncMapBox("selected object refresh");
     }
     function ensureFloatingObjectInfo() {
       let panel = $("floating-object-info-card");
@@ -5967,10 +6246,10 @@
       return row ? row[1] : "\u2014";
     }
     function pairLine(a, b, c, d) {
-      return `<div class="floating-info-pair"><span class="floating-field"><b>${a}\uFF1A</b><em>${b || "\u2014"}</em></span><span class="floating-field"><b>${c}\uFF1A</b><em>${d || "\u2014"}</em></span></div>`;
+      return infoPairLine(a, b, c, d);
     }
     function singleLine(a, b) {
-      return `<div class="floating-info-single"><b>${a}\uFF1A</b><em>${b || "\u2014"}</em></div>`;
+      return infoSingleLine(a, b);
     }
     function renderFloatingObjectInfo(obj) {
       const rows = objectRows(obj);
@@ -5997,18 +6276,18 @@
       $("floating-object-title").textContent = data.title;
       $("floating-object-grid").innerHTML = data.html;
     }
-    function skyEventPoint(canvas, event) {
-      const rect = canvas.getBoundingClientRect();
-      return [event.clientX - rect.left, event.clientY - rect.top];
+    function skyEventPoint2(canvas, event) {
+      return skyEventPoint(canvas, event);
     }
     function selectAtEvent(canvas, event) {
       try {
-        const [x, y] = skyEventPoint(canvas, event);
+        const [x, y] = skyEventPoint2(canvas, event);
         const found = nearestCatalogObject(x, y);
         if (found) {
           floatingObjectInfoDismissed = false;
           found.label = objectLabel(found.type, found.d);
           showObjectInfo(found);
+          redrawAndSyncMapBox("object selection");
           return;
         }
         const p = Celestial.mapProjection.invert([x, y]);
@@ -6019,14 +6298,16 @@
           d: { properties: {} },
           coord: p,
           epochCoord: p,
+          displayCoord: p,
           label: t("skyPosition")
         });
+        redrawAndSyncMapBox("sky position selection");
       } catch (err) {
         console.warn("Object picking failed", err);
       }
     }
     function buildSkyConfig() {
-      const zh = state.lang === "zh", showWestern = showWesternCulture(), size = skyPaneSize(), metrics = applyMapBoxMetrics(projectionCanvasMetrics());
+      const zh = state.lang === "zh", showWestern = showWesternCulture(), size = skyPaneSize2(), metrics = applyMapBoxMetrics2(projectionCanvasMetrics2());
       lastRenderedSize = { width: size.width, height: size.height };
       const horizontal = isHorizontalView(), properType = state.cultureMode === "western" ? zh ? "zh" : "name" : "zh";
       return {
@@ -6325,7 +6606,7 @@
     }
     function dedupeSelection(selector, keyFn) {
       try {
-        const nodes = selectionNodes(selector), seen = /* @__PURE__ */ new Set();
+        const nodes = selectionNodes2(selector), seen = /* @__PURE__ */ new Set();
         nodes.forEach((node, index) => {
           const d = node.__data__, key = keyFn ? keyFn(d, index) : d && d.id !== void 0 ? String(d.id) : JSON.stringify(d && d.geometry && d.geometry.coordinates);
           if (seen.has(key)) d3.select(node).remove();
@@ -6389,17 +6670,17 @@
           );
           attachCanvasInfo(canvas);
           updateSkyView(true);
-          const savedView = state.projectionViews && state.projectionViews[viewKey()];
+          const savedView = state.projectionViews && state.projectionViews[viewKey2()];
           const shouldRestoreViewState = viewState && !isHorizontalView();
           if (shouldRestoreViewState) restoreView(viewState);
           else if (savedView && !isHorizontalView()) restoreView(savedView);
-          else if (isHorizontalView()) setMapScale(viewMapScale(savedView || desiredView(), state.mapScale));
+          else if (isHorizontalView()) setMapScale(viewMapScale2(savedView || desiredView2(), state.mapScale));
           updateSelectedObject();
           setTimeout(() => {
             if (generation !== rebuildGeneration) return;
             rebuildInProgress = false;
             suppressResizeUntil = performance.now() + 500;
-            lastRenderedSize = skyPaneSize();
+            lastRenderedSize = skyPaneSize2();
             setLoading(false);
             const snap = $("sky-snapshot");
             if (snap) {
@@ -6428,7 +6709,7 @@
         rebuildInProgress = true;
         suppressResizeUntil = performance.now() + 1200;
         const generation = ++rebuildGeneration;
-        state.mapScale = viewMapScale(viewState || desiredView(), state.mapScale);
+        state.mapScale = viewMapScale2(viewState || desiredView2(), state.mapScale);
         $("celestial-map").innerHTML = "";
         skyReady = false;
         registerChineseOverlay();
@@ -6526,7 +6807,7 @@
             });
             noteTimeRenderDebug({ skyviewStatus: "ok", fallbackStatus: "unused" });
             if (force) redrawOk = redrawAndSyncMapBox(reason || "horizontal sky view");
-            else syncMapBoxAfterRedraw(projectionCanvasMetrics());
+            else syncMapBoxAfterRedraw(projectionCanvasMetrics2());
           } catch (skyviewErr) {
             console.warn("Celestial skyview failed; trying local sidereal fallback", skyviewErr);
             noteTimeRenderDebug({
@@ -6930,24 +7211,24 @@
       save();
       updateProjectionHelp();
       updateHUD(false);
-      const target = desiredView();
-      state.mapScale = viewMapScale(target, state.mapScale);
-      applyMapBoxMetrics(projectionCanvasMetrics(next));
+      const target = desiredView2();
+      state.mapScale = viewMapScale2(target, state.mapScale);
+      applyMapBoxMetrics2(projectionCanvasMetrics2(next));
       try {
         resetInternalZoom();
         suppressResizeUntil = performance.now() + 520;
         Celestial.reproject({ projection: next, projectionRatio: null });
         setTimeout(() => {
           try {
-            const nextMetrics = projectionCanvasMetrics(next);
+            const nextMetrics = projectionCanvasMetrics2(next);
             Celestial.resize(nextMetrics.width);
             resetInternalZoom();
             syncRenderedMapBox(nextMetrics);
             if (isHorizontalView()) {
               updateSkyView(true);
-              setMapScale(viewMapScale(target, state.mapScale));
+              setMapScale(viewMapScale2(target, state.mapScale));
               resetInternalZoom();
-              state.projectionViews[viewKey()] = { mapScale: state.mapScale };
+              state.projectionViews[viewKey2()] = { mapScale: state.mapScale };
               save();
             } else {
               restoreView(target);
@@ -6975,8 +7256,8 @@
       save();
       updateProjectionHelp();
       updateHUD(false);
-      const target = desiredView(), nextTransform = projectionCoordinateTransform();
-      state.mapScale = viewMapScale(target, state.mapScale);
+      const target = desiredView2(), nextTransform = projectionCoordinateTransform();
+      state.mapScale = viewMapScale2(target, state.mapScale);
       if (nextTransform !== previousTransform) {
         try {
           rebuildSkyPreservingPixels(target);
@@ -6989,12 +7270,8 @@
       resetCurrentCoordinateView({ preferSaved: true });
       redrawAndSyncMapBox("coordinate view switch");
     }
-    function clamp(value, min, max) {
-      return Math.max(min, Math.min(max, value));
-    }
-    function canvasRect() {
-      const c = document.querySelector("#celestial-map canvas");
-      return c ? c.getBoundingClientRect() : null;
+    function canvasRect2() {
+      return canvasRect();
     }
     function handleMapScaleWheel(event) {
       if (event.target.closest && event.target.closest("#debug-overlay"))
@@ -7038,12 +7315,12 @@
       if (Math.hypot(dx, dy) > 4) {
         paneDrag.moved = true;
       }
-      const rect = canvasRect();
+      const rect = canvasRect2();
       if (!rect) return;
       const degPerPx = 180 / Math.max(180, Math.min(rect.width, rect.height));
       const next = [
         paneDrag.center[0] - dx * degPerPx,
-        clamp(paneDrag.center[1] + dy * degPerPx, -89.5, 89.5),
+        clampNumber(paneDrag.center[1] + dy * degPerPx, -89.5, 89.5),
         paneDrag.center[2] || 0
       ];
       try {
@@ -7067,7 +7344,7 @@
     }
     function resetCurrentCoordinateView(options = {}) {
       try {
-        const saved = options.preferSaved && state.projectionViews && state.projectionViews[viewKey()], configured = state.coordinateSystem === "horizontal" ? coordinateViewDefault() : saved || coordinateViewDefault(), targetScale = viewMapScale(saved || configured, defaults.mapScale);
+        const saved = options.preferSaved && state.projectionViews && state.projectionViews[viewKey2()], configured = state.coordinateSystem === "horizontal" ? coordinateViewDefault2() : saved || coordinateViewDefault2(), targetScale = viewMapScale2(saved || configured, defaults.mapScale);
         if (state.coordinateSystem !== "horizontal" && saved) {
           restoreView(saved);
           save();
@@ -7081,7 +7358,7 @@
               setMapScale(targetScale);
               resetInternalZoom();
               redrawAndSyncMapBox("horizontal reset");
-              state.projectionViews[viewKey()] = { mapScale: targetScale };
+              state.projectionViews[viewKey2()] = { mapScale: targetScale };
               save();
             } catch (err) {
               console.warn("Horizontal reset failed", err);
@@ -7093,7 +7370,7 @@
           center: Array.isArray(configured.center) ? configured.center.slice() : [0, 0, 0],
           mapScale: targetScale
         };
-        state.projectionViews[viewKey()] = {
+        state.projectionViews[viewKey2()] = {
           center: v.center.slice(),
           mapScale: v.mapScale
         };
@@ -7102,22 +7379,19 @@
       } catch (_) {
       }
     }
-    function isTextEditingTarget(target) {
-      if (!target || !target.closest) return false;
-      return !!target.closest(
-        "input,select,textarea,[contenteditable='true'],.modal,#debug-overlay"
-      );
+    function isTextEditingTarget2(target) {
+      return isTextEditingTarget(target);
     }
     function panSkyByKeyboard(key) {
-      if (!skyReady || !window.Celestial || isTextEditingTarget(document.activeElement)) return false;
+      if (!skyReady || !window.Celestial || isTextEditingTarget2(document.activeElement)) return false;
       const center = Celestial.rotate();
       if (!Array.isArray(center)) return false;
       const step = Number(cfg("interaction.keyboardPanDegrees", 4)) || 4;
       const next = center.slice();
       if (key === "ArrowLeft") next[0] -= step;
       else if (key === "ArrowRight") next[0] += step;
-      else if (key === "ArrowUp") next[1] = clamp(next[1] + step, -89.5, 89.5);
-      else if (key === "ArrowDown") next[1] = clamp(next[1] - step, -89.5, 89.5);
+      else if (key === "ArrowUp") next[1] = clampNumber(next[1] + step, -89.5, 89.5);
+      else if (key === "ArrowDown") next[1] = clampNumber(next[1] - step, -89.5, 89.5);
       else return false;
       Celestial.rotate({ center: next });
       redrawAndSyncMapBox("keyboard pan");
@@ -7131,9 +7405,9 @@
       try {
         if (storage) {
           Object.keys(storage).forEach((key) => {
-            if (/^(real-sky-observatory|rso-|__rso_)/i.test(key)) storage.removeItem(key);
+            if (/^(real-sky-observatory|rso-|__rso_)/i.test(key)) removeStorageKey(key);
           });
-          storage.removeItem(STORAGE_KEY);
+          removeStorageKey(STORAGE_KEY);
         }
       } catch (err) {
         console.warn("Default reset could not remove stored state", err);
@@ -7509,7 +7783,7 @@
       );
       document.addEventListener("keydown", (event) => {
         if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
-        if (isTextEditingTarget(event.target)) return;
+        if (isTextEditingTarget2(event.target)) return;
         if (panSkyByKeyboard(event.key)) event.preventDefault();
       });
       window.addEventListener("pointerup", () => {
@@ -7588,13 +7862,13 @@
       }
       syncControls();
       applyI18n();
-      setupCitySearch();
+      setupCitySearch2();
       setupObjectSearch();
       bind();
       installDatasetEpochHook();
       updateAstronomyModelDebug();
       if ($("geo-mode-note")) $("geo-mode-note").style.display = "none";
-      initialDisplay(desiredView());
+      initialDisplay(desiredView2());
       requestAnimationFrame(animationLoop);
     }
     window.addEventListener("error", (event) => {

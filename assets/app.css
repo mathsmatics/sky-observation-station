@@ -1771,7 +1771,7 @@ select optgroup {
   }
 }
 
-/* 5.3.2 content-driven manual, unified sidebar scrolling, and touch viewport sizing. */
+/* 5.3.x content-driven manual, unified sidebar scrolling, and touch viewport sizing. */
 #control-panel {
   padding-top: max(48px, calc(env(safe-area-inset-top) + 46px));
 }
@@ -1911,7 +1911,7 @@ select optgroup {
   display: block;
 }
 
-/* Limited 5.3.2 fix: keep brand fixed below top buttons, keep HUD in the collapsible panel, equalize top button height, and keep the guide selector as a native dropdown. */
+/* Limited 5.3.x fix: keep brand fixed below top buttons, keep HUD in the collapsible panel, equalize top button height, and keep the guide selector as a native dropdown. */
 :root {
   --rso-top-control-size: max(var(--panel-toggle-size, 36px), calc(var(--panel-toggle-size, 36px) * var(--rso-font-scale)));
   --rso-top-control-touch-size: max(42px, calc(42px * var(--rso-font-scale)));

@@ -69,3 +69,7 @@ docs/       架构、构建、数据来源和第三方声明文档。
 This project is licensed under the PolyForm Noncommercial License 1.0.0.
 
 Commercial use is not permitted without prior permission.
+
+## Source layout note
+
+Version 5.3.3 keeps the accepted UI and astronomy behavior while organizing source code by functional area. `src/state/` contains state/storage helpers, `src/ui/` contains controls, help, panels and layout helpers, `src/sky/` contains renderer, projection, layer and interaction helpers, and `src/astronomy/` contains reusable angle, time, sidereal-time, coordinate and precession utilities. `src/app.ts` remains the application assembly layer that connects state, UI, D3-Celestial and data. Build outputs in `assets/` are generated artifacts and should not be edited by hand.

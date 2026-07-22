@@ -36,6 +36,57 @@ import {
   precessEquatorialJ2000ToDate,
 } from "./astronomy/precession";
 import { helpManualForLanguage } from "./data/content/help-manual";
+import { degToRad, radToDeg, normalizeDegrees, clampNumber as clamp } from "./astronomy/angle";
+import {
+  astronomicalYearToDisplay,
+  astronomicalYearToInput,
+  formatCivilDateTime,
+  formatOffset,
+  formatOffsetDetailed,
+  julianDateFromDate,
+} from "./astronomy/time";
+import { localSiderealDegrees } from "./astronomy/sidereal";
+import { equatorialFromHorizontal as equatorialFromHorizontalPure, formatDec, formatRA } from "./astronomy/coordinates";
+import { calculateCurrentPlanetPositions } from "./astronomy/bodies-simple";
+import { getProjectStorage, readJsonFromStorage, removeStorageKey, writeJsonToStorage } from "./state/storage";
+import { createHelpRenderer } from "./ui/help";
+import {
+  applyMapBoxMetrics as applySkyMapBoxMetrics,
+  canvasRect as skyCanvasRect,
+  projectionCanvasMetrics as computeProjectionCanvasMetrics,
+  projectionNaturalRatio as computeProjectionNaturalRatio,
+  skyPaneSize as computeSkyPaneSize,
+} from "./sky/renderer";
+import {
+  clampMapScale as clampProjectionMapScale,
+  coordinateViewDefault as computeCoordinateViewDefault,
+  desiredView as computeDesiredView,
+  viewKey as projectionViewKey,
+  viewMapScale as projectionViewMapScale,
+} from "./sky/projection";
+import {
+  drawProjectedLine as drawLayerProjectedLine,
+  drawReferenceText as drawLayerReferenceText,
+  selectionNodes as getLayerSelectionNodes,
+} from "./sky/layers";
+import {
+  drawSearchReticle,
+  drawSelectionReticle,
+  skyEventPoint as getSkyEventPoint,
+} from "./sky/interactions";
+import {
+  elementRect as getElementRect,
+  isMobileLayout as isMobileLayoutByWidth,
+  isTextEditingTarget as isUiTextEditingTarget,
+} from "./ui/layout";
+import { debugSpan as panelDebugSpan, infoPairLine, infoSingleLine } from "./ui/panels";
+import {
+  applyMenuSectionOrder as applyMenuSectionOrderToPanel,
+  createSectionShell as createMenuSectionShell,
+  initializeMenuSections as initializeCollapsibleMenuSections,
+  readIntegerField as readIntegerControlField,
+  setupCitySearch as setupCitySearchControl,
+} from "./ui/controls";
 (() => {
   "use strict";
   /**
@@ -556,14 +607,12 @@ import { helpManualForLanguage } from "./data/content/help-manual";
   let resizeTimer = null;
   let applyTimer = null;
   let loadTimer = null;
-  const guidePageByLang = { zh: 0, en: 0 };
   let chineseLinesReady = false;
   let chineseNamesReady = false;
   let westernDualLinesReady = false;
   let westernDualLineFeatures = [];
   let chineseLineFeatures = [];
   let sharedCultureSegments = new Set();
-  let storageAvailable = null;
   let traditionalRegionsReady = false,
     traditionalLabelsReady = false;
   let rebuildInProgress = false,
@@ -665,20 +714,7 @@ import { helpManualForLanguage } from "./data/content/help-manual";
   let chineseStarAsterismIndex = null;
   let chineseAsterismCoordinateEntries = [];
 
-  function getStorage() {
-    if (storageAvailable === false) return null;
-    try {
-      const storage = window.localStorage;
-      const probe = "__rso_storage_probe__";
-      storage.setItem(probe, "1");
-      storage.removeItem(probe);
-      storageAvailable = true;
-      return storage;
-    } catch (_) {
-      storageAvailable = false;
-      return null;
-    }
-  }
+  const getStorage = getProjectStorage;
   function t(key) {
     return (I18N[state.lang] && I18N[state.lang][key]) || key;
   }
@@ -696,21 +732,14 @@ import { helpManualForLanguage } from "./data/content/help-manual";
     );
   }
   function clampMapScale(value) {
-    const min = mapScaleMin(),
-      max = Math.max(min, mapScaleMax()),
-      number = Number(value);
-    return Math.max(min, Math.min(max, Number.isFinite(number) ? number : min));
+    return clampProjectionMapScale(value, mapScaleMin(), mapScaleMax());
   }
   function getMapScale() {
     state.mapScale = clampMapScale(state.mapScale);
     return state.mapScale;
   }
   function viewMapScale(view, fallback = state.mapScale) {
-    if (view && Object.prototype.hasOwnProperty.call(view, "mapScale"))
-      return clampMapScale(view.mapScale);
-    if (view && Object.prototype.hasOwnProperty.call(view, "zoom"))
-      return clampMapScale(view.zoom);
-    return clampMapScale(fallback);
+    return projectionViewMapScale(view, fallback, clampMapScale);
   }
   function isValidZone(zone) {
     if (!zone || typeof zone !== "string") return false;
@@ -866,13 +895,7 @@ import { helpManualForLanguage } from "./data/content/help-manual";
    * 星表数据和第三方引擎内部状态不保存，启动时由 `state` 重新构建。
    */
   function save() {
-    const storage = getStorage();
-    if (!storage) return;
-    try {
-      storage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (err) {
-      console.warn("State save failed", err);
-    }
+    writeJsonToStorage(STORAGE_KEY, state);
   }
   /**
    * 将内部 UTC 瞬时转换为观测者当前 IANA 时区。
@@ -888,27 +911,6 @@ import { helpManualForLanguage } from "./data/content/help-manual";
     if (!instant.isValid) instant = DateTime.utc();
     return instant.setZone(zone);
   }
-  function formatOffset(minutes) {
-    const sign = minutes >= 0 ? "+" : "−";
-    const a = Math.abs(Math.trunc(minutes)),
-      h = Math.floor(a / 60),
-      m = a % 60;
-    return `UTC${sign}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-  }
-
-  function formatOffsetDetailed(minutes) {
-    const totalSeconds = Math.round(Number(minutes) * 60);
-    if (!Number.isFinite(totalSeconds)) return "-";
-    const sign = totalSeconds >= 0 ? "+" : "−",
-      abs = Math.abs(totalSeconds),
-      h = Math.floor(abs / 3600),
-      m = Math.floor((abs % 3600) / 60),
-      sec = abs % 60;
-    return sec
-      ? `UTC${sign}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`
-      : `UTC${sign}${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
-  }
-
   function timeZoneOffsetDebug(dt) {
     if (!dt || !dt.isValid)
       return { timezone: state.zone || "-", utcOffset: "-", utcOffsetNote: "unknown" };
@@ -936,28 +938,9 @@ import { helpManualForLanguage } from "./data/content/help-manual";
     if (value === "pending") return zh ? "刷新中" : "pending";
     return zh ? "正常" : "healthy";
   }
-  function astronomicalYearToDisplay(year) {
-    const n = Number(year);
-    if (!Number.isFinite(n)) return "";
-    const whole = Math.trunc(n);
-    if (whole <= 0) return `BC ${String(1 - whole).padStart(1, "0")}`;
-    return `AD ${String(whole).padStart(4, "0")}`;
-  }
-
-  function astronomicalYearToInput(year) {
-    const n = Number(year);
-    if (!Number.isFinite(n)) return "";
-    const whole = Math.trunc(n);
-    return whole <= 0 ? `-${1 - whole}` : String(whole);
-  }
   function currentInstantDate() {
     const dt = DateTime.fromISO(String(state.instant || ""), { zone: "utc" });
     return (dt.isValid ? dt : DateTime.fromISO(defaults.instant, { zone: "utc" })).toJSDate();
-  }
-
-  function julianDateFromDate(date) {
-    if (!(date instanceof Date) || !Number.isFinite(date.getTime())) return null;
-    return date.getTime() / 86400000 + 2440587.5;
   }
 
   function precisionStatusForYear(year) {
@@ -1031,13 +1014,7 @@ import { helpManualForLanguage } from "./data/content/help-manual";
     Object.assign(timeRenderDebug, patch);
     if (debugVisible) updateDebugOverlay(true);
   }
-  function formatCivilDateTime(dt, includeSeconds = false) {
-    const y = astronomicalYearToDisplay(dt.year);
-    const base = `${y}/${String(dt.month).padStart(2, "0")}/${String(dt.day).padStart(2, "0")} ${String(dt.hour).padStart(2, "0")}:${String(dt.minute).padStart(2, "0")}`;
-    return includeSeconds ? `${base}:${String(dt.second).padStart(2, "0")}` : base;
-  }
-
-  const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
+const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
   const TIME_FIELD_TO_ID = {
     year: "time-year",
     month: "time-month",
@@ -1152,8 +1129,7 @@ import { helpManualForLanguage } from "./data/content/help-manual";
   function readIntegerField(id) {
     const value = String($(id)?.value || "").trim();
     if (!/^[+-]?\d+$/.test(value)) return null;
-    const n = Number(value);
-    return Number.isSafeInteger(n) ? n : null;
+    return readIntegerControlField({ value });
   }
 
   function parseObserverTimeFields() {
@@ -1378,237 +1354,20 @@ import { helpManualForLanguage } from "./data/content/help-manual";
     el.classList.toggle("hidden", !on);
   }
 
-  function guideLang() {
-    return state.lang === "en" ? "en" : "zh";
-  }
-
-  function currentGuideArticle() {
-    return document.querySelector(`[data-doc-lang="${guideLang()}"]`);
-  }
-
-  function createGuideElement(block) {
-    if (block.type === "paragraph") {
-      const p = document.createElement("p");
-      p.innerHTML = block.html;
-      return p;
-    }
-    if (block.type === "subheading") {
-      const h = document.createElement("h4");
-      h.innerHTML = block.html;
-      return h;
-    }
-    if (block.type === "list") {
-      const ul = document.createElement("ul");
-      (block.items || []).forEach((item) => {
-        const li = document.createElement("li");
-        li.innerHTML = item;
-        ul.appendChild(li);
-      });
-      return ul;
-    }
-    if (block.type === "table") {
-      const table = document.createElement("table");
-      const thead = document.createElement("thead");
-      const headRow = document.createElement("tr");
-      (block.headers || []).forEach((header) => {
-        const th = document.createElement("th");
-        th.innerHTML = header;
-        headRow.appendChild(th);
-      });
-      thead.appendChild(headRow);
-      const tbody = document.createElement("tbody");
-      (block.rows || []).forEach((row) => {
-        const tr = document.createElement("tr");
-        row.forEach((cell) => {
-          const td = document.createElement("td");
-          td.innerHTML = cell;
-          tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-      });
-      table.append(thead, tbody);
-      return table;
-    }
-    if (block.type === "formula") {
-      const div = document.createElement("div");
-      div.className = "doc-formula";
-      div.innerHTML = block.html;
-      return div;
-    }
-    if (block.type === "code") {
-      const pre = document.createElement("pre");
-      const code = document.createElement("code");
-      code.textContent = block.text || "";
-      pre.appendChild(code);
-      return pre;
-    }
-    if (block.type === "note" || block.type === "warning") {
-      const div = document.createElement("div");
-      div.className = block.type === "warning" ? "warn" : "doc-note";
-      div.innerHTML = block.html;
-      return div;
-    }
-    const p = document.createElement("p");
-    p.textContent = String(block.html || block.text || "");
-    return p;
-  }
-
-  function renderGuideArticle(article, manual) {
-    article.textContent = "";
-    article.dataset.copyText = "";
-    const title = document.createElement("h3");
-    title.textContent = manual.title;
-    article.appendChild(title);
-    const copyParts = [manual.title];
-    manual.sections.forEach((section) => {
-      const sectionEl = document.createElement("section");
-      sectionEl.className = "doc-section";
-      sectionEl.id = `guide-${section.id}`;
-      sectionEl.dataset.docSection = section.id;
-      const h = document.createElement("h3");
-      h.textContent = section.title;
-      sectionEl.appendChild(h);
-      copyParts.push(section.title);
-      (section.blocks || []).forEach((block) => {
-        sectionEl.appendChild(createGuideElement(block));
-        if (block.html) copyParts.push(String(block.html).replace(/<[^>]+>/g, ""));
-        if (block.text) copyParts.push(block.text);
-        if (block.items) copyParts.push(block.items.join("\n"));
-      });
-      article.appendChild(sectionEl);
-    });
-    article.dataset.copyText = copyParts.filter(Boolean).join("\n\n");
-  }
-
-  function initializeGuidePagination() {
-    const manual = helpManualForLanguage(guideLang());
-    document.querySelectorAll(".doc[data-doc-lang]").forEach((article) => {
-      const lang = article.dataset.docLang || "zh";
-      renderGuideArticle(article, helpManualForLanguage(lang));
-    });
-  }
-
-  function guidePages(article) {
-    return Array.from(article.querySelectorAll(".doc-section"));
-  }
-
-  function guidePageTitle(page) {
-    const heading = page.querySelector("h3");
-    return String(heading?.textContent || (state.lang === "zh" ? "说明" : "Guide")).trim();
-  }
-
-  function closeGuidePageDropdown() {
-    const dropdown = $("guide-page-dropdown");
-    const trigger = $("guide-page-trigger");
-    const menu = $("guide-page-menu");
-    if (!dropdown || !trigger || !menu) return;
-    dropdown.classList.remove("open");
-    trigger.setAttribute("aria-expanded", "false");
-  }
-
-  function openGuidePageDropdown() {
-    const dropdown = $("guide-page-dropdown");
-    const trigger = $("guide-page-trigger");
-    const menu = $("guide-page-menu");
-    if (!dropdown || !trigger || !menu) return;
-    dropdown.classList.add("open");
-    trigger.setAttribute("aria-expanded", "true");
-    const active = menu.querySelector('[aria-selected="true"]');
-    active?.scrollIntoView({ block: "nearest" });
-  }
-
-  function toggleGuidePageDropdown() {
-    const dropdown = $("guide-page-dropdown");
-    if (!dropdown) return;
-    if (dropdown.classList.contains("open")) closeGuidePageDropdown();
-    else openGuidePageDropdown();
-  }
-
-  function focusGuidePageOption(offset) {
-    const menu = $("guide-page-menu");
-    if (!menu) return;
-    const options = Array.from(menu.querySelectorAll(".guide-page-option"));
-    if (!options.length) return;
-    const active = document.activeElement;
-    const current = Math.max(0, options.indexOf(active));
-    const next = Math.max(0, Math.min(current + offset, options.length - 1));
-    options[next].focus();
-  }
-
-  function renderGuidePageDropdown(sections, activeIndex) {
-    const trigger = $("guide-page-trigger");
-    const label = $("guide-page-label");
-    const menu = $("guide-page-menu");
-    if (!trigger || !label || !menu) return;
-    const ariaLabel = t("guideSelectLabel");
-    trigger.setAttribute("aria-label", ariaLabel);
-    menu.setAttribute("aria-label", ariaLabel);
-    label.textContent = sections[activeIndex] ? guidePageTitle(sections[activeIndex]) : ariaLabel;
-    menu.textContent = "";
-    sections.forEach((section, index) => {
-      const option = document.createElement("button");
-      option.type = "button";
-      option.className = "guide-page-option";
-      option.setAttribute("role", "option");
-      option.setAttribute("aria-selected", String(index === activeIndex));
-      option.dataset.guideIndex = String(index);
-      option.textContent = guidePageTitle(section);
-      option.addEventListener("click", () => {
-        selectGuidePage(index);
-        closeGuidePageDropdown();
-        trigger.focus();
-      });
-      option.addEventListener("keydown", (e) => {
-        if (e.key === "ArrowDown") {
-          e.preventDefault();
-          focusGuidePageOption(1);
-        } else if (e.key === "ArrowUp") {
-          e.preventDefault();
-          focusGuidePageOption(-1);
-        } else if (e.key === "Escape") {
-          e.preventDefault();
-          closeGuidePageDropdown();
-          trigger.focus();
-        }
-      });
-      menu.appendChild(option);
-    });
-  }
-
-  function updateGuidePaginationUI(scrollToTop = false) {
-    initializeGuidePagination();
-    const article = currentGuideArticle();
-    if (!article) return;
-    const sections = guidePages(article);
-    const index = Math.max(0, Math.min(guidePageByLang[guideLang()], sections.length - 1));
-    guidePageByLang[guideLang()] = index;
-    renderGuidePageDropdown(sections, index);
-    $("guide-next-page").disabled = index >= sections.length - 1;
-    if (scrollToTop) sections[index]?.scrollIntoView({ block: "start" });
-  }
-
-  function selectGuidePage(index) {
-    const article = currentGuideArticle();
-    if (!article) return;
-    const sections = guidePages(article);
-    const lang = guideLang();
-    guidePageByLang[lang] = Math.max(0, Math.min(index, Math.max(0, sections.length - 1)));
-    updateGuidePaginationUI(true);
-  }
-
-  function setGuidePage(offset) {
-    const article = currentGuideArticle();
-    if (!article) return;
-    const sections = guidePages(article);
-    const lang = guideLang();
-    guidePageByLang[lang] = Math.max(0, Math.min(guidePageByLang[lang] + offset, Math.max(0, sections.length - 1)));
-    updateGuidePaginationUI(true);
-  }
-
-  function openTechnicalGuide() {
-    $("tech-modal").classList.add("open");
-    updateGuidePaginationUI(true);
-  }
+  const helpRenderer = createHelpRenderer({
+    $,
+    t,
+    getLanguage: () => (state.lang === "en" ? "en" : "zh"),
+    helpManualForLanguage,
+  });
+  const {
+    closeGuidePageDropdown,
+    toggleGuidePageDropdown,
+    openGuidePageDropdown,
+    updateGuidePaginationUI,
+    setGuidePage,
+    openTechnicalGuide,
+  } = helpRenderer;
 
   function applyI18n() {
     document.documentElement.lang = state.lang === "zh" ? "zh-CN" : "en";
@@ -1716,23 +1475,7 @@ import { helpManualForLanguage } from "./data/content/help-manual";
   };
 
   function createSectionShell(id, titleKey, hintKey, contentClass = "") {
-    const section = document.createElement("section");
-    section.className = `section ${contentClass}`.trim();
-    section.dataset.menuId = id;
-    section.id = `${id.replace(/[A-Z]/g, (m) => `-${m.toLowerCase()}`)}-section`;
-    const title = document.createElement("div");
-    title.className = "section-title";
-    const titleText = document.createElement("span");
-    titleText.dataset.i18n = titleKey;
-    titleText.textContent = t(titleKey);
-    const hint = document.createElement("span");
-    hint.dataset.i18n = hintKey;
-    hint.textContent = t(hintKey);
-    title.append(titleText, hint);
-    const body = document.createElement("div");
-    body.className = "section-body";
-    section.append(title, body);
-    return { section, body };
+    return createMenuSectionShell({ id, titleKey, hintKey, contentClass, t });
   }
 
   function initializeIntegratedLayout() {
@@ -1781,53 +1524,25 @@ import { helpManualForLanguage } from "./data/content/help-manual";
   }
 
   function applyMenuSectionOrder(panel = $("control-panel")) {
-    if (!panel || panel.dataset.menuOrderChecked === "true") return;
-    const configured = cfg("menu.order", []),
-      order = Array.isArray(configured) ? configured : [];
-    order.forEach((id) => {
-      const section = panel.querySelector(`[data-menu-id="${id}"]`);
-      if (section) panel.appendChild(section);
-    });
-    panel.dataset.menuOrderChecked = "true";
+    applyMenuSectionOrderToPanel(panel, cfg("menu.order", []));
   }
 
   /**
    * 所有大分区都支持折叠；默认展开和不可折叠不再混用。
    */
+  /**
+   * 所有大分区都支持折叠；默认展开和不可折叠不再混用。
+   * 具体 DOM 绑定已迁入 ui/controls.ts，app.ts 只提供状态读写回调。
+   */
   function initializeMenuSections(panel = $("control-panel")) {
-    if (!panel || panel.dataset.menuSectionsReady === "true") return;
-    const collapsible = new Set(
-      Array.isArray(cfg("menu.collapsible", [])) ? cfg("menu.collapsible", []) : [],
-    );
-    panel.querySelectorAll("[data-menu-id]").forEach((section) => {
-      const id = section.dataset.menuId,
-        title = section.querySelector(".section-title");
-      if (!collapsible.has(id) || !title) return;
-      section.classList.add("section-collapsible");
-      const collapsed = state.menuCollapsed.includes(id);
-      section.classList.toggle("section-collapsed", collapsed);
-      title.setAttribute("role", "button");
-      title.setAttribute("tabindex", "0");
-      title.setAttribute("aria-expanded", String(!collapsed));
-      const toggle = () => {
-        const collapsed = section.classList.toggle("section-collapsed");
-        title.setAttribute("aria-expanded", String(!collapsed));
-        state.menuCollapsed = Array.from(
-          panel.querySelectorAll(".section-collapsible.section-collapsed"),
-        )
-          .map((item) => item.dataset.menuId)
-          .filter(Boolean);
-        save();
-        scheduleSkyResize("menu-section-toggle");
-      };
-      title.addEventListener("click", toggle);
-      title.addEventListener("keydown", (event) => {
-        if (event.key !== "Enter" && event.key !== " ") return;
-        event.preventDefault();
-        toggle();
-      });
+    initializeCollapsibleMenuSections({
+      panel,
+      collapsible: cfg("menu.collapsible", []),
+      getCollapsedIds: () => state.menuCollapsed,
+      setCollapsedIds: (ids) => (state.menuCollapsed = ids),
+      save,
+      scheduleSkyResize,
     });
-    panel.dataset.menuSectionsReady = "true";
   }
 
   /**
@@ -1837,7 +1552,7 @@ import { helpManualForLanguage } from "./data/content/help-manual";
   function isMobileLayout() {
     return (
       (window.matchMedia && window.matchMedia("(max-width: 800px)").matches) ||
-      window.innerWidth <= 800
+      isMobileLayoutByWidth(window.innerWidth)
     );
   }
 
@@ -1850,8 +1565,7 @@ import { helpManualForLanguage } from "./data/content/help-manual";
   }
 
   function elementRect(selector) {
-    const el = document.querySelector(selector);
-    return el ? el.getBoundingClientRect() : null;
+    return getElementRect(selector);
   }
 
   function updateDebugToggleTitle() {
@@ -2728,85 +2442,35 @@ import { helpManualForLanguage } from "./data/content/help-manual";
   }
 
   function skyPaneSize() {
-    const pane = $("sky-pane");
-    if (!pane)
-      return {
-        width: window.innerWidth,
-        height: window.innerHeight,
-        ratio: window.innerWidth / Math.max(1, window.innerHeight),
-      };
-    const r = pane.getBoundingClientRect();
-    const width = Math.max(1, Math.round(r.width)),
-      height = Math.max(1, Math.round(r.height));
-    return { width, height, ratio: width / Math.max(1, height) };
+    return computeSkyPaneSize($("sky-pane"));
   }
   function projectionNaturalRatio(name = state.projection) {
-    try {
-      const meta =
-        window.Celestial && Celestial.projections
-          ? Celestial.projections()[name]
-          : null;
-      const ratio = meta && Number(meta.ratio);
-      return Number.isFinite(ratio) && ratio > 0 ? ratio : 1;
-    } catch (_) {
-      // 圆形投影读不到元数据时按 1:1 处理，避免竖屏被错误压成半高画布。
-      return 1;
-    }
+    return computeProjectionNaturalRatio(window.Celestial, name);
   }
   /**
    * 计算应用层星图画布尺寸。
    * `#sky-pane` 是固定裁剪窗口；`#celestial-map` 是可放大的真实星图。
    * 初始缩放下，画布短边等于背景短边，长边按投影自然比例延展。
    */
+  /**
+   * 计算应用层星图画布尺寸。实际公式在 sky/renderer.ts，
+   * app.ts 只传入当前投影和缩放状态。
+   */
   function projectionCanvasMetrics(
     name = state.projection,
     scale = getMapScale(),
   ) {
-    const pane = skyPaneSize(),
-      ratio = projectionNaturalRatio(name),
-      fitPadding = 0.96,
-      widthFactor = ratio >= 1 ? ratio : 1,
-      heightFactor = ratio >= 1 ? 1 : 1 / Math.max(ratio, 0.0001),
-      fitByWidth = pane.width / widthFactor,
-      fitByHeight = pane.height / heightFactor,
-      baseFitSide = Math.max(1, Math.min(fitByWidth, fitByHeight) * fitPadding),
-      mapScale = clampMapScale(scale);
-    let width = baseFitSide * widthFactor * mapScale,
-      height = baseFitSide * heightFactor * mapScale;
-    width = Math.max(1, Math.round(width));
-    height = Math.max(1, Math.round(height));
-    return {
-      paneWidth: pane.width,
-      paneHeight: pane.height,
-      paneCenterX: pane.width / 2,
-      paneCenterY: pane.height / 2,
-      baseShortSide: baseFitSide,
-      ratio,
-      scale: mapScale,
-      width,
-      height,
-      overflowX: Math.max(0, (width - pane.width) / 2),
-      overflowY: Math.max(0, (height - pane.height) / 2),
-    };
+    return computeProjectionCanvasMetrics({
+      pane: $("sky-pane"),
+      celestial: window.Celestial,
+      projection: name,
+      mapScale: scale,
+      clampMapScale,
+    });
   }
 
   function applyMapBoxMetrics(metrics = projectionCanvasMetrics()) {
-    const map = $("celestial-map");
-    if (!map) return metrics;
-    const forceSize = (node) => {
-      node.style.setProperty("width", `${metrics.width}px`, "important");
-      node.style.setProperty("height", `${metrics.height}px`, "important");
-      node.style.setProperty("min-width", "0px", "important");
-      node.style.setProperty("min-height", "0px", "important");
-      node.style.setProperty("max-width", "none", "important");
-      node.style.setProperty("max-height", "none", "important");
-      node.style.setProperty("box-sizing", "border-box");
-    };
-    forceSize(map);
-    map.querySelectorAll("canvas, svg").forEach((node) => {
-      forceSize(node);
-    });
-    return metrics;
+    return applySkyMapBoxMetrics($("celestial-map"), metrics);
   }
 
   /**
@@ -2902,7 +2566,7 @@ import { helpManualForLanguage } from "./data/content/help-manual";
     projection = state.projection,
     coord = state.coordinateSystem,
   ) {
-    return `${coord}:${projection}`;
+    return projectionViewKey(projection, coord);
   }
   function saveCurrentProjectionView() {
     if (!skyReady || !window.Celestial) return;
@@ -2920,29 +2584,24 @@ import { helpManualForLanguage } from "./data/content/help-manual";
   function desiredView() {
     const fallback = coordinateViewDefault();
     const saved = state.projectionViews && state.projectionViews[viewKey()];
-    if (isHorizontalView()) {
-      return {
-        ...fallback,
-        mapScale: viewMapScale(saved || fallback, fallback.mapScale),
-      };
-    }
-    return saved || fallback;
+    return computeDesiredView({
+      savedView: saved,
+      fallbackView: fallback,
+      isHorizontalView: isHorizontalView(),
+      viewMapScale,
+    });
   }
   function coordinateViewDefault(
     coord = state.coordinateSystem,
     projection = state.projection,
   ) {
-    const projectionDefault = PROJECTION_DEFAULTS[projection] || {
-        center: [0, 0, 0],
-        mapScale: 1,
-      },
-      configured = cfg(`resetViews.${coord}`, {});
-    return {
-      center: Array.isArray(configured.center)
-        ? configured.center.slice()
-        : projectionDefault.center.slice(),
-      mapScale: viewMapScale(configured, projectionDefault.mapScale),
-    };
+    return computeCoordinateViewDefault({
+      coordinateSystem: coord,
+      projection,
+      projectionDefaults: PROJECTION_DEFAULTS,
+      configuredResetView: cfg(`resetViews.${coord}`, {}),
+      viewMapScale,
+    });
   }
   function setMapScale(value, options = {}) {
     const next = clampMapScale(value);
@@ -3044,78 +2703,19 @@ import { helpManualForLanguage } from "./data/content/help-manual";
    * 绑定中英文城市搜索框。
    * 选择城市会调用 `setObserver()`，在保留同一 UTC 瞬时的前提下更新地点和时区。
    */
+  /**
+   * 绑定中英文城市搜索框。城市搜索的 DOM 与键盘逻辑在 ui/controls.ts，
+   * app.ts 只提供当前语言、候选上限和 setObserver 回调。
+   */
   function setupCitySearch() {
-    const input = $("city-search"),
-      box = $("city-suggestions");
-    if (!input || !box) return;
-    let found = [],
-      activeIndex = -1,
-      composing = false;
-    const setActive = (index) => {
-      const buttons = Array.from(box.querySelectorAll(".city-option"));
-      activeIndex = buttons.length ? (index + buttons.length) % buttons.length : -1;
-      buttons.forEach((button, i) => {
-        button.classList.toggle("active", i === activeIndex);
-        button.setAttribute("aria-selected", String(i === activeIndex));
-      });
-      if (buttons[activeIndex]) buttons[activeIndex].scrollIntoView({ block: "nearest" });
-    };
-    const choose = (city) => {
-      if (!city) return;
-      input.value = state.lang === "zh" ? city.zh : city.en;
-      box.classList.remove("open");
-      setObserver(city.lat, city.lon, city.zone, city.zh, city.en, true);
-    };
-    const render = (query = "") => {
-      const q = String(query).trim().toLowerCase();
-      const cityMaxResults = Math.max(1, Math.floor(Number(cfg("search.cityMaxResults", 60)) || 60));
-      found = CITIES.filter((c) => !q || citySearchText(c).includes(q)).slice(
-        0,
-        cityMaxResults,
-      );
-      box.innerHTML = "";
-      found.forEach((c, index) => {
-        const b = document.createElement("button");
-        b.type = "button";
-        b.className = "city-option";
-        b.setAttribute("role", "option");
-        b.title = `${c.zh} / ${c.en} · ${c.zone}`;
-        b.innerHTML = `<span class="city-option-name">${state.lang === "zh" ? c.zh : c.en}</span><small class="city-option-zone">${c.zone}</small>`;
-        b.addEventListener("mouseenter", () => setActive(index));
-        b.addEventListener("mousedown", (e) => {
-          e.preventDefault();
-          choose(c);
-        });
-        box.appendChild(b);
-      });
-      box.classList.toggle("open", found.length > 0);
-      setActive(found.length ? 0 : -1);
-    };
-    input.addEventListener("compositionstart", () => (composing = true));
-    input.addEventListener("compositionend", () => (composing = false));
-    input.addEventListener("focus", () => render(input.value));
-    input.addEventListener("input", () => render(input.value));
-    input.addEventListener("keydown", (e) => {
-      if (composing || e.isComposing) return;
-      if (e.key === "ArrowDown") {
-        e.preventDefault();
-        if (!box.classList.contains("open")) render(input.value);
-        else setActive(activeIndex + 1);
-      } else if (e.key === "ArrowUp") {
-        e.preventDefault();
-        if (!box.classList.contains("open")) render(input.value);
-        else setActive(activeIndex - 1);
-      } else if (e.key === "Enter") {
-        const city = found[activeIndex] || CITIES.find((x) => x.zh === input.value.trim() || x.en.toLowerCase() === input.value.trim().toLowerCase());
-        if (city) {
-          e.preventDefault();
-          choose(city);
-          input.blur();
-        }
-      } else if (e.key === "Escape") box.classList.remove("open");
-    });
-    document.addEventListener("mousedown", (e) => {
-      if (!e.target.closest(".city-search-wrap")) box.classList.remove("open");
+    setupCitySearchControl({
+      input: $("city-search"),
+      box: $("city-suggestions"),
+      cities: CITIES,
+      citySearchText,
+      getLanguage: () => state.lang,
+      getMaxResults: () => cfg("search.cityMaxResults", 60),
+      setObserver,
     });
   }
   function updateBoundaryUI() {
@@ -3291,16 +2891,6 @@ import { helpManualForLanguage } from "./data/content/help-manual";
     return state.coordinateSystem === "horizontal";
   }
 
-  function formatRA(deg) {
-    let h = (((Number(deg) % 360) + 360) % 360) / 15;
-    const hh = Math.floor(h),
-      mm = Math.floor((h - hh) * 60),
-      ss = Math.round(((h - hh) * 60 - mm) * 60);
-    return `${String(hh).padStart(2, "0")}h ${String(mm).padStart(2, "0")}m ${String(ss).padStart(2, "0")}s`;
-  }
-  function formatDec(deg) {
-    return `${Number(deg) >= 0 ? "+" : "−"}${Math.abs(Number(deg)).toFixed(2)}°`;
-  }
   function horizontalFor(coord, options = {}) {
     try {
       const eq = options.alreadyEpoch ? coord : epochEquatorialFromJ2000(coord);
@@ -3314,45 +2904,15 @@ import { helpManualForLanguage } from "./data/content/help-manual";
     }
   }
 
-  function degToRad(value) {
-    return (Number(value) * Math.PI) / 180;
-  }
-
-  function radToDeg(value) {
-    return (Number(value) * 180) / Math.PI;
-  }
-
-  function normalizeDegrees(value) {
-    return ((Number(value) % 360) + 360) % 360;
-  }
-
-  function julianDate(date) {
-    return date.getTime() / 86400000 + 2440587.5;
-  }
-
-  function localSiderealDegrees(date, longitude) {
-    const jd = julianDate(date),
-      d = jd - 2451545.0,
-      gmst = 280.46061837 + 360.98564736629 * d;
-    return normalizeDegrees(gmst + Number(longitude));
-  }
-
   function equatorialFromHorizontal(azimuth, altitude) {
-    const az = degToRad(azimuth),
-      alt = degToRad(altitude),
-      lat = degToRad(state.lat),
-      lst = degToRad(localSiderealDegrees(currentInstantDate(), state.lon));
-    const sinDec =
-        Math.sin(alt) * Math.sin(lat) +
-        Math.cos(alt) * Math.cos(lat) * Math.cos(az),
-      dec = Math.asin(Math.max(-1, Math.min(1, sinDec))),
-      hourAngle = Math.atan2(
-        -Math.sin(az) * Math.cos(alt),
-        Math.sin(alt) * Math.cos(lat) -
-          Math.cos(alt) * Math.sin(lat) * Math.cos(az),
-      ),
-      ra = normalizeDegrees(radToDeg(lst - hourAngle));
-    return [normalizeCelestialLongitude(ra), radToDeg(dec)];
+    return equatorialFromHorizontalPure({
+      azimuth,
+      altitude,
+      latitude: state.lat,
+      longitude: state.lon,
+      date: currentInstantDate(),
+      normalizeLongitude: normalizeCelestialLongitude,
+    });
   }
 
   function scaleFont(font) {
@@ -3412,15 +2972,13 @@ import { helpManualForLanguage } from "./data/content/help-manual";
 
   function drawReferenceText(text, point, style, align = "center") {
     if (!point) return;
-    const ctx = Celestial.context;
-    ctx.save();
-    ctx.globalAlpha = Number(style.opacity ?? 1);
-    ctx.fillStyle = style.fill;
-    ctx.font = scaleFont(style.font);
-    ctx.textAlign = align;
-    ctx.textBaseline = style.baseline || "middle";
-    ctx.fillText(text, point[0], point[1]);
-    ctx.restore();
+    drawLayerReferenceText(
+      Celestial.context,
+      text,
+      point,
+      { ...style, font: scaleFont(style.font), baseline: style.baseline || "middle" },
+      align,
+    );
   }
 
   function drawHorizonLayer() {
@@ -3533,25 +3091,31 @@ import { helpManualForLanguage } from "./data/content/help-manual";
     if (!searchHighlight || !searchHighlight.coord) return;
     const pt = projectEquatorialCoordinate(searchHighlight.coord);
     if (!pt) return;
-    const ctx = Celestial.context;
-    ctx.save();
-    ctx.strokeStyle = "#ffe45c";
-    ctx.globalAlpha = 0.94;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(pt[0], pt[1], 16, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(pt[0] - 23, pt[1]);
-    ctx.lineTo(pt[0] - 8, pt[1]);
-    ctx.moveTo(pt[0] + 8, pt[1]);
-    ctx.lineTo(pt[0] + 23, pt[1]);
-    ctx.moveTo(pt[0], pt[1] - 23);
-    ctx.lineTo(pt[0], pt[1] - 8);
-    ctx.moveTo(pt[0], pt[1] + 8);
-    ctx.lineTo(pt[0], pt[1] + 23);
-    ctx.stroke();
-    ctx.restore();
+    drawSearchReticle(Celestial.context, pt);
+  }
+
+  /**
+   * 绘制点击选中标记。
+   * 与搜索准星分离：搜索仍然用圆形准星，点击选中只画四条等长短线，
+   * 中心留空，避免遮挡被选中的星点或行星图标。
+   */
+  function drawSelectionHighlight() {
+    if (!currentSelected) return;
+    let point = null;
+    const display = currentSelected.displayCoord || currentSelected.epochCoord;
+    if (display && Celestial.clip(display)) {
+      const pt = Celestial.mapProjection(display);
+      if (pt && Number.isFinite(pt[0]) && Number.isFinite(pt[1])) point = pt;
+    }
+    if (!point && currentSelected.coord) point = projectEquatorialCoordinate(currentSelected.coord);
+    if (!point) return;
+    drawSelectionReticle(Celestial.context, point, {
+      stroke: cfg("selectionMarker.stroke", "#8eeaff"),
+      opacity: Number(cfg("selectionMarker.opacity", 0.9)),
+      lineWidth: Number(cfg("selectionMarker.lineWidth", 1.45)),
+      gap: Number(cfg("selectionMarker.gap", 10)),
+      armLength: Number(cfg("selectionMarker.armLength", 13)),
+    });
   }
 
 
@@ -3580,17 +3144,13 @@ import { helpManualForLanguage } from "./data/content/help-manual";
         drawEquatorialGridLabels();
         drawEclipticLineLayer();
         drawSearchHighlight();
+        drawSelectionHighlight();
       },
     });
   }
 
   function selectionNodes(selector) {
-    try {
-      const sel = Celestial.container.selectAll(selector);
-      return sel && sel[0] ? sel[0].filter(Boolean) : [];
-    } catch (_) {
-      return [];
-    }
+    return getLayerSelectionNodes(Celestial, selector);
   }
   const PLANET_STYLE = cfg("planets", {});
   const TRAD_TO_SIMP = {
@@ -3941,46 +3501,15 @@ import { helpManualForLanguage } from "./data/content/help-manual";
    * 返回赤道目录坐标；绘制和点击拾取再转换到当前 D3-Celestial transform。
    */
   function currentPlanetPositions() {
-    const objects = window.__RSO_PLANET_OBJECTS__ || [],
-      origin = window.__RSO_PLANET_ORIGIN__;
-    if (!origin || !objects.length) {
-      noteTimeRenderDebug({ planetStatus: "skipped", planetCount: 0 });
-      return [];
-    }
-    try {
-      const dt = currentInstantDate(),
-        observer = origin(dt).spherical();
-      const planets = objects
-        .map((fn) => {
-          const body = fn(dt).equatorial(observer),
-            ep = (body && body.ephemeris) || {},
-            eq = ep.pos;
-          if (!eq || !Number.isFinite(eq[0]) || !Number.isFinite(eq[1]))
-            return null;
-          const epochCoord = epochEquatorialFromJ2000(eq);
-          return {
-            id: fn.id(),
-            body,
-            coord: eq.slice(),
-            epochCoord,
-            displayCoord: displayCoordinateForEpochEquatorial(epochCoord),
-          };
-        })
-        .filter(Boolean);
-      noteTimeRenderDebug({
-        planetStatus: "ok",
-        planetCount: planets.length,
-      });
-      return planets;
-    } catch (err) {
-      console.warn("Planet position calculation failed", err);
-      noteTimeRenderDebug({
-        planetStatus: "failed",
-        planetCount: 0,
-        lastError: `planet calculation failed: ${debugErrorText(err)}`,
-      });
-      return [];
-    }
+    return calculateCurrentPlanetPositions({
+      objects: window.__RSO_PLANET_OBJECTS__ || [],
+      origin: window.__RSO_PLANET_ORIGIN__,
+      date: currentInstantDate(),
+      epochEquatorialFromJ2000,
+      displayCoordinateForEpochEquatorial,
+      noteTimeRenderDebug,
+      debugErrorText,
+    });
   }
   function planetById(id) {
     return currentPlanetPositions().find((p) => p.id === id) || null;
@@ -4775,6 +4304,7 @@ import { helpManualForLanguage } from "./data/content/help-manual";
         };
     }
     showObjectInfo(currentSelected);
+    if (skyReady && window.Celestial) redrawAndSyncMapBox("selected object refresh");
   }
 
   function ensureFloatingObjectInfo() {
@@ -4879,11 +4409,11 @@ import { helpManualForLanguage } from "./data/content/help-manual";
   }
 
   function pairLine(a, b, c, d) {
-    return `<div class="floating-info-pair"><span class="floating-field"><b>${a}：</b><em>${b || "—"}</em></span><span class="floating-field"><b>${c}：</b><em>${d || "—"}</em></span></div>`;
+    return infoPairLine(a, b, c, d);
   }
 
   function singleLine(a, b) {
-    return `<div class="floating-info-single"><b>${a}：</b><em>${b || "—"}</em></div>`;
+    return infoSingleLine(a, b);
   }
 
   function renderFloatingObjectInfo(obj) {
@@ -4929,11 +4459,7 @@ import { helpManualForLanguage } from "./data/content/help-manual";
     $("floating-object-grid").innerHTML = data.html;
   }
   function skyEventPoint(canvas, event) {
-    const rect = canvas.getBoundingClientRect();
-    // D3-Celestial 会按 devicePixelRatio 缩放 2D context，但投影坐标仍使用
-    // CSS 像素。因此指针坐标也必须保持在 CSS 像素空间；如果乘以
-    // canvas.width / rect.width，高分屏下点击拾取会错位。
-    return [event.clientX - rect.left, event.clientY - rect.top];
+    return getSkyEventPoint(canvas, event);
   }
   function selectAtEvent(canvas, event) {
     try {
@@ -4943,6 +4469,7 @@ import { helpManualForLanguage } from "./data/content/help-manual";
         floatingObjectInfoDismissed = false;
         found.label = objectLabel(found.type, found.d);
         showObjectInfo(found);
+        redrawAndSyncMapBox("object selection");
         return;
       }
       const p = Celestial.mapProjection.invert([x, y]);
@@ -4953,8 +4480,10 @@ import { helpManualForLanguage } from "./data/content/help-manual";
         d: { properties: {} },
         coord: p,
         epochCoord: p,
+        displayCoord: p,
         label: t("skyPosition"),
       });
+      redrawAndSyncMapBox("sky position selection");
     } catch (err) {
       console.warn("Object picking failed", err);
     }
@@ -6099,12 +5628,8 @@ import { helpManualForLanguage } from "./data/content/help-manual";
     redrawAndSyncMapBox("coordinate view switch");
   }
 
-  function clamp(value, min, max) {
-    return Math.max(min, Math.min(max, value));
-  }
   function canvasRect() {
-    const c = document.querySelector("#celestial-map canvas");
-    return c ? c.getBoundingClientRect() : null;
+    return skyCanvasRect();
   }
   function handleMapScaleWheel(event) {
     if (event.target.closest && event.target.closest("#debug-overlay"))
@@ -6239,10 +5764,7 @@ import { helpManualForLanguage } from "./data/content/help-manual";
   }
 
   function isTextEditingTarget(target) {
-    if (!target || !target.closest) return false;
-    return !!target.closest(
-      "input,select,textarea,[contenteditable='true'],.modal,#debug-overlay",
-    );
+    return isUiTextEditingTarget(target);
   }
 
   function panSkyByKeyboard(key) {
@@ -6269,9 +5791,9 @@ import { helpManualForLanguage } from "./data/content/help-manual";
     try {
       if (storage) {
         Object.keys(storage).forEach((key) => {
-          if (/^(real-sky-observatory|rso-|__rso_)/i.test(key)) storage.removeItem(key);
+          if (/^(real-sky-observatory|rso-|__rso_)/i.test(key)) removeStorageKey(key);
         });
-        storage.removeItem(STORAGE_KEY);
+        removeStorageKey(STORAGE_KEY);
       }
     } catch (err) {
       console.warn("Default reset could not remove stored state", err);
