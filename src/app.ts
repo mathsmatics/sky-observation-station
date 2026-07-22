@@ -21,6 +21,7 @@ import {
 } from "./data/deep-sky";
 import {
   buildObjectSearchIndexFromSources,
+  brightestStarEntries,
   candidateCoord,
   searchObjectEntries,
 } from "./data/object-search-index";
@@ -329,6 +330,8 @@ import {
     lastPrecessionError: "-",
   };
   let objectSearchIndex = null,
+    objectSearchIndexLang = "",
+    objectSearchIndexCultureMode = "",
     searchHighlight = null,
     searchHighlightTimer = null,
     floatingObjectInfoDismissed = false;
@@ -2989,6 +2992,21 @@ import {
     drawProjectedLine(points, style);
   }
 
+  function drawGalacticEquatorLayer() {
+    if (state.coordinateSystem !== "galactic") return;
+    const style = {
+      stroke: cfg("sky.galacticEquator.stroke", "#b26dff"),
+      width: Number(cfg("sky.galacticEquator.width", 1.35)),
+      opacity: Number(cfg("sky.galacticEquator.opacity", 0.86)),
+    };
+    const points = [];
+    for (let lon = -180; lon <= 180; lon += 2) {
+      const coord = [lon, 0];
+      points.push(Celestial.clip(coord) ? Celestial.mapProjection(coord) : null);
+    }
+    drawProjectedLine(points, style);
+  }
+
   function registerReferenceOverlays() {
     Celestial.add({
       type: "raw",
@@ -2998,6 +3016,7 @@ import {
         drawHorizonLayer();
         drawEquatorialGridLabels();
         drawEclipticLineLayer();
+        drawGalacticEquatorLayer();
         drawSearchHighlight();
         drawSelectionHighlight();
       },
@@ -3083,8 +3102,46 @@ import {
     return true;
   }
 
+  function syncMilkyWayBackgroundMaskGeometry() {
+    const sourceNode =
+      selectionNodes(".milkyWay")[0] || selectionNodes(".mw")[0],
+      sourceFeature = sourceNode && sourceNode.__data__,
+      sourceCoordinates =
+        sourceFeature &&
+        sourceFeature.geometry &&
+        sourceFeature.geometry.coordinates &&
+        sourceFeature.geometry.coordinates[0];
+    if (!Array.isArray(sourceCoordinates)) return 0;
+    let synced = 0;
+    [".milkyWayBg", ".mwbg"].forEach((selector) => {
+      selectionNodes(selector).forEach((node) => {
+        const feature = node && node.__data__;
+        if (!feature || !feature.geometry) return;
+        feature.geometry = {
+          type: "MultiPolygon",
+          coordinates: [
+            sourceCoordinates.map((ring) =>
+              Array.isArray(ring) ? ring.slice().reverse() : ring,
+            ),
+          ],
+        };
+        synced += 1;
+      });
+    });
+    return synced;
+  }
+
+  function useNativeGalacticFixedSkyFrame() {
+    return projectionCoordinateTransform() === "galactic";
+  }
+
   function prepareDatasetForEpoch(path, data) {
     if (!data || data.type !== "FeatureCollection" || !Array.isArray(data.features)) return data;
+    if (useNativeGalacticFixedSkyFrame()) {
+      astronomyModelDebug.fixedLayerPrecession = "native galactic fixed-sky frame";
+      astronomyModelDebug.lastPrecessionError = "-";
+      return data;
+    }
     const date = currentInstantDate();
     let transformed = 0;
     data.features.forEach((feature) => {
@@ -3139,6 +3196,11 @@ import {
   function updateLoadedCoordinateFrame() {
     if (!skyReady || !window.Celestial || !Celestial.container) return;
     updateAstronomyModelDebug();
+    if (useNativeGalacticFixedSkyFrame()) {
+      astronomyModelDebug.fixedLayerPrecession = "native galactic fixed-sky frame";
+      astronomyModelDebug.lastPrecessionError = "-";
+      return;
+    }
     const mapper = (coord) => displayCoordinateForEquatorial(coord);
     const selectors = [
       ".star",
@@ -3151,6 +3213,8 @@ import {
       ".rso-cn-name",
       ".rso-traditional-region",
       ".rso-traditional-label",
+      ".milkyWay",
+      ".mw",
     ];
     let transformed = 0;
     try {
@@ -3160,7 +3224,10 @@ import {
           if (applyFeatureGeometryFrame(d, mapper)) transformed += 1;
         });
       });
+      const syncedMilkyWayMasks = syncMilkyWayBackgroundMaskGeometry();
       astronomyModelDebug.fixedLayerPrecession = transformed ? `${transformed} displayed features` : "no loaded feature geometry";
+      if (syncedMilkyWayMasks)
+        astronomyModelDebug.fixedLayerPrecession += `, ${syncedMilkyWayMasks} Milky Way masks synced`;
       astronomyModelDebug.boundaryPrecession = transformed ? "connected" : astronomyModelDebug.boundaryPrecession;
       astronomyModelDebug.asterismPrecession = transformed ? "connected" : astronomyModelDebug.asterismPrecession;
       if (westernDualLineFeatures.length || chineseLineFeatures.length) rebuildSharedCultureSegments();
@@ -3281,7 +3348,12 @@ import {
   }
 
   function buildObjectSearchIndex() {
-    if (objectSearchIndex) return objectSearchIndex;
+    if (
+      objectSearchIndex &&
+      objectSearchIndexLang === state.lang &&
+      objectSearchIndexCultureMode === state.cultureMode
+    )
+      return objectSearchIndex;
     objectSearchIndex = buildObjectSearchIndexFromSources({
       stars: ORIGINAL_STARS,
       starNames: STAR_NAMES,
@@ -3289,16 +3361,57 @@ import {
       deepSkyNames: DSO_NAMES,
       constellationNameFeatures: westernConstellationNameFeatures(),
       asterismNameFeatures: chineseAsterismNameFeatures(),
+      planets: [],
+      simplifyChinese,
+      labelObject: objectLabel,
+    });
+    objectSearchIndexLang = state.lang;
+    objectSearchIndexCultureMode = state.cultureMode;
+    return objectSearchIndex;
+  }
+
+  function currentPlanetSearchEntries() {
+    return buildObjectSearchIndexFromSources({
+      stars: [],
+      starNames: STAR_NAMES,
+      deepSkyFeatures: [],
+      deepSkyNames: DSO_NAMES,
+      constellationNameFeatures: [],
+      asterismNameFeatures: [],
       planets: currentPlanetPositions(),
       simplifyChinese,
       labelObject: objectLabel,
     });
-    return objectSearchIndex;
   }
 
   function searchObjects(query) {
-    objectSearchIndex = null;
-    return searchObjectEntries(query, buildObjectSearchIndex(), simplifyChinese);
+    return searchObjectEntries(
+      query,
+      buildObjectSearchIndex().concat(currentPlanetSearchEntries()),
+      simplifyChinese,
+    );
+  }
+
+  function defaultBrightStarSuggestions() {
+    return brightestStarEntries(buildObjectSearchIndex(), 50);
+  }
+
+  function objectSearchDisplayTitle(entry) {
+    if (!entry) return "";
+    return state.lang === "zh"
+      ? entry.names[0]
+      : entry.names[1] || entry.names[0];
+  }
+
+  function objectSearchMetaText(entry) {
+    if (!entry) return "";
+    if (entry.type !== "star") return objectSearchTypeLabel(entry.type);
+    const names = STAR_NAMES[String(entry.d && entry.d.id)] || {},
+      meta = constellationMeta(names.c),
+      western = state.lang === "zh" ? meta.zh : meta.gen || names.c || "",
+      asterisms = chineseAsterismsForStar(entry.d && entry.d.id).slice(0, 2),
+      parts = [western].concat(asterisms).filter(Boolean);
+    return parts.length ? parts.join(" / ") : objectSearchTypeLabel(entry.type);
   }
 
   let objectSearchResults = [],
@@ -3336,12 +3449,10 @@ import {
       button.className = "object-option";
       button.type = "button";
       button.setAttribute("role", "option");
-      const title =
-        state.lang === "zh" ? entry.names[0] : entry.names[1] || entry.names[0];
       const name = document.createElement("span"),
         type = document.createElement("small");
-      name.textContent = title;
-      type.textContent = objectSearchTypeLabel(entry.type);
+      name.textContent = objectSearchDisplayTitle(entry);
+      type.textContent = objectSearchMetaText(entry);
       button.append(name, type);
       button.addEventListener("mouseenter", () => setObjectSearchActive(index));
       button.addEventListener("mousedown", (e) => {
@@ -3361,13 +3472,16 @@ import {
     let composing = false;
     input.addEventListener("compositionstart", () => (composing = true));
     input.addEventListener("compositionend", () => (composing = false));
+    const showDefaultSuggestions = () => {
+      if (input.value.trim()) return;
+      renderObjectSuggestions(defaultBrightStarSuggestions(), false);
+    };
+    input.addEventListener("focus", showDefaultSuggestions);
+    input.addEventListener("click", showDefaultSuggestions);
     input.addEventListener("input", () => {
       const value = input.value.trim();
       if (!value) {
-        box.classList.remove("open");
-        box.innerHTML = "";
-        objectSearchResults = [];
-        objectSearchActiveIndex = -1;
+        showDefaultSuggestions();
         return;
       }
       const results = searchObjects(value);
@@ -3425,6 +3539,8 @@ import {
 
   function selectObjectSearchResult(entry) {
     floatingObjectInfoDismissed = false;
+    const input = $("object-search");
+    if (input) input.value = objectSearchDisplayTitle(entry);
     const obj =
       entry.type === "planet"
         ? {

@@ -164,6 +164,7 @@ export function searchObjectEntries(
   query: string,
   entries: SearchEntrySeed[],
   simplifyChinese: (value: string) => string,
+  limit = 24,
 ): SearchEntrySeed[] {
   const needle = normalizeObjectSearchText(simplifyChinese(query || ""));
   if (!needle) return [];
@@ -180,6 +181,20 @@ export function searchObjectEntries(
       (a: any, b: any) =>
         a.score - b.score || a.entry.names[0].localeCompare(b.entry.names[0]),
     )
-    .slice(0, 24)
+    .slice(0, limit)
     .map((item: any) => item.entry);
+}
+
+export function brightestStarEntries(entries: SearchEntrySeed[], limit = 50): SearchEntrySeed[] {
+  return entries
+    .filter((entry) => entry.type === "star")
+    .slice()
+    .sort((a: any, b: any) => {
+      const aMag = Number(a.d && a.d.properties && a.d.properties.mag);
+      const bMag = Number(b.d && b.d.properties && b.d.properties.mag);
+      const safeA = Number.isFinite(aMag) ? aMag : Infinity;
+      const safeB = Number.isFinite(bMag) ? bMag : Infinity;
+      return safeA - safeB || a.names[0].localeCompare(b.names[0]);
+    })
+    .slice(0, limit);
 }

@@ -1136,6 +1136,9 @@ body.panel-collapsed #sidebar {
   z-index: 40;
   left: 0;
   right: 0;
+  width: 100%;
+  min-width: 100%;
+  max-width: 100%;
   top: calc(100% + 4px);
   max-height: 260px;
   overflow: auto;
@@ -1178,7 +1181,8 @@ body.panel-collapsed #sidebar {
 }
 .object-option {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) minmax(74px, auto);
+  align-items: center;
   gap: 8px;
   width: 100%;
   padding: 8px 10px;
@@ -1187,11 +1191,26 @@ body.panel-collapsed #sidebar {
   background: transparent;
   text-align: left;
 }
+.object-option span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .object-option:hover {
   transform: none;
   background: #18304d;
 }
-.object-option small,
+.object-option small {
+  min-width: 0;
+  max-width: 150px;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: calc(9px * var(--rso-font-scale));
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .object-search-empty {
   color: var(--muted);
 }
