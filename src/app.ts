@@ -64,6 +64,7 @@ import {
   viewKey as projectionViewKey,
   viewMapScale as projectionViewMapScale,
 } from "./sky/projection";
+import { createRotationController } from "./sky/rotation-controller";
 import {
   drawProjectedLine as drawLayerProjectedLine,
   drawReferenceText as drawLayerReferenceText,
@@ -630,7 +631,7 @@ import {
     clickStart = null,
     pointerMoved = false,
     paneDrag = null,
-    poleCustomDrag = null;
+    rotationPointerDrag = null;
   let currentSelected = null,
     customViewRestoreTimer = null,
     lastRenderedSize = null,
@@ -647,6 +648,7 @@ import {
     pendingCanvasResizeMetrics = null,
     pendingCanvasResizeReason = "scheduled resize",
     layoutResizeGeneration = 0;
+  const rotationController = createRotationController();
   const timeRenderDebug = {
     inputStatus: "valid",
     activeField: "year",
@@ -1225,7 +1227,7 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     let ok = true;
     try {
       if (window.Celestial && snapshot.center) {
-        Celestial.rotate({ center: snapshot.center.slice() });
+        setCelestialCenter(snapshot.center.slice(), "snapshot rollback");
       }
       setMapScale(state.mapScale);
       updateHUD(true);
@@ -1845,9 +1847,49 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     } catch (_) {}
   }
 
+  function currentCelestialCenter() {
+    try {
+      const center = window.Celestial && Celestial.rotate && Celestial.rotate();
+      return Array.isArray(center) ? center.slice() : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function syncRotationFromCurrentView(reason = "sync") {
+    const center = currentCelestialCenter();
+    if (center) rotationController.syncFromCenter(center, reason);
+    return center;
+  }
+
+  function setCelestialCenter(center, reason = "center update") {
+    if (!window.Celestial || !Array.isArray(center)) return false;
+    Celestial.rotate({ center: center.slice() });
+    // D3-Celestial 仍接收 center，四元数只作为内部连续旋转状态；
+    // 所有外部定位、恢复和键盘操作完成后都同步一次，避免下一次拖动从旧姿态起步。
+    rotationController.syncFromCenter(center, reason);
+    return true;
+  }
+
+  function applyQuaternionPointerDelta(dx, dy, rect, reason = "quaternion drag") {
+    if (!window.Celestial || !rect) return false;
+    const nextCenter = rotationController.applyPointerDelta({
+      dx,
+      dy,
+      width: rect.width,
+      height: rect.height,
+      sensitivity: Number(cfg("interaction.dragSensitivity", 1)),
+    });
+    Celestial.rotate({ center: nextCenter });
+    redrawAndSyncMapBox(reason);
+    queueDebugOverlayUpdate();
+    return true;
+  }
+
   function debugCurrentView() {
     try {
       const center = Celestial.rotate();
+      if (Array.isArray(center)) rotationController.syncFromCenter(center, "debug-read");
       return {
         center: Array.isArray(center) ? center : null,
         mapScale: getMapScale(),
@@ -1861,9 +1903,9 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
   function debugDragMode(zh) {
     const map = $("celestial-map"),
       dragging = !!(map && map.classList.contains("dragging"));
-    if (paneDrag) return zh ? "星图留白拖动" : "pane-margin drag";
-    if (poleCustomDrag) return zh ? "极区保护拖动" : "polar-guard drag";
-    if (dragging) return zh ? "Canvas 原生拖动" : "native canvas drag";
+    if (paneDrag) return zh ? "星图留白四元数拖动" : "pane-margin quaternion drag";
+    if (rotationPointerDrag) return zh ? "Canvas 四元数拖动" : "canvas quaternion drag";
+    if (dragging) return zh ? "Canvas 拖动" : "canvas drag";
     if (clickStart) return zh ? "等待区分点击/拖动" : "click-or-drag pending";
     return zh ? "空闲" : "idle";
   }
@@ -1916,6 +1958,7 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
             canvasGroup: "【星图画布尺寸模型】",
             viewGroup: "【视角与投影状态】",
             interactionGroup: "【天球交互参数】",
+            rotationGroup: "【旋转控制 / Rotation】",
             layerGroup: "【图层与显示选项】",
             viewport: "浏览器视口 window",
             layoutMode: "当前响应式布局模式",
@@ -1966,10 +2009,18 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
             dragMoved: "已超过拖动阈值",
             clickPending: "点击判定中",
             dragThreshold: "点击/拖动阈值",
-            dragSensitivity: "Canvas 拖动灵敏度",
-            maxDragStep: "单帧最大拖动步长",
-            poleGuard: "极区保护起点",
-            poleClamp: "纬度夹取上限",
+            dragSensitivity: "四元数拖动灵敏度",
+            rotationMode: "旋转模式",
+            quaternion: "Quaternion",
+            quaternionNorm: "Quaternion 长度",
+            quaternionNormalized: "是否归一化",
+            eulerDisplay: "显示用欧拉角",
+            rotationCenter: "四元数视图中心",
+            nearPole: "是否接近极区",
+            poleDistance: "极区距离",
+            lastPointerDelta: "最近拖动增量",
+            lastAngleDelta: "最近旋转增量",
+            lastRotationSync: "最近同步来源",
             displayOptions: "显示选项",
             starLimit: "恒星最暗星等",
             starSize: "恒星大小",
@@ -2001,6 +2052,7 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
             canvasGroup: "【Canvas Layout Model】",
             viewGroup: "【View & Projection State】",
             interactionGroup: "【Celestial Interaction】",
+            rotationGroup: "【Rotation Control】",
             layerGroup: "【Layers & Display Options】",
             viewport: "browser viewport window",
             layoutMode: "responsive layout mode",
@@ -2051,10 +2103,18 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
             dragMoved: "drag threshold crossed",
             clickPending: "click pending",
             dragThreshold: "click/drag threshold",
-            dragSensitivity: "canvas drag sensitivity",
-            maxDragStep: "max drag step",
-            poleGuard: "polar guard start",
-            poleClamp: "latitude clamp",
+            dragSensitivity: "quaternion drag sensitivity",
+            rotationMode: "rotation mode",
+            quaternion: "Quaternion",
+            quaternionNorm: "Quaternion norm",
+            quaternionNormalized: "normalized",
+            eulerDisplay: "Euler for display",
+            rotationCenter: "quaternion view center",
+            nearPole: "near pole",
+            poleDistance: "pole distance",
+            lastPointerDelta: "last pointer delta",
+            lastAngleDelta: "last angle delta",
+            lastRotationSync: "last sync reason",
             displayOptions: "display options",
             starLimit: "stellar magnitude limit",
             starSize: "star size",
@@ -2086,6 +2146,7 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
       svg = document.querySelector("#celestial-map svg"),
       metrics = projectionCanvasMetrics(),
       starMagnitudeStats = currentStarMagnitudeStats(),
+      rotationStats = rotationController.debugState(),
       celestialMetrics =
         window.Celestial && typeof Celestial.metrics === "function"
           ? Celestial.metrics()
@@ -2435,15 +2496,41 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
       debugLine(label.dragSensitivity, [
         debugValue(cfg("interaction.dragSensitivity", 1)),
       ]),
-      debugLine(label.maxDragStep, [
-        debugValue(cfg("interaction.maxDragStepPixels", 28)),
-        debugUnit("px"),
+      debugBlankLine(),
+      debugGroup(label.rotationGroup),
+      debugLine(label.rotationMode, [debugValue(rotationStats.mode)]),
+      debugLine(label.quaternion, [
+        debugSep("w="), debugValue(Number(rotationStats.quaternion.w).toFixed(6)),
+        debugSep(" x="), debugValue(Number(rotationStats.quaternion.x).toFixed(6)),
+        debugSep(" y="), debugValue(Number(rotationStats.quaternion.y).toFixed(6)),
+        debugSep(" z="), debugValue(Number(rotationStats.quaternion.z).toFixed(6)),
       ]),
-      debugLine(label.poleGuard, [
-        debugValue(formatAngle(cfg("interaction.poleLockStart", 82))),
-        debugSep(` ${label.poleClamp}=`),
-        debugValue(formatAngle(cfg("interaction.poleLatitudeClamp", 89.2))),
+      debugLine(label.quaternionNorm, [debugValue(Number(rotationStats.norm).toFixed(6))]),
+      debugLine(label.quaternionNormalized, debugBoolParts(rotationStats.normalized)),
+      debugLine(label.eulerDisplay, [
+        debugSep("yaw="), debugValue(formatAngle(rotationStats.eulerForDisplay.yaw)),
+        debugSep(" pitch="), debugValue(formatAngle(rotationStats.eulerForDisplay.pitch)),
+        debugSep(" roll="), debugValue(formatAngle(rotationStats.eulerForDisplay.roll)),
       ]),
+      debugLine(label.rotationCenter, [
+        debugSep("lon="), debugValue(formatAngle(rotationStats.center[0])),
+        debugSep(" lat="), debugValue(formatAngle(rotationStats.center[1])),
+        debugSep(" roll="), debugValue(formatAngle(rotationStats.center[2])),
+      ]),
+      debugLine(label.nearPole, debugBoolParts(rotationStats.nearPole)),
+      debugLine(label.poleDistance, [
+        debugSep("N="), debugValue(formatAngle(rotationStats.northPoleDistance)),
+        debugSep(" S="), debugValue(formatAngle(rotationStats.southPoleDistance)),
+      ]),
+      debugLine(label.lastPointerDelta, [
+        debugSep("dx="), debugValue(formatSigned(rotationStats.lastPointerDelta.dx)), debugUnit("px"),
+        debugSep(" dy="), debugValue(formatSigned(rotationStats.lastPointerDelta.dy)), debugUnit("px"),
+      ]),
+      debugLine(label.lastAngleDelta, [
+        debugSep("x="), debugValue(formatSigned(rotationStats.lastAngleDelta.x)), debugUnit("°"),
+        debugSep(" y="), debugValue(formatSigned(rotationStats.lastAngleDelta.y)), debugUnit("°"),
+      ]),
+      debugLine(label.lastRotationSync, [debugValue(rotationStats.lastSyncReason || "-")]),
       debugBlankLine(),
       debugGroup(label.layerGroup),
       debugLine(label.starLimit, [debugValue(state.magnitude)]),
@@ -2769,7 +2856,7 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
             return;
           }
           if (Array.isArray(view.center))
-            Celestial.rotate({ center: view.center.slice() });
+            setCelestialCenter(view.center.slice(), "restore view");
           setMapScale(viewMapScale(view, state.mapScale));
           syncInternalZoomForMetrics(projectionCanvasMetrics());
           redrawAndSyncMapBox("restore view");
@@ -3977,7 +4064,7 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
       const display =
         obj.displayCoord || displayCoordinateForEquatorial(obj.coord);
       if (!display) return;
-      Celestial.rotate({ center: display.slice() });
+      setCelestialCenter(display.slice(), "object search center");
       redrawAndSyncMapBox("object search center");
       saveCurrentProjectionView();
       save();
@@ -5071,6 +5158,7 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
         );
         attachCanvasInfo(canvas);
         updateSkyView(true);
+        syncRotationFromCurrentView("canvas ready");
         // 初始天空已由 Celestial 的 follow/zenith 配置居中。
         // 这里只恢复显式快照或已保存视角；投影尚未稳定时强行写入默认旋转，
         // 可能访问到 D3-Celestial 尚未初始化完成的内部中心。
@@ -5181,7 +5269,7 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
         lst = localSiderealDegrees(date, state.lon),
         lat = Math.max(-89.9, Math.min(89.9, Number(state.lat) || 0)),
         center = [normalizeDegrees(lst), lat, 0];
-      Celestial.rotate({ center });
+      setCelestialCenter(center, "horizontal skyview fallback");
       noteTimeRenderDebug({
         fallbackStatus: "ok",
         errorStage: originalError ? "skyview-fallback" : "-",
@@ -5230,6 +5318,7 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
             location: [Number(state.lat), Number(state.lon)],
             timezone: dt.offset,
           });
+          syncRotationFromCurrentView("horizontal skyview");
           noteTimeRenderDebug({ skyviewStatus: "ok", fallbackStatus: "unused" });
           if (force) redrawOk = redrawAndSyncMapBox(reason || "horizontal sky view");
           else syncMapBoxAfterRedraw(projectionCanvasMetrics());
@@ -5456,6 +5545,10 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
    * 为 Canvas 添加指针处理：区分拖动/点击、极区拖动保护、滚轮视角保存和天体拾取。
    * 它会修改视角状态，但不会编辑目录坐标或图层可见性。
    */
+  /**
+   * 为 Canvas 添加指针处理：区分拖动/点击、四元数视角拖动、滚轮视角保存和天体拾取。
+   * D3-Celestial 仍负责投影和绘制；拖动增量先进入四元数控制器，再输出回 D3 center。
+   */
   function attachCanvasInfo(canvas) {
     if (canvas.dataset.rsoBound) return;
     canvas.dataset.rsoBound = "1";
@@ -5470,35 +5563,25 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
         };
         pointerMoved = false;
         map.classList.add("dragging");
-        let center = null;
+        const center = syncRotationFromCurrentView("pointerdown");
+        rotationPointerDrag = center
+          ? {
+              id: event.pointerId,
+              lastX: event.clientX,
+              lastY: event.clientY,
+            }
+          : null;
         try {
-          center = Celestial.rotate();
+          canvas.setPointerCapture(event.pointerId);
         } catch (_) {}
-        if (
-          Array.isArray(center) &&
-          Math.abs(Number(center[1]) || 0) >=
-            Number(cfg("interaction.poleLockStart", 82))
-        ) {
-          poleCustomDrag = {
-            id: event.pointerId,
-            lastX: event.clientX,
-            lastY: event.clientY,
-            center: center.slice(),
-          };
-          try {
-            canvas.setPointerCapture(event.pointerId);
-          } catch (_) {}
-        }
       },
       { capture: true },
     );
-    // 除极端高纬区域外，保留 D3-Celestial 的四元数拖动。
-    // 在极区只拦截原生 mousedown，改用增量中心更新，并保持当前拖动方向：
-    // 向右增加经度，向下增加纬度。
+    // 拦截 D3-Celestial 的原生 mousedown，避免原生欧拉角拖动和本项目四元数拖动同时生效。
     canvas.addEventListener(
       "mousedown",
       (event) => {
-        if (!poleCustomDrag) return;
+        if (!rotationPointerDrag) return;
         event.preventDefault();
         event.stopImmediatePropagation();
       },
@@ -5507,48 +5590,24 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     canvas.addEventListener(
       "pointermove",
       (event) => {
-        if (poleCustomDrag && event.pointerId === poleCustomDrag.id) {
-          const dx = event.clientX - poleCustomDrag.lastX,
-            dy = event.clientY - poleCustomDrag.lastY;
+        if (rotationPointerDrag && event.pointerId === rotationPointerDrag.id) {
+          const totalDx = clickStart ? event.clientX - clickStart.x : 0,
+            totalDy = clickStart ? event.clientY - clickStart.y : 0;
           if (
-            Math.hypot(
-              event.clientX - clickStart.x,
-              event.clientY - clickStart.y,
-            ) > Number(cfg("interaction.dragThreshold", 6))
+            Math.hypot(totalDx, totalDy) > Number(cfg("interaction.dragThreshold", 6))
           ) {
             pointerMoved = true;
           }
-          const rect = canvas.getBoundingClientRect(),
-            shortSide = Math.max(180, Math.min(rect.width, rect.height));
-          const degPerPx =
-            (180 / shortSide) * Number(cfg("interaction.dragSensitivity", 1));
-          const lat = Number(poleCustomDrag.center[1]) || 0;
-          const longitudeFactor = Math.min(
-            4,
-            1 / Math.max(0.25, Math.abs(Math.cos((lat * Math.PI) / 180))),
-          );
-          const maxPx = Number(cfg("interaction.maxDragStepPixels", 28));
-          const sx = Math.max(-maxPx, Math.min(maxPx, dx)),
-            sy = Math.max(-maxPx, Math.min(maxPx, dy));
-          const next = [
-            poleCustomDrag.center[0] + sx * degPerPx * longitudeFactor,
-            Math.max(
-              -Number(cfg("interaction.poleLatitudeClamp", 89.2)),
-              Math.min(
-                Number(cfg("interaction.poleLatitudeClamp", 89.2)),
-                poleCustomDrag.center[1] + sy * degPerPx,
-              ),
-            ),
-            poleCustomDrag.center[2] || 0,
-          ];
-          try {
-            Celestial.rotate({ center: next });
-            redrawAndSyncMapBox("polar drag");
-            poleCustomDrag.center = next;
-            poleCustomDrag.lastX = event.clientX;
-            poleCustomDrag.lastY = event.clientY;
-            queueDebugOverlayUpdate();
-          } catch (_) {}
+          if (pointerMoved) {
+            const dx = event.clientX - rotationPointerDrag.lastX,
+              dy = event.clientY - rotationPointerDrag.lastY;
+            const rect = canvas.getBoundingClientRect();
+            // 四元数作为内部主旋转状态：拖动只生成本帧局部旋转增量，
+            // 不再在极区附近反复用欧拉角累积，避免中心接近 ±90° 时方向跳变。
+            applyQuaternionPointerDelta(dx, dy, rect, "quaternion drag");
+            rotationPointerDrag.lastX = event.clientX;
+            rotationPointerDrag.lastY = event.clientY;
+          }
           event.preventDefault();
           event.stopImmediatePropagation();
           return;
@@ -5569,6 +5628,7 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     const persistViewSoon = () =>
       setTimeout(() => {
         if (!skyReady) return;
+        syncRotationFromCurrentView("persist view");
         saveCurrentProjectionView();
         save();
       }, 100);
@@ -5576,14 +5636,14 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
       map.classList.remove("dragging");
       if (clickStart && event.pointerId === clickStart.id && !pointerMoved)
         selectAtEvent(canvas, event);
-      if (poleCustomDrag && event.pointerId === poleCustomDrag.id) {
+      if (rotationPointerDrag && event.pointerId === rotationPointerDrag.id) {
         try {
           canvas.releasePointerCapture(event.pointerId);
         } catch (_) {}
       }
       clickStart = null;
       pointerMoved = false;
-      poleCustomDrag = null;
+      rotationPointerDrag = null;
       persistViewSoon();
     };
     canvas.addEventListener("pointerup", finish, { capture: true });
@@ -5593,7 +5653,7 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
         map.classList.remove("dragging");
         clickStart = null;
         pointerMoved = false;
-        poleCustomDrag = null;
+        rotationPointerDrag = null;
         persistViewSoon();
       },
       { capture: true },
@@ -5719,6 +5779,7 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
       syncInternalZoomForMetrics(projectionCanvasMetrics(next));
       suppressResizeUntil = performance.now() + 520;
       Celestial.reproject({ projection: next, projectionRatio: null });
+      syncRotationFromCurrentView("projection switch");
       setTimeout(() => {
         try {
           const nextMetrics = projectionCanvasMetrics(next);
@@ -5729,6 +5790,7 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
           }
           syncInternalZoomForMetrics(nextMetrics);
           syncRenderedMapBox(nextMetrics);
+          syncRotationFromCurrentView("projection resized");
           if (isHorizontalView()) {
             updateSkyView(true);
             setMapScale(viewMapScale(target, state.mapScale));
@@ -5822,10 +5884,13 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     if (!skyReady || !window.Celestial) return;
     const center = Celestial.rotate();
     if (!Array.isArray(center)) return;
+    rotationController.syncFromCenter(center, "pane margin pointerdown");
     paneDrag = {
       id: event.pointerId,
       x: event.clientX,
       y: event.clientY,
+      lastX: event.clientX,
+      lastY: event.clientY,
       center: center.slice(),
       moved: false,
     };
@@ -5844,16 +5909,15 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     }
     const rect = canvasRect();
     if (!rect) return;
-    const degPerPx = 180 / Math.max(180, Math.min(rect.width, rect.height));
-    const next = [
-      paneDrag.center[0] - dx * degPerPx,
-      clamp(paneDrag.center[1] + dy * degPerPx, -89.5, 89.5),
-      paneDrag.center[2] || 0,
-    ];
     try {
-      Celestial.rotate({ center: next });
-      redrawAndSyncMapBox("pane margin drag");
-      queueDebugOverlayUpdate();
+      applyQuaternionPointerDelta(
+        event.clientX - paneDrag.lastX,
+        event.clientY - paneDrag.lastY,
+        rect,
+        "pane margin quaternion drag",
+      );
+      paneDrag.lastX = event.clientX;
+      paneDrag.lastY = event.clientY;
     } catch (_) {}
     event.preventDefault();
   }
@@ -5934,7 +5998,7 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     else if (key === "ArrowUp") next[1] = clamp(next[1] + step, -89.5, 89.5);
     else if (key === "ArrowDown") next[1] = clamp(next[1] - step, -89.5, 89.5);
     else return false;
-    Celestial.rotate({ center: next });
+    setCelestialCenter(next, "keyboard pan");
     redrawAndSyncMapBox("keyboard pan");
     saveCurrentProjectionView();
     save();

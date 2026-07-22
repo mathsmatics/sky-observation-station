@@ -100,7 +100,7 @@
     mapScale: {
       min: 1,
       max: 8,
-      // 5.3.6 统一为 8x：保留高倍细节，同时避免过高缩放导致连续重绘明显卡顿
+      // 保持 8x：高倍细节由 5.3.6 的视口 Canvas 模式承接
       buttonFactor: 1.25
     },
     /** 鼠标、触摸和视图稳定性 */
@@ -108,23 +108,7 @@
       dragThreshold: 5,
       // 小于该像素距离视为“点击”，大于才视为“拖动”
       dragSensitivity: 1,
-      // 拖动灵敏度；越大移动越快
-      maxDragStepPixels: 28,
-      // 单帧最大拖动步长，防止浏览器掉帧后视图突然跳跃
-      poleLatitudeClamp: 89.2,
-      // 视图中心纬度限制，避免跨越极点发生翻转
-      poleSlowdownStart: 70,
-      // 超过该纬度后逐渐降低经向拖动灵敏度
-      poleLongitudeFactorMin: 0.08,
-      // 正对极点时保留的最小经向灵敏度
-      poleLockStart: 82,
-      // 超过该中心纬度后启用“只纠正异常跳变”的极区保护；正常拖动仍由 D3-Celestial 原生交互处理
-      poleJumpLimitDegrees: 8,
-      // 单次事件允许的最大异常角度变化；超过时按最短角差限幅
-      poleLatitudeJumpLimitDegrees: 5,
-      // 极区单次纬向异常变化上限
-      poleGuardDelayMs: 0,
-      // 原生拖动完成后再检查，0 表示下一事件循环
+      // 四元数拖动灵敏度；越大移动越快
       minZoom: 1,
       maxZoom: 8,
       zoomButtonFactor: 1.25,
@@ -2722,6 +2706,226 @@
     return options.savedView || options.fallbackView;
   }
 
+  // src/sky/quaternion.ts
+  function identityQuaternion() {
+    return { w: 1, x: 0, y: 0, z: 0 };
+  }
+  function quaternionNorm(q) {
+    return Math.sqrt(q.w * q.w + q.x * q.x + q.y * q.y + q.z * q.z);
+  }
+  function normalizeQuaternion(q) {
+    const n = quaternionNorm(q);
+    if (!Number.isFinite(n) || n < 1e-12) return identityQuaternion();
+    return { w: q.w / n, x: q.x / n, y: q.y / n, z: q.z / n };
+  }
+  function multiplyQuaternions(a, b) {
+    return {
+      w: a.w * b.w - a.x * b.x - a.y * b.y - a.z * b.z,
+      x: a.w * b.x + a.x * b.w + a.y * b.z - a.z * b.y,
+      y: a.w * b.y - a.x * b.z + a.y * b.w + a.z * b.x,
+      z: a.w * b.z + a.x * b.y - a.y * b.x + a.z * b.w
+    };
+  }
+  function dotVec3(a, b) {
+    return a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+  }
+  function crossVec3(a, b) {
+    return [
+      a[1] * b[2] - a[2] * b[1],
+      a[2] * b[0] - a[0] * b[2],
+      a[0] * b[1] - a[1] * b[0]
+    ];
+  }
+  function normalizeVec3(v, fallback = [1, 0, 0]) {
+    const n = Math.sqrt(dotVec3(v, v));
+    if (!Number.isFinite(n) || n < 1e-12) return fallback.slice();
+    return [v[0] / n, v[1] / n, v[2] / n];
+  }
+  function quaternionFromAxisAngle(axis, angleRad) {
+    const a = normalizeVec3(axis, [0, 0, 1]);
+    const half = angleRad / 2;
+    const s = Math.sin(half);
+    return normalizeQuaternion({
+      w: Math.cos(half),
+      x: a[0] * s,
+      y: a[1] * s,
+      z: a[2] * s
+    });
+  }
+  function conjugateQuaternion(q) {
+    return { w: q.w, x: -q.x, y: -q.y, z: -q.z };
+  }
+  function rotateVectorByQuaternion(v, q) {
+    const nq = normalizeQuaternion(q);
+    const p = { w: 0, x: v[0], y: v[1], z: v[2] };
+    const r = multiplyQuaternions(multiplyQuaternions(nq, p), conjugateQuaternion(nq));
+    return [r.x, r.y, r.z];
+  }
+  function quaternionFromRotationMatrix(m) {
+    const trace = m[0][0] + m[1][1] + m[2][2];
+    let q;
+    if (trace > 0) {
+      const s = Math.sqrt(trace + 1) * 2;
+      q = {
+        w: 0.25 * s,
+        x: (m[2][1] - m[1][2]) / s,
+        y: (m[0][2] - m[2][0]) / s,
+        z: (m[1][0] - m[0][1]) / s
+      };
+    } else if (m[0][0] > m[1][1] && m[0][0] > m[2][2]) {
+      const s = Math.sqrt(1 + m[0][0] - m[1][1] - m[2][2]) * 2;
+      q = {
+        w: (m[2][1] - m[1][2]) / s,
+        x: 0.25 * s,
+        y: (m[0][1] + m[1][0]) / s,
+        z: (m[0][2] + m[2][0]) / s
+      };
+    } else if (m[1][1] > m[2][2]) {
+      const s = Math.sqrt(1 + m[1][1] - m[0][0] - m[2][2]) * 2;
+      q = {
+        w: (m[0][2] - m[2][0]) / s,
+        x: (m[0][1] + m[1][0]) / s,
+        y: 0.25 * s,
+        z: (m[1][2] + m[2][1]) / s
+      };
+    } else {
+      const s = Math.sqrt(1 + m[2][2] - m[0][0] - m[1][1]) * 2;
+      q = {
+        w: (m[1][0] - m[0][1]) / s,
+        x: (m[0][2] + m[2][0]) / s,
+        y: (m[1][2] + m[2][1]) / s,
+        z: 0.25 * s
+      };
+    }
+    return normalizeQuaternion(q);
+  }
+  function longitudeLatitudeToVector(lonDeg, latDeg) {
+    const lon = lonDeg * Math.PI / 180;
+    const lat = latDeg * Math.PI / 180;
+    const cosLat = Math.cos(lat);
+    return [cosLat * Math.cos(lon), cosLat * Math.sin(lon), Math.sin(lat)];
+  }
+  function vectorToLongitudeLatitude(v, fallbackLonDeg = 0) {
+    const n = normalizeVec3(v, [1, 0, 0]);
+    const horizontal = Math.hypot(n[0], n[1]);
+    const lon = horizontal < 1e-10 ? fallbackLonDeg : Math.atan2(n[1], n[0]) * 180 / Math.PI;
+    const lat = Math.asin(Math.max(-1, Math.min(1, n[2]))) * 180 / Math.PI;
+    const normalizedLon = (lon % 360 + 360) % 360;
+    return [normalizedLon, lat];
+  }
+  function localNorthEast(lonDeg, latDeg) {
+    const lon = lonDeg * Math.PI / 180;
+    const lat = latDeg * Math.PI / 180;
+    const north = normalizeVec3([
+      -Math.sin(lat) * Math.cos(lon),
+      -Math.sin(lat) * Math.sin(lon),
+      Math.cos(lat)
+    ], [0, 0, 1]);
+    const east = normalizeVec3([-Math.sin(lon), Math.cos(lon), 0], [0, 1, 0]);
+    return { north, east };
+  }
+  function eulerToQuaternion(center) {
+    const lon = Number(center && center[0]) || 0;
+    const lat = Number(center && center[1]) || 0;
+    const roll = (Number(center && center[2]) || 0) * Math.PI / 180;
+    const forward = normalizeVec3(longitudeLatitudeToVector(lon, lat), [1, 0, 0]);
+    const { north, east } = localNorthEast(lon, lat);
+    const up = normalizeVec3([
+      north[0] * Math.cos(roll) + east[0] * Math.sin(roll),
+      north[1] * Math.cos(roll) + east[1] * Math.sin(roll),
+      north[2] * Math.cos(roll) + east[2] * Math.sin(roll)
+    ], [0, 0, 1]);
+    const right = normalizeVec3(crossVec3(up, forward), [0, 1, 0]);
+    const trueUp = normalizeVec3(crossVec3(forward, right), up);
+    return quaternionFromRotationMatrix([
+      [forward[0], right[0], trueUp[0]],
+      [forward[1], right[1], trueUp[1]],
+      [forward[2], right[2], trueUp[2]]
+    ]);
+  }
+  function quaternionToEuler(q, fallbackLonDeg = 0) {
+    const forward = rotateVectorByQuaternion([1, 0, 0], q);
+    const up = rotateVectorByQuaternion([0, 0, 1], q);
+    const [lon, lat] = vectorToLongitudeLatitude(forward, fallbackLonDeg);
+    const { north, east } = localNorthEast(lon, lat);
+    const roll = Math.atan2(dotVec3(up, east), dotVec3(up, north)) * 180 / Math.PI;
+    return { yaw: lon, pitch: lat, roll };
+  }
+
+  // src/sky/rotation-controller.ts
+  function finiteCenter(center) {
+    return [
+      Number.isFinite(Number(center && center[0])) ? Number(center[0]) : 0,
+      Number.isFinite(Number(center && center[1])) ? Number(center[1]) : 0,
+      Number.isFinite(Number(center && center[2])) ? Number(center[2]) : 0
+    ];
+  }
+  function centerFromQuaternion(q, fallbackCenter) {
+    const forward = rotateVectorByQuaternion([1, 0, 0], q);
+    const [lon, lat] = vectorToLongitudeLatitude(forward, fallbackCenter[0]);
+    const e = quaternionToEuler(q, fallbackCenter[0]);
+    return [lon, lat, e.roll];
+  }
+  function createRotationController() {
+    let orientation = identityQuaternion();
+    let center = [0, 0, 0];
+    let lastPointerDelta = { dx: 0, dy: 0 };
+    let lastAngleDelta = { x: 0, y: 0 };
+    let lastSyncReason = "startup";
+    function syncFromCenter(inputCenter, reason = "sync") {
+      center = finiteCenter(inputCenter);
+      orientation = normalizeQuaternion(eulerToQuaternion(center));
+      lastSyncReason = reason;
+      return center.slice();
+    }
+    function applyPointerDelta(options) {
+      const dx = Number(options.dx) || 0;
+      const dy = Number(options.dy) || 0;
+      const shortSide = Math.max(180, Math.min(Number(options.width) || 0, Number(options.height) || 0));
+      const sensitivity = Number.isFinite(Number(options.sensitivity)) ? Number(options.sensitivity) : 1;
+      const radiansPerPixel = Math.PI / shortSide * sensitivity;
+      const angleX = dx * radiansPerPixel;
+      const angleY = -dy * radiansPerPixel;
+      const up = rotateVectorByQuaternion([0, 0, 1], orientation);
+      const right = rotateVectorByQuaternion([0, 1, 0], orientation);
+      const qDeltaX = quaternionFromAxisAngle(up, angleX);
+      const qDeltaY = quaternionFromAxisAngle(right, angleY);
+      orientation = normalizeQuaternion(multiplyQuaternions(multiplyQuaternions(qDeltaY, qDeltaX), orientation));
+      center = centerFromQuaternion(orientation, center);
+      lastPointerDelta = { dx, dy };
+      lastAngleDelta = { x: angleX * 180 / Math.PI, y: angleY * 180 / Math.PI };
+      lastSyncReason = "pointer-delta";
+      return center.slice();
+    }
+    function debugState() {
+      const norm = quaternionNorm(orientation);
+      const normalized = Number.isFinite(norm) && Math.abs(norm - 1) < 1e-4;
+      const euler = quaternionToEuler(orientation, center[0]);
+      const c = centerFromQuaternion(orientation, center);
+      const northPoleDistance = Math.max(0, 90 - c[1]);
+      const southPoleDistance = Math.max(0, c[1] + 90);
+      return {
+        mode: "QUATERNION",
+        quaternion: { ...orientation },
+        norm,
+        normalized,
+        eulerForDisplay: euler,
+        center: c,
+        nearPole: Math.min(northPoleDistance, southPoleDistance) < 5,
+        northPoleDistance,
+        southPoleDistance,
+        lastPointerDelta: { ...lastPointerDelta },
+        lastAngleDelta: { ...lastAngleDelta },
+        lastSyncReason
+      };
+    }
+    return {
+      syncFromCenter,
+      applyPointerDelta,
+      debugState
+    };
+  }
+
   // src/sky/layers.ts
   function drawReferenceText(context, text, point, style, align = "center") {
     if (!context || !point) return;
@@ -3452,8 +3656,9 @@
     let sharedCultureSegments = /* @__PURE__ */ new Set();
     let traditionalRegionsReady = false, traditionalLabelsReady = false;
     let rebuildInProgress = false, suppressResizeUntil = 0, rebuildGeneration = 0;
-    let resizeObserver = null, clickStart = null, pointerMoved = false, paneDrag = null, poleCustomDrag = null;
+    let resizeObserver = null, clickStart = null, pointerMoved = false, paneDrag = null, rotationPointerDrag = null;
     let currentSelected = null, customViewRestoreTimer = null, lastRenderedSize = null, debugVisible = !!cfg("debug.enabled", false) && !!cfg("debug.defaultOpen", false), lastDebugUpdate = 0, lastDebugPlainText = "", debugCopyStatus = "idle", debugCopyTimer = null, debugFramePending = false, mapBoxSyncFramePending = false, pendingMapBoxSyncMetrics = null, canvasResizeFramePending = false, pendingCanvasResizeMetrics = null, pendingCanvasResizeReason = "scheduled resize", layoutResizeGeneration = 0;
+    const rotationController = createRotationController();
     const timeRenderDebug = {
       inputStatus: "valid",
       activeField: "year",
@@ -3931,7 +4136,7 @@
       let ok = true;
       try {
         if (window.Celestial && snapshot.center) {
-          Celestial.rotate({ center: snapshot.center.slice() });
+          setCelestialCenter(snapshot.center.slice(), "snapshot rollback");
         }
         setMapScale(state.mapScale);
         updateHUD(true);
@@ -4449,9 +4654,43 @@
       } catch (_) {
       }
     }
+    function currentCelestialCenter() {
+      try {
+        const center = window.Celestial && Celestial.rotate && Celestial.rotate();
+        return Array.isArray(center) ? center.slice() : null;
+      } catch (_) {
+        return null;
+      }
+    }
+    function syncRotationFromCurrentView(reason = "sync") {
+      const center = currentCelestialCenter();
+      if (center) rotationController.syncFromCenter(center, reason);
+      return center;
+    }
+    function setCelestialCenter(center, reason = "center update") {
+      if (!window.Celestial || !Array.isArray(center)) return false;
+      Celestial.rotate({ center: center.slice() });
+      rotationController.syncFromCenter(center, reason);
+      return true;
+    }
+    function applyQuaternionPointerDelta(dx, dy, rect, reason = "quaternion drag") {
+      if (!window.Celestial || !rect) return false;
+      const nextCenter = rotationController.applyPointerDelta({
+        dx,
+        dy,
+        width: rect.width,
+        height: rect.height,
+        sensitivity: Number(cfg("interaction.dragSensitivity", 1))
+      });
+      Celestial.rotate({ center: nextCenter });
+      redrawAndSyncMapBox(reason);
+      queueDebugOverlayUpdate();
+      return true;
+    }
     function debugCurrentView() {
       try {
         const center = Celestial.rotate();
+        if (Array.isArray(center)) rotationController.syncFromCenter(center, "debug-read");
         return {
           center: Array.isArray(center) ? center : null,
           mapScale: getMapScale(),
@@ -4463,9 +4702,9 @@
     }
     function debugDragMode(zh) {
       const map = $("celestial-map"), dragging = !!(map && map.classList.contains("dragging"));
-      if (paneDrag) return zh ? "\u661F\u56FE\u7559\u767D\u62D6\u52A8" : "pane-margin drag";
-      if (poleCustomDrag) return zh ? "\u6781\u533A\u4FDD\u62A4\u62D6\u52A8" : "polar-guard drag";
-      if (dragging) return zh ? "Canvas \u539F\u751F\u62D6\u52A8" : "native canvas drag";
+      if (paneDrag) return zh ? "\u661F\u56FE\u7559\u767D\u56DB\u5143\u6570\u62D6\u52A8" : "pane-margin quaternion drag";
+      if (rotationPointerDrag) return zh ? "Canvas \u56DB\u5143\u6570\u62D6\u52A8" : "canvas quaternion drag";
+      if (dragging) return zh ? "Canvas \u62D6\u52A8" : "canvas drag";
       if (clickStart) return zh ? "\u7B49\u5F85\u533A\u5206\u70B9\u51FB/\u62D6\u52A8" : "click-or-drag pending";
       return zh ? "\u7A7A\u95F2" : "idle";
     }
@@ -4500,6 +4739,7 @@
         canvasGroup: "\u3010\u661F\u56FE\u753B\u5E03\u5C3A\u5BF8\u6A21\u578B\u3011",
         viewGroup: "\u3010\u89C6\u89D2\u4E0E\u6295\u5F71\u72B6\u6001\u3011",
         interactionGroup: "\u3010\u5929\u7403\u4EA4\u4E92\u53C2\u6570\u3011",
+        rotationGroup: "\u3010\u65CB\u8F6C\u63A7\u5236 / Rotation\u3011",
         layerGroup: "\u3010\u56FE\u5C42\u4E0E\u663E\u793A\u9009\u9879\u3011",
         viewport: "\u6D4F\u89C8\u5668\u89C6\u53E3 window",
         layoutMode: "\u5F53\u524D\u54CD\u5E94\u5F0F\u5E03\u5C40\u6A21\u5F0F",
@@ -4550,10 +4790,18 @@
         dragMoved: "\u5DF2\u8D85\u8FC7\u62D6\u52A8\u9608\u503C",
         clickPending: "\u70B9\u51FB\u5224\u5B9A\u4E2D",
         dragThreshold: "\u70B9\u51FB/\u62D6\u52A8\u9608\u503C",
-        dragSensitivity: "Canvas \u62D6\u52A8\u7075\u654F\u5EA6",
-        maxDragStep: "\u5355\u5E27\u6700\u5927\u62D6\u52A8\u6B65\u957F",
-        poleGuard: "\u6781\u533A\u4FDD\u62A4\u8D77\u70B9",
-        poleClamp: "\u7EAC\u5EA6\u5939\u53D6\u4E0A\u9650",
+        dragSensitivity: "\u56DB\u5143\u6570\u62D6\u52A8\u7075\u654F\u5EA6",
+        rotationMode: "\u65CB\u8F6C\u6A21\u5F0F",
+        quaternion: "Quaternion",
+        quaternionNorm: "Quaternion \u957F\u5EA6",
+        quaternionNormalized: "\u662F\u5426\u5F52\u4E00\u5316",
+        eulerDisplay: "\u663E\u793A\u7528\u6B27\u62C9\u89D2",
+        rotationCenter: "\u56DB\u5143\u6570\u89C6\u56FE\u4E2D\u5FC3",
+        nearPole: "\u662F\u5426\u63A5\u8FD1\u6781\u533A",
+        poleDistance: "\u6781\u533A\u8DDD\u79BB",
+        lastPointerDelta: "\u6700\u8FD1\u62D6\u52A8\u589E\u91CF",
+        lastAngleDelta: "\u6700\u8FD1\u65CB\u8F6C\u589E\u91CF",
+        lastRotationSync: "\u6700\u8FD1\u540C\u6B65\u6765\u6E90",
         displayOptions: "\u663E\u793A\u9009\u9879",
         starLimit: "\u6052\u661F\u6700\u6697\u661F\u7B49",
         starSize: "\u6052\u661F\u5927\u5C0F",
@@ -4584,6 +4832,7 @@
         canvasGroup: "\u3010Canvas Layout Model\u3011",
         viewGroup: "\u3010View & Projection State\u3011",
         interactionGroup: "\u3010Celestial Interaction\u3011",
+        rotationGroup: "\u3010Rotation Control\u3011",
         layerGroup: "\u3010Layers & Display Options\u3011",
         viewport: "browser viewport window",
         layoutMode: "responsive layout mode",
@@ -4634,10 +4883,18 @@
         dragMoved: "drag threshold crossed",
         clickPending: "click pending",
         dragThreshold: "click/drag threshold",
-        dragSensitivity: "canvas drag sensitivity",
-        maxDragStep: "max drag step",
-        poleGuard: "polar guard start",
-        poleClamp: "latitude clamp",
+        dragSensitivity: "quaternion drag sensitivity",
+        rotationMode: "rotation mode",
+        quaternion: "Quaternion",
+        quaternionNorm: "Quaternion norm",
+        quaternionNormalized: "normalized",
+        eulerDisplay: "Euler for display",
+        rotationCenter: "quaternion view center",
+        nearPole: "near pole",
+        poleDistance: "pole distance",
+        lastPointerDelta: "last pointer delta",
+        lastAngleDelta: "last angle delta",
+        lastRotationSync: "last sync reason",
         displayOptions: "display options",
         starLimit: "stellar magnitude limit",
         starSize: "star size",
@@ -4664,7 +4921,7 @@
         skyReady: "skyReady",
         rebuild: "rebuild"
       };
-      const pane = $("sky-pane"), canvas = document.querySelector("#celestial-map canvas"), svg = document.querySelector("#celestial-map svg"), metrics = projectionCanvasMetrics2(), starMagnitudeStats = currentStarMagnitudeStats(), celestialMetrics = window.Celestial && typeof Celestial.metrics === "function" ? Celestial.metrics() : null;
+      const pane = $("sky-pane"), canvas = document.querySelector("#celestial-map canvas"), svg = document.querySelector("#celestial-map svg"), metrics = projectionCanvasMetrics2(), starMagnitudeStats = currentStarMagnitudeStats(), rotationStats = rotationController.debugState(), celestialMetrics = window.Celestial && typeof Celestial.metrics === "function" ? Celestial.metrics() : null;
       const paneRect = pane ? pane.getBoundingClientRect() : null, sidebarRect = elementRect2("#sidebar"), panelToggleRect = elementRect2("#panel-toggle"), overlayRect = overlay.getBoundingClientRect(), stageRect = elementRect2("#sky-stage"), frameRect = elementRect2("#celestial-frame"), mapRect = elementRect2("#celestial-map"), canvasRect3 = canvas ? canvas.getBoundingClientRect() : null, svgRect = svg ? svg.getBoundingClientRect() : null, paneCenter = paneRect ? {
         x: paneRect.left + paneRect.width / 2,
         y: paneRect.top + paneRect.height / 2
@@ -4974,15 +5231,61 @@
         debugLine(label.dragSensitivity, [
           debugValue(cfg("interaction.dragSensitivity", 1))
         ]),
-        debugLine(label.maxDragStep, [
-          debugValue(cfg("interaction.maxDragStepPixels", 28)),
+        debugBlankLine(),
+        debugGroup(label.rotationGroup),
+        debugLine(label.rotationMode, [debugValue(rotationStats.mode)]),
+        debugLine(label.quaternion, [
+          debugSep("w="),
+          debugValue(Number(rotationStats.quaternion.w).toFixed(6)),
+          debugSep(" x="),
+          debugValue(Number(rotationStats.quaternion.x).toFixed(6)),
+          debugSep(" y="),
+          debugValue(Number(rotationStats.quaternion.y).toFixed(6)),
+          debugSep(" z="),
+          debugValue(Number(rotationStats.quaternion.z).toFixed(6))
+        ]),
+        debugLine(label.quaternionNorm, [debugValue(Number(rotationStats.norm).toFixed(6))]),
+        debugLine(label.quaternionNormalized, debugBoolParts(rotationStats.normalized)),
+        debugLine(label.eulerDisplay, [
+          debugSep("yaw="),
+          debugValue(formatAngle(rotationStats.eulerForDisplay.yaw)),
+          debugSep(" pitch="),
+          debugValue(formatAngle(rotationStats.eulerForDisplay.pitch)),
+          debugSep(" roll="),
+          debugValue(formatAngle(rotationStats.eulerForDisplay.roll))
+        ]),
+        debugLine(label.rotationCenter, [
+          debugSep("lon="),
+          debugValue(formatAngle(rotationStats.center[0])),
+          debugSep(" lat="),
+          debugValue(formatAngle(rotationStats.center[1])),
+          debugSep(" roll="),
+          debugValue(formatAngle(rotationStats.center[2]))
+        ]),
+        debugLine(label.nearPole, debugBoolParts(rotationStats.nearPole)),
+        debugLine(label.poleDistance, [
+          debugSep("N="),
+          debugValue(formatAngle(rotationStats.northPoleDistance)),
+          debugSep(" S="),
+          debugValue(formatAngle(rotationStats.southPoleDistance))
+        ]),
+        debugLine(label.lastPointerDelta, [
+          debugSep("dx="),
+          debugValue(formatSigned(rotationStats.lastPointerDelta.dx)),
+          debugUnit("px"),
+          debugSep(" dy="),
+          debugValue(formatSigned(rotationStats.lastPointerDelta.dy)),
           debugUnit("px")
         ]),
-        debugLine(label.poleGuard, [
-          debugValue(formatAngle(cfg("interaction.poleLockStart", 82))),
-          debugSep(` ${label.poleClamp}=`),
-          debugValue(formatAngle(cfg("interaction.poleLatitudeClamp", 89.2)))
+        debugLine(label.lastAngleDelta, [
+          debugSep("x="),
+          debugValue(formatSigned(rotationStats.lastAngleDelta.x)),
+          debugUnit("\xB0"),
+          debugSep(" y="),
+          debugValue(formatSigned(rotationStats.lastAngleDelta.y)),
+          debugUnit("\xB0")
         ]),
+        debugLine(label.lastRotationSync, [debugValue(rotationStats.lastSyncReason || "-")]),
         debugBlankLine(),
         debugGroup(label.layerGroup),
         debugLine(label.starLimit, [debugValue(state.magnitude)]),
@@ -5263,7 +5566,7 @@
               return;
             }
             if (Array.isArray(view.center))
-              Celestial.rotate({ center: view.center.slice() });
+              setCelestialCenter(view.center.slice(), "restore view");
             setMapScale(viewMapScale2(view, state.mapScale));
             syncInternalZoomForMetrics(projectionCanvasMetrics2());
             redrawAndSyncMapBox("restore view");
@@ -6293,7 +6596,7 @@
       try {
         const display = obj.displayCoord || displayCoordinateForEquatorial(obj.coord);
         if (!display) return;
-        Celestial.rotate({ center: display.slice() });
+        setCelestialCenter(display.slice(), "object search center");
         redrawAndSyncMapBox("object search center");
         saveCurrentProjectionView();
         save();
@@ -7210,6 +7513,7 @@
           );
           attachCanvasInfo(canvas);
           updateSkyView(true);
+          syncRotationFromCurrentView("canvas ready");
           const savedView = state.projectionViews && state.projectionViews[viewKey2()];
           const shouldRestoreViewState = viewState && !isHorizontalView();
           if (shouldRestoreViewState) restoreView(viewState);
@@ -7304,7 +7608,7 @@
     function applyHorizontalSkyViewFallback(reason = "horizontal fallback", originalError = null) {
       try {
         const date = currentInstantDate(), lst = localSiderealDegrees(date, state.lon), lat = Math.max(-89.9, Math.min(89.9, Number(state.lat) || 0)), center = [normalizeDegrees(lst), lat, 0];
-        Celestial.rotate({ center });
+        setCelestialCenter(center, "horizontal skyview fallback");
         noteTimeRenderDebug({
           fallbackStatus: "ok",
           errorStage: originalError ? "skyview-fallback" : "-",
@@ -7345,6 +7649,7 @@
               location: [Number(state.lat), Number(state.lon)],
               timezone: dt.offset
             });
+            syncRotationFromCurrentView("horizontal skyview");
             noteTimeRenderDebug({ skyviewStatus: "ok", fallbackStatus: "unused" });
             if (force) redrawOk = redrawAndSyncMapBox(reason || "horizontal sky view");
             else syncMapBoxAfterRedraw(projectionCanvasMetrics2());
@@ -7536,22 +7841,15 @@
           };
           pointerMoved = false;
           map.classList.add("dragging");
-          let center = null;
+          const center = syncRotationFromCurrentView("pointerdown");
+          rotationPointerDrag = center ? {
+            id: event.pointerId,
+            lastX: event.clientX,
+            lastY: event.clientY
+          } : null;
           try {
-            center = Celestial.rotate();
+            canvas.setPointerCapture(event.pointerId);
           } catch (_) {
-          }
-          if (Array.isArray(center) && Math.abs(Number(center[1]) || 0) >= Number(cfg("interaction.poleLockStart", 82))) {
-            poleCustomDrag = {
-              id: event.pointerId,
-              lastX: event.clientX,
-              lastY: event.clientY,
-              center: center.slice()
-            };
-            try {
-              canvas.setPointerCapture(event.pointerId);
-            } catch (_) {
-            }
           }
         },
         { capture: true }
@@ -7559,7 +7857,7 @@
       canvas.addEventListener(
         "mousedown",
         (event) => {
-          if (!poleCustomDrag) return;
+          if (!rotationPointerDrag) return;
           event.preventDefault();
           event.stopImmediatePropagation();
         },
@@ -7568,42 +7866,17 @@
       canvas.addEventListener(
         "pointermove",
         (event) => {
-          if (poleCustomDrag && event.pointerId === poleCustomDrag.id) {
-            const dx = event.clientX - poleCustomDrag.lastX, dy = event.clientY - poleCustomDrag.lastY;
-            if (Math.hypot(
-              event.clientX - clickStart.x,
-              event.clientY - clickStart.y
-            ) > Number(cfg("interaction.dragThreshold", 6))) {
+          if (rotationPointerDrag && event.pointerId === rotationPointerDrag.id) {
+            const totalDx = clickStart ? event.clientX - clickStart.x : 0, totalDy = clickStart ? event.clientY - clickStart.y : 0;
+            if (Math.hypot(totalDx, totalDy) > Number(cfg("interaction.dragThreshold", 6))) {
               pointerMoved = true;
             }
-            const rect = canvas.getBoundingClientRect(), shortSide = Math.max(180, Math.min(rect.width, rect.height));
-            const degPerPx = 180 / shortSide * Number(cfg("interaction.dragSensitivity", 1));
-            const lat = Number(poleCustomDrag.center[1]) || 0;
-            const longitudeFactor = Math.min(
-              4,
-              1 / Math.max(0.25, Math.abs(Math.cos(lat * Math.PI / 180)))
-            );
-            const maxPx = Number(cfg("interaction.maxDragStepPixels", 28));
-            const sx = Math.max(-maxPx, Math.min(maxPx, dx)), sy = Math.max(-maxPx, Math.min(maxPx, dy));
-            const next = [
-              poleCustomDrag.center[0] + sx * degPerPx * longitudeFactor,
-              Math.max(
-                -Number(cfg("interaction.poleLatitudeClamp", 89.2)),
-                Math.min(
-                  Number(cfg("interaction.poleLatitudeClamp", 89.2)),
-                  poleCustomDrag.center[1] + sy * degPerPx
-                )
-              ),
-              poleCustomDrag.center[2] || 0
-            ];
-            try {
-              Celestial.rotate({ center: next });
-              redrawAndSyncMapBox("polar drag");
-              poleCustomDrag.center = next;
-              poleCustomDrag.lastX = event.clientX;
-              poleCustomDrag.lastY = event.clientY;
-              queueDebugOverlayUpdate();
-            } catch (_) {
+            if (pointerMoved) {
+              const dx = event.clientX - rotationPointerDrag.lastX, dy = event.clientY - rotationPointerDrag.lastY;
+              const rect = canvas.getBoundingClientRect();
+              applyQuaternionPointerDelta(dx, dy, rect, "quaternion drag");
+              rotationPointerDrag.lastX = event.clientX;
+              rotationPointerDrag.lastY = event.clientY;
             }
             event.preventDefault();
             event.stopImmediatePropagation();
@@ -7621,6 +7894,7 @@
       );
       const persistViewSoon = () => setTimeout(() => {
         if (!skyReady) return;
+        syncRotationFromCurrentView("persist view");
         saveCurrentProjectionView();
         save();
       }, 100);
@@ -7628,7 +7902,7 @@
         map.classList.remove("dragging");
         if (clickStart && event.pointerId === clickStart.id && !pointerMoved)
           selectAtEvent(canvas, event);
-        if (poleCustomDrag && event.pointerId === poleCustomDrag.id) {
+        if (rotationPointerDrag && event.pointerId === rotationPointerDrag.id) {
           try {
             canvas.releasePointerCapture(event.pointerId);
           } catch (_) {
@@ -7636,7 +7910,7 @@
         }
         clickStart = null;
         pointerMoved = false;
-        poleCustomDrag = null;
+        rotationPointerDrag = null;
         persistViewSoon();
       };
       canvas.addEventListener("pointerup", finish, { capture: true });
@@ -7646,7 +7920,7 @@
           map.classList.remove("dragging");
           clickStart = null;
           pointerMoved = false;
-          poleCustomDrag = null;
+          rotationPointerDrag = null;
           persistViewSoon();
         },
         { capture: true }
@@ -7758,6 +8032,7 @@
         syncInternalZoomForMetrics(projectionCanvasMetrics2(next));
         suppressResizeUntil = performance.now() + 520;
         Celestial.reproject({ projection: next, projectionRatio: null });
+        syncRotationFromCurrentView("projection switch");
         setTimeout(() => {
           try {
             const nextMetrics = projectionCanvasMetrics2(next);
@@ -7768,6 +8043,7 @@
             }
             syncInternalZoomForMetrics(nextMetrics);
             syncRenderedMapBox(nextMetrics);
+            syncRotationFromCurrentView("projection resized");
             if (isHorizontalView()) {
               updateSkyView(true);
               setMapScale(viewMapScale2(target, state.mapScale));
@@ -7839,10 +8115,13 @@
       if (!skyReady || !window.Celestial) return;
       const center = Celestial.rotate();
       if (!Array.isArray(center)) return;
+      rotationController.syncFromCenter(center, "pane margin pointerdown");
       paneDrag = {
         id: event.pointerId,
         x: event.clientX,
         y: event.clientY,
+        lastX: event.clientX,
+        lastY: event.clientY,
         center: center.slice(),
         moved: false
       };
@@ -7861,16 +8140,15 @@
       }
       const rect = canvasRect2();
       if (!rect) return;
-      const degPerPx = 180 / Math.max(180, Math.min(rect.width, rect.height));
-      const next = [
-        paneDrag.center[0] - dx * degPerPx,
-        clampNumber(paneDrag.center[1] + dy * degPerPx, -89.5, 89.5),
-        paneDrag.center[2] || 0
-      ];
       try {
-        Celestial.rotate({ center: next });
-        redrawAndSyncMapBox("pane margin drag");
-        queueDebugOverlayUpdate();
+        applyQuaternionPointerDelta(
+          event.clientX - paneDrag.lastX,
+          event.clientY - paneDrag.lastY,
+          rect,
+          "pane margin quaternion drag"
+        );
+        paneDrag.lastX = event.clientX;
+        paneDrag.lastY = event.clientY;
       } catch (_) {
       }
       event.preventDefault();
@@ -7937,7 +8215,7 @@
       else if (key === "ArrowUp") next[1] = clampNumber(next[1] + step, -89.5, 89.5);
       else if (key === "ArrowDown") next[1] = clampNumber(next[1] - step, -89.5, 89.5);
       else return false;
-      Celestial.rotate({ center: next });
+      setCelestialCenter(next, "keyboard pan");
       redrawAndSyncMapBox("keyboard pan");
       saveCurrentProjectionView();
       save();

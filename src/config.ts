@@ -1,5 +1,5 @@
 /**
- * 真实星空观测台 5.3.6 —— 用户可配置文件
+ * 真实星空观测台 5.3.7 —— 用户可配置文件
  * ------------------------------------------------------------
  * 修改本文件后，运行 npm run build 并刷新 index.html 即可生效。
  * 建议每次只修改一个参数，并保留原值，便于出现问题时恢复。
@@ -90,22 +90,14 @@ window.RSO_CONFIG = {
   /** 应用层星图画布缩放：缩放会改变 #celestial-map / canvas 的 CSS 尺寸 */
   mapScale: {
     min: 1,
-    max: 8, // 5.3.6 统一为 8x：保留高倍细节，同时避免过高缩放导致连续重绘明显卡顿
+    max: 8, // 保持 8x：高倍细节由 5.3.6 的视口 Canvas 模式承接
     buttonFactor: 1.25,
   },
 
   /** 鼠标、触摸和视图稳定性 */
   interaction: {
     dragThreshold: 5, // 小于该像素距离视为“点击”，大于才视为“拖动”
-    dragSensitivity: 1.0, // 拖动灵敏度；越大移动越快
-    maxDragStepPixels: 28, // 单帧最大拖动步长，防止浏览器掉帧后视图突然跳跃
-    poleLatitudeClamp: 89.2, // 视图中心纬度限制，避免跨越极点发生翻转
-    poleSlowdownStart: 70, // 超过该纬度后逐渐降低经向拖动灵敏度
-    poleLongitudeFactorMin: 0.08, // 正对极点时保留的最小经向灵敏度
-    poleLockStart: 82, // 超过该中心纬度后启用“只纠正异常跳变”的极区保护；正常拖动仍由 D3-Celestial 原生交互处理
-    poleJumpLimitDegrees: 8, // 单次事件允许的最大异常角度变化；超过时按最短角差限幅
-    poleLatitudeJumpLimitDegrees: 5, // 极区单次纬向异常变化上限
-    poleGuardDelayMs: 0, // 原生拖动完成后再检查，0 表示下一事件循环
+    dragSensitivity: 1.0, // 四元数拖动灵敏度；越大移动越快
     minZoom: 1.0,
     maxZoom: 8.0,
     zoomButtonFactor: 1.25,

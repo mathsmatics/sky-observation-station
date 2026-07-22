@@ -78,3 +78,5 @@ Version 5.3.5 keeps the 5.3.3 functional source layout and the 5.3.4 Meeus Sun/M
 5.3.5 fixes the keyboard left/right pan direction, unifies the maximum application zoom at 8x, coalesces high-frequency zoom/mapBox/debug refresh work to reduce high-zoom stutter, and expands the in-page help manual with concrete accuracy ranges and planetary error magnitudes. It does not add quaternion camera control, VSOP87 or professional ephemerides.
 
 5.3.6 重点处理高倍缩放时物理 Canvas 过大的问题：当虚拟星图宽高都超过当前星图区视口时，进入 VIEWPORT_CANVAS；该模式下虚拟星图仍记录当前缩放倍率，但物理 Canvas 直接使用当前星图区视口大小。Debug 面板新增星图区尺寸、Canvas CSS/bitmap 尺寸、虚拟星图尺寸、缩放倍率、触发条件和当前星等阈值内恒星数。
+
+5.3.7 新增四元数中间层，用于改善南北极附近拖动时的旋转稳定性。内部拖动增量先累积到 Quaternion，再输出回 D3-Celestial 现有中心/roll 参数；欧拉角继续保留为显示、调试和兼容表达。Debug 面板新增 Quaternion、归一化状态、显示用欧拉角、极区距离和最近拖动增量等旋转诊断信息。
