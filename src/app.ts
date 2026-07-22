@@ -1729,6 +1729,26 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     return [debugValue(Number(value || 0).toFixed(3)), debugUnit("x")];
   }
 
+  function debugBoolParts(value) {
+    return [debugValue(value ? "true" : "false")];
+  }
+
+  function currentStarMagnitudeStats() {
+    const loadedStars = Array.isArray(ORIGINAL_STARS) ? ORIGINAL_STARS.length : 0;
+    const threshold = Number(state.magnitude);
+    const starsWithinMagnitude = Array.isArray(ORIGINAL_STARS)
+      ? ORIGINAL_STARS.filter((feature) => {
+          const mag = Number(feature && feature.properties && feature.properties.mag);
+          return Number.isFinite(mag) && Number.isFinite(threshold) && mag <= threshold;
+        }).length
+      : 0;
+    return {
+      loadedStars,
+      threshold,
+      starsWithinMagnitude,
+    };
+  }
+
   function debugMetricStatus(ok, zh) {
     return debugSpan(
       ok ? "OK" : zh ? "MISMATCH 尺寸不一致" : "MISMATCH",
@@ -1808,6 +1828,14 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     } catch (_) {
       return 1;
     }
+  }
+
+  function syncInternalZoomForMetrics(metrics = projectionCanvasMetrics()) {
+    try {
+      const target = Math.max(1, Number(metrics && metrics.internalZoom) || 1);
+      const current = getInternalZoom();
+      if (Math.abs(current - target) > 0.002) Celestial.zoomBy(target / Math.max(0.0001, current));
+    } catch (_) {}
   }
 
   function resetInternalZoom() {
@@ -1918,6 +1946,16 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
             mapCenter: "地图中心",
             centerDelta: "地图中心相对背景中心偏差",
             celestial: "Celestial 内部尺寸",
+            renderMode: "渲染模式",
+            viewportTriggerRule: "VIEWPORT_CANVAS 触发条件",
+            viewportTriggerResult: "触发结果",
+            baseSkySize: "基础星图尺寸",
+            virtualSkySize: "虚拟星图尺寸",
+            canvasCssTarget: "Canvas CSS 目标尺寸",
+            canvasBitmapTarget: "Canvas bitmap 目标尺寸",
+            starStats: "恒星统计",
+            loadedStars: "已加载恒星总数",
+            starsWithinMagnitude: "阈值内恒星数",
             projection: "当前投影",
             coords: "当前坐标视角",
             culture: "当前星空体系",
@@ -1993,6 +2031,16 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
             mapCenter: "map center",
             centerDelta: "map center delta from pane",
             celestial: "celestial metrics",
+            renderMode: "render mode",
+            viewportTriggerRule: "VIEWPORT_CANVAS trigger rule",
+            viewportTriggerResult: "trigger result",
+            baseSkySize: "base sky size",
+            virtualSkySize: "virtual sky size",
+            canvasCssTarget: "Canvas CSS target size",
+            canvasBitmapTarget: "Canvas bitmap target size",
+            starStats: "star statistics",
+            loadedStars: "loaded stars",
+            starsWithinMagnitude: "stars within threshold",
             projection: "current projection",
             coords: "current coordinate view",
             culture: "current sky culture",
@@ -2037,6 +2085,7 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
       canvas = document.querySelector("#celestial-map canvas"),
       svg = document.querySelector("#celestial-map svg"),
       metrics = projectionCanvasMetrics(),
+      starMagnitudeStats = currentStarMagnitudeStats(),
       celestialMetrics =
         window.Celestial && typeof Celestial.metrics === "function"
           ? Celestial.metrics()
@@ -2142,6 +2191,15 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
         debugValue(Number(metrics.ratio || 0).toFixed(3)),
       ]),
       debugLine(label.mapScale, debugScaleParts(metrics.scale)),
+      debugLine(label.renderMode, [debugValue(metrics.renderMode || "FULL")]),
+      debugLine(label.viewportTriggerRule, [
+        debugValue("virtualSkyWidth > viewportWidth && virtualSkyHeight > viewportHeight"),
+      ]),
+      debugLine(label.viewportTriggerResult, debugBoolParts(!!metrics.viewportTrigger)),
+      debugLine(label.baseSkySize, debugSizeParts(metrics.baseWidth, metrics.baseHeight)),
+      debugLine(label.virtualSkySize, debugSizeParts(metrics.virtualWidth, metrics.virtualHeight)),
+      debugLine(label.canvasCssTarget, debugSizeParts(metrics.canvasCssWidth, metrics.canvasCssHeight)),
+      debugLine(label.canvasBitmapTarget, debugSizeParts(metrics.canvasBitmapWidth, metrics.canvasBitmapHeight)),
       debugLine(label.overflow, [
         debugSep("X="),
         debugValue(Math.round(metrics.overflowX)),
@@ -2206,6 +2264,12 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
           ).length,
         ),
       ]),
+      debugLine(label.starStats, [debugValue(zh ? "当前星等阈值对应数量" : "current magnitude threshold count")]),
+      debugLine(label.loadedStars, [debugValue(starMagnitudeStats.loadedStars)]),
+      debugLine(label.starLimit, [
+        debugValue(Number(starMagnitudeStats.threshold || 0).toFixed(2)),
+      ]),
+      debugLine(label.starsWithinMagnitude, [debugValue(starMagnitudeStats.starsWithinMagnitude)]),
       debugLine(zh ? "当前时区" : "current time zone", [
         debugValue(timeRenderDebug.timezone || state.zone || "-"),
       ]),
@@ -2595,7 +2659,11 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     try {
       if (skyReady && window.Celestial) {
         Celestial.resize(metrics.width);
-        resetInternalZoom();
+        applyMapBoxMetrics(metrics);
+        if (metrics.renderMode === "VIEWPORT_CANVAS" && Celestial.mapProjection && Celestial.mapProjection.translate) {
+          Celestial.mapProjection.translate([metrics.width / 2, metrics.height / 2]);
+        }
+        syncInternalZoomForMetrics(metrics);
         redrawAndSyncMapBox(reason, metrics);
         redrew = true;
       }
@@ -2703,7 +2771,7 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
           if (Array.isArray(view.center))
             Celestial.rotate({ center: view.center.slice() });
           setMapScale(viewMapScale(view, state.mapScale));
-          resetInternalZoom();
+          syncInternalZoomForMetrics(projectionCanvasMetrics());
           redrawAndSyncMapBox("restore view");
         } catch (err) {
           if (attempt < 4) restoreView(view, attempt + 1);
@@ -5648,19 +5716,23 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
     state.mapScale = viewMapScale(target, state.mapScale);
     applyMapBoxMetrics(projectionCanvasMetrics(next));
     try {
-      resetInternalZoom();
+      syncInternalZoomForMetrics(projectionCanvasMetrics(next));
       suppressResizeUntil = performance.now() + 520;
       Celestial.reproject({ projection: next, projectionRatio: null });
       setTimeout(() => {
         try {
           const nextMetrics = projectionCanvasMetrics(next);
           Celestial.resize(nextMetrics.width);
-          resetInternalZoom();
+          applyMapBoxMetrics(nextMetrics);
+          if (nextMetrics.renderMode === "VIEWPORT_CANVAS" && Celestial.mapProjection && Celestial.mapProjection.translate) {
+            Celestial.mapProjection.translate([nextMetrics.width / 2, nextMetrics.height / 2]);
+          }
+          syncInternalZoomForMetrics(nextMetrics);
           syncRenderedMapBox(nextMetrics);
           if (isHorizontalView()) {
             updateSkyView(true);
             setMapScale(viewMapScale(target, state.mapScale));
-            resetInternalZoom();
+            syncInternalZoomForMetrics(projectionCanvasMetrics());
             state.projectionViews[viewKey()] = { mapScale: state.mapScale };
             save();
           } else {
@@ -5820,7 +5892,7 @@ const TIME_FIELD_KEYS = ["year", "month", "day", "hour", "minute"];
         customViewRestoreTimer = setTimeout(() => {
           try {
             setMapScale(targetScale);
-            resetInternalZoom();
+            syncInternalZoomForMetrics(projectionCanvasMetrics());
             redrawAndSyncMapBox("horizontal reset");
             state.projectionViews[viewKey()] = { mapScale: targetScale };
             save();

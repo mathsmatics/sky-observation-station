@@ -100,7 +100,7 @@
     mapScale: {
       min: 1,
       max: 8,
-      // 5.3.5 统一为 8x：保留高倍细节，同时避免过高缩放导致连续重绘明显卡顿
+      // 5.3.6 统一为 8x：保留高倍细节，同时避免过高缩放导致连续重绘明显卡顿
       buttonFactor: 1.25
     },
     /** 鼠标、触摸和视图稳定性 */
@@ -2616,37 +2616,69 @@
     const fitByHeight = pane.height / heightFactor;
     const baseFitSide = Math.max(1, Math.min(fitByWidth, fitByHeight) * fitPadding);
     const mapScale = options.clampMapScale(options.mapScale);
-    let width = baseFitSide * widthFactor * mapScale;
-    let height = baseFitSide * heightFactor * mapScale;
-    width = Math.max(1, Math.round(width));
-    height = Math.max(1, Math.round(height));
+    const baseWidth = Math.max(1, Math.round(baseFitSide * widthFactor));
+    const baseHeight = Math.max(1, Math.round(baseFitSide * heightFactor));
+    const virtualWidth = Math.max(1, Math.round(baseWidth * mapScale));
+    const virtualHeight = Math.max(1, Math.round(baseHeight * mapScale));
+    const viewportTrigger = virtualWidth > pane.width && virtualHeight > pane.height;
+    const renderMode = viewportTrigger ? "VIEWPORT_CANVAS" : "FULL";
+    const width = viewportTrigger ? pane.width : virtualWidth;
+    const height = viewportTrigger ? pane.height : virtualHeight;
+    const dpr = Math.max(1, Number(window.devicePixelRatio || 1));
+    const internalZoom = viewportTrigger ? Math.max(1, virtualWidth / Math.max(1, width)) : 1;
     return {
       paneWidth: pane.width,
       paneHeight: pane.height,
       paneCenterX: pane.width / 2,
       paneCenterY: pane.height / 2,
       baseShortSide: baseFitSide,
+      baseWidth,
+      baseHeight,
       ratio,
       scale: mapScale,
       width,
       height,
-      overflowX: Math.max(0, (width - pane.width) / 2),
-      overflowY: Math.max(0, (height - pane.height) / 2)
+      virtualWidth,
+      virtualHeight,
+      canvasCssWidth: width,
+      canvasCssHeight: height,
+      canvasBitmapWidth: Math.max(1, Math.round(width * dpr)),
+      canvasBitmapHeight: Math.max(1, Math.round(height * dpr)),
+      devicePixelRatio: dpr,
+      renderMode,
+      viewportCanvas: viewportTrigger,
+      viewportTrigger,
+      internalZoom,
+      overflowX: Math.max(0, (virtualWidth - pane.width) / 2),
+      overflowY: Math.max(0, (virtualHeight - pane.height) / 2)
     };
+  }
+  function forceElementCssSize(node, width, height) {
+    node.style.setProperty("width", `${width}px`, "important");
+    node.style.setProperty("height", `${height}px`, "important");
+    node.style.setProperty("min-width", "0px", "important");
+    node.style.setProperty("min-height", "0px", "important");
+    node.style.setProperty("max-width", "none", "important");
+    node.style.setProperty("max-height", "none", "important");
+    node.style.setProperty("box-sizing", "border-box");
+  }
+  function syncCanvasBitmapSize(canvas, metrics) {
+    const bitmapWidth = Math.max(1, Math.round(metrics.canvasBitmapWidth));
+    const bitmapHeight = Math.max(1, Math.round(metrics.canvasBitmapHeight));
+    if (canvas.width !== bitmapWidth) canvas.width = bitmapWidth;
+    if (canvas.height !== bitmapHeight) canvas.height = bitmapHeight;
+    const context = canvas.getContext("2d");
+    if (context && typeof context.setTransform === "function") {
+      context.setTransform(metrics.devicePixelRatio, 0, 0, metrics.devicePixelRatio, 0, 0);
+    }
   }
   function applyMapBoxMetrics(map, metrics) {
     if (!map) return metrics;
-    const forceSize = (node) => {
-      node.style.setProperty("width", `${metrics.width}px`, "important");
-      node.style.setProperty("height", `${metrics.height}px`, "important");
-      node.style.setProperty("min-width", "0px", "important");
-      node.style.setProperty("min-height", "0px", "important");
-      node.style.setProperty("max-width", "none", "important");
-      node.style.setProperty("max-height", "none", "important");
-      node.style.setProperty("box-sizing", "border-box");
-    };
-    forceSize(map);
-    map.querySelectorAll("canvas, svg").forEach((node) => forceSize(node));
+    forceElementCssSize(map, metrics.width, metrics.height);
+    map.querySelectorAll("canvas, svg").forEach((node) => {
+      forceElementCssSize(node, metrics.width, metrics.height);
+      if (node instanceof HTMLCanvasElement) syncCanvasBitmapSize(node, metrics);
+    });
     return metrics;
   }
   function canvasRect(mapSelector = "#celestial-map canvas") {
@@ -4314,6 +4346,22 @@
     function debugScaleParts(value) {
       return [debugValue(Number(value || 0).toFixed(3)), debugUnit("x")];
     }
+    function debugBoolParts(value) {
+      return [debugValue(value ? "true" : "false")];
+    }
+    function currentStarMagnitudeStats() {
+      const loadedStars = Array.isArray(ORIGINAL_STARS) ? ORIGINAL_STARS.length : 0;
+      const threshold = Number(state.magnitude);
+      const starsWithinMagnitude = Array.isArray(ORIGINAL_STARS) ? ORIGINAL_STARS.filter((feature) => {
+        const mag = Number(feature && feature.properties && feature.properties.mag);
+        return Number.isFinite(mag) && Number.isFinite(threshold) && mag <= threshold;
+      }).length : 0;
+      return {
+        loadedStars,
+        threshold,
+        starsWithinMagnitude
+      };
+    }
     function debugMetricStatus(ok, zh) {
       return debugSpan(
         ok ? "OK" : zh ? "MISMATCH \u5C3A\u5BF8\u4E0D\u4E00\u81F4" : "MISMATCH",
@@ -4384,6 +4432,14 @@
         return Number(Celestial.zoomBy()) || 1;
       } catch (_) {
         return 1;
+      }
+    }
+    function syncInternalZoomForMetrics(metrics = projectionCanvasMetrics2()) {
+      try {
+        const target = Math.max(1, Number(metrics && metrics.internalZoom) || 1);
+        const current = getInternalZoom();
+        if (Math.abs(current - target) > 2e-3) Celestial.zoomBy(target / Math.max(1e-4, current));
+      } catch (_) {
       }
     }
     function resetInternalZoom() {
@@ -4474,6 +4530,16 @@
         mapCenter: "\u5730\u56FE\u4E2D\u5FC3",
         centerDelta: "\u5730\u56FE\u4E2D\u5FC3\u76F8\u5BF9\u80CC\u666F\u4E2D\u5FC3\u504F\u5DEE",
         celestial: "Celestial \u5185\u90E8\u5C3A\u5BF8",
+        renderMode: "\u6E32\u67D3\u6A21\u5F0F",
+        viewportTriggerRule: "VIEWPORT_CANVAS \u89E6\u53D1\u6761\u4EF6",
+        viewportTriggerResult: "\u89E6\u53D1\u7ED3\u679C",
+        baseSkySize: "\u57FA\u7840\u661F\u56FE\u5C3A\u5BF8",
+        virtualSkySize: "\u865A\u62DF\u661F\u56FE\u5C3A\u5BF8",
+        canvasCssTarget: "Canvas CSS \u76EE\u6807\u5C3A\u5BF8",
+        canvasBitmapTarget: "Canvas bitmap \u76EE\u6807\u5C3A\u5BF8",
+        starStats: "\u6052\u661F\u7EDF\u8BA1",
+        loadedStars: "\u5DF2\u52A0\u8F7D\u6052\u661F\u603B\u6570",
+        starsWithinMagnitude: "\u9608\u503C\u5185\u6052\u661F\u6570",
         projection: "\u5F53\u524D\u6295\u5F71",
         coords: "\u5F53\u524D\u5750\u6807\u89C6\u89D2",
         culture: "\u5F53\u524D\u661F\u7A7A\u4F53\u7CFB",
@@ -4548,6 +4614,16 @@
         mapCenter: "map center",
         centerDelta: "map center delta from pane",
         celestial: "celestial metrics",
+        renderMode: "render mode",
+        viewportTriggerRule: "VIEWPORT_CANVAS trigger rule",
+        viewportTriggerResult: "trigger result",
+        baseSkySize: "base sky size",
+        virtualSkySize: "virtual sky size",
+        canvasCssTarget: "Canvas CSS target size",
+        canvasBitmapTarget: "Canvas bitmap target size",
+        starStats: "star statistics",
+        loadedStars: "loaded stars",
+        starsWithinMagnitude: "stars within threshold",
         projection: "current projection",
         coords: "current coordinate view",
         culture: "current sky culture",
@@ -4588,7 +4664,7 @@
         skyReady: "skyReady",
         rebuild: "rebuild"
       };
-      const pane = $("sky-pane"), canvas = document.querySelector("#celestial-map canvas"), svg = document.querySelector("#celestial-map svg"), metrics = projectionCanvasMetrics2(), celestialMetrics = window.Celestial && typeof Celestial.metrics === "function" ? Celestial.metrics() : null;
+      const pane = $("sky-pane"), canvas = document.querySelector("#celestial-map canvas"), svg = document.querySelector("#celestial-map svg"), metrics = projectionCanvasMetrics2(), starMagnitudeStats = currentStarMagnitudeStats(), celestialMetrics = window.Celestial && typeof Celestial.metrics === "function" ? Celestial.metrics() : null;
       const paneRect = pane ? pane.getBoundingClientRect() : null, sidebarRect = elementRect2("#sidebar"), panelToggleRect = elementRect2("#panel-toggle"), overlayRect = overlay.getBoundingClientRect(), stageRect = elementRect2("#sky-stage"), frameRect = elementRect2("#celestial-frame"), mapRect = elementRect2("#celestial-map"), canvasRect3 = canvas ? canvas.getBoundingClientRect() : null, svgRect = svg ? svg.getBoundingClientRect() : null, paneCenter = paneRect ? {
         x: paneRect.left + paneRect.width / 2,
         y: paneRect.top + paneRect.height / 2
@@ -4658,6 +4734,15 @@
           debugValue(Number(metrics.ratio || 0).toFixed(3))
         ]),
         debugLine(label.mapScale, debugScaleParts(metrics.scale)),
+        debugLine(label.renderMode, [debugValue(metrics.renderMode || "FULL")]),
+        debugLine(label.viewportTriggerRule, [
+          debugValue("virtualSkyWidth > viewportWidth && virtualSkyHeight > viewportHeight")
+        ]),
+        debugLine(label.viewportTriggerResult, debugBoolParts(!!metrics.viewportTrigger)),
+        debugLine(label.baseSkySize, debugSizeParts(metrics.baseWidth, metrics.baseHeight)),
+        debugLine(label.virtualSkySize, debugSizeParts(metrics.virtualWidth, metrics.virtualHeight)),
+        debugLine(label.canvasCssTarget, debugSizeParts(metrics.canvasCssWidth, metrics.canvasCssHeight)),
+        debugLine(label.canvasBitmapTarget, debugSizeParts(metrics.canvasBitmapWidth, metrics.canvasBitmapHeight)),
         debugLine(label.overflow, [
           debugSep("X="),
           debugValue(Math.round(metrics.overflowX)),
@@ -4718,6 +4803,12 @@
             ).length
           )
         ]),
+        debugLine(label.starStats, [debugValue(zh ? "\u5F53\u524D\u661F\u7B49\u9608\u503C\u5BF9\u5E94\u6570\u91CF" : "current magnitude threshold count")]),
+        debugLine(label.loadedStars, [debugValue(starMagnitudeStats.loadedStars)]),
+        debugLine(label.starLimit, [
+          debugValue(Number(starMagnitudeStats.threshold || 0).toFixed(2))
+        ]),
+        debugLine(label.starsWithinMagnitude, [debugValue(starMagnitudeStats.starsWithinMagnitude)]),
         debugLine(zh ? "\u5F53\u524D\u65F6\u533A" : "current time zone", [
           debugValue(timeRenderDebug.timezone || state.zone || "-")
         ]),
@@ -5072,7 +5163,11 @@
       try {
         if (skyReady && window.Celestial) {
           Celestial.resize(metrics.width);
-          resetInternalZoom();
+          applyMapBoxMetrics2(metrics);
+          if (metrics.renderMode === "VIEWPORT_CANVAS" && Celestial.mapProjection && Celestial.mapProjection.translate) {
+            Celestial.mapProjection.translate([metrics.width / 2, metrics.height / 2]);
+          }
+          syncInternalZoomForMetrics(metrics);
           redrawAndSyncMapBox(reason, metrics);
           redrew = true;
         }
@@ -5170,7 +5265,7 @@
             if (Array.isArray(view.center))
               Celestial.rotate({ center: view.center.slice() });
             setMapScale(viewMapScale2(view, state.mapScale));
-            resetInternalZoom();
+            syncInternalZoomForMetrics(projectionCanvasMetrics2());
             redrawAndSyncMapBox("restore view");
           } catch (err) {
             if (attempt < 4) restoreView(view, attempt + 1);
@@ -7660,19 +7755,23 @@
       state.mapScale = viewMapScale2(target, state.mapScale);
       applyMapBoxMetrics2(projectionCanvasMetrics2(next));
       try {
-        resetInternalZoom();
+        syncInternalZoomForMetrics(projectionCanvasMetrics2(next));
         suppressResizeUntil = performance.now() + 520;
         Celestial.reproject({ projection: next, projectionRatio: null });
         setTimeout(() => {
           try {
             const nextMetrics = projectionCanvasMetrics2(next);
             Celestial.resize(nextMetrics.width);
-            resetInternalZoom();
+            applyMapBoxMetrics2(nextMetrics);
+            if (nextMetrics.renderMode === "VIEWPORT_CANVAS" && Celestial.mapProjection && Celestial.mapProjection.translate) {
+              Celestial.mapProjection.translate([nextMetrics.width / 2, nextMetrics.height / 2]);
+            }
+            syncInternalZoomForMetrics(nextMetrics);
             syncRenderedMapBox(nextMetrics);
             if (isHorizontalView()) {
               updateSkyView(true);
               setMapScale(viewMapScale2(target, state.mapScale));
-              resetInternalZoom();
+              syncInternalZoomForMetrics(projectionCanvasMetrics2());
               state.projectionViews[viewKey2()] = { mapScale: state.mapScale };
               save();
             } else {
@@ -7801,7 +7900,7 @@
           customViewRestoreTimer = setTimeout(() => {
             try {
               setMapScale(targetScale);
-              resetInternalZoom();
+              syncInternalZoomForMetrics(projectionCanvasMetrics2());
               redrawAndSyncMapBox("horizontal reset");
               state.projectionViews[viewKey2()] = { mapScale: targetScale };
               save();
