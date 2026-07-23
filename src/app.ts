@@ -35,17 +35,18 @@ import {
   precisionStatusForYear,
 } from "./astronomy/time";
 import {
-  longitudeFallbackZone,
-  lookupZone,
-  normalizeZone,
   safeZoneForCoordinates as safeTimezoneForCoordinates,
 } from "./astronomy/timezone";
 import { localSiderealDegrees } from "./astronomy/sidereal";
 import { calculateCurrentPlanetPositions } from "./astronomy/bodies-simple";
+import { createAppAnimationController } from "./runtime/app-animation";
 import { createDefaultState } from "./state/defaults";
 import { getProjectStorage, readJsonFromStorage, removeStorageKey, writeJsonToStorage } from "./state/storage";
+import { createObserverLocationController } from "./time/observer-location";
+import { createTimeInputActions } from "./time/time-input-actions";
 import { createHelpRenderer } from "./ui/help";
 import { I18N } from "./ui/i18n";
+import { createEventBindings } from "./ui/event-bindings";
 import { createObjectInfoFormatter } from "./ui/object-info";
 import { createObjectSearchController } from "./ui/object-search";
 import { simplifyChinese } from "./ui/text";
@@ -91,7 +92,6 @@ import {
 import { createRotationController } from "./sky/rotation-controller";
 import {
   keyboardPanDeltaForKey,
-  keyboardPanUnitVector,
   pressedArrowKeysLabel as formatPressedArrowKeys,
 } from "./sky/keyboard-pan";
 import {
@@ -100,6 +100,7 @@ import {
   normalizeControlCenter,
   updatePoleAxisDiagnostics,
 } from "./sky/view-control";
+import { createViewModeController } from "./sky/view-mode-switching";
 import {
   selectionNodes as getLayerSelectionNodes,
 } from "./sky/layers";
@@ -3569,78 +3570,27 @@ import {
   }
 
   function commitObserverDateTimeInput(source = "Enter") {
-    const dt = parseObserverTimeFields();
-    if (!dt) {
-      noteTimeRenderDebug({
-        inputStatus: "invalid",
-        fields: timeFieldDebugText(),
-        updateSource: source,
-        errorStage: "input",
-        refreshHealth: "failed",
-        currentFatalError: "time field parse failed",
-        lastError: "time field parse failed",
-      });
-      reportInvalidTimeInput();
-      syncTimeInputs();
-      return false;
-    }
-    return applyObserverDateTime(dt, true, source);
+    return timeInputActions.commitObserverDateTimeInput(source);
   }
 
   function adjustTimeField(field, delta) {
-    const base = observerDT().setZone(safeZoneForCoordinates());
-    const units = {
-      year: "years",
-      month: "months",
-      day: "days",
-      hour: "hours",
-      minute: "minutes",
-    };
-    const unit = units[field];
-    if (!unit) return false;
-    const change = {};
-    change[unit] = delta;
-    const ok = applyObserverDateTime(
-      base.plus(change),
-      true,
-      `${field} ${delta > 0 ? "ArrowUp" : "ArrowDown"}`,
-    );
-    if (ok) focusTimeField(field);
-    return ok;
+    return timeInputActions.adjustTimeField(field, delta);
   }
 
   function shiftObserverTime(unit, amount, source = "shortcut") {
-    const delta = {};
-    delta[unit] = Number(amount);
-    return applyObserverDateTime(observerDT().plus(delta), true, source);
+    return timeInputActions.shiftObserverTime(unit, amount, source);
   }
 
   function readTimeStepValue() {
-    const input = $("time-step-value");
-    const value = Math.floor(Number(input && input.value));
-    if (!Number.isFinite(value) || value < 1) {
-      if (input) input.value = "1";
-      showToast(t("invalidTimeStep"), true);
-      return 1;
-    }
-    if (input) input.value = String(value);
-    return value;
+    return timeInputActions.readTimeStepValue();
   }
 
   function shiftObserverTimeByControl(sign) {
-    const unitSelect = $("time-step-unit");
-    const unit = unitSelect ? unitSelect.value : "hours";
-    if (!["minutes", "hours", "days", "years"].includes(unit)) return;
-    shiftObserverTime(unit, readTimeStepValue() * (sign < 0 ? -1 : 1), "step");
+    return timeInputActions.shiftObserverTimeByControl(sign);
   }
 
   function resolveZone(lat, lon, explicitZone) {
-    // 新地点不能继承旧地点的时区。
-    return (
-      normalizeZone(explicitZone) ||
-      lookupZone(lat, lon) ||
-      longitudeFallbackZone(lon)
-    );
+    return observerLocation.resolveZone(lat, lon, explicitZone);
   }
   /**
    * 更新观测者纬度、经度、显示城市和 IANA 时区。
@@ -3654,53 +3604,7 @@ import {
     cityEn = "",
     notice = true,
   ) {
-    lat = Number(lat);
-    lon = Number(lon);
-    if (
-      !Number.isFinite(lat) ||
-      !Number.isFinite(lon) ||
-      lat < -90 ||
-      lat > 90 ||
-      lon < -180 ||
-      lon > 180
-    ) {
-      showToast(t("invalidCoordinate"), true);
-      return false;
-    }
-    const resolved = resolveZone(lat, lon, zone);
-    const snapshot = captureRenderSnapshot(),
-      previousLocation = {
-        lat: state.lat,
-        lon: state.lon,
-        zone: state.zone,
-        cityZh: state.cityZh,
-        cityEn: state.cityEn,
-      };
-    state.lat = lat;
-    state.lon = lon;
-    state.zone = resolved;
-    state.cityZh = cityZh;
-    state.cityEn = cityEn;
-    syncControls();
-    updateHUD(true);
-    noteTimeRenderDebug({ updateSource: "location update", rollbackStatus: "unused" });
-    const ok = updateSkyView(true, "location update");
-    if (!ok) {
-      Object.assign(state, previousLocation);
-      restoreRenderSnapshot(snapshot, "location update");
-      syncControls();
-      updateHUD(true);
-      showToast(
-        state.lang === "zh" ? "地点刷新失败，已恢复上一个有效地点" : "Location refresh failed; restored the previous valid location",
-        true,
-      );
-      return false;
-    }
-    updateActiveTimeDebug({ updateSource: "location update", rollbackStatus: "unused" });
-    save();
-    if (notice)
-      showToast(`${t("locationApplied")} · ${resolved} · ${t("sameInstant")}`);
-    return true;
+    return observerLocation.setObserver(lat, lon, zone, cityZh, cityEn, notice);
   }
 
   /**
@@ -3954,54 +3858,7 @@ import {
    * 每个“坐标视角 + 投影”组合都保存独立中心和缩放。
    */
   function switchProjection(next) {
-    if (
-      !Object.prototype.hasOwnProperty.call(PROJECTION_DEFAULTS, next) ||
-      next === state.projection
-    )
-      return;
-    noteDebugLastAction("projection changed");
-    saveCurrentProjectionView();
-    state.projection = next;
-    save();
-    updateProjectionHelp();
-    updateHUD(false);
-    const target = desiredView();
-    state.mapScale = viewMapScale(target, state.mapScale);
-    applyMapBoxMetrics(projectionCanvasMetrics(next));
-    try {
-      syncInternalZoomForMetrics(projectionCanvasMetrics(next));
-      suppressResizeUntil = performance.now() + 520;
-      Celestial.reproject({ projection: next, projectionRatio: null });
-      syncRotationFromCurrentView("projection switch");
-      setTimeout(() => {
-        try {
-          const nextMetrics = projectionCanvasMetrics(next);
-          Celestial.resize(nextMetrics.width);
-          applyMapBoxMetrics(nextMetrics);
-          if (nextMetrics.renderMode === "VIEWPORT_CANVAS" && Celestial.mapProjection && Celestial.mapProjection.translate) {
-            Celestial.mapProjection.translate([nextMetrics.width / 2, nextMetrics.height / 2]);
-          }
-          syncInternalZoomForMetrics(nextMetrics);
-          syncRenderedMapBox(nextMetrics);
-          syncRotationFromCurrentView("projection resized");
-          if (isHorizontalView()) {
-            updateSkyView(true);
-            setMapScale(viewMapScale(target, state.mapScale));
-            syncInternalZoomForMetrics(projectionCanvasMetrics());
-            state.projectionViews[viewKey()] = { mapScale: state.mapScale };
-            save();
-          } else {
-            restoreView(target);
-          }
-          updateDebugOverlay(true);
-        } catch (err) {
-          console.warn("Projection resize failed", err);
-        }
-      }, 60);
-    } catch (err) {
-      console.warn("Projection switch failed", err);
-      initialDisplay(target);
-    }
+    return viewModeController.switchProjection(next);
   }
   /**
    * 在地平、赤道、黄道和银河坐标视角之间切换。
@@ -4009,34 +3866,7 @@ import {
    * 地平/赤道同属赤道 transform，只恢复视角；黄道/银河切换 transform 时完整重建。
    */
   function switchCoordinateSystem(next) {
-    if (!["horizontal", "equatorial", "ecliptic", "galactic"].includes(next))
-      return;
-    if (next === state.coordinateSystem) {
-      noteDebugLastAction("reset view");
-      resetCurrentCoordinateView();
-      return;
-    }
-    noteDebugLastAction("coordinate system changed");
-    const previousTransform = projectionCoordinateTransform();
-    saveCurrentProjectionView();
-    state.coordinateSystem = next;
-    save();
-    updateProjectionHelp();
-    updateHUD(false);
-    const target = desiredView(),
-      nextTransform = projectionCoordinateTransform();
-    state.mapScale = viewMapScale(target, state.mapScale);
-    if (nextTransform !== previousTransform) {
-      try {
-        rebuildSkyPreservingPixels(target);
-      } catch (err) {
-        console.warn("Coordinate transform switch failed", err);
-        initialDisplay(target);
-      }
-      return;
-    }
-    resetCurrentCoordinateView({ preferSaved: true });
-    redrawAndSyncMapBox("coordinate view switch");
+    return viewModeController.switchCoordinateSystem(next);
   }
 
   function canvasRect() {
@@ -4165,49 +3995,7 @@ import {
    * 不修改地点、时间、文化体系、显示参数、字体缩放或选中天体。
    */
   function resetCurrentCoordinateView(options = {}) {
-    noteDebugLastAction("reset view");
-    try {
-      const saved =
-          options.preferSaved &&
-          state.projectionViews &&
-          state.projectionViews[viewKey()],
-        configured = state.coordinateSystem === "horizontal" ? coordinateViewDefault() : saved || coordinateViewDefault(),
-        targetScale = viewMapScale(saved || configured, defaults.mapScale);
-      if (state.coordinateSystem !== "horizontal" && saved) {
-        restoreView(saved);
-        save();
-        return;
-      }
-      if (state.coordinateSystem === "horizontal") {
-        // 地平坐标视角的中心始终由当前地点和时间的本地天空计算，不恢复旧 center。
-        updateSkyView(true);
-        clearTimeout(customViewRestoreTimer);
-        customViewRestoreTimer = setTimeout(() => {
-          try {
-            setMapScale(targetScale);
-            syncInternalZoomForMetrics(projectionCanvasMetrics());
-            redrawAndSyncMapBox("horizontal reset");
-            state.projectionViews[viewKey()] = { mapScale: targetScale };
-            save();
-          } catch (err) {
-            console.warn("Horizontal reset failed", err);
-          }
-        }, 120);
-        return;
-      }
-      const v = {
-        center: Array.isArray(configured.center)
-          ? configured.center.slice()
-          : [0, 0, 0],
-        mapScale: targetScale,
-      };
-      state.projectionViews[viewKey()] = {
-        center: v.center.slice(),
-        mapScale: v.mapScale,
-      };
-      restoreView(v);
-      save();
-    } catch (_) {}
+    return viewModeController.resetCurrentCoordinateView(options);
   }
 
   function isTextEditingTarget(target) {
@@ -4256,53 +4044,8 @@ import {
     save();
   }
 
-  function updateKeyboardPanFrame(now) {
-    if (!skyPanKeys.size) {
-      lastKeyboardPanFrame = 0;
-      return;
-    }
-    if (isTextEditingTarget(document.activeElement)) {
-      skyPanKeys.clear();
-      flushKeyboardPanView();
-      return;
-    }
-    const last = lastKeyboardPanFrame || now;
-    lastKeyboardPanFrame = now;
-    const dt = Math.max(0, Math.min(0.05, (now - last) / 1000));
-    if (dt <= 0) return;
-    const speed = Number(cfg("interaction.keyboardPanDegreesPerSecond", 72)) || 72;
-    const vector = keyboardPanUnitVector(skyPanKeys);
-    if (!vector) return;
-    // 方向键长按不再依赖浏览器 keydown 自动重复事件。keydown 只维护按键集合，
-    // 这里在动画帧里按当前方向移动一次，避免重复事件堆积大量同步 redraw 后卡死。
-    applyKeyboardPanDelta(vector.lon * speed * dt, vector.lat * speed * dt, "keyboard pan frame");
-  }
-
   function switchPoleAxisConstraint(enabled) {
-    const next = !!enabled;
-    if (next === poleAxisConstraintEnabled()) {
-      syncControls();
-      return;
-    }
-    skyPanKeys.clear();
-    flushKeyboardPanView();
-    // 切换控制模式前先复用现有 reset view 链路。这样自由四元数模式积累的 roll
-    // 不会残留到欧拉角中轴约束模式，欧拉角模式的强制 roll=0 也不会污染自由模式。
-    resetCurrentCoordinateView();
-    state.poleAxisConstraintEnabled = next;
-    noteDebugLastAction("mode switched");
-    poleAxisDebug.guardActive = false;
-    poleAxisDebug.guardReason = "none";
-    syncControls();
-    const center = currentCelestialCenter();
-    if (center) setCelestialCenter(center, "pole axis constraint toggle");
-    else syncRotationFromCurrentView("pole axis constraint toggle");
-    save();
-    redrawAndSyncMapBox("pole axis constraint toggle");
-    setTimeout(() => {
-      syncRotationFromCurrentView("pole axis constraint toggle settle");
-      updateDebugOverlay(true);
-    }, 160);
+    return viewModeController.switchPoleAxisConstraint(enabled);
   }
 
   function resetAllDefaults() {
@@ -4324,428 +4067,233 @@ import {
     window.location.reload();
   }
 
+  const timeInputActions = createTimeInputActions({
+    dom: { $ },
+    time: {
+      observerDT,
+      safeZoneForCoordinates,
+      parseObserverTimeFields,
+      applyObserverDateTime,
+      syncTimeInputs,
+      focusTimeField,
+      timeFieldDebugText,
+      noteTimeRenderDebug,
+      reportInvalidTimeInput,
+    },
+    ui: { showToast, t },
+  });
+
+  const observerLocation = createObserverLocationController({
+    state: { state },
+    render: {
+      captureRenderSnapshot,
+      restoreRenderSnapshot,
+      syncControls,
+      updateHUD,
+      updateSkyView,
+      save,
+    },
+    time: { noteTimeRenderDebug, updateActiveTimeDebug },
+    ui: { showToast, t },
+  });
+
+  const viewModeController = createViewModeController({
+    dom: {
+      getCelestial: () => window.Celestial,
+      performance,
+      setTimeout,
+      clearTimeout,
+    },
+    state: {
+      state,
+      defaults,
+      skyPanKeys,
+      poleAxisDebug,
+      setSuppressResizeUntil: (value) => {
+        suppressResizeUntil = value;
+      },
+      getCustomViewRestoreTimer: () => customViewRestoreTimer,
+      setCustomViewRestoreTimer: (value) => {
+        customViewRestoreTimer = value;
+      },
+    },
+    projection: {
+      desiredView,
+      coordinateViewDefault,
+      viewKey,
+      viewMapScale,
+      projectionCanvasMetrics,
+      projectionCoordinateTransform,
+      isHorizontalView,
+    },
+    render: {
+      saveCurrentProjectionView,
+      updateProjectionHelp,
+      updateHUD,
+      applyMapBoxMetrics,
+      syncInternalZoomForMetrics,
+      syncRenderedMapBox,
+      syncRotationFromCurrentView,
+      updateSkyView,
+      setMapScale,
+      restoreView,
+      initialDisplay,
+      rebuildSkyPreservingPixels,
+      redrawAndSyncMapBox,
+      currentCelestialCenter,
+      setCelestialCenter,
+      syncControls,
+      save,
+    },
+    control: { poleAxisConstraintEnabled, flushKeyboardPanView },
+    debug: { noteDebugLastAction, updateDebugOverlay },
+  });
+
+  const eventBindings = createEventBindings({
+    dom: { $, document, window, navigator, location, performance },
+    state: {
+      state,
+      skyPanKeys,
+      getSkyReady: () => skyReady,
+      getCurrentSelected: () => currentSelected,
+      getPlaying: () => playing,
+      setPlaying: (value) => {
+        playing = value;
+      },
+      setLastFrame: (value) => {
+        lastFrame = value;
+      },
+      setLastKeyboardPanFrame: (value) => {
+        lastKeyboardPanFrame = value;
+      },
+      setDebugPointer: (active, coord) => {
+        debugPointerActive = active;
+        debugPointerSkyCoord = coord || null;
+      },
+      setFloatingObjectInfoDismissed: (dismissed) => {
+        floatingObjectInfoDismissed = dismissed;
+      },
+    },
+    time: {
+      DateTime,
+      TIME_FIELD_IDS,
+      TIME_FIELD_ID_TO_KEY,
+      markTimeFieldSelected,
+      setTimeFieldWidths,
+      noteTimeRenderDebug,
+      timeFieldDebugText,
+      moveTimeField,
+      syncTimeInputs,
+      commitObserverDateTimeInput,
+      adjustTimeField,
+      shiftObserverTimeByControl,
+      readTimeStepValue,
+      applyObserverDateTime,
+      shiftObserverTime,
+    },
+    view: {
+      save,
+      applyI18n,
+      applyVisualConfig,
+      applyCultureMode,
+      switchProjection,
+      switchCoordinateSystem,
+      resetCurrentCoordinateView,
+      switchPoleAxisConstraint,
+      updateRegionLegend,
+      redrawAndSyncMapBox,
+      scaleMapByFactor,
+      mapScaleButtonFactor,
+      applyFontScale,
+      setPanel,
+      updateDebugOverlay,
+      scheduleSkyResize,
+      saveCurrentProjectionView,
+      updateHUD,
+      updateFloatingObjectInfo,
+    },
+    observer: { resolveZone, setObserver },
+    sky: {
+      handleMapScaleWheel,
+      beginPaneMarginDrag,
+      movePaneMarginDrag,
+      endPaneMarginDrag,
+      isTextEditingTarget,
+      panSkyByKeyboard,
+      flushKeyboardPanView,
+      queueDebugOverlayUpdate,
+    },
+    ui: {
+      t,
+      showToast,
+      openTechnicalGuide,
+      toggleGuidePageDropdown,
+      openGuidePageDropdown,
+      closeGuidePageDropdown,
+      setGuidePage,
+      resetAllDefaults,
+      clearObjectInfo,
+    },
+  });
+
+  const animationController = createAppAnimationController({
+    dom: {
+      document,
+      requestAnimationFrame: window.requestAnimationFrame.bind(window),
+    },
+    config: { cfg, defaults },
+    state: {
+      state,
+      skyPanKeys,
+      getPlaying: () => playing,
+      setPlaying: (value) => {
+        playing = value;
+      },
+      getLastFrame: () => lastFrame,
+      setLastFrame: (value) => {
+        lastFrame = value;
+      },
+      getLastSkyUpdate: () => lastSkyUpdate,
+      setLastSkyUpdate: (value) => {
+        lastSkyUpdate = value;
+      },
+      getLastHudUpdate: () => lastHudUpdate,
+      setLastHudUpdate: (value) => {
+        lastHudUpdate = value;
+      },
+      getLastKeyboardPanFrame: () => lastKeyboardPanFrame,
+      setLastKeyboardPanFrame: (value) => {
+        lastKeyboardPanFrame = value;
+      },
+      getDebugVisible: () => debugVisible,
+      getLastDebugUpdate: () => lastDebugUpdate,
+      setLastDebugUpdate: (value) => {
+        lastDebugUpdate = value;
+      },
+    },
+    time: {
+      DateTime,
+      renderableDateForDateTime,
+      noteTimeRenderDebug,
+      julianDateFromDate,
+      precisionStatusForYear,
+      safeZoneForCoordinates,
+    },
+    sky: {
+      isTextEditingTarget,
+      flushKeyboardPanView,
+      applyKeyboardPanDelta,
+      updateSkyView,
+    },
+    ui: { updateHUD, updateDebugOverlay, debugRefreshIntervalMs },
+  });
+
   /**
    * 将 DOM 控件连接到状态更新、渲染更新和持久化。
    * 事件流刻意保持直接：控件 -> 修改状态 -> 重绘/应用。
    */
   function bind() {
-    $("language-select").addEventListener("change", (e) => {
-      state.lang = e.target.value === "en" ? "en" : "zh";
-      save();
-      applyI18n();
-      applyVisualConfig(true);
-    });
-    $("culture-select").addEventListener("change", (e) => {
-      state.cultureMode = ["western", "chinese", "both"].includes(
-        e.target.value,
-      )
-        ? e.target.value
-        : "western";
-      applyCultureMode();
-    });
-    $("projection-select").addEventListener("change", (e) =>
-      switchProjection(e.target.value),
-    );
-    const coordinateSelect = $("coordinate-select");
-    let coordinateSelectOpenedValue = coordinateSelect.value;
-    coordinateSelect.addEventListener("pointerdown", () => {
-      coordinateSelectOpenedValue = coordinateSelect.value;
-    });
-    coordinateSelect.addEventListener("change", (e) =>
-      switchCoordinateSystem(e.target.value),
-    );
-    coordinateSelect.addEventListener("blur", () => {
-      if (
-        coordinateSelect.value === coordinateSelectOpenedValue &&
-        coordinateSelect.value === state.coordinateSystem
-      )
-        resetCurrentCoordinateView();
-    });
-    $("pole-axis-constraint")?.addEventListener("change", (e) =>
-      switchPoleAxisConstraint(!!e.target.checked),
-    );
-    $("traditional-detail").addEventListener("change", (e) => {
-      state.traditionalDetail = ["major", "battlefields", "mansions"].includes(
-        e.target.value,
-      )
-        ? e.target.value
-        : "battlefields";
-      save();
-      updateRegionLegend();
-      redrawAndSyncMapBox("traditional detail");
-    });
-    $("apply-location").addEventListener("click", () => {
-      const lat = Number($("observer-lat").value),
-        lon = Number($("observer-lon").value),
-        zone = resolveZone(lat, lon, null);
-      setObserver(lat, lon, zone, "", "", true);
-      showToast(`${t("autoZone")} · ${zone} · ${t("timezoneEstimated")}`);
-    });
-    document
-      .querySelectorAll("[data-city-zh]")
-      .forEach((btn) =>
-        btn.addEventListener("click", () =>
-          setObserver(
-            btn.dataset.lat,
-            btn.dataset.lon,
-            btn.dataset.zone,
-            btn.dataset.cityZh,
-            btn.dataset.cityEn,
-            true,
-          ),
-        ),
-      );
-    $("geolocate").addEventListener("click", () => {
-      if (location.protocol === "file:") {
-        showToast(t("localServerHint"), true);
-        return;
-      }
-      if (!navigator.geolocation) {
-        showToast(t("geoFail"), true);
-        return;
-      }
-      showToast(t("geoRequest"));
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const z = resolveZone(
-            pos.coords.latitude,
-            pos.coords.longitude,
-            null,
-          );
-          setObserver(
-            pos.coords.latitude,
-            pos.coords.longitude,
-            z,
-            "我的位置",
-            "My location",
-            false,
-          );
-          showToast(`${t("locationApplied")} · ${z}`);
-        },
-        () => showToast(t("geoFail"), true),
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 },
-      );
-    });
-    TIME_FIELD_IDS.forEach((id) => {
-      const field = $(id);
-      if (!field) return;
-      field.dataset.replaceOnType = "1";
-      field.addEventListener("focus", () => markTimeFieldSelected(field));
-      field.addEventListener("click", () => markTimeFieldSelected(field));
-      field.addEventListener("mouseup", (e) => {
-        e.preventDefault();
-        markTimeFieldSelected(field);
-      });
-      field.addEventListener("input", () => {
-        field.value = field.value.replace(id === "time-year" ? /[^0-9-]/g : /\D/g, "");
-        if (id === "time-year") field.value = field.value.replace(/(?!^)-/g, "");
-        setTimeFieldWidths();
-        noteTimeRenderDebug({
-          inputStatus: "draft",
-          activeField: TIME_FIELD_ID_TO_KEY[id] || "-",
-          fields: timeFieldDebugText(),
-        });
-      });
-      field.addEventListener("blur", (event) => {
-        field.classList.remove("time-part-active");
-        field.dataset.replaceOnType = "1";
-        const shell = $("observer-time-fields");
-        if (shell && event.relatedTarget && shell.contains(event.relatedTarget)) return;
-        syncTimeInputs();
-      });
-      field.addEventListener("keydown", (e) => {
-        if (e.isComposing) return;
-        const key = TIME_FIELD_ID_TO_KEY[id];
-        if (e.key === "Enter") {
-          e.preventDefault();
-          if (commitObserverDateTimeInput("Enter")) {
-            field.dataset.replaceOnType = "1";
-            markTimeFieldSelected(field);
-          }
-          return;
-        }
-        if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-          e.preventDefault();
-          moveTimeField(id, e.key === "ArrowRight" ? 1 : -1);
-          return;
-        }
-        if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-          e.preventDefault();
-          adjustTimeField(key, e.key === "ArrowUp" ? 1 : -1);
-          return;
-        }
-        if (/^[0-9]$/.test(e.key) || (id === "time-year" && e.key === "-")) {
-          e.preventDefault();
-          if (field.dataset.replaceOnType === "1") {
-            field.value = "";
-            field.dataset.replaceOnType = "0";
-          }
-          if (e.key === "-" && field.value.includes("-")) return;
-          field.value += e.key;
-          setTimeFieldWidths();
-          markTimeFieldSelected(field);
-          field.dataset.replaceOnType = "0";
-          noteTimeRenderDebug({
-            inputStatus: "draft",
-            activeField: key || "-",
-            fields: timeFieldDebugText(),
-          });
-          return;
-        }
-        if (e.key === "Backspace" || e.key === "Delete") {
-          e.preventDefault();
-          field.value = "";
-          field.dataset.replaceOnType = "0";
-          setTimeFieldWidths();
-          noteTimeRenderDebug({
-            inputStatus: "draft",
-            activeField: key || "-",
-            fields: timeFieldDebugText(),
-          });
-        }
-      });
-    });
-    $("time-step-minus").addEventListener("click", () => shiftObserverTimeByControl(-1));
-    $("time-step-plus").addEventListener("click", () => shiftObserverTimeByControl(1));
-    $("time-step-value").addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && !e.isComposing) {
-        e.preventDefault();
-        readTimeStepValue();
-        $("time-step-value").blur();
-      }
-    });
-    $("observer-now").addEventListener("click", () => {
-      applyObserverDateTime(DateTime.utc(), true, "now");
-      showToast(t("nowApplied"));
-    });
-    document
-      .querySelectorAll("[data-shift-unit]")
-      .forEach((btn) =>
-        btn.addEventListener("click", () =>
-          shiftObserverTime(btn.dataset.shiftUnit, btn.dataset.shiftValue, "shortcut"),
-        ),
-      );
-    $("play").addEventListener("click", () => {
-      playing = !playing;
-      lastFrame = performance.now();
-      updateHUD(false);
-    });
-    $("speed").addEventListener("change", () => {
-      state.speed = Number($("speed").value);
-      save();
-      updateHUD(false);
-    });
-    $("magnitude").addEventListener("input", () => {
-      state.magnitude = Number($("magnitude").value);
-      $("magnitude-value").textContent = state.magnitude.toFixed(1);
-      save();
-      applyVisualConfig();
-    });
-    $("star-size").addEventListener("input", () => {
-      state.starSize = Number($("star-size").value);
-      $("star-size-value").textContent = `${state.starSize} px`;
-      save();
-      applyVisualConfig();
-    });
-    const checks = {
-      "star-names": "starNames",
-      "culture-lines": "cultureLines",
-      "culture-names": "cultureNames",
-      planets: "planets",
-      "milky-way": "milkyWay",
-      grid: "grid",
-      "horizontal-grid": "horizontalGrid",
-      ecliptic: "ecliptic",
-      equator: "equator",
-      horizon: "horizon",
-      "deep-sky": "deepSky",
-      "floating-object-info": "floatingObjectInfo",
-    };
-    Object.entries(checks).forEach(([id, key]) =>
-      $(id).addEventListener("change", (e) => {
-        state[key] = e.target.checked;
-        save();
-        if (key === "floatingObjectInfo") {
-          floatingObjectInfoDismissed = false;
-          updateFloatingObjectInfo();
-        } else applyVisualConfig(true);
-      }),
-    );
-    $("region-boundaries").addEventListener("change", (e) => {
-      if (state.cultureMode === "both") {
-        e.target.checked = !!state.regionBoundaries;
-        return;
-      }
-      state.regionBoundaries = e.target.checked;
-      save();
-      updateRegionLegend();
-      applyVisualConfig(true);
-      redrawAndSyncMapBox("region boundaries");
-    });
-    $("night-vision").addEventListener("change", (e) => {
-      state.nightVision = e.target.checked;
-      $("sky-stage").classList.toggle("night-vision", state.nightVision);
-      save();
-      showToast(state.nightVision ? t("nightOn") : t("nightOff"));
-    });
-    $("panel-toggle").addEventListener("click", () =>
-      setPanel(!state.panelOpen),
-    );
-    $("zoom-in").addEventListener("click", () => {
-      try {
-        scaleMapByFactor(mapScaleButtonFactor());
-        updateDebugOverlay();
-      } catch (_) {}
-    });
-    $("zoom-out").addEventListener("click", () => {
-      try {
-        scaleMapByFactor(1 / mapScaleButtonFactor());
-        updateDebugOverlay();
-      } catch (_) {}
-    });
-    $("font-decrease").addEventListener("click", () => {
-      state.fontScale = (Number(state.fontScale) || 1) / 1.08;
-      applyFontScale();
-      save();
-      applyVisualConfig(true);
-    });
-    $("font-increase").addEventListener("click", () => {
-      state.fontScale = (Number(state.fontScale) || 1) * 1.08;
-      applyFontScale();
-      save();
-      applyVisualConfig(true);
-    });
-    $("reset-view").addEventListener("click", resetCurrentCoordinateView);
-    $("fullscreen").addEventListener("click", async () => {
-      try {
-        if (!document.fullscreenElement)
-          await document.documentElement.requestFullscreen();
-        else await document.exitFullscreen();
-      } catch (_) {}
-    });
-    $("explain-btn").addEventListener("click", openTechnicalGuide);
-    $("guide-page-trigger").addEventListener("click", (e) => {
-      e.stopPropagation();
-      toggleGuidePageDropdown();
-    });
-    $("guide-page-trigger").addEventListener("keydown", (e) => {
-      if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        openGuidePageDropdown();
-        const first = $("guide-page-menu").querySelector(".guide-page-option");
-        first?.focus();
-      } else if (e.key === "Escape") {
-        closeGuidePageDropdown();
-      }
-    });
-    $("guide-page-menu").addEventListener("click", (e) => e.stopPropagation());
-    document.addEventListener("click", (e) => {
-      if (!$("guide-page-dropdown")?.contains(e.target)) closeGuidePageDropdown();
-    });
-    $("guide-next-page").addEventListener("click", () => setGuidePage(1));
-    $("reset-defaults-btn").addEventListener("click", resetAllDefaults);
-    $("close-modal").addEventListener("click", () =>
-      $("tech-modal").classList.remove("open"),
-    );
-    $("tech-modal").addEventListener("click", (e) => {
-      if (e.target === $("tech-modal"))
-        $("tech-modal").classList.remove("open");
-    });
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        closeGuidePageDropdown();
-        $("tech-modal").classList.remove("open");
-        $("city-suggestions").classList.remove("open");
-      }
-    });
-    $("copy-guide").addEventListener("click", async () => {
-      const active = document.querySelector(
-        state.lang === "zh" ? '[data-doc-lang="zh"]' : '[data-doc-lang="en"]',
-      );
-      try {
-        await navigator.clipboard.writeText(
-          active.dataset.copyText || active.innerText,
-        );
-        showToast(t("copied"));
-      } catch (_) {
-        showToast(t("copyFail"), true);
-      }
-    });
-    $("close-object").addEventListener("click", clearObjectInfo);
-    $("copy-object").addEventListener("click", async () => {
-      if (!currentSelected) return;
-      const text =
-        $("object-info-title").textContent +
-        "\n" +
-        Array.from($("object-info-grid").children)
-          .map((el) => el.textContent)
-          .join("\n");
-      try {
-        await navigator.clipboard.writeText(text);
-        showToast(t("copiedObject"));
-      } catch (_) {
-        showToast(t("copyFail"), true);
-      }
-    });
-    $("sky-pane").addEventListener(
-      "wheel",
-      (e) => {
-        if (!document.querySelector("#celestial-map canvas")) return;
-        handleMapScaleWheel(e);
-      },
-      { passive: false },
-    );
-    $("sky-pane").addEventListener("pointerdown", beginPaneMarginDrag);
-    $("sky-pane").addEventListener("pointermove", movePaneMarginDrag);
-    $("sky-pane").addEventListener("pointerup", endPaneMarginDrag);
-    $("sky-pane").addEventListener("pointercancel", endPaneMarginDrag);
-    $("sky-pane").setAttribute("tabindex", "0");
-    $("sky-pane").setAttribute(
-      "aria-label",
-      state.lang === "zh" ? "星图区域，可用方向键平移" : "Sky map, use arrow keys to pan",
-    );
-    document.addEventListener("keydown", (event) => {
-      if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
-      if (isTextEditingTarget(event.target)) return;
-      if (!skyReady || !window.Celestial) return;
-      event.preventDefault();
-      if (!skyPanKeys.has(event.key)) {
-        skyPanKeys.add(event.key);
-        panSkyByKeyboard(event.key);
-        lastKeyboardPanFrame = performance.now();
-        queueDebugOverlayUpdate();
-      }
-    });
-    document.addEventListener("keyup", (event) => {
-      if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
-      if (skyPanKeys.delete(event.key)) {
-        if (!skyPanKeys.size) flushKeyboardPanView();
-        queueDebugOverlayUpdate();
-      }
-    });
-    window.addEventListener("blur", () => {
-      if (!skyPanKeys.size) return;
-      skyPanKeys.clear();
-      flushKeyboardPanView();
-      queueDebugOverlayUpdate();
-    });
-    window.addEventListener("pointerup", () => {
-      const m = $("celestial-map");
-      if (m) m.classList.remove("dragging");
-      debugPointerActive = false;
-      debugPointerSkyCoord = null;
-      if (skyReady) {
-        saveCurrentProjectionView();
-        save();
-      }
-    });
-    window.addEventListener("resize", () => scheduleSkyResize("window.resize"));
-    window.addEventListener("orientationchange", () => scheduleSkyResize("orientationchange"));
-    window.addEventListener("pageshow", () => scheduleSkyResize("pageshow"));
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener("resize", () => scheduleSkyResize("visualViewport.resize"));
-      window.visualViewport.addEventListener("scroll", () => scheduleSkyResize("visualViewport.scroll"));
-    }
+    eventBindings.bind();
   }
 
   /**
@@ -4753,57 +4301,7 @@ import {
    * HUD 和星图更新分别节流，以保证高速时间流下交互仍然响应。
    */
   function animationLoop(now) {
-    const dt = Math.min(0.25, (now - lastFrame) / 1000);
-    lastFrame = now;
-    if (playing) {
-      const current = DateTime.fromISO(String(state.instant || ""), { zone: "utc" });
-      const nextInstant = (current.isValid ? current : DateTime.fromISO(defaults.instant, { zone: "utc" }))
-        .plus({ seconds: dt * Number(state.speed) });
-      const iso = nextInstant.isValid ? nextInstant.toISO() : null;
-      const renderDate = renderableDateForDateTime(nextInstant);
-      if (iso && renderDate) {
-        state.instant = iso;
-        noteTimeRenderDebug({
-          inputStatus: "valid",
-          internalUtc: iso,
-          jsDateYear: String(renderDate.getUTCFullYear()),
-          julianDate: (julianDateFromDate(renderDate) || 0).toFixed(5),
-          updateSource: "playback",
-          precision: precisionStatusForYear(nextInstant.setZone(safeZoneForCoordinates()).year),
-          refreshHealth: "healthy",
-          currentFatalError: "-",
-          recoveredOriginalError: "-",
-          lastError: "-",
-        });
-      } else {
-        playing = false;
-        noteTimeRenderDebug({
-          inputStatus: "invalid",
-          updateSource: "playback",
-          errorStage: "playback",
-          refreshHealth: "failed",
-          currentFatalError: "playback produced non-renderable time",
-          lastError: "playback produced non-renderable time",
-        });
-      }
-      if (now - lastSkyUpdate > 220) {
-        updateSkyView(true, "playback");
-        lastSkyUpdate = now;
-      }
-      if (now - lastHudUpdate > 240) {
-        updateHUD(true);
-        lastHudUpdate = now;
-      }
-    }
-    updateKeyboardPanFrame(now);
-    if (
-      debugVisible &&
-      now - lastDebugUpdate > debugRefreshIntervalMs()
-    ) {
-      lastDebugUpdate = now;
-      updateDebugOverlay();
-    }
-    requestAnimationFrame(animationLoop);
+    animationController.animationLoop(now);
   }
 
   /**
