@@ -789,21 +789,21 @@
       key: "deepSky",
       file: "dsos.bright.json",
       path: DATASET_PATHS.deepSky,
-      purposeZh: "\u4EAE\u6DF1\u7A7A\u5929\u4F53\u663E\u793A\u3001\u641C\u7D22\u548C\u70B9\u51FB\u62FE\u53D6",
-      purposeEn: "bright DSO rendering, search and picking",
-      source: "D3-Celestial bundled data",
-      license: "source to verify",
-      sourceStatus: "source-to-verify"
+      purposeZh: "\u4EAE\u6DF1\u7A7A\u5929\u4F53\u3001Messier \u5168\u8868\u3001Caldwell \u5168\u8868\u7684\u663E\u793A\u3001\u641C\u7D22\u548C\u70B9\u51FB\u62FE\u53D6",
+      purposeEn: "bright DSO, complete Messier and complete Caldwell rendering, search and picking",
+      source: "D3-Celestial bundled bright DSO data; OpenNGC v20231203; NOIRLab/KPNO Messier and Caldwell catalog snapshots",
+      license: "mixed; OpenNGC CC BY-SA 4.0, other source status to verify",
+      sourceStatus: "derived"
     },
     deepSkyNames: {
       key: "deepSkyNames",
       file: "dsonames.json",
       path: DATASET_PATHS.deepSkyNames,
-      purposeZh: "\u6DF1\u7A7A\u5929\u4F53\u540D\u79F0\u548C\u641C\u7D22",
-      purposeEn: "deep-sky object names and search",
-      source: "D3-Celestial bundled data",
-      license: "source to verify",
-      sourceStatus: "source-to-verify"
+      purposeZh: "\u6DF1\u7A7A\u5929\u4F53\u540D\u79F0\u3001Messier/Caldwell \u7F16\u53F7\u522B\u540D\u548C\u641C\u7D22",
+      purposeEn: "deep-sky object names, Messier/Caldwell aliases and search",
+      source: "D3-Celestial bundled names, plus aliases derived from OpenNGC and NOIRLab/KPNO catalog identifiers",
+      license: "mixed; OpenNGC CC BY-SA 4.0, other source status to verify",
+      sourceStatus: "derived"
     },
     westernConstellationNames: {
       key: "westernConstellationNames",
@@ -1539,11 +1539,13 @@
           { type: "paragraph", html: "\u897F\u65B9\u661F\u5EA7\u548C\u4E2D\u56FD\u661F\u5B98\u662F\u4E24\u5957\u4E0D\u540C\u6587\u5316\u7CFB\u7EDF\u3002\u73B0\u4EE3\u897F\u65B9\u661F\u5EA7\u4F7F\u7528 IAU 88 \u661F\u5EA7\u548C\u8FB9\u754C\u4F53\u7CFB\uFF1B\u4E2D\u56FD\u661F\u5B98\u6765\u81EA\u4F20\u7EDF\u5929\u6587\u6587\u5316\uFF0C\u5E38\u4EE5\u82E5\u5E72\u6052\u661F\u8FDE\u7EBF\u548C\u540D\u79F0\u7EC4\u7EC7\uFF0C\u5E76\u4E0D\u80FD\u7B80\u5355\u89C6\u4E3A\u897F\u65B9\u661F\u5EA7\u7684\u7FFB\u8BD1\u3002" },
           { type: "table", headers: ["\u6570\u636E\u7C7B\u578B", "\u5B58\u50A8\u65B9\u5F0F", "\u7528\u9014"], rows: [
             ["\u6052\u661F", "\u76EE\u5F55\u7F16\u53F7\u3001RA/Dec\u3001\u661F\u7B49\u3001\u989C\u8272\u6307\u6570\u3001\u540D\u79F0\u6620\u5C04", "\u7ED8\u5236\u661F\u70B9\u3001\u641C\u7D22\u3001\u70B9\u51FB\u548C\u6807\u7B7E\u3002"],
+            ["\u6DF1\u7A7A\u5929\u4F53", "\u4EAE\u76EE\u6807\u70B9\u4F4D\u3001Messier \u5168\u8868\u3001Caldwell \u5168\u8868\u548C\u540D\u79F0\u522B\u540D", "\u663E\u793A\u661F\u7CFB\u3001\u661F\u4E91\u3001\u661F\u56E2\u7B49\u6DF1\u7A7A\u76EE\u6807\uFF1B\u53EF\u641C\u7D22 M\u3001C\u3001NGC\u3001IC \u548C\u5E38\u7528\u540D\u79F0\u3002"],
             ["\u897F\u65B9\u661F\u5EA7\u7EBF", "\u6309\u661F\u5EA7\u5206\u7EC4\u7684\u6052\u661F\u8FDE\u7EBF", "\u663E\u793A\u73B0\u4EE3\u5E38\u89C1\u661F\u5EA7\u56FE\u6848\u3002"],
             ["IAU \u661F\u5EA7\u8FB9\u754C", "\u5929\u533A\u8FB9\u754C\u70B9\u5217", "\u663E\u793A\u73B0\u4EE3\u5929\u6587\u5B66\u7684\u661F\u5EA7\u5206\u533A\u3002"],
             ["\u4E2D\u56FD\u661F\u5B98", "\u661F\u5B98\u540D\u79F0\u3001\u5173\u8054\u6052\u661F\u3001\u8FDE\u7EBF\u3001\u6807\u7B7E\u4F4D\u7F6E", "\u663E\u793A\u4F20\u7EDF\u4E2D\u56FD\u661F\u7A7A\u4F53\u7CFB\u3002"],
             ["\u4F20\u7EDF\u5929\u533A", "\u4E09\u57A3\u3001\u56DB\u8C61\u3001\u4E8C\u5341\u516B\u5BBF\u7B49\u533A\u57DF\u7684\u53EF\u89C6\u5316\u8FB9\u754C\u6216\u6807\u7B7E", "\u63D0\u4F9B\u6587\u5316\u5C42\u7EA7\u53C2\u8003\uFF0C\u4E0D\u7B49\u540C\u4E8E IAU \u6CD5\u5B9A\u8FB9\u754C\u3002"]
           ] },
+          { type: "note", html: "\u5F53\u524D\u6DF1\u7A7A\u6570\u636E\u5E93\u5305\u542B\u5B8C\u6574 Messier 110 \u4E2A\u76EE\u6807\u3001\u5B8C\u6574 Caldwell 109 \u4E2A\u76EE\u6807\uFF0C\u5E76\u4FDD\u7559\u5C11\u91CF\u539F\u6709\u4EAE\u76EE\u6807\u3002\u661F\u56FE\u662F\u5426\u76F4\u63A5\u663E\u793A\u67D0\u4E2A\u6DF1\u7A7A\u76EE\u6807\u4ECD\u53D7\u201C\u4EAE\u6DF1\u7A7A\u5929\u4F53\u201D\u5F00\u5173\u548C\u5F53\u524D\u661F\u7B49\u9608\u503C\u5F71\u54CD\uFF1B\u641C\u7D22\u7D22\u5F15\u4F1A\u8986\u76D6\u8FD9\u4E9B\u76EE\u6807\u7684\u4E3B\u8981\u7F16\u53F7\u548C\u522B\u540D\u3002" },
           { type: "paragraph", html: "\u4E09\u57A3\u3001\u4E8C\u5341\u516B\u5BBF\u3001\u56DB\u8C61\u662F\u4F20\u7EDF\u4E2D\u56FD\u5929\u6587\u5B66\u4E2D\u7EC4\u7EC7\u5929\u7A7A\u7684\u65B9\u5F0F\u3002\u661F\u5B98\u66F4\u50CF\u4E00\u4E2A\u4E2A\u5C0F\u7684\u661F\u7EC4\u6216\u5B98\u7F72\u540D\u79F0\uFF1B\u661F\u5EA7\u5219\u662F\u73B0\u4EE3\u5929\u6587\u5B66\u628A\u5168\u5929\u5212\u5206\u6210 88 \u4E2A\u4E92\u4E0D\u91CD\u53E0\u533A\u57DF\u7684\u4F53\u7CFB\u3002" }
         ]
       },
@@ -1681,6 +1683,14 @@
             ["docs/ARCHITECTURE_GUIDE.md", "\u66F4\u5B8C\u6574\u7684\u7EF4\u62A4\u8005\u67B6\u6784\u8BF4\u660E\u3002"]
           ] },
           { type: "note", html: "\u7F51\u9875\u5E2E\u52A9\u6587\u6863\u4F1A\u89E3\u91CA\u4E3B\u8981\u903B\u8F91\uFF1B\u771F\u6B63\u8981\u6539\u4EE3\u7801\u65F6\uFF0C\u8BF7\u518D\u8BFB docs/ARCHITECTURE_GUIDE.md\u3002" }
+        ]
+      },
+      {
+        id: "version-info",
+        title: "19. \u7248\u672C\u4FE1\u606F",
+        blocks: [
+          { type: "paragraph", html: "\u5F53\u524D\u8BF4\u660E\u4E66\u5BF9\u5E94\u9879\u76EE\u7248\u672C\uFF1A<strong>5.5.1</strong>\u3002" },
+          { type: "paragraph", html: "\u672C\u7248\u672C\u8865\u5168 Messier \u4E0E Caldwell \u6DF1\u7A7A\u76EE\u5F55\uFF0C\u5E76\u540C\u6B65\u66F4\u65B0\u6DF1\u7A7A\u6570\u636E\u6765\u6E90\u3001\u641C\u7D22\u522B\u540D\u548C\u7EF4\u62A4\u6587\u6863\u3002\u66F4\u5B8C\u6574\u7684\u7248\u672C\u8BB0\u5F55\u89C1 <code>docs/VERSION_HISTORY.md</code>\u3002" }
         ]
       }
     ]
@@ -5261,6 +5271,12 @@
         names.name,
         names.zh,
         props.desig,
+        props.messier,
+        props.caldwell,
+        props.ngc,
+        props.ic,
+        props.objectTitle,
+        ...Array.isArray(props.aliases) ? props.aliases : [],
         feature.id
       ], simplify);
     });

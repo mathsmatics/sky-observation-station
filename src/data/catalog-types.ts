@@ -60,6 +60,14 @@ export interface StarNameEntry {
 export interface DeepSkyObject extends GeoJsonFeature<{
   mag?: number | string;
   desig?: string;
+  type?: string;
+  morph?: string;
+  dim?: string;
+  messier?: string;
+  caldwell?: string;
+  ngc?: string;
+  ic?: string;
+  aliases?: string[];
 }> {
   id: string | number;
   geometry: GeoJsonPointGeometry;

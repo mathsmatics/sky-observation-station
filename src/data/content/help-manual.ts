@@ -143,11 +143,13 @@ export const HELP_MANUAL_ZH: HelpManual = {
         { type: "paragraph", html: "西方星座和中国星官是两套不同文化系统。现代西方星座使用 IAU 88 星座和边界体系；中国星官来自传统天文文化，常以若干恒星连线和名称组织，并不能简单视为西方星座的翻译。" },
         { type: "table", headers: ["数据类型", "存储方式", "用途"], rows: [
           ["恒星", "目录编号、RA/Dec、星等、颜色指数、名称映射", "绘制星点、搜索、点击和标签。"],
+          ["深空天体", "亮目标点位、Messier 全表、Caldwell 全表和名称别名", "显示星系、星云、星团等深空目标；可搜索 M、C、NGC、IC 和常用名称。"],
           ["西方星座线", "按星座分组的恒星连线", "显示现代常见星座图案。"],
           ["IAU 星座边界", "天区边界点列", "显示现代天文学的星座分区。"],
           ["中国星官", "星官名称、关联恒星、连线、标签位置", "显示传统中国星空体系。"],
           ["传统天区", "三垣、四象、二十八宿等区域的可视化边界或标签", "提供文化层级参考，不等同于 IAU 法定边界。"]
         ] },
+        { type: "note", html: "当前深空数据库包含完整 Messier 110 个目标、完整 Caldwell 109 个目标，并保留少量原有亮目标。星图是否直接显示某个深空目标仍受“亮深空天体”开关和当前星等阈值影响；搜索索引会覆盖这些目标的主要编号和别名。" },
         { type: "paragraph", html: "三垣、二十八宿、四象是传统中国天文学中组织天空的方式。星官更像一个个小的星组或官署名称；星座则是现代天文学把全天划分成 88 个互不重叠区域的体系。" }
       ]
     },
@@ -285,6 +287,14 @@ export const HELP_MANUAL_ZH: HelpManual = {
           ["docs/ARCHITECTURE_GUIDE.md", "更完整的维护者架构说明。"]
         ] },
         { type: "note", html: "网页帮助文档会解释主要逻辑；真正要改代码时，请再读 docs/ARCHITECTURE_GUIDE.md。" }
+      ]
+    },
+    {
+      id: "version-info",
+      title: "19. 版本信息",
+      blocks: [
+        { type: "paragraph", html: "当前说明书对应项目版本：<strong>5.5.1</strong>。" },
+        { type: "paragraph", html: "本版本补全 Messier 与 Caldwell 深空目录，并同步更新深空数据来源、搜索别名和维护文档。更完整的版本记录见 <code>docs/VERSION_HISTORY.md</code>。" }
       ]
     }
   ]

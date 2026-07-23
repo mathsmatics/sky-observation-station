@@ -111,6 +111,12 @@ export function buildObjectSearchIndexFromSources(options: {
       names.name,
       names.zh,
       props.desig,
+      props.messier,
+      props.caldwell,
+      props.ngc,
+      props.ic,
+      props.objectTitle,
+      ...(Array.isArray(props.aliases) ? props.aliases : []),
       feature.id,
     ], simplify);
   });

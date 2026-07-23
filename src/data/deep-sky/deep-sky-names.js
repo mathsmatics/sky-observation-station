@@ -8897,6 +8897,16099 @@ window.registerSkyData("deep-sky/dsonames.json", {
     "it": "Nebulosa Elica",
     "es": "Nebulosa del Propulsor",
     "ru": "Туманность Пропеллер"
+  },
+  "C 1": {
+    "name": "Polarissima Cluster",
+    "ar": "‎حشد بولاريسيما‎",
+    "zh": "近极星团",
+    "fi": "Polarissima-joukko",
+    "fr": "Amas Polarissima",
+    "de": "Polarissima-Haufen",
+    "it": "Ammasso Polarissima",
+    "ko": "작은곰자리 성단",
+    "la": "Congregatio Polarissima",
+    "es": "Cúmulo Polarissima",
+    "ru": "Скопление Поляриссимы"
+  },
+  "C1": {
+    "name": "Polarissima Cluster",
+    "ar": "‎حشد بولاريسيما‎",
+    "zh": "近极星团",
+    "fi": "Polarissima-joukko",
+    "fr": "Amas Polarissima",
+    "de": "Polarissima-Haufen",
+    "it": "Ammasso Polarissima",
+    "ko": "작은곰자리 성단",
+    "la": "Congregatio Polarissima",
+    "es": "Cúmulo Polarissima",
+    "ru": "Скопление Поляриссимы"
+  },
+  "NGC188": {
+    "name": "Polarissima Cluster",
+    "ar": "‎حشد بولاريسيما‎",
+    "zh": "近极星团",
+    "fi": "Polarissima-joukko",
+    "fr": "Amas Polarissima",
+    "de": "Polarissima-Haufen",
+    "it": "Ammasso Polarissima",
+    "ko": "작은곰자리 성단",
+    "la": "Congregatio Polarissima",
+    "es": "Cúmulo Polarissima",
+    "ru": "Скопление Поляриссимы"
+  },
+  "C 001": {
+    "name": "Polarissima Cluster",
+    "ar": "‎حشد بولاريسيما‎",
+    "zh": "近极星团",
+    "fi": "Polarissima-joukko",
+    "fr": "Amas Polarissima",
+    "de": "Polarissima-Haufen",
+    "it": "Ammasso Polarissima",
+    "ko": "작은곰자리 성단",
+    "la": "Congregatio Polarissima",
+    "es": "Cúmulo Polarissima",
+    "ru": "Скопление Поляриссимы"
+  },
+  "C001": {
+    "name": "Polarissima Cluster",
+    "ar": "‎حشد بولاريسيما‎",
+    "zh": "近极星团",
+    "fi": "Polarissima-joukko",
+    "fr": "Amas Polarissima",
+    "de": "Polarissima-Haufen",
+    "it": "Ammasso Polarissima",
+    "ko": "작은곰자리 성단",
+    "la": "Congregatio Polarissima",
+    "es": "Cúmulo Polarissima",
+    "ru": "Скопление Поляриссимы"
+  },
+  "MWSC 0074": {
+    "name": "Polarissima Cluster",
+    "ar": "‎حشد بولاريسيما‎",
+    "zh": "近极星团",
+    "fi": "Polarissima-joukko",
+    "fr": "Amas Polarissima",
+    "de": "Polarissima-Haufen",
+    "it": "Ammasso Polarissima",
+    "ko": "작은곰자리 성단",
+    "la": "Congregatio Polarissima",
+    "es": "Cúmulo Polarissima",
+    "ru": "Скопление Поляриссимы"
+  },
+  "MWSC0074": {
+    "name": "Polarissima Cluster",
+    "ar": "‎حشد بولاريسيما‎",
+    "zh": "近极星团",
+    "fi": "Polarissima-joukko",
+    "fr": "Amas Polarissima",
+    "de": "Polarissima-Haufen",
+    "it": "Ammasso Polarissima",
+    "ko": "작은곰자리 성단",
+    "la": "Congregatio Polarissima",
+    "es": "Cúmulo Polarissima",
+    "ru": "Скопление Поляриссимы"
+  },
+  "C 2": {
+    "name": "Bow-Tie Nebula",
+    "ar": "‎‎سديم ربطة العنق‎‎",
+    "zh": "蝴蝶结星云",
+    "fi": "Rusettisumu",
+    "fr": "Nébuleuse du Nœud-Papillon",
+    "de": "Mascherl-Nebel",
+    "it": "Nebulosa Bow-Tie",
+    "ko": "부메랑 성운",
+    "fa": "سحابی پاپیون",
+    "es": "Nebulosa de lazo",
+    "ru": "Туманность Бабочка",
+    "tr": "Bumerang Bulutsusu"
+  },
+  "C2": {
+    "name": "Bow-Tie Nebula",
+    "ar": "‎‎سديم ربطة العنق‎‎",
+    "zh": "蝴蝶结星云",
+    "fi": "Rusettisumu",
+    "fr": "Nébuleuse du Nœud-Papillon",
+    "de": "Mascherl-Nebel",
+    "it": "Nebulosa Bow-Tie",
+    "ko": "부메랑 성운",
+    "fa": "سحابی پاپیون",
+    "es": "Nebulosa de lazo",
+    "ru": "Туманность Бабочка",
+    "tr": "Bumerang Bulutsusu"
+  },
+  "NGC40": {
+    "name": "Bow-Tie Nebula",
+    "ar": "‎‎سديم ربطة العنق‎‎",
+    "zh": "蝴蝶结星云",
+    "fi": "Rusettisumu",
+    "fr": "Nébuleuse du Nœud-Papillon",
+    "de": "Mascherl-Nebel",
+    "it": "Nebulosa Bow-Tie",
+    "ko": "부메랑 성운",
+    "fa": "سحابی پاپیون",
+    "es": "Nebulosa de lazo",
+    "ru": "Туманность Бабочка",
+    "tr": "Bumerang Bulutsusu"
+  },
+  "C 002": {
+    "name": "Bow-Tie Nebula",
+    "ar": "‎‎سديم ربطة العنق‎‎",
+    "zh": "蝴蝶结星云",
+    "fi": "Rusettisumu",
+    "fr": "Nébuleuse du Nœud-Papillon",
+    "de": "Mascherl-Nebel",
+    "it": "Nebulosa Bow-Tie",
+    "ko": "부메랑 성운",
+    "fa": "سحابی پاپیون",
+    "es": "Nebulosa de lazo",
+    "ru": "Туманность Бабочка",
+    "tr": "Bumerang Bulutsusu"
+  },
+  "C002": {
+    "name": "Bow-Tie Nebula",
+    "ar": "‎‎سديم ربطة العنق‎‎",
+    "zh": "蝴蝶结星云",
+    "fi": "Rusettisumu",
+    "fr": "Nébuleuse du Nœud-Papillon",
+    "de": "Mascherl-Nebel",
+    "it": "Nebulosa Bow-Tie",
+    "ko": "부메랑 성운",
+    "fa": "سحابی پاپیون",
+    "es": "Nebulosa de lazo",
+    "ru": "Туманность Бабочка",
+    "tr": "Bumerang Bulutsusu"
+  },
+  "IRAS 00102+7214": {
+    "name": "Bow-Tie Nebula",
+    "ar": "‎‎سديم ربطة العنق‎‎",
+    "zh": "蝴蝶结星云",
+    "fi": "Rusettisumu",
+    "fr": "Nébuleuse du Nœud-Papillon",
+    "de": "Mascherl-Nebel",
+    "it": "Nebulosa Bow-Tie",
+    "ko": "부메랑 성운",
+    "fa": "سحابی پاپیون",
+    "es": "Nebulosa de lazo",
+    "ru": "Туманность Бабочка",
+    "tr": "Bumerang Bulutsusu"
+  },
+  "IRAS00102+7214": {
+    "name": "Bow-Tie Nebula",
+    "ar": "‎‎سديم ربطة العنق‎‎",
+    "zh": "蝴蝶结星云",
+    "fi": "Rusettisumu",
+    "fr": "Nébuleuse du Nœud-Papillon",
+    "de": "Mascherl-Nebel",
+    "it": "Nebulosa Bow-Tie",
+    "ko": "부메랑 성운",
+    "fa": "سحابی پاپیون",
+    "es": "Nebulosa de lazo",
+    "ru": "Туманность Бабочка",
+    "tr": "Bumerang Bulutsusu"
+  },
+  "PN G120.0+09.8": {
+    "name": "Bow-Tie Nebula",
+    "ar": "‎‎سديم ربطة العنق‎‎",
+    "zh": "蝴蝶结星云",
+    "fi": "Rusettisumu",
+    "fr": "Nébuleuse du Nœud-Papillon",
+    "de": "Mascherl-Nebel",
+    "it": "Nebulosa Bow-Tie",
+    "ko": "부메랑 성운",
+    "fa": "سحابی پاپیون",
+    "es": "Nebulosa de lazo",
+    "ru": "Туманность Бабочка",
+    "tr": "Bumerang Bulutsusu"
+  },
+  "PNG120.0+09.8": {
+    "name": "Bow-Tie Nebula",
+    "ar": "‎‎سديم ربطة العنق‎‎",
+    "zh": "蝴蝶结星云",
+    "fi": "Rusettisumu",
+    "fr": "Nébuleuse du Nœud-Papillon",
+    "de": "Mascherl-Nebel",
+    "it": "Nebulosa Bow-Tie",
+    "ko": "부메랑 성운",
+    "fa": "سحابی پاپیون",
+    "es": "Nebulosa de lazo",
+    "ru": "Туманность Бабочка",
+    "tr": "Bumerang Bulutsusu"
+  },
+  "Bow-Tie nebula": {
+    "name": "Bow-Tie Nebula",
+    "ar": "‎‎سديم ربطة العنق‎‎",
+    "zh": "蝴蝶结星云",
+    "fi": "Rusettisumu",
+    "fr": "Nébuleuse du Nœud-Papillon",
+    "de": "Mascherl-Nebel",
+    "it": "Nebulosa Bow-Tie",
+    "ko": "부메랑 성운",
+    "fa": "سحابی پاپیون",
+    "es": "Nebulosa de lazo",
+    "ru": "Туманность Бабочка",
+    "tr": "Bumerang Bulutsusu"
+  },
+  "Bow-Tienebula": {
+    "name": "Bow-Tie Nebula",
+    "ar": "‎‎سديم ربطة العنق‎‎",
+    "zh": "蝴蝶结星云",
+    "fi": "Rusettisumu",
+    "fr": "Nébuleuse du Nœud-Papillon",
+    "de": "Mascherl-Nebel",
+    "it": "Nebulosa Bow-Tie",
+    "ko": "부메랑 성운",
+    "fa": "سحابی پاپیون",
+    "es": "Nebulosa de lazo",
+    "ru": "Туманность Бабочка",
+    "tr": "Bumerang Bulutsusu"
+  },
+  "C 3": {
+    "name": "NGC 4236"
+  },
+  "C3": {
+    "name": "NGC 4236"
+  },
+  "NGC 4236": {
+    "name": "NGC 4236"
+  },
+  "NGC4236": {
+    "name": "NGC 4236"
+  },
+  "2MASX J12164211+6927452": {
+    "name": "NGC 4236"
+  },
+  "2MASXJ12164211+6927452": {
+    "name": "NGC 4236"
+  },
+  "C 003": {
+    "name": "NGC 4236"
+  },
+  "C003": {
+    "name": "NGC 4236"
+  },
+  "IRAS 12143+6945": {
+    "name": "NGC 4236"
+  },
+  "IRAS12143+6945": {
+    "name": "NGC 4236"
+  },
+  "MCG +12-12-004": {
+    "name": "NGC 4236"
+  },
+  "MCG+12-12-004": {
+    "name": "NGC 4236"
+  },
+  "PGC 039346": {
+    "name": "NGC 4236"
+  },
+  "PGC039346": {
+    "name": "NGC 4236"
+  },
+  "UGC 07306": {
+    "name": "NGC 4236"
+  },
+  "UGC07306": {
+    "name": "NGC 4236"
+  },
+  "C 4": {
+    "name": "Iris Nebula",
+    "ar": "‎‎سديم السوسن‎‎",
+    "zh": "鸢尾花星云",
+    "fi": "Iirissumu",
+    "fr": "Nébuleuse de l'Iris",
+    "de": "Iris-Nebel",
+    "it": "Nebulosa Arcobaleno",
+    "ko": "아이리스 성운",
+    "fa": "سحابی عنبیه",
+    "es": "Nebulosa Iris",
+    "ru": "Туманность Ирис"
+  },
+  "C4": {
+    "name": "Iris Nebula",
+    "ar": "‎‎سديم السوسن‎‎",
+    "zh": "鸢尾花星云",
+    "fi": "Iirissumu",
+    "fr": "Nébuleuse de l'Iris",
+    "de": "Iris-Nebel",
+    "it": "Nebulosa Arcobaleno",
+    "ko": "아이리스 성운",
+    "fa": "سحابی عنبیه",
+    "es": "Nebulosa Iris",
+    "ru": "Туманность Ирис"
+  },
+  "NGC7023": {
+    "name": "Iris Nebula",
+    "ar": "‎‎سديم السوسن‎‎",
+    "zh": "鸢尾花星云",
+    "fi": "Iirissumu",
+    "fr": "Nébuleuse de l'Iris",
+    "de": "Iris-Nebel",
+    "it": "Nebulosa Arcobaleno",
+    "ko": "아이리스 성운",
+    "fa": "سحابی عنبیه",
+    "es": "Nebulosa Iris",
+    "ru": "Туманность Ирис"
+  },
+  "C 004": {
+    "name": "Iris Nebula",
+    "ar": "‎‎سديم السوسن‎‎",
+    "zh": "鸢尾花星云",
+    "fi": "Iirissumu",
+    "fr": "Nébuleuse de l'Iris",
+    "de": "Iris-Nebel",
+    "it": "Nebulosa Arcobaleno",
+    "ko": "아이리스 성운",
+    "fa": "سحابی عنبیه",
+    "es": "Nebulosa Iris",
+    "ru": "Туманность Ирис"
+  },
+  "C004": {
+    "name": "Iris Nebula",
+    "ar": "‎‎سديم السوسن‎‎",
+    "zh": "鸢尾花星云",
+    "fi": "Iirissumu",
+    "fr": "Nébuleuse de l'Iris",
+    "de": "Iris-Nebel",
+    "it": "Nebulosa Arcobaleno",
+    "ko": "아이리스 성운",
+    "fa": "سحابی عنبیه",
+    "es": "Nebulosa Iris",
+    "ru": "Туманность Ирис"
+  },
+  "IRAS 21009+6758": {
+    "name": "Iris Nebula",
+    "ar": "‎‎سديم السوسن‎‎",
+    "zh": "鸢尾花星云",
+    "fi": "Iirissumu",
+    "fr": "Nébuleuse de l'Iris",
+    "de": "Iris-Nebel",
+    "it": "Nebulosa Arcobaleno",
+    "ko": "아이리스 성운",
+    "fa": "سحابی عنبیه",
+    "es": "Nebulosa Iris",
+    "ru": "Туманность Ирис"
+  },
+  "IRAS21009+6758": {
+    "name": "Iris Nebula",
+    "ar": "‎‎سديم السوسن‎‎",
+    "zh": "鸢尾花星云",
+    "fi": "Iirissumu",
+    "fr": "Nébuleuse de l'Iris",
+    "de": "Iris-Nebel",
+    "it": "Nebulosa Arcobaleno",
+    "ko": "아이리스 성운",
+    "fa": "سحابی عنبیه",
+    "es": "Nebulosa Iris",
+    "ru": "Туманность Ирис"
+  },
+  "LBN 487": {
+    "name": "Iris Nebula",
+    "ar": "‎‎سديم السوسن‎‎",
+    "zh": "鸢尾花星云",
+    "fi": "Iirissumu",
+    "fr": "Nébuleuse de l'Iris",
+    "de": "Iris-Nebel",
+    "it": "Nebulosa Arcobaleno",
+    "ko": "아이리스 성운",
+    "fa": "سحابی عنبیه",
+    "es": "Nebulosa Iris",
+    "ru": "Туманность Ирис"
+  },
+  "LBN487": {
+    "name": "Iris Nebula",
+    "ar": "‎‎سديم السوسن‎‎",
+    "zh": "鸢尾花星云",
+    "fi": "Iirissumu",
+    "fr": "Nébuleuse de l'Iris",
+    "de": "Iris-Nebel",
+    "it": "Nebulosa Arcobaleno",
+    "ko": "아이리스 성운",
+    "fa": "سحابی عنبیه",
+    "es": "Nebulosa Iris",
+    "ru": "Туманность Ирис"
+  },
+  "Iris Nebula": {
+    "name": "Iris Nebula",
+    "ar": "‎‎سديم السوسن‎‎",
+    "zh": "鸢尾花星云",
+    "fi": "Iirissumu",
+    "fr": "Nébuleuse de l'Iris",
+    "de": "Iris-Nebel",
+    "it": "Nebulosa Arcobaleno",
+    "ko": "아이리스 성운",
+    "fa": "سحابی عنبیه",
+    "es": "Nebulosa Iris",
+    "ru": "Туманность Ирис"
+  },
+  "IrisNebula": {
+    "name": "Iris Nebula",
+    "ar": "‎‎سديم السوسن‎‎",
+    "zh": "鸢尾花星云",
+    "fi": "Iirissumu",
+    "fr": "Nébuleuse de l'Iris",
+    "de": "Iris-Nebel",
+    "it": "Nebulosa Arcobaleno",
+    "ko": "아이리스 성운",
+    "fa": "سحابی عنبیه",
+    "es": "Nebulosa Iris",
+    "ru": "Туманность Ирис"
+  },
+  "C 5": {
+    "name": "Maffei 1 Group",
+    "ar": "‎مجموعة مافي 1‎",
+    "zh": "马费伊1星系群",
+    "fi": "Maffei 1 -ryhmä",
+    "de": "Maffei 1 Gruppe",
+    "ja": "マフェイ1银河群",
+    "ko": "마페이 1 은하단",
+    "es": "Grupo Maffei 1",
+    "ru": "Группа Маффей 1"
+  },
+  "C5": {
+    "name": "Maffei 1 Group",
+    "ar": "‎مجموعة مافي 1‎",
+    "zh": "马费伊1星系群",
+    "fi": "Maffei 1 -ryhmä",
+    "de": "Maffei 1 Gruppe",
+    "ja": "マフェイ1银河群",
+    "ko": "마페이 1 은하단",
+    "es": "Grupo Maffei 1",
+    "ru": "Группа Маффей 1"
+  },
+  "IC342": {
+    "name": "Maffei 1 Group",
+    "ar": "‎مجموعة مافي 1‎",
+    "zh": "马费伊1星系群",
+    "fi": "Maffei 1 -ryhmä",
+    "de": "Maffei 1 Gruppe",
+    "ja": "マフェイ1银河群",
+    "ko": "마페이 1 은하단",
+    "es": "Grupo Maffei 1",
+    "ru": "Группа Маффей 1"
+  },
+  "2MASX J03464851+6805459": {
+    "name": "Maffei 1 Group",
+    "ar": "‎مجموعة مافي 1‎",
+    "zh": "马费伊1星系群",
+    "fi": "Maffei 1 -ryhmä",
+    "de": "Maffei 1 Gruppe",
+    "ja": "マフェイ1银河群",
+    "ko": "마페이 1 은하단",
+    "es": "Grupo Maffei 1",
+    "ru": "Группа Маффей 1"
+  },
+  "2MASXJ03464851+6805459": {
+    "name": "Maffei 1 Group",
+    "ar": "‎مجموعة مافي 1‎",
+    "zh": "马费伊1星系群",
+    "fi": "Maffei 1 -ryhmä",
+    "de": "Maffei 1 Gruppe",
+    "ja": "マフェイ1银河群",
+    "ko": "마페이 1 은하단",
+    "es": "Grupo Maffei 1",
+    "ru": "Группа Маффей 1"
+  },
+  "C 005": {
+    "name": "Maffei 1 Group",
+    "ar": "‎مجموعة مافي 1‎",
+    "zh": "马费伊1星系群",
+    "fi": "Maffei 1 -ryhmä",
+    "de": "Maffei 1 Gruppe",
+    "ja": "マフェイ1银河群",
+    "ko": "마페이 1 은하단",
+    "es": "Grupo Maffei 1",
+    "ru": "Группа Маффей 1"
+  },
+  "C005": {
+    "name": "Maffei 1 Group",
+    "ar": "‎مجموعة مافي 1‎",
+    "zh": "马费伊1星系群",
+    "fi": "Maffei 1 -ryhmä",
+    "de": "Maffei 1 Gruppe",
+    "ja": "マフェイ1银河群",
+    "ko": "마페이 1 은하단",
+    "es": "Grupo Maffei 1",
+    "ru": "Группа Маффей 1"
+  },
+  "IRAS 03419+6756": {
+    "name": "Maffei 1 Group",
+    "ar": "‎مجموعة مافي 1‎",
+    "zh": "马费伊1星系群",
+    "fi": "Maffei 1 -ryhmä",
+    "de": "Maffei 1 Gruppe",
+    "ja": "マフェイ1银河群",
+    "ko": "마페이 1 은하단",
+    "es": "Grupo Maffei 1",
+    "ru": "Группа Маффей 1"
+  },
+  "IRAS03419+6756": {
+    "name": "Maffei 1 Group",
+    "ar": "‎مجموعة مافي 1‎",
+    "zh": "马费伊1星系群",
+    "fi": "Maffei 1 -ryhmä",
+    "de": "Maffei 1 Gruppe",
+    "ja": "マフェイ1银河群",
+    "ko": "마페이 1 은하단",
+    "es": "Grupo Maffei 1",
+    "ru": "Группа Маффей 1"
+  },
+  "MCG +11-05-003": {
+    "name": "Maffei 1 Group",
+    "ar": "‎مجموعة مافي 1‎",
+    "zh": "马费伊1星系群",
+    "fi": "Maffei 1 -ryhmä",
+    "de": "Maffei 1 Gruppe",
+    "ja": "マフェイ1银河群",
+    "ko": "마페이 1 은하단",
+    "es": "Grupo Maffei 1",
+    "ru": "Группа Маффей 1"
+  },
+  "MCG+11-05-003": {
+    "name": "Maffei 1 Group",
+    "ar": "‎مجموعة مافي 1‎",
+    "zh": "马费伊1星系群",
+    "fi": "Maffei 1 -ryhmä",
+    "de": "Maffei 1 Gruppe",
+    "ja": "マフェイ1银河群",
+    "ko": "마페이 1 은하단",
+    "es": "Grupo Maffei 1",
+    "ru": "Группа Маффей 1"
+  },
+  "PGC 013826": {
+    "name": "Maffei 1 Group",
+    "ar": "‎مجموعة مافي 1‎",
+    "zh": "马费伊1星系群",
+    "fi": "Maffei 1 -ryhmä",
+    "de": "Maffei 1 Gruppe",
+    "ja": "マフェイ1银河群",
+    "ko": "마페이 1 은하단",
+    "es": "Grupo Maffei 1",
+    "ru": "Группа Маффей 1"
+  },
+  "PGC013826": {
+    "name": "Maffei 1 Group",
+    "ar": "‎مجموعة مافي 1‎",
+    "zh": "马费伊1星系群",
+    "fi": "Maffei 1 -ryhmä",
+    "de": "Maffei 1 Gruppe",
+    "ja": "マフェイ1银河群",
+    "ko": "마페이 1 은하단",
+    "es": "Grupo Maffei 1",
+    "ru": "Группа Маффей 1"
+  },
+  "UGC 02847": {
+    "name": "Maffei 1 Group",
+    "ar": "‎مجموعة مافي 1‎",
+    "zh": "马费伊1星系群",
+    "fi": "Maffei 1 -ryhmä",
+    "de": "Maffei 1 Gruppe",
+    "ja": "マフェイ1银河群",
+    "ko": "마페이 1 은하단",
+    "es": "Grupo Maffei 1",
+    "ru": "Группа Маффей 1"
+  },
+  "UGC02847": {
+    "name": "Maffei 1 Group",
+    "ar": "‎مجموعة مافي 1‎",
+    "zh": "马费伊1星系群",
+    "fi": "Maffei 1 -ryhmä",
+    "de": "Maffei 1 Gruppe",
+    "ja": "マフェイ1银河群",
+    "ko": "마페이 1 은하단",
+    "es": "Grupo Maffei 1",
+    "ru": "Группа Маффей 1"
+  },
+  "C 6": {
+    "name": "Cat's Eye Nebula",
+    "ar": "‎‎سديم عين القط‎‎",
+    "zh": "猫眼星云",
+    "fi": "Kissansilmäsumu",
+    "fr": "Nébuleuse de l'Oeil de chat",
+    "de": "Katzenaugen-Nebel",
+    "it": "Nebulosa Occhio di Gatto",
+    "ja": "キャッツアイ星云",
+    "ko": "고양이 눈 성운",
+    "fa": "سحابی چشم گربه",
+    "es": "Nebulosa Ojo de Gato",
+    "ru": "Туманность Кошачий глаз",
+    "he": "ערפילית עין החתול"
+  },
+  "C6": {
+    "name": "Cat's Eye Nebula",
+    "ar": "‎‎سديم عين القط‎‎",
+    "zh": "猫眼星云",
+    "fi": "Kissansilmäsumu",
+    "fr": "Nébuleuse de l'Oeil de chat",
+    "de": "Katzenaugen-Nebel",
+    "it": "Nebulosa Occhio di Gatto",
+    "ja": "キャッツアイ星云",
+    "ko": "고양이 눈 성운",
+    "fa": "سحابی چشم گربه",
+    "es": "Nebulosa Ojo de Gato",
+    "ru": "Туманность Кошачий глаз",
+    "he": "ערפילית עין החתול"
+  },
+  "NGC6543": {
+    "name": "Cat's Eye Nebula",
+    "ar": "‎‎سديم عين القط‎‎",
+    "zh": "猫眼星云",
+    "fi": "Kissansilmäsumu",
+    "fr": "Nébuleuse de l'Oeil de chat",
+    "de": "Katzenaugen-Nebel",
+    "it": "Nebulosa Occhio di Gatto",
+    "ja": "キャッツアイ星云",
+    "ko": "고양이 눈 성운",
+    "fa": "سحابی چشم گربه",
+    "es": "Nebulosa Ojo de Gato",
+    "ru": "Туманность Кошачий глаз",
+    "he": "ערפילית עין החתול"
+  },
+  "2MASX J17583335+6637591": {
+    "name": "Cat's Eye Nebula",
+    "ar": "‎‎سديم عين القط‎‎",
+    "zh": "猫眼星云",
+    "fi": "Kissansilmäsumu",
+    "fr": "Nébuleuse de l'Oeil de chat",
+    "de": "Katzenaugen-Nebel",
+    "it": "Nebulosa Occhio di Gatto",
+    "ja": "キャッツアイ星云",
+    "ko": "고양이 눈 성운",
+    "fa": "سحابی چشم گربه",
+    "es": "Nebulosa Ojo de Gato",
+    "ru": "Туманность Кошачий глаз",
+    "he": "ערפילית עין החתול"
+  },
+  "2MASXJ17583335+6637591": {
+    "name": "Cat's Eye Nebula",
+    "ar": "‎‎سديم عين القط‎‎",
+    "zh": "猫眼星云",
+    "fi": "Kissansilmäsumu",
+    "fr": "Nébuleuse de l'Oeil de chat",
+    "de": "Katzenaugen-Nebel",
+    "it": "Nebulosa Occhio di Gatto",
+    "ja": "キャッツアイ星云",
+    "ko": "고양이 눈 성운",
+    "fa": "سحابی چشم گربه",
+    "es": "Nebulosa Ojo de Gato",
+    "ru": "Туманность Кошачий глаз",
+    "he": "ערפילית עין החתול"
+  },
+  "C 006": {
+    "name": "Cat's Eye Nebula",
+    "ar": "‎‎سديم عين القط‎‎",
+    "zh": "猫眼星云",
+    "fi": "Kissansilmäsumu",
+    "fr": "Nébuleuse de l'Oeil de chat",
+    "de": "Katzenaugen-Nebel",
+    "it": "Nebulosa Occhio di Gatto",
+    "ja": "キャッツアイ星云",
+    "ko": "고양이 눈 성운",
+    "fa": "سحابی چشم گربه",
+    "es": "Nebulosa Ojo de Gato",
+    "ru": "Туманность Кошачий глаз",
+    "he": "ערפילית עין החתול"
+  },
+  "C006": {
+    "name": "Cat's Eye Nebula",
+    "ar": "‎‎سديم عين القط‎‎",
+    "zh": "猫眼星云",
+    "fi": "Kissansilmäsumu",
+    "fr": "Nébuleuse de l'Oeil de chat",
+    "de": "Katzenaugen-Nebel",
+    "it": "Nebulosa Occhio di Gatto",
+    "ja": "キャッツアイ星云",
+    "ko": "고양이 눈 성운",
+    "fa": "سحابی چشم گربه",
+    "es": "Nebulosa Ojo de Gato",
+    "ru": "Туманность Кошачий глаз",
+    "he": "ערפילית עין החתול"
+  },
+  "IRAS 17584+6638": {
+    "name": "Cat's Eye Nebula",
+    "ar": "‎‎سديم عين القط‎‎",
+    "zh": "猫眼星云",
+    "fi": "Kissansilmäsumu",
+    "fr": "Nébuleuse de l'Oeil de chat",
+    "de": "Katzenaugen-Nebel",
+    "it": "Nebulosa Occhio di Gatto",
+    "ja": "キャッツアイ星云",
+    "ko": "고양이 눈 성운",
+    "fa": "سحابی چشم گربه",
+    "es": "Nebulosa Ojo de Gato",
+    "ru": "Туманность Кошачий глаз",
+    "he": "ערפילית עין החתול"
+  },
+  "IRAS17584+6638": {
+    "name": "Cat's Eye Nebula",
+    "ar": "‎‎سديم عين القط‎‎",
+    "zh": "猫眼星云",
+    "fi": "Kissansilmäsumu",
+    "fr": "Nébuleuse de l'Oeil de chat",
+    "de": "Katzenaugen-Nebel",
+    "it": "Nebulosa Occhio di Gatto",
+    "ja": "キャッツアイ星云",
+    "ko": "고양이 눈 성운",
+    "fa": "سحابی چشم گربه",
+    "es": "Nebulosa Ojo de Gato",
+    "ru": "Туманность Кошачий глаз",
+    "he": "ערפילית עין החתול"
+  },
+  "PN G096.4+29.9": {
+    "name": "Cat's Eye Nebula",
+    "ar": "‎‎سديم عين القط‎‎",
+    "zh": "猫眼星云",
+    "fi": "Kissansilmäsumu",
+    "fr": "Nébuleuse de l'Oeil de chat",
+    "de": "Katzenaugen-Nebel",
+    "it": "Nebulosa Occhio di Gatto",
+    "ja": "キャッツアイ星云",
+    "ko": "고양이 눈 성운",
+    "fa": "سحابی چشم گربه",
+    "es": "Nebulosa Ojo de Gato",
+    "ru": "Туманность Кошачий глаз",
+    "he": "ערפילית עין החתול"
+  },
+  "PNG096.4+29.9": {
+    "name": "Cat's Eye Nebula",
+    "ar": "‎‎سديم عين القط‎‎",
+    "zh": "猫眼星云",
+    "fi": "Kissansilmäsumu",
+    "fr": "Nébuleuse de l'Oeil de chat",
+    "de": "Katzenaugen-Nebel",
+    "it": "Nebulosa Occhio di Gatto",
+    "ja": "キャッツアイ星云",
+    "ko": "고양이 눈 성운",
+    "fa": "سحابی چشم گربه",
+    "es": "Nebulosa Ojo de Gato",
+    "ru": "Туманность Кошачий глаз",
+    "he": "ערפילית עין החתול"
+  },
+  "Cat's Eye Nebula": {
+    "name": "Cat's Eye Nebula",
+    "ar": "‎‎سديم عين القط‎‎",
+    "zh": "猫眼星云",
+    "fi": "Kissansilmäsumu",
+    "fr": "Nébuleuse de l'Oeil de chat",
+    "de": "Katzenaugen-Nebel",
+    "it": "Nebulosa Occhio di Gatto",
+    "ja": "キャッツアイ星云",
+    "ko": "고양이 눈 성운",
+    "fa": "سحابی چشم گربه",
+    "es": "Nebulosa Ojo de Gato",
+    "ru": "Туманность Кошачий глаз",
+    "he": "ערפילית עין החתול"
+  },
+  "Cat'sEyeNebula": {
+    "name": "Cat's Eye Nebula",
+    "ar": "‎‎سديم عين القط‎‎",
+    "zh": "猫眼星云",
+    "fi": "Kissansilmäsumu",
+    "fr": "Nébuleuse de l'Oeil de chat",
+    "de": "Katzenaugen-Nebel",
+    "it": "Nebulosa Occhio di Gatto",
+    "ja": "キャッツアイ星云",
+    "ko": "고양이 눈 성운",
+    "fa": "سحابی چشم گربه",
+    "es": "Nebulosa Ojo de Gato",
+    "ru": "Туманность Кошачий глаз",
+    "he": "ערפילית עין החתול"
+  },
+  "C 7": {
+    "name": "NGC 2403"
+  },
+  "C7": {
+    "name": "NGC 2403"
+  },
+  "NGC 2403": {
+    "name": "NGC 2403"
+  },
+  "NGC2403": {
+    "name": "NGC 2403"
+  },
+  "2MASX J07365139+6536091": {
+    "name": "NGC 2403"
+  },
+  "2MASXJ07365139+6536091": {
+    "name": "NGC 2403"
+  },
+  "C 007": {
+    "name": "NGC 2403"
+  },
+  "C007": {
+    "name": "NGC 2403"
+  },
+  "IRAS 07321+6543": {
+    "name": "NGC 2403"
+  },
+  "IRAS07321+6543": {
+    "name": "NGC 2403"
+  },
+  "MCG +11-10-007": {
+    "name": "NGC 2403"
+  },
+  "MCG+11-10-007": {
+    "name": "NGC 2403"
+  },
+  "PGC 021396": {
+    "name": "NGC 2403"
+  },
+  "PGC021396": {
+    "name": "NGC 2403"
+  },
+  "UGC 03918": {
+    "name": "NGC 2403"
+  },
+  "UGC03918": {
+    "name": "NGC 2403"
+  },
+  "C 8": {
+    "name": "NGC 559"
+  },
+  "C8": {
+    "name": "NGC 559"
+  },
+  "NGC 559": {
+    "name": "NGC 559"
+  },
+  "NGC559": {
+    "name": "NGC 559"
+  },
+  "C 008": {
+    "name": "NGC 559"
+  },
+  "C008": {
+    "name": "NGC 559"
+  },
+  "MWSC 0122": {
+    "name": "NGC 559"
+  },
+  "MWSC0122": {
+    "name": "NGC 559"
+  },
+  "C 9": {
+    "name": "Sh2-155"
+  },
+  "C9": {
+    "name": "Sh2-155"
+  },
+  "Sh2-155": {
+    "name": "Sh2-155"
+  },
+  "C 10": {
+    "name": "Lawnmower Cluster",
+    "ar": "‎حشد آلة قص العشب‎",
+    "zh": "割草机星团",
+    "fi": "Ruohonleikkurijoukko",
+    "fr": "Amas de la Tondeuse à gazon",
+    "de": "Rasenmäher-Haufen",
+    "it": "Ammasso Tagliaerba",
+    "ko": "잔디깍기 성단",
+    "es": "Cúmulo Lawnmower",
+    "ru": "Скопление Газонокосилка"
+  },
+  "C10": {
+    "name": "Lawnmower Cluster",
+    "ar": "‎حشد آلة قص العشب‎",
+    "zh": "割草机星团",
+    "fi": "Ruohonleikkurijoukko",
+    "fr": "Amas de la Tondeuse à gazon",
+    "de": "Rasenmäher-Haufen",
+    "it": "Ammasso Tagliaerba",
+    "ko": "잔디깍기 성단",
+    "es": "Cúmulo Lawnmower",
+    "ru": "Скопление Газонокосилка"
+  },
+  "NGC663": {
+    "name": "Lawnmower Cluster",
+    "ar": "‎حشد آلة قص العشب‎",
+    "zh": "割草机星团",
+    "fi": "Ruohonleikkurijoukko",
+    "fr": "Amas de la Tondeuse à gazon",
+    "de": "Rasenmäher-Haufen",
+    "it": "Ammasso Tagliaerba",
+    "ko": "잔디깍기 성단",
+    "es": "Cúmulo Lawnmower",
+    "ru": "Скопление Газонокосилка"
+  },
+  "C 010": {
+    "name": "Lawnmower Cluster",
+    "ar": "‎حشد آلة قص العشب‎",
+    "zh": "割草机星团",
+    "fi": "Ruohonleikkurijoukko",
+    "fr": "Amas de la Tondeuse à gazon",
+    "de": "Rasenmäher-Haufen",
+    "it": "Ammasso Tagliaerba",
+    "ko": "잔디깍기 성단",
+    "es": "Cúmulo Lawnmower",
+    "ru": "Скопление Газонокосилка"
+  },
+  "C010": {
+    "name": "Lawnmower Cluster",
+    "ar": "‎حشد آلة قص العشب‎",
+    "zh": "割草机星团",
+    "fi": "Ruohonleikkurijoukko",
+    "fr": "Amas de la Tondeuse à gazon",
+    "de": "Rasenmäher-Haufen",
+    "it": "Ammasso Tagliaerba",
+    "ko": "잔디깍기 성단",
+    "es": "Cúmulo Lawnmower",
+    "ru": "Скопление Газонокосилка"
+  },
+  "MWSC 0139": {
+    "name": "Lawnmower Cluster",
+    "ar": "‎حشد آلة قص العشب‎",
+    "zh": "割草机星团",
+    "fi": "Ruohonleikkurijoukko",
+    "fr": "Amas de la Tondeuse à gazon",
+    "de": "Rasenmäher-Haufen",
+    "it": "Ammasso Tagliaerba",
+    "ko": "잔디깍기 성단",
+    "es": "Cúmulo Lawnmower",
+    "ru": "Скопление Газонокосилка"
+  },
+  "MWSC0139": {
+    "name": "Lawnmower Cluster",
+    "ar": "‎حشد آلة قص العشب‎",
+    "zh": "割草机星团",
+    "fi": "Ruohonleikkurijoukko",
+    "fr": "Amas de la Tondeuse à gazon",
+    "de": "Rasenmäher-Haufen",
+    "it": "Ammasso Tagliaerba",
+    "ko": "잔디깍기 성단",
+    "es": "Cúmulo Lawnmower",
+    "ru": "Скопление Газонокосилка"
+  },
+  "C 11": {
+    "name": "Bubble Nebula",
+    "ar": "‎سديم الفقاعة‎",
+    "zh": "气泡星云",
+    "fi": "Kuplasumu",
+    "fr": "Nébuleuse de la Bulle",
+    "de": "Blasen-Nebel",
+    "el": "Νεφέλωμα Φυσαλίδα",
+    "it": "Nebulosa bolla",
+    "ja": "バブル星云",
+    "ko": "버블 성운",
+    "fa": "سحابی حبابی",
+    "es": "Nebulosa de la Burbuja",
+    "ru": "Туманность Пузырь",
+    "tr": "Kabarcık Bulutsusu",
+    "he": "ערפילית הבועה"
+  },
+  "C11": {
+    "name": "Bubble Nebula",
+    "ar": "‎سديم الفقاعة‎",
+    "zh": "气泡星云",
+    "fi": "Kuplasumu",
+    "fr": "Nébuleuse de la Bulle",
+    "de": "Blasen-Nebel",
+    "el": "Νεφέλωμα Φυσαλίδα",
+    "it": "Nebulosa bolla",
+    "ja": "バブル星云",
+    "ko": "버블 성운",
+    "fa": "سحابی حبابی",
+    "es": "Nebulosa de la Burbuja",
+    "ru": "Туманность Пузырь",
+    "tr": "Kabarcık Bulutsusu",
+    "he": "ערפילית הבועה"
+  },
+  "NGC7635": {
+    "name": "Bubble Nebula",
+    "ar": "‎سديم الفقاعة‎",
+    "zh": "气泡星云",
+    "fi": "Kuplasumu",
+    "fr": "Nébuleuse de la Bulle",
+    "de": "Blasen-Nebel",
+    "el": "Νεφέλωμα Φυσαλίδα",
+    "it": "Nebulosa bolla",
+    "ja": "バブル星云",
+    "ko": "버블 성운",
+    "fa": "سحابی حبابی",
+    "es": "Nebulosa de la Burbuja",
+    "ru": "Туманность Пузырь",
+    "tr": "Kabarcık Bulutsusu",
+    "he": "ערפילית הבועה"
+  },
+  "C 011": {
+    "name": "Bubble Nebula",
+    "ar": "‎سديم الفقاعة‎",
+    "zh": "气泡星云",
+    "fi": "Kuplasumu",
+    "fr": "Nébuleuse de la Bulle",
+    "de": "Blasen-Nebel",
+    "el": "Νεφέλωμα Φυσαλίδα",
+    "it": "Nebulosa bolla",
+    "ja": "バブル星云",
+    "ko": "버블 성운",
+    "fa": "سحابی حبابی",
+    "es": "Nebulosa de la Burbuja",
+    "ru": "Туманность Пузырь",
+    "tr": "Kabarcık Bulutsusu",
+    "he": "ערפילית הבועה"
+  },
+  "C011": {
+    "name": "Bubble Nebula",
+    "ar": "‎سديم الفقاعة‎",
+    "zh": "气泡星云",
+    "fi": "Kuplasumu",
+    "fr": "Nébuleuse de la Bulle",
+    "de": "Blasen-Nebel",
+    "el": "Νεφέλωμα Φυσαλίδα",
+    "it": "Nebulosa bolla",
+    "ja": "バブル星云",
+    "ko": "버블 성운",
+    "fa": "سحابی حبابی",
+    "es": "Nebulosa de la Burbuja",
+    "ru": "Туманность Пузырь",
+    "tr": "Kabarcık Bulutsusu",
+    "he": "ערפילית הבועה"
+  },
+  "LBN 548": {
+    "name": "Bubble Nebula",
+    "ar": "‎سديم الفقاعة‎",
+    "zh": "气泡星云",
+    "fi": "Kuplasumu",
+    "fr": "Nébuleuse de la Bulle",
+    "de": "Blasen-Nebel",
+    "el": "Νεφέλωμα Φυσαλίδα",
+    "it": "Nebulosa bolla",
+    "ja": "バブル星云",
+    "ko": "버블 성운",
+    "fa": "سحابی حبابی",
+    "es": "Nebulosa de la Burbuja",
+    "ru": "Туманность Пузырь",
+    "tr": "Kabarcık Bulutsusu",
+    "he": "ערפילית הבועה"
+  },
+  "LBN548": {
+    "name": "Bubble Nebula",
+    "ar": "‎سديم الفقاعة‎",
+    "zh": "气泡星云",
+    "fi": "Kuplasumu",
+    "fr": "Nébuleuse de la Bulle",
+    "de": "Blasen-Nebel",
+    "el": "Νεφέλωμα Φυσαλίδα",
+    "it": "Nebulosa bolla",
+    "ja": "バブル星云",
+    "ko": "버블 성운",
+    "fa": "سحابی حبابی",
+    "es": "Nebulosa de la Burbuja",
+    "ru": "Туманность Пузырь",
+    "tr": "Kabarcık Bulutsusu",
+    "he": "ערפילית הבועה"
+  },
+  "Bubble Nebula": {
+    "name": "Bubble Nebula",
+    "ar": "‎سديم الفقاعة‎",
+    "zh": "气泡星云",
+    "fi": "Kuplasumu",
+    "fr": "Nébuleuse de la Bulle",
+    "de": "Blasen-Nebel",
+    "el": "Νεφέλωμα Φυσαλίδα",
+    "it": "Nebulosa bolla",
+    "ja": "バブル星云",
+    "ko": "버블 성운",
+    "fa": "سحابی حبابی",
+    "es": "Nebulosa de la Burbuja",
+    "ru": "Туманность Пузырь",
+    "tr": "Kabarcık Bulutsusu",
+    "he": "ערפילית הבועה"
+  },
+  "BubbleNebula": {
+    "name": "Bubble Nebula",
+    "ar": "‎سديم الفقاعة‎",
+    "zh": "气泡星云",
+    "fi": "Kuplasumu",
+    "fr": "Nébuleuse de la Bulle",
+    "de": "Blasen-Nebel",
+    "el": "Νεφέλωμα Φυσαλίδα",
+    "it": "Nebulosa bolla",
+    "ja": "バブル星云",
+    "ko": "버블 성운",
+    "fa": "سحابی حبابی",
+    "es": "Nebulosa de la Burbuja",
+    "ru": "Туманность Пузырь",
+    "tr": "Kabarcık Bulutsusu",
+    "he": "ערפילית הבועה"
+  },
+  "C 12": {
+    "name": "Fireworks Galaxy",
+    "ar": "‎‎مجرة الألعاب النارية‎‎",
+    "zh": "烟花星系",
+    "fi": "Ilotulitussumu",
+    "fr": "Galaxie du Feu d'artifice",
+    "de": "Feuerwerks-Galaxie",
+    "it": "Galassia Fuochi d'Artificio",
+    "ko": "불꽃놀이 은하",
+    "fa": "کهکشان آتش بازی",
+    "es": "Galaxia de los Fuegos Artificiales",
+    "ru": "Галактика Фейрверк"
+  },
+  "C12": {
+    "name": "Fireworks Galaxy",
+    "ar": "‎‎مجرة الألعاب النارية‎‎",
+    "zh": "烟花星系",
+    "fi": "Ilotulitussumu",
+    "fr": "Galaxie du Feu d'artifice",
+    "de": "Feuerwerks-Galaxie",
+    "it": "Galassia Fuochi d'Artificio",
+    "ko": "불꽃놀이 은하",
+    "fa": "کهکشان آتش بازی",
+    "es": "Galaxia de los Fuegos Artificiales",
+    "ru": "Галактика Фейрверк"
+  },
+  "NGC6946": {
+    "name": "Fireworks Galaxy",
+    "ar": "‎‎مجرة الألعاب النارية‎‎",
+    "zh": "烟花星系",
+    "fi": "Ilotulitussumu",
+    "fr": "Galaxie du Feu d'artifice",
+    "de": "Feuerwerks-Galaxie",
+    "it": "Galassia Fuochi d'Artificio",
+    "ko": "불꽃놀이 은하",
+    "fa": "کهکشان آتش بازی",
+    "es": "Galaxia de los Fuegos Artificiales",
+    "ru": "Галактика Фейрверк"
+  },
+  "2MASX J20345233+6009132": {
+    "name": "Fireworks Galaxy",
+    "ar": "‎‎مجرة الألعاب النارية‎‎",
+    "zh": "烟花星系",
+    "fi": "Ilotulitussumu",
+    "fr": "Galaxie du Feu d'artifice",
+    "de": "Feuerwerks-Galaxie",
+    "it": "Galassia Fuochi d'Artificio",
+    "ko": "불꽃놀이 은하",
+    "fa": "کهکشان آتش بازی",
+    "es": "Galaxia de los Fuegos Artificiales",
+    "ru": "Галактика Фейрверк"
+  },
+  "2MASXJ20345233+6009132": {
+    "name": "Fireworks Galaxy",
+    "ar": "‎‎مجرة الألعاب النارية‎‎",
+    "zh": "烟花星系",
+    "fi": "Ilotulitussumu",
+    "fr": "Galaxie du Feu d'artifice",
+    "de": "Feuerwerks-Galaxie",
+    "it": "Galassia Fuochi d'Artificio",
+    "ko": "불꽃놀이 은하",
+    "fa": "کهکشان آتش بازی",
+    "es": "Galaxia de los Fuegos Artificiales",
+    "ru": "Галактика Фейрверк"
+  },
+  "C 012": {
+    "name": "Fireworks Galaxy",
+    "ar": "‎‎مجرة الألعاب النارية‎‎",
+    "zh": "烟花星系",
+    "fi": "Ilotulitussumu",
+    "fr": "Galaxie du Feu d'artifice",
+    "de": "Feuerwerks-Galaxie",
+    "it": "Galassia Fuochi d'Artificio",
+    "ko": "불꽃놀이 은하",
+    "fa": "کهکشان آتش بازی",
+    "es": "Galaxia de los Fuegos Artificiales",
+    "ru": "Галактика Фейрверк"
+  },
+  "C012": {
+    "name": "Fireworks Galaxy",
+    "ar": "‎‎مجرة الألعاب النارية‎‎",
+    "zh": "烟花星系",
+    "fi": "Ilotulitussumu",
+    "fr": "Galaxie du Feu d'artifice",
+    "de": "Feuerwerks-Galaxie",
+    "it": "Galassia Fuochi d'Artificio",
+    "ko": "불꽃놀이 은하",
+    "fa": "کهکشان آتش بازی",
+    "es": "Galaxia de los Fuegos Artificiales",
+    "ru": "Галактика Фейрверк"
+  },
+  "IRAS 20338+5958": {
+    "name": "Fireworks Galaxy",
+    "ar": "‎‎مجرة الألعاب النارية‎‎",
+    "zh": "烟花星系",
+    "fi": "Ilotulitussumu",
+    "fr": "Galaxie du Feu d'artifice",
+    "de": "Feuerwerks-Galaxie",
+    "it": "Galassia Fuochi d'Artificio",
+    "ko": "불꽃놀이 은하",
+    "fa": "کهکشان آتش بازی",
+    "es": "Galaxia de los Fuegos Artificiales",
+    "ru": "Галактика Фейрверк"
+  },
+  "IRAS20338+5958": {
+    "name": "Fireworks Galaxy",
+    "ar": "‎‎مجرة الألعاب النارية‎‎",
+    "zh": "烟花星系",
+    "fi": "Ilotulitussumu",
+    "fr": "Galaxie du Feu d'artifice",
+    "de": "Feuerwerks-Galaxie",
+    "it": "Galassia Fuochi d'Artificio",
+    "ko": "불꽃놀이 은하",
+    "fa": "کهکشان آتش بازی",
+    "es": "Galaxia de los Fuegos Artificiales",
+    "ru": "Галактика Фейрверк"
+  },
+  "MCG +10-29-006": {
+    "name": "Fireworks Galaxy",
+    "ar": "‎‎مجرة الألعاب النارية‎‎",
+    "zh": "烟花星系",
+    "fi": "Ilotulitussumu",
+    "fr": "Galaxie du Feu d'artifice",
+    "de": "Feuerwerks-Galaxie",
+    "it": "Galassia Fuochi d'Artificio",
+    "ko": "불꽃놀이 은하",
+    "fa": "کهکشان آتش بازی",
+    "es": "Galaxia de los Fuegos Artificiales",
+    "ru": "Галактика Фейрверк"
+  },
+  "MCG+10-29-006": {
+    "name": "Fireworks Galaxy",
+    "ar": "‎‎مجرة الألعاب النارية‎‎",
+    "zh": "烟花星系",
+    "fi": "Ilotulitussumu",
+    "fr": "Galaxie du Feu d'artifice",
+    "de": "Feuerwerks-Galaxie",
+    "it": "Galassia Fuochi d'Artificio",
+    "ko": "불꽃놀이 은하",
+    "fa": "کهکشان آتش بازی",
+    "es": "Galaxia de los Fuegos Artificiales",
+    "ru": "Галактика Фейрверк"
+  },
+  "PGC 065001": {
+    "name": "Fireworks Galaxy",
+    "ar": "‎‎مجرة الألعاب النارية‎‎",
+    "zh": "烟花星系",
+    "fi": "Ilotulitussumu",
+    "fr": "Galaxie du Feu d'artifice",
+    "de": "Feuerwerks-Galaxie",
+    "it": "Galassia Fuochi d'Artificio",
+    "ko": "불꽃놀이 은하",
+    "fa": "کهکشان آتش بازی",
+    "es": "Galaxia de los Fuegos Artificiales",
+    "ru": "Галактика Фейрверк"
+  },
+  "PGC065001": {
+    "name": "Fireworks Galaxy",
+    "ar": "‎‎مجرة الألعاب النارية‎‎",
+    "zh": "烟花星系",
+    "fi": "Ilotulitussumu",
+    "fr": "Galaxie du Feu d'artifice",
+    "de": "Feuerwerks-Galaxie",
+    "it": "Galassia Fuochi d'Artificio",
+    "ko": "불꽃놀이 은하",
+    "fa": "کهکشان آتش بازی",
+    "es": "Galaxia de los Fuegos Artificiales",
+    "ru": "Галактика Фейрверк"
+  },
+  "UGC 11597": {
+    "name": "Fireworks Galaxy",
+    "ar": "‎‎مجرة الألعاب النارية‎‎",
+    "zh": "烟花星系",
+    "fi": "Ilotulitussumu",
+    "fr": "Galaxie du Feu d'artifice",
+    "de": "Feuerwerks-Galaxie",
+    "it": "Galassia Fuochi d'Artificio",
+    "ko": "불꽃놀이 은하",
+    "fa": "کهکشان آتش بازی",
+    "es": "Galaxia de los Fuegos Artificiales",
+    "ru": "Галактика Фейрверк"
+  },
+  "UGC11597": {
+    "name": "Fireworks Galaxy",
+    "ar": "‎‎مجرة الألعاب النارية‎‎",
+    "zh": "烟花星系",
+    "fi": "Ilotulitussumu",
+    "fr": "Galaxie du Feu d'artifice",
+    "de": "Feuerwerks-Galaxie",
+    "it": "Galassia Fuochi d'Artificio",
+    "ko": "불꽃놀이 은하",
+    "fa": "کهکشان آتش بازی",
+    "es": "Galaxia de los Fuegos Artificiales",
+    "ru": "Галактика Фейрверк"
+  },
+  "Fireworks Galaxy": {
+    "name": "Fireworks Galaxy",
+    "ar": "‎‎مجرة الألعاب النارية‎‎",
+    "zh": "烟花星系",
+    "fi": "Ilotulitussumu",
+    "fr": "Galaxie du Feu d'artifice",
+    "de": "Feuerwerks-Galaxie",
+    "it": "Galassia Fuochi d'Artificio",
+    "ko": "불꽃놀이 은하",
+    "fa": "کهکشان آتش بازی",
+    "es": "Galaxia de los Fuegos Artificiales",
+    "ru": "Галактика Фейрверк"
+  },
+  "FireworksGalaxy": {
+    "name": "Fireworks Galaxy",
+    "ar": "‎‎مجرة الألعاب النارية‎‎",
+    "zh": "烟花星系",
+    "fi": "Ilotulitussumu",
+    "fr": "Galaxie du Feu d'artifice",
+    "de": "Feuerwerks-Galaxie",
+    "it": "Galassia Fuochi d'Artificio",
+    "ko": "불꽃놀이 은하",
+    "fa": "کهکشان آتش بازی",
+    "es": "Galaxia de los Fuegos Artificiales",
+    "ru": "Галактика Фейрверк"
+  },
+  "C 13": {
+    "name": "Dragonfly Cluster",
+    "ar": "‎‎حشد اليعسوب‎‎",
+    "zh": "蜻蜓星团",
+    "fi": "Sudenkorentojoukko",
+    "fr": "Amas de la Libellule",
+    "de": "Libellen-Haufen",
+    "it": "Ammasso Libellula",
+    "ko": "잠자리 성단",
+    "fa": "خوشه سنجاقک",
+    "es": "Cúmulo de la Libélula",
+    "ru": "Скопление Стрекоза",
+    "tr": "Dragonfly Kümesi"
+  },
+  "C13": {
+    "name": "Dragonfly Cluster",
+    "ar": "‎‎حشد اليعسوب‎‎",
+    "zh": "蜻蜓星团",
+    "fi": "Sudenkorentojoukko",
+    "fr": "Amas de la Libellule",
+    "de": "Libellen-Haufen",
+    "it": "Ammasso Libellula",
+    "ko": "잠자리 성단",
+    "fa": "خوشه سنجاقک",
+    "es": "Cúmulo de la Libélula",
+    "ru": "Скопление Стрекоза",
+    "tr": "Dragonfly Kümesi"
+  },
+  "NGC457": {
+    "name": "Dragonfly Cluster",
+    "ar": "‎‎حشد اليعسوب‎‎",
+    "zh": "蜻蜓星团",
+    "fi": "Sudenkorentojoukko",
+    "fr": "Amas de la Libellule",
+    "de": "Libellen-Haufen",
+    "it": "Ammasso Libellula",
+    "ko": "잠자리 성단",
+    "fa": "خوشه سنجاقک",
+    "es": "Cúmulo de la Libélula",
+    "ru": "Скопление Стрекоза",
+    "tr": "Dragonfly Kümesi"
+  },
+  "C 013": {
+    "name": "Dragonfly Cluster",
+    "ar": "‎‎حشد اليعسوب‎‎",
+    "zh": "蜻蜓星团",
+    "fi": "Sudenkorentojoukko",
+    "fr": "Amas de la Libellule",
+    "de": "Libellen-Haufen",
+    "it": "Ammasso Libellula",
+    "ko": "잠자리 성단",
+    "fa": "خوشه سنجاقک",
+    "es": "Cúmulo de la Libélula",
+    "ru": "Скопление Стрекоза",
+    "tr": "Dragonfly Kümesi"
+  },
+  "C013": {
+    "name": "Dragonfly Cluster",
+    "ar": "‎‎حشد اليعسوب‎‎",
+    "zh": "蜻蜓星团",
+    "fi": "Sudenkorentojoukko",
+    "fr": "Amas de la Libellule",
+    "de": "Libellen-Haufen",
+    "it": "Ammasso Libellula",
+    "ko": "잠자리 성단",
+    "fa": "خوشه سنجاقک",
+    "es": "Cúmulo de la Libélula",
+    "ru": "Скопление Стрекоза",
+    "tr": "Dragonfly Kümesi"
+  },
+  "MWSC 0114": {
+    "name": "Dragonfly Cluster",
+    "ar": "‎‎حشد اليعسوب‎‎",
+    "zh": "蜻蜓星团",
+    "fi": "Sudenkorentojoukko",
+    "fr": "Amas de la Libellule",
+    "de": "Libellen-Haufen",
+    "it": "Ammasso Libellula",
+    "ko": "잠자리 성단",
+    "fa": "خوشه سنجاقک",
+    "es": "Cúmulo de la Libélula",
+    "ru": "Скопление Стрекоза",
+    "tr": "Dragonfly Kümesi"
+  },
+  "MWSC0114": {
+    "name": "Dragonfly Cluster",
+    "ar": "‎‎حشد اليعسوب‎‎",
+    "zh": "蜻蜓星团",
+    "fi": "Sudenkorentojoukko",
+    "fr": "Amas de la Libellule",
+    "de": "Libellen-Haufen",
+    "it": "Ammasso Libellula",
+    "ko": "잠자리 성단",
+    "fa": "خوشه سنجاقک",
+    "es": "Cúmulo de la Libélula",
+    "ru": "Скопление Стрекоза",
+    "tr": "Dragonfly Kümesi"
+  },
+  "Owl Cluster": {
+    "name": "Dragonfly Cluster",
+    "ar": "‎‎حشد اليعسوب‎‎",
+    "zh": "蜻蜓星团",
+    "fi": "Sudenkorentojoukko",
+    "fr": "Amas de la Libellule",
+    "de": "Libellen-Haufen",
+    "it": "Ammasso Libellula",
+    "ko": "잠자리 성단",
+    "fa": "خوشه سنجاقک",
+    "es": "Cúmulo de la Libélula",
+    "ru": "Скопление Стрекоза",
+    "tr": "Dragonfly Kümesi"
+  },
+  "OwlCluster": {
+    "name": "Dragonfly Cluster",
+    "ar": "‎‎حشد اليعسوب‎‎",
+    "zh": "蜻蜓星团",
+    "fi": "Sudenkorentojoukko",
+    "fr": "Amas de la Libellule",
+    "de": "Libellen-Haufen",
+    "it": "Ammasso Libellula",
+    "ko": "잠자리 성단",
+    "fa": "خوشه سنجاقک",
+    "es": "Cúmulo de la Libélula",
+    "ru": "Скопление Стрекоза",
+    "tr": "Dragonfly Kümesi"
+  },
+  "C 14": {
+    "name": "h Persei",
+    "zh": "英仙座",
+    "ja": "h",
+    "ko": "NGC 869",
+    "ru": "h Персея",
+    "he": "h בפרסאוס"
+  },
+  "C14": {
+    "name": "h Persei",
+    "zh": "英仙座",
+    "ja": "h",
+    "ko": "NGC 869",
+    "ru": "h Персея",
+    "he": "h בפרסאוס"
+  },
+  "NGC 869/NGC 884": {
+    "name": "h Persei",
+    "zh": "英仙座",
+    "ja": "h",
+    "ko": "NGC 869",
+    "ru": "h Персея",
+    "he": "h בפרסאוס"
+  },
+  "NGC869/NGC884": {
+    "name": "h Persei",
+    "zh": "英仙座",
+    "ja": "h",
+    "ko": "NGC 869",
+    "ru": "h Персея",
+    "he": "h בפרסאוס"
+  },
+  "NGC869": {
+    "name": "h Persei",
+    "zh": "英仙座",
+    "ja": "h",
+    "ko": "NGC 869",
+    "ru": "h Персея",
+    "he": "h בפרסאוס"
+  },
+  "NGC884": {
+    "name": "h Persei",
+    "zh": "英仙座",
+    "ja": "h",
+    "ko": "NGC 869",
+    "ru": "h Персея",
+    "he": "h בפרסאוס"
+  },
+  "C 15": {
+    "name": "Blinking Planetary Nebula",
+    "ar": "‎السديم الكوكبي المومض‎",
+    "zh": "眨眼行星状星云",
+    "de": "Blinkender Planetarischer Nebel",
+    "it": "Nebulosa Planetaria Intermittente",
+    "ko": "깜빡이는 행성상 성운",
+    "es": "Nebulosa Planetaria Parpadeante",
+    "ru": "Мигающая планетарная туманность"
+  },
+  "C15": {
+    "name": "Blinking Planetary Nebula",
+    "ar": "‎السديم الكوكبي المومض‎",
+    "zh": "眨眼行星状星云",
+    "de": "Blinkender Planetarischer Nebel",
+    "it": "Nebulosa Planetaria Intermittente",
+    "ko": "깜빡이는 행성상 성운",
+    "es": "Nebulosa Planetaria Parpadeante",
+    "ru": "Мигающая планетарная туманность"
+  },
+  "NGC6826": {
+    "name": "Blinking Planetary Nebula",
+    "ar": "‎السديم الكوكبي المومض‎",
+    "zh": "眨眼行星状星云",
+    "de": "Blinkender Planetarischer Nebel",
+    "it": "Nebulosa Planetaria Intermittente",
+    "ko": "깜빡이는 행성상 성운",
+    "es": "Nebulosa Planetaria Parpadeante",
+    "ru": "Мигающая планетарная туманность"
+  },
+  "2MASX J19444814+5031304": {
+    "name": "Blinking Planetary Nebula",
+    "ar": "‎السديم الكوكبي المومض‎",
+    "zh": "眨眼行星状星云",
+    "de": "Blinkender Planetarischer Nebel",
+    "it": "Nebulosa Planetaria Intermittente",
+    "ko": "깜빡이는 행성상 성운",
+    "es": "Nebulosa Planetaria Parpadeante",
+    "ru": "Мигающая планетарная туманность"
+  },
+  "2MASXJ19444814+5031304": {
+    "name": "Blinking Planetary Nebula",
+    "ar": "‎السديم الكوكبي المومض‎",
+    "zh": "眨眼行星状星云",
+    "de": "Blinkender Planetarischer Nebel",
+    "it": "Nebulosa Planetaria Intermittente",
+    "ko": "깜빡이는 행성상 성운",
+    "es": "Nebulosa Planetaria Parpadeante",
+    "ru": "Мигающая планетарная туманность"
+  },
+  "C 015": {
+    "name": "Blinking Planetary Nebula",
+    "ar": "‎السديم الكوكبي المومض‎",
+    "zh": "眨眼行星状星云",
+    "de": "Blinkender Planetarischer Nebel",
+    "it": "Nebulosa Planetaria Intermittente",
+    "ko": "깜빡이는 행성상 성운",
+    "es": "Nebulosa Planetaria Parpadeante",
+    "ru": "Мигающая планетарная туманность"
+  },
+  "C015": {
+    "name": "Blinking Planetary Nebula",
+    "ar": "‎السديم الكوكبي المومض‎",
+    "zh": "眨眼行星状星云",
+    "de": "Blinkender Planetarischer Nebel",
+    "it": "Nebulosa Planetaria Intermittente",
+    "ko": "깜빡이는 행성상 성운",
+    "es": "Nebulosa Planetaria Parpadeante",
+    "ru": "Мигающая планетарная туманность"
+  },
+  "IRAS 19434+5024": {
+    "name": "Blinking Planetary Nebula",
+    "ar": "‎السديم الكوكبي المومض‎",
+    "zh": "眨眼行星状星云",
+    "de": "Blinkender Planetarischer Nebel",
+    "it": "Nebulosa Planetaria Intermittente",
+    "ko": "깜빡이는 행성상 성운",
+    "es": "Nebulosa Planetaria Parpadeante",
+    "ru": "Мигающая планетарная туманность"
+  },
+  "IRAS19434+5024": {
+    "name": "Blinking Planetary Nebula",
+    "ar": "‎السديم الكوكبي المومض‎",
+    "zh": "眨眼行星状星云",
+    "de": "Blinkender Planetarischer Nebel",
+    "it": "Nebulosa Planetaria Intermittente",
+    "ko": "깜빡이는 행성상 성운",
+    "es": "Nebulosa Planetaria Parpadeante",
+    "ru": "Мигающая планетарная туманность"
+  },
+  "PN G083.5+12.7": {
+    "name": "Blinking Planetary Nebula",
+    "ar": "‎السديم الكوكبي المومض‎",
+    "zh": "眨眼行星状星云",
+    "de": "Blinkender Planetarischer Nebel",
+    "it": "Nebulosa Planetaria Intermittente",
+    "ko": "깜빡이는 행성상 성운",
+    "es": "Nebulosa Planetaria Parpadeante",
+    "ru": "Мигающая планетарная туманность"
+  },
+  "PNG083.5+12.7": {
+    "name": "Blinking Planetary Nebula",
+    "ar": "‎السديم الكوكبي المومض‎",
+    "zh": "眨眼行星状星云",
+    "de": "Blinkender Planetarischer Nebel",
+    "it": "Nebulosa Planetaria Intermittente",
+    "ko": "깜빡이는 행성상 성운",
+    "es": "Nebulosa Planetaria Parpadeante",
+    "ru": "Мигающая планетарная туманность"
+  },
+  "Blinking Planetary": {
+    "name": "Blinking Planetary Nebula",
+    "ar": "‎السديم الكوكبي المومض‎",
+    "zh": "眨眼行星状星云",
+    "de": "Blinkender Planetarischer Nebel",
+    "it": "Nebulosa Planetaria Intermittente",
+    "ko": "깜빡이는 행성상 성운",
+    "es": "Nebulosa Planetaria Parpadeante",
+    "ru": "Мигающая планетарная туманность"
+  },
+  "BlinkingPlanetary": {
+    "name": "Blinking Planetary Nebula",
+    "ar": "‎السديم الكوكبي المومض‎",
+    "zh": "眨眼行星状星云",
+    "de": "Blinkender Planetarischer Nebel",
+    "it": "Nebulosa Planetaria Intermittente",
+    "ko": "깜빡이는 행성상 성운",
+    "es": "Nebulosa Planetaria Parpadeante",
+    "ru": "Мигающая планетарная туманность"
+  },
+  "C 16": {
+    "name": "NGC 7243"
+  },
+  "C16": {
+    "name": "NGC 7243"
+  },
+  "NGC 7243": {
+    "name": "NGC 7243"
+  },
+  "NGC7243": {
+    "name": "NGC 7243"
+  },
+  "C 016": {
+    "name": "NGC 7243"
+  },
+  "C016": {
+    "name": "NGC 7243"
+  },
+  "MWSC 3602": {
+    "name": "NGC 7243"
+  },
+  "MWSC3602": {
+    "name": "NGC 7243"
+  },
+  "C 17": {
+    "name": "NGC 147"
+  },
+  "C17": {
+    "name": "NGC 147"
+  },
+  "NGC 147": {
+    "name": "NGC 147"
+  },
+  "NGC147": {
+    "name": "NGC 147"
+  },
+  "2MASX J00331212+4830314": {
+    "name": "NGC 147"
+  },
+  "2MASXJ00331212+4830314": {
+    "name": "NGC 147"
+  },
+  "C 017": {
+    "name": "NGC 147"
+  },
+  "C017": {
+    "name": "NGC 147"
+  },
+  "MCG +08-02-005": {
+    "name": "NGC 147"
+  },
+  "MCG+08-02-005": {
+    "name": "NGC 147"
+  },
+  "PGC 002004": {
+    "name": "NGC 147"
+  },
+  "PGC002004": {
+    "name": "NGC 147"
+  },
+  "UGC 00326": {
+    "name": "NGC 147"
+  },
+  "UGC00326": {
+    "name": "NGC 147"
+  },
+  "C 18": {
+    "name": "NGC 185"
+  },
+  "C18": {
+    "name": "NGC 185"
+  },
+  "NGC 185": {
+    "name": "NGC 185"
+  },
+  "NGC185": {
+    "name": "NGC 185"
+  },
+  "2MASX J00385796+4820145": {
+    "name": "NGC 185"
+  },
+  "2MASXJ00385796+4820145": {
+    "name": "NGC 185"
+  },
+  "C 018": {
+    "name": "NGC 185"
+  },
+  "C018": {
+    "name": "NGC 185"
+  },
+  "IRAS 00362+4803": {
+    "name": "NGC 185"
+  },
+  "IRAS00362+4803": {
+    "name": "NGC 185"
+  },
+  "MCG +08-02-010": {
+    "name": "NGC 185"
+  },
+  "MCG+08-02-010": {
+    "name": "NGC 185"
+  },
+  "PGC 002329": {
+    "name": "NGC 185"
+  },
+  "PGC002329": {
+    "name": "NGC 185"
+  },
+  "UGC 00396": {
+    "name": "NGC 185"
+  },
+  "UGC00396": {
+    "name": "NGC 185"
+  },
+  "C 19": {
+    "name": "Cocoon Nebula",
+    "ar": "‎سديم الشرنقة‎",
+    "zh": "茧星云",
+    "fi": "Kotelosumu",
+    "fr": "Nébuleuse du Cocon",
+    "de": "Kokon-Nebel",
+    "el": "Νεφέλωμα Κουκούλι",
+    "it": "Nebulosa bozzolo",
+    "ja": "まゆ星云",
+    "ko": "고치 성운",
+    "la": "Cocon Nebula",
+    "fa": "سحابی پیلۀ کرم ابریشم",
+    "es": "Nebulosa de la Cáscara",
+    "ru": "Туманность Кокон",
+    "tr": "Koza Bulutsusu"
+  },
+  "C19": {
+    "name": "Cocoon Nebula",
+    "ar": "‎سديم الشرنقة‎",
+    "zh": "茧星云",
+    "fi": "Kotelosumu",
+    "fr": "Nébuleuse du Cocon",
+    "de": "Kokon-Nebel",
+    "el": "Νεφέλωμα Κουκούλι",
+    "it": "Nebulosa bozzolo",
+    "ja": "まゆ星云",
+    "ko": "고치 성운",
+    "la": "Cocon Nebula",
+    "fa": "سحابی پیلۀ کرم ابریشم",
+    "es": "Nebulosa de la Cáscara",
+    "ru": "Туманность Кокон",
+    "tr": "Koza Bulutsusu"
+  },
+  "IC5146": {
+    "name": "Cocoon Nebula",
+    "ar": "‎سديم الشرنقة‎",
+    "zh": "茧星云",
+    "fi": "Kotelosumu",
+    "fr": "Nébuleuse du Cocon",
+    "de": "Kokon-Nebel",
+    "el": "Νεφέλωμα Κουκούλι",
+    "it": "Nebulosa bozzolo",
+    "ja": "まゆ星云",
+    "ko": "고치 성운",
+    "la": "Cocon Nebula",
+    "fa": "سحابی پیلۀ کرم ابریشم",
+    "es": "Nebulosa de la Cáscara",
+    "ru": "Туманность Кокон",
+    "tr": "Koza Bulutsusu"
+  },
+  "C 019": {
+    "name": "Cocoon Nebula",
+    "ar": "‎سديم الشرنقة‎",
+    "zh": "茧星云",
+    "fi": "Kotelosumu",
+    "fr": "Nébuleuse du Cocon",
+    "de": "Kokon-Nebel",
+    "el": "Νεφέλωμα Κουκούλι",
+    "it": "Nebulosa bozzolo",
+    "ja": "まゆ星云",
+    "ko": "고치 성운",
+    "la": "Cocon Nebula",
+    "fa": "سحابی پیلۀ کرم ابریشم",
+    "es": "Nebulosa de la Cáscara",
+    "ru": "Туманность Кокон",
+    "tr": "Koza Bulutsusu"
+  },
+  "C019": {
+    "name": "Cocoon Nebula",
+    "ar": "‎سديم الشرنقة‎",
+    "zh": "茧星云",
+    "fi": "Kotelosumu",
+    "fr": "Nébuleuse du Cocon",
+    "de": "Kokon-Nebel",
+    "el": "Νεφέλωμα Κουκούλι",
+    "it": "Nebulosa bozzolo",
+    "ja": "まゆ星云",
+    "ko": "고치 성운",
+    "la": "Cocon Nebula",
+    "fa": "سحابی پیلۀ کرم ابریشم",
+    "es": "Nebulosa de la Cáscara",
+    "ru": "Туманность Кокон",
+    "tr": "Koza Bulutsusu"
+  },
+  "LBN 424": {
+    "name": "Cocoon Nebula",
+    "ar": "‎سديم الشرنقة‎",
+    "zh": "茧星云",
+    "fi": "Kotelosumu",
+    "fr": "Nébuleuse du Cocon",
+    "de": "Kokon-Nebel",
+    "el": "Νεφέλωμα Κουκούλι",
+    "it": "Nebulosa bozzolo",
+    "ja": "まゆ星云",
+    "ko": "고치 성운",
+    "la": "Cocon Nebula",
+    "fa": "سحابی پیلۀ کرم ابریشم",
+    "es": "Nebulosa de la Cáscara",
+    "ru": "Туманность Кокон",
+    "tr": "Koza Bulutsusu"
+  },
+  "LBN424": {
+    "name": "Cocoon Nebula",
+    "ar": "‎سديم الشرنقة‎",
+    "zh": "茧星云",
+    "fi": "Kotelosumu",
+    "fr": "Nébuleuse du Cocon",
+    "de": "Kokon-Nebel",
+    "el": "Νεφέλωμα Κουκούλι",
+    "it": "Nebulosa bozzolo",
+    "ja": "まゆ星云",
+    "ko": "고치 성운",
+    "la": "Cocon Nebula",
+    "fa": "سحابی پیلۀ کرم ابریشم",
+    "es": "Nebulosa de la Cáscara",
+    "ru": "Туманность Кокон",
+    "tr": "Koza Bulutsusu"
+  },
+  "MWSC 3571": {
+    "name": "Cocoon Nebula",
+    "ar": "‎سديم الشرنقة‎",
+    "zh": "茧星云",
+    "fi": "Kotelosumu",
+    "fr": "Nébuleuse du Cocon",
+    "de": "Kokon-Nebel",
+    "el": "Νεφέλωμα Κουκούλι",
+    "it": "Nebulosa bozzolo",
+    "ja": "まゆ星云",
+    "ko": "고치 성운",
+    "la": "Cocon Nebula",
+    "fa": "سحابی پیلۀ کرم ابریشم",
+    "es": "Nebulosa de la Cáscara",
+    "ru": "Туманность Кокон",
+    "tr": "Koza Bulutsusu"
+  },
+  "MWSC3571": {
+    "name": "Cocoon Nebula",
+    "ar": "‎سديم الشرنقة‎",
+    "zh": "茧星云",
+    "fi": "Kotelosumu",
+    "fr": "Nébuleuse du Cocon",
+    "de": "Kokon-Nebel",
+    "el": "Νεφέλωμα Κουκούλι",
+    "it": "Nebulosa bozzolo",
+    "ja": "まゆ星云",
+    "ko": "고치 성운",
+    "la": "Cocon Nebula",
+    "fa": "سحابی پیلۀ کرم ابریشم",
+    "es": "Nebulosa de la Cáscara",
+    "ru": "Туманность Кокон",
+    "tr": "Koza Bulutsusu"
+  },
+  "Cocoon Nebula": {
+    "name": "Cocoon Nebula",
+    "ar": "‎سديم الشرنقة‎",
+    "zh": "茧星云",
+    "fi": "Kotelosumu",
+    "fr": "Nébuleuse du Cocon",
+    "de": "Kokon-Nebel",
+    "el": "Νεφέλωμα Κουκούλι",
+    "it": "Nebulosa bozzolo",
+    "ja": "まゆ星云",
+    "ko": "고치 성운",
+    "la": "Cocon Nebula",
+    "fa": "سحابی پیلۀ کرم ابریشم",
+    "es": "Nebulosa de la Cáscara",
+    "ru": "Туманность Кокон",
+    "tr": "Koza Bulutsusu"
+  },
+  "CocoonNebula": {
+    "name": "Cocoon Nebula",
+    "ar": "‎سديم الشرنقة‎",
+    "zh": "茧星云",
+    "fi": "Kotelosumu",
+    "fr": "Nébuleuse du Cocon",
+    "de": "Kokon-Nebel",
+    "el": "Νεφέλωμα Κουκούλι",
+    "it": "Nebulosa bozzolo",
+    "ja": "まゆ星云",
+    "ko": "고치 성운",
+    "la": "Cocon Nebula",
+    "fa": "سحابی پیلۀ کرم ابریشم",
+    "es": "Nebulosa de la Cáscara",
+    "ru": "Туманность Кокон",
+    "tr": "Koza Bulutsusu"
+  },
+  "C 20": {
+    "name": "North America Nebula",
+    "ar": "‎‎سديم أمريكا الشمالية‎‎",
+    "zh": "北美洲星云",
+    "fi": "Pohjois-Amerikka-sumu",
+    "fr": "Nébuleuse Amérique du Nord",
+    "de": "Nordamerika-Nebel",
+    "it": "Nebulosa Nord America",
+    "ja": "北アメリカ星云",
+    "ko": "북아메리카 성운",
+    "la": "America borealis nebula",
+    "fa": "سحابی آمریکای شمالی",
+    "es": "Nebulosa Norteamérica",
+    "ru": "Туманность Северная Америка"
+  },
+  "C20": {
+    "name": "North America Nebula",
+    "ar": "‎‎سديم أمريكا الشمالية‎‎",
+    "zh": "北美洲星云",
+    "fi": "Pohjois-Amerikka-sumu",
+    "fr": "Nébuleuse Amérique du Nord",
+    "de": "Nordamerika-Nebel",
+    "it": "Nebulosa Nord America",
+    "ja": "北アメリカ星云",
+    "ko": "북아메리카 성운",
+    "la": "America borealis nebula",
+    "fa": "سحابی آمریکای شمالی",
+    "es": "Nebulosa Norteamérica",
+    "ru": "Туманность Северная Америка"
+  },
+  "NGC7000": {
+    "name": "North America Nebula",
+    "ar": "‎‎سديم أمريكا الشمالية‎‎",
+    "zh": "北美洲星云",
+    "fi": "Pohjois-Amerikka-sumu",
+    "fr": "Nébuleuse Amérique du Nord",
+    "de": "Nordamerika-Nebel",
+    "it": "Nebulosa Nord America",
+    "ja": "北アメリカ星云",
+    "ko": "북아메리카 성운",
+    "la": "America borealis nebula",
+    "fa": "سحابی آمریکای شمالی",
+    "es": "Nebulosa Norteamérica",
+    "ru": "Туманность Северная Америка"
+  },
+  "C 020": {
+    "name": "North America Nebula",
+    "ar": "‎‎سديم أمريكا الشمالية‎‎",
+    "zh": "北美洲星云",
+    "fi": "Pohjois-Amerikka-sumu",
+    "fr": "Nébuleuse Amérique du Nord",
+    "de": "Nordamerika-Nebel",
+    "it": "Nebulosa Nord America",
+    "ja": "北アメリカ星云",
+    "ko": "북아메리카 성운",
+    "la": "America borealis nebula",
+    "fa": "سحابی آمریکای شمالی",
+    "es": "Nebulosa Norteamérica",
+    "ru": "Туманность Северная Америка"
+  },
+  "C020": {
+    "name": "North America Nebula",
+    "ar": "‎‎سديم أمريكا الشمالية‎‎",
+    "zh": "北美洲星云",
+    "fi": "Pohjois-Amerikka-sumu",
+    "fr": "Nébuleuse Amérique du Nord",
+    "de": "Nordamerika-Nebel",
+    "it": "Nebulosa Nord America",
+    "ja": "北アメリカ星云",
+    "ko": "북아메리카 성운",
+    "la": "America borealis nebula",
+    "fa": "سحابی آمریکای شمالی",
+    "es": "Nebulosa Norteamérica",
+    "ru": "Туманность Северная Америка"
+  },
+  "LBN 373": {
+    "name": "North America Nebula",
+    "ar": "‎‎سديم أمريكا الشمالية‎‎",
+    "zh": "北美洲星云",
+    "fi": "Pohjois-Amerikka-sumu",
+    "fr": "Nébuleuse Amérique du Nord",
+    "de": "Nordamerika-Nebel",
+    "it": "Nebulosa Nord America",
+    "ja": "北アメリカ星云",
+    "ko": "북아메리카 성운",
+    "la": "America borealis nebula",
+    "fa": "سحابی آمریکای شمالی",
+    "es": "Nebulosa Norteamérica",
+    "ru": "Туманность Северная Америка"
+  },
+  "LBN373": {
+    "name": "North America Nebula",
+    "ar": "‎‎سديم أمريكا الشمالية‎‎",
+    "zh": "北美洲星云",
+    "fi": "Pohjois-Amerikka-sumu",
+    "fr": "Nébuleuse Amérique du Nord",
+    "de": "Nordamerika-Nebel",
+    "it": "Nebulosa Nord America",
+    "ja": "北アメリカ星云",
+    "ko": "북아메리카 성운",
+    "la": "America borealis nebula",
+    "fa": "سحابی آمریکای شمالی",
+    "es": "Nebulosa Norteamérica",
+    "ru": "Туманность Северная Америка"
+  },
+  "North America Nebula": {
+    "name": "North America Nebula",
+    "ar": "‎‎سديم أمريكا الشمالية‎‎",
+    "zh": "北美洲星云",
+    "fi": "Pohjois-Amerikka-sumu",
+    "fr": "Nébuleuse Amérique du Nord",
+    "de": "Nordamerika-Nebel",
+    "it": "Nebulosa Nord America",
+    "ja": "北アメリカ星云",
+    "ko": "북아메리카 성운",
+    "la": "America borealis nebula",
+    "fa": "سحابی آمریکای شمالی",
+    "es": "Nebulosa Norteamérica",
+    "ru": "Туманность Северная Америка"
+  },
+  "NorthAmericaNebula": {
+    "name": "North America Nebula",
+    "ar": "‎‎سديم أمريكا الشمالية‎‎",
+    "zh": "北美洲星云",
+    "fi": "Pohjois-Amerikka-sumu",
+    "fr": "Nébuleuse Amérique du Nord",
+    "de": "Nordamerika-Nebel",
+    "it": "Nebulosa Nord America",
+    "ja": "北アメリカ星云",
+    "ko": "북아메리카 성운",
+    "la": "America borealis nebula",
+    "fa": "سحابی آمریکای شمالی",
+    "es": "Nebulosa Norteamérica",
+    "ru": "Туманность Северная Америка"
+  },
+  "C 21": {
+    "name": "SDSS J122811.10+440537.0"
+  },
+  "C21": {
+    "name": "SDSS J122811.10+440537.0"
+  },
+  "NGC 4449": {
+    "name": "SDSS J122811.10+440537.0"
+  },
+  "NGC4449": {
+    "name": "SDSS J122811.10+440537.0"
+  },
+  "2MASX J12281111+4405368": {
+    "name": "SDSS J122811.10+440537.0"
+  },
+  "2MASXJ12281111+4405368": {
+    "name": "SDSS J122811.10+440537.0"
+  },
+  "C 021": {
+    "name": "SDSS J122811.10+440537.0"
+  },
+  "C021": {
+    "name": "SDSS J122811.10+440537.0"
+  },
+  "MCG +07-26-009": {
+    "name": "SDSS J122811.10+440537.0"
+  },
+  "MCG+07-26-009": {
+    "name": "SDSS J122811.10+440537.0"
+  },
+  "PGC 040973": {
+    "name": "SDSS J122811.10+440537.0"
+  },
+  "PGC040973": {
+    "name": "SDSS J122811.10+440537.0"
+  },
+  "SDSS J122811.10+440537.0": {
+    "name": "SDSS J122811.10+440537.0"
+  },
+  "SDSSJ122811.10+440537.0": {
+    "name": "SDSS J122811.10+440537.0"
+  },
+  "UGC 07592": {
+    "name": "SDSS J122811.10+440537.0"
+  },
+  "UGC07592": {
+    "name": "SDSS J122811.10+440537.0"
+  },
+  "C 22": {
+    "name": "Blue Snowball",
+    "ar": "‎‎كرة الثلج الزرقاء‎‎",
+    "zh": "蓝雪球星云",
+    "fi": "Sininen lumipallo",
+    "fr": "Boule de neige bleue",
+    "de": "Blauer Schneeball",
+    "el": "Μπλε Χιονόμπαλα",
+    "it": "Palla di neve blu",
+    "ja": "青い雪だるま",
+    "ko": "푸른 눈덩이",
+    "hi": "ब्लू स्नोबाल",
+    "fa": "گلوله‌برفی آبی",
+    "es": "Bola de nieve azul",
+    "ru": "Голубой снежок",
+    "tr": "Mavi Kartopu"
+  },
+  "C22": {
+    "name": "Blue Snowball",
+    "ar": "‎‎كرة الثلج الزرقاء‎‎",
+    "zh": "蓝雪球星云",
+    "fi": "Sininen lumipallo",
+    "fr": "Boule de neige bleue",
+    "de": "Blauer Schneeball",
+    "el": "Μπλε Χιονόμπαλα",
+    "it": "Palla di neve blu",
+    "ja": "青い雪だるま",
+    "ko": "푸른 눈덩이",
+    "hi": "ब्लू स्नोबाल",
+    "fa": "گلوله‌برفی آبی",
+    "es": "Bola de nieve azul",
+    "ru": "Голубой снежок",
+    "tr": "Mavi Kartopu"
+  },
+  "NGC7662": {
+    "name": "Blue Snowball",
+    "ar": "‎‎كرة الثلج الزرقاء‎‎",
+    "zh": "蓝雪球星云",
+    "fi": "Sininen lumipallo",
+    "fr": "Boule de neige bleue",
+    "de": "Blauer Schneeball",
+    "el": "Μπλε Χιονόμπαλα",
+    "it": "Palla di neve blu",
+    "ja": "青い雪だるま",
+    "ko": "푸른 눈덩이",
+    "hi": "ब्लू स्नोबाल",
+    "fa": "گلوله‌برفی آبی",
+    "es": "Bola de nieve azul",
+    "ru": "Голубой снежок",
+    "tr": "Mavi Kartopu"
+  },
+  "2MASX J23255415+4232111": {
+    "name": "Blue Snowball",
+    "ar": "‎‎كرة الثلج الزرقاء‎‎",
+    "zh": "蓝雪球星云",
+    "fi": "Sininen lumipallo",
+    "fr": "Boule de neige bleue",
+    "de": "Blauer Schneeball",
+    "el": "Μπλε Χιονόμπαλα",
+    "it": "Palla di neve blu",
+    "ja": "青い雪だるま",
+    "ko": "푸른 눈덩이",
+    "hi": "ब्लू स्नोबाल",
+    "fa": "گلوله‌برفی آبی",
+    "es": "Bola de nieve azul",
+    "ru": "Голубой снежок",
+    "tr": "Mavi Kartopu"
+  },
+  "2MASXJ23255415+4232111": {
+    "name": "Blue Snowball",
+    "ar": "‎‎كرة الثلج الزرقاء‎‎",
+    "zh": "蓝雪球星云",
+    "fi": "Sininen lumipallo",
+    "fr": "Boule de neige bleue",
+    "de": "Blauer Schneeball",
+    "el": "Μπλε Χιονόμπαλα",
+    "it": "Palla di neve blu",
+    "ja": "青い雪だるま",
+    "ko": "푸른 눈덩이",
+    "hi": "ब्लू स्नोबाल",
+    "fa": "گلوله‌برفی آبی",
+    "es": "Bola de nieve azul",
+    "ru": "Голубой снежок",
+    "tr": "Mavi Kartopu"
+  },
+  "C 022": {
+    "name": "Blue Snowball",
+    "ar": "‎‎كرة الثلج الزرقاء‎‎",
+    "zh": "蓝雪球星云",
+    "fi": "Sininen lumipallo",
+    "fr": "Boule de neige bleue",
+    "de": "Blauer Schneeball",
+    "el": "Μπλε Χιονόμπαλα",
+    "it": "Palla di neve blu",
+    "ja": "青い雪だるま",
+    "ko": "푸른 눈덩이",
+    "hi": "ब्लू स्नोबाल",
+    "fa": "گلوله‌برفی آبی",
+    "es": "Bola de nieve azul",
+    "ru": "Голубой снежок",
+    "tr": "Mavi Kartopu"
+  },
+  "C022": {
+    "name": "Blue Snowball",
+    "ar": "‎‎كرة الثلج الزرقاء‎‎",
+    "zh": "蓝雪球星云",
+    "fi": "Sininen lumipallo",
+    "fr": "Boule de neige bleue",
+    "de": "Blauer Schneeball",
+    "el": "Μπλε Χιονόμπαλα",
+    "it": "Palla di neve blu",
+    "ja": "青い雪だるま",
+    "ko": "푸른 눈덩이",
+    "hi": "ब्लू स्नोबाल",
+    "fa": "گلوله‌برفی آبی",
+    "es": "Bola de nieve azul",
+    "ru": "Голубой снежок",
+    "tr": "Mavi Kartopu"
+  },
+  "IRAS 23234+4215": {
+    "name": "Blue Snowball",
+    "ar": "‎‎كرة الثلج الزرقاء‎‎",
+    "zh": "蓝雪球星云",
+    "fi": "Sininen lumipallo",
+    "fr": "Boule de neige bleue",
+    "de": "Blauer Schneeball",
+    "el": "Μπλε Χιονόμπαλα",
+    "it": "Palla di neve blu",
+    "ja": "青い雪だるま",
+    "ko": "푸른 눈덩이",
+    "hi": "ब्लू स्नोबाल",
+    "fa": "گلوله‌برفی آبی",
+    "es": "Bola de nieve azul",
+    "ru": "Голубой снежок",
+    "tr": "Mavi Kartopu"
+  },
+  "IRAS23234+4215": {
+    "name": "Blue Snowball",
+    "ar": "‎‎كرة الثلج الزرقاء‎‎",
+    "zh": "蓝雪球星云",
+    "fi": "Sininen lumipallo",
+    "fr": "Boule de neige bleue",
+    "de": "Blauer Schneeball",
+    "el": "Μπλε Χιονόμπαλα",
+    "it": "Palla di neve blu",
+    "ja": "青い雪だるま",
+    "ko": "푸른 눈덩이",
+    "hi": "ब्लू स्नोबाल",
+    "fa": "گلوله‌برفی آبی",
+    "es": "Bola de nieve azul",
+    "ru": "Голубой снежок",
+    "tr": "Mavi Kartopu"
+  },
+  "PN G106.5-17.6": {
+    "name": "Blue Snowball",
+    "ar": "‎‎كرة الثلج الزرقاء‎‎",
+    "zh": "蓝雪球星云",
+    "fi": "Sininen lumipallo",
+    "fr": "Boule de neige bleue",
+    "de": "Blauer Schneeball",
+    "el": "Μπλε Χιονόμπαλα",
+    "it": "Palla di neve blu",
+    "ja": "青い雪だるま",
+    "ko": "푸른 눈덩이",
+    "hi": "ब्लू स्नोबाल",
+    "fa": "گلوله‌برفی آبی",
+    "es": "Bola de nieve azul",
+    "ru": "Голубой снежок",
+    "tr": "Mavi Kartopu"
+  },
+  "PNG106.5-17.6": {
+    "name": "Blue Snowball",
+    "ar": "‎‎كرة الثلج الزرقاء‎‎",
+    "zh": "蓝雪球星云",
+    "fi": "Sininen lumipallo",
+    "fr": "Boule de neige bleue",
+    "de": "Blauer Schneeball",
+    "el": "Μπλε Χιονόμπαλα",
+    "it": "Palla di neve blu",
+    "ja": "青い雪だるま",
+    "ko": "푸른 눈덩이",
+    "hi": "ब्लू स्नोबाल",
+    "fa": "گلوله‌برفی آبی",
+    "es": "Bola de nieve azul",
+    "ru": "Голубой снежок",
+    "tr": "Mavi Kartopu"
+  },
+  "Copeland's Blue Snowball": {
+    "name": "Blue Snowball",
+    "ar": "‎‎كرة الثلج الزرقاء‎‎",
+    "zh": "蓝雪球星云",
+    "fi": "Sininen lumipallo",
+    "fr": "Boule de neige bleue",
+    "de": "Blauer Schneeball",
+    "el": "Μπλε Χιονόμπαλα",
+    "it": "Palla di neve blu",
+    "ja": "青い雪だるま",
+    "ko": "푸른 눈덩이",
+    "hi": "ब्लू स्नोबाल",
+    "fa": "گلوله‌برفی آبی",
+    "es": "Bola de nieve azul",
+    "ru": "Голубой снежок",
+    "tr": "Mavi Kartopu"
+  },
+  "Copeland'sBlueSnowball": {
+    "name": "Blue Snowball",
+    "ar": "‎‎كرة الثلج الزرقاء‎‎",
+    "zh": "蓝雪球星云",
+    "fi": "Sininen lumipallo",
+    "fr": "Boule de neige bleue",
+    "de": "Blauer Schneeball",
+    "el": "Μπλε Χιονόμπαλα",
+    "it": "Palla di neve blu",
+    "ja": "青い雪だるま",
+    "ko": "푸른 눈덩이",
+    "hi": "ब्लू स्नोबाल",
+    "fa": "گلوله‌برفی آبی",
+    "es": "Bola de nieve azul",
+    "ru": "Голубой снежок",
+    "tr": "Mavi Kartopu"
+  },
+  "C 23": {
+    "name": "NGC 891"
+  },
+  "C23": {
+    "name": "NGC 891"
+  },
+  "NGC 891": {
+    "name": "NGC 891"
+  },
+  "NGC891": {
+    "name": "NGC 891"
+  },
+  "2MASX J02223290+4220539": {
+    "name": "NGC 891"
+  },
+  "2MASXJ02223290+4220539": {
+    "name": "NGC 891"
+  },
+  "C 023": {
+    "name": "NGC 891"
+  },
+  "C023": {
+    "name": "NGC 891"
+  },
+  "IRAS 02193+4207": {
+    "name": "NGC 891"
+  },
+  "IRAS02193+4207": {
+    "name": "NGC 891"
+  },
+  "MCG +07-05-046": {
+    "name": "NGC 891"
+  },
+  "MCG+07-05-046": {
+    "name": "NGC 891"
+  },
+  "PGC 009031": {
+    "name": "NGC 891"
+  },
+  "PGC009031": {
+    "name": "NGC 891"
+  },
+  "UGC 01831": {
+    "name": "NGC 891"
+  },
+  "UGC01831": {
+    "name": "NGC 891"
+  },
+  "C 24": {
+    "name": "Perseus A",
+    "ar": "‎‎برشاوش ا‎‎",
+    "zh": "英仙座",
+    "fr": "Perseus A",
+    "el": "Περσέας Α",
+    "ja": "ペルセウス座A",
+    "ko": "페가수스 알파",
+    "fa": "پرساوش A",
+    "es": "Perseo A",
+    "ru": "Персей А",
+    "tr": "Kahraman A"
+  },
+  "C24": {
+    "name": "Perseus A",
+    "ar": "‎‎برشاوش ا‎‎",
+    "zh": "英仙座",
+    "fr": "Perseus A",
+    "el": "Περσέας Α",
+    "ja": "ペルセウス座A",
+    "ko": "페가수스 알파",
+    "fa": "پرساوش A",
+    "es": "Perseo A",
+    "ru": "Персей А",
+    "tr": "Kahraman A"
+  },
+  "NGC1275": {
+    "name": "Perseus A",
+    "ar": "‎‎برشاوش ا‎‎",
+    "zh": "英仙座",
+    "fr": "Perseus A",
+    "el": "Περσέας Α",
+    "ja": "ペルセウス座A",
+    "ko": "페가수스 알파",
+    "fa": "پرساوش A",
+    "es": "Perseo A",
+    "ru": "Персей А",
+    "tr": "Kahraman A"
+  },
+  "2MASX J03194823+4130420": {
+    "name": "Perseus A",
+    "ar": "‎‎برشاوش ا‎‎",
+    "zh": "英仙座",
+    "fr": "Perseus A",
+    "el": "Περσέας Α",
+    "ja": "ペルセウス座A",
+    "ko": "페가수스 알파",
+    "fa": "پرساوش A",
+    "es": "Perseo A",
+    "ru": "Персей А",
+    "tr": "Kahraman A"
+  },
+  "2MASXJ03194823+4130420": {
+    "name": "Perseus A",
+    "ar": "‎‎برشاوش ا‎‎",
+    "zh": "英仙座",
+    "fr": "Perseus A",
+    "el": "Περσέας Α",
+    "ja": "ペルセウス座A",
+    "ko": "페가수스 알파",
+    "fa": "پرساوش A",
+    "es": "Perseo A",
+    "ru": "Персей А",
+    "tr": "Kahraman A"
+  },
+  "C 024": {
+    "name": "Perseus A",
+    "ar": "‎‎برشاوش ا‎‎",
+    "zh": "英仙座",
+    "fr": "Perseus A",
+    "el": "Περσέας Α",
+    "ja": "ペルセウス座A",
+    "ko": "페가수스 알파",
+    "fa": "پرساوش A",
+    "es": "Perseo A",
+    "ru": "Персей А",
+    "tr": "Kahraman A"
+  },
+  "C024": {
+    "name": "Perseus A",
+    "ar": "‎‎برشاوش ا‎‎",
+    "zh": "英仙座",
+    "fr": "Perseus A",
+    "el": "Περσέας Α",
+    "ja": "ペルセウス座A",
+    "ko": "페가수스 알파",
+    "fa": "پرساوش A",
+    "es": "Perseo A",
+    "ru": "Персей А",
+    "tr": "Kahraman A"
+  },
+  "IRAS 03164+4119": {
+    "name": "Perseus A",
+    "ar": "‎‎برشاوش ا‎‎",
+    "zh": "英仙座",
+    "fr": "Perseus A",
+    "el": "Περσέας Α",
+    "ja": "ペルセウス座A",
+    "ko": "페가수스 알파",
+    "fa": "پرساوش A",
+    "es": "Perseo A",
+    "ru": "Персей А",
+    "tr": "Kahraman A"
+  },
+  "IRAS03164+4119": {
+    "name": "Perseus A",
+    "ar": "‎‎برشاوش ا‎‎",
+    "zh": "英仙座",
+    "fr": "Perseus A",
+    "el": "Περσέας Α",
+    "ja": "ペルセウス座A",
+    "ko": "페가수스 알파",
+    "fa": "پرساوش A",
+    "es": "Perseo A",
+    "ru": "Персей А",
+    "tr": "Kahraman A"
+  },
+  "MCG +07-07-063": {
+    "name": "Perseus A",
+    "ar": "‎‎برشاوش ا‎‎",
+    "zh": "英仙座",
+    "fr": "Perseus A",
+    "el": "Περσέας Α",
+    "ja": "ペルセウス座A",
+    "ko": "페가수스 알파",
+    "fa": "پرساوش A",
+    "es": "Perseo A",
+    "ru": "Персей А",
+    "tr": "Kahraman A"
+  },
+  "MCG+07-07-063": {
+    "name": "Perseus A",
+    "ar": "‎‎برشاوش ا‎‎",
+    "zh": "英仙座",
+    "fr": "Perseus A",
+    "el": "Περσέας Α",
+    "ja": "ペルセウス座A",
+    "ko": "페가수스 알파",
+    "fa": "پرساوش A",
+    "es": "Perseo A",
+    "ru": "Персей А",
+    "tr": "Kahraman A"
+  },
+  "PGC 012429": {
+    "name": "Perseus A",
+    "ar": "‎‎برشاوش ا‎‎",
+    "zh": "英仙座",
+    "fr": "Perseus A",
+    "el": "Περσέας Α",
+    "ja": "ペルセウス座A",
+    "ko": "페가수스 알파",
+    "fa": "پرساوش A",
+    "es": "Perseo A",
+    "ru": "Персей А",
+    "tr": "Kahraman A"
+  },
+  "PGC012429": {
+    "name": "Perseus A",
+    "ar": "‎‎برشاوش ا‎‎",
+    "zh": "英仙座",
+    "fr": "Perseus A",
+    "el": "Περσέας Α",
+    "ja": "ペルセウス座A",
+    "ko": "페가수스 알파",
+    "fa": "پرساوش A",
+    "es": "Perseo A",
+    "ru": "Персей А",
+    "tr": "Kahraman A"
+  },
+  "SDSS J031948.15+413042.1": {
+    "name": "Perseus A",
+    "ar": "‎‎برشاوش ا‎‎",
+    "zh": "英仙座",
+    "fr": "Perseus A",
+    "el": "Περσέας Α",
+    "ja": "ペルセウス座A",
+    "ko": "페가수스 알파",
+    "fa": "پرساوش A",
+    "es": "Perseo A",
+    "ru": "Персей А",
+    "tr": "Kahraman A"
+  },
+  "SDSSJ031948.15+413042.1": {
+    "name": "Perseus A",
+    "ar": "‎‎برشاوش ا‎‎",
+    "zh": "英仙座",
+    "fr": "Perseus A",
+    "el": "Περσέας Α",
+    "ja": "ペルセウス座A",
+    "ko": "페가수스 알파",
+    "fa": "پرساوش A",
+    "es": "Perseo A",
+    "ru": "Персей А",
+    "tr": "Kahraman A"
+  },
+  "UGC 02669": {
+    "name": "Perseus A",
+    "ar": "‎‎برشاوش ا‎‎",
+    "zh": "英仙座",
+    "fr": "Perseus A",
+    "el": "Περσέας Α",
+    "ja": "ペルセウス座A",
+    "ko": "페가수스 알파",
+    "fa": "پرساوش A",
+    "es": "Perseo A",
+    "ru": "Персей А",
+    "tr": "Kahraman A"
+  },
+  "UGC02669": {
+    "name": "Perseus A",
+    "ar": "‎‎برشاوش ا‎‎",
+    "zh": "英仙座",
+    "fr": "Perseus A",
+    "el": "Περσέας Α",
+    "ja": "ペルセウス座A",
+    "ko": "페가수스 알파",
+    "fa": "پرساوش A",
+    "es": "Perseo A",
+    "ru": "Персей А",
+    "tr": "Kahraman A"
+  },
+  "Perseus A": {
+    "name": "Perseus A",
+    "ar": "‎‎برشاوش ا‎‎",
+    "zh": "英仙座",
+    "fr": "Perseus A",
+    "el": "Περσέας Α",
+    "ja": "ペルセウス座A",
+    "ko": "페가수스 알파",
+    "fa": "پرساوش A",
+    "es": "Perseo A",
+    "ru": "Персей А",
+    "tr": "Kahraman A"
+  },
+  "PerseusA": {
+    "name": "Perseus A",
+    "ar": "‎‎برشاوش ا‎‎",
+    "zh": "英仙座",
+    "fr": "Perseus A",
+    "el": "Περσέας Α",
+    "ja": "ペルセウス座A",
+    "ko": "페가수스 알파",
+    "fa": "پرساوش A",
+    "es": "Perseo A",
+    "ru": "Персей А",
+    "tr": "Kahraman A"
+  },
+  "C 25": {
+    "name": "Intergalactic Wanderer",
+    "ar": "المتجول بين المجرات",
+    "zh": "漫游者星团",
+    "fi": "Galaksienvälinen vaeltaja",
+    "fr": "Vagabond intergalactique",
+    "de": "Intergalaktischer Wanderer",
+    "ko": "은하 사이의 방랑자",
+    "es": "Vagabundo Intergaláctico",
+    "ru": "Межгалактический странник"
+  },
+  "C25": {
+    "name": "Intergalactic Wanderer",
+    "ar": "المتجول بين المجرات",
+    "zh": "漫游者星团",
+    "fi": "Galaksienvälinen vaeltaja",
+    "fr": "Vagabond intergalactique",
+    "de": "Intergalaktischer Wanderer",
+    "ko": "은하 사이의 방랑자",
+    "es": "Vagabundo Intergaláctico",
+    "ru": "Межгалактический странник"
+  },
+  "NGC2419": {
+    "name": "Intergalactic Wanderer",
+    "ar": "المتجول بين المجرات",
+    "zh": "漫游者星团",
+    "fi": "Galaksienvälinen vaeltaja",
+    "fr": "Vagabond intergalactique",
+    "de": "Intergalaktischer Wanderer",
+    "ko": "은하 사이의 방랑자",
+    "es": "Vagabundo Intergaláctico",
+    "ru": "Межгалактический странник"
+  },
+  "2MASX J07380795+3852479": {
+    "name": "Intergalactic Wanderer",
+    "ar": "المتجول بين المجرات",
+    "zh": "漫游者星团",
+    "fi": "Galaksienvälinen vaeltaja",
+    "fr": "Vagabond intergalactique",
+    "de": "Intergalaktischer Wanderer",
+    "ko": "은하 사이의 방랑자",
+    "es": "Vagabundo Intergaláctico",
+    "ru": "Межгалактический странник"
+  },
+  "2MASXJ07380795+3852479": {
+    "name": "Intergalactic Wanderer",
+    "ar": "المتجول بين المجرات",
+    "zh": "漫游者星团",
+    "fi": "Galaksienvälinen vaeltaja",
+    "fr": "Vagabond intergalactique",
+    "de": "Intergalaktischer Wanderer",
+    "ko": "은하 사이의 방랑자",
+    "es": "Vagabundo Intergaláctico",
+    "ru": "Межгалактический странник"
+  },
+  "C 025": {
+    "name": "Intergalactic Wanderer",
+    "ar": "المتجول بين المجرات",
+    "zh": "漫游者星团",
+    "fi": "Galaksienvälinen vaeltaja",
+    "fr": "Vagabond intergalactique",
+    "de": "Intergalaktischer Wanderer",
+    "ko": "은하 사이의 방랑자",
+    "es": "Vagabundo Intergaláctico",
+    "ru": "Межгалактический странник"
+  },
+  "C025": {
+    "name": "Intergalactic Wanderer",
+    "ar": "المتجول بين المجرات",
+    "zh": "漫游者星团",
+    "fi": "Galaksienvälinen vaeltaja",
+    "fr": "Vagabond intergalactique",
+    "de": "Intergalaktischer Wanderer",
+    "ko": "은하 사이의 방랑자",
+    "es": "Vagabundo Intergaláctico",
+    "ru": "Межгалактический странник"
+  },
+  "MWSC 1290": {
+    "name": "Intergalactic Wanderer",
+    "ar": "المتجول بين المجرات",
+    "zh": "漫游者星团",
+    "fi": "Galaksienvälinen vaeltaja",
+    "fr": "Vagabond intergalactique",
+    "de": "Intergalaktischer Wanderer",
+    "ko": "은하 사이의 방랑자",
+    "es": "Vagabundo Intergaláctico",
+    "ru": "Межгалактический странник"
+  },
+  "MWSC1290": {
+    "name": "Intergalactic Wanderer",
+    "ar": "المتجول بين المجرات",
+    "zh": "漫游者星团",
+    "fi": "Galaksienvälinen vaeltaja",
+    "fr": "Vagabond intergalactique",
+    "de": "Intergalaktischer Wanderer",
+    "ko": "은하 사이의 방랑자",
+    "es": "Vagabundo Intergaláctico",
+    "ru": "Межгалактический странник"
+  },
+  "C 26": {
+    "name": "NGC 4244"
+  },
+  "C26": {
+    "name": "NGC 4244"
+  },
+  "NGC 4244": {
+    "name": "NGC 4244"
+  },
+  "NGC4244": {
+    "name": "NGC 4244"
+  },
+  "2MASX J12172965+3748255": {
+    "name": "NGC 4244"
+  },
+  "2MASXJ12172965+3748255": {
+    "name": "NGC 4244"
+  },
+  "C 026": {
+    "name": "NGC 4244"
+  },
+  "C026": {
+    "name": "NGC 4244"
+  },
+  "MCG +06-27-045": {
+    "name": "NGC 4244"
+  },
+  "MCG+06-27-045": {
+    "name": "NGC 4244"
+  },
+  "PGC 039422": {
+    "name": "NGC 4244"
+  },
+  "PGC039422": {
+    "name": "NGC 4244"
+  },
+  "UGC 07322": {
+    "name": "NGC 4244"
+  },
+  "UGC07322": {
+    "name": "NGC 4244"
+  },
+  "C 27": {
+    "name": "Crescent Nebula",
+    "ar": "‎سديم الهلال‎",
+    "zh": "眉月星云",
+    "fi": "Sirppisumu",
+    "fr": "Nébuleuse du Croissant",
+    "de": "Mondsichel-Nebel",
+    "el": "Νεφέλωμα Ημισελήνου",
+    "it": "Nebulosa crescent",
+    "ja": "三日月星云",
+    "ko": "초승달 성운",
+    "la": "Crescens Nebula",
+    "fa": "سحابی هلالی",
+    "es": "Nebulosa del Creciente",
+    "ru": "Туманность Полумесяц",
+    "tr": "Ayça Bulutsusu"
+  },
+  "C27": {
+    "name": "Crescent Nebula",
+    "ar": "‎سديم الهلال‎",
+    "zh": "眉月星云",
+    "fi": "Sirppisumu",
+    "fr": "Nébuleuse du Croissant",
+    "de": "Mondsichel-Nebel",
+    "el": "Νεφέλωμα Ημισελήνου",
+    "it": "Nebulosa crescent",
+    "ja": "三日月星云",
+    "ko": "초승달 성운",
+    "la": "Crescens Nebula",
+    "fa": "سحابی هلالی",
+    "es": "Nebulosa del Creciente",
+    "ru": "Туманность Полумесяц",
+    "tr": "Ayça Bulutsusu"
+  },
+  "NGC6888": {
+    "name": "Crescent Nebula",
+    "ar": "‎سديم الهلال‎",
+    "zh": "眉月星云",
+    "fi": "Sirppisumu",
+    "fr": "Nébuleuse du Croissant",
+    "de": "Mondsichel-Nebel",
+    "el": "Νεφέλωμα Ημισελήνου",
+    "it": "Nebulosa crescent",
+    "ja": "三日月星云",
+    "ko": "초승달 성운",
+    "la": "Crescens Nebula",
+    "fa": "سحابی هلالی",
+    "es": "Nebulosa del Creciente",
+    "ru": "Туманность Полумесяц",
+    "tr": "Ayça Bulutsusu"
+  },
+  "BD +37 3821": {
+    "name": "Crescent Nebula",
+    "ar": "‎سديم الهلال‎",
+    "zh": "眉月星云",
+    "fi": "Sirppisumu",
+    "fr": "Nébuleuse du Croissant",
+    "de": "Mondsichel-Nebel",
+    "el": "Νεφέλωμα Ημισελήνου",
+    "it": "Nebulosa crescent",
+    "ja": "三日月星云",
+    "ko": "초승달 성운",
+    "la": "Crescens Nebula",
+    "fa": "سحابی هلالی",
+    "es": "Nebulosa del Creciente",
+    "ru": "Туманность Полумесяц",
+    "tr": "Ayça Bulutsusu"
+  },
+  "BD+373821": {
+    "name": "Crescent Nebula",
+    "ar": "‎سديم الهلال‎",
+    "zh": "眉月星云",
+    "fi": "Sirppisumu",
+    "fr": "Nébuleuse du Croissant",
+    "de": "Mondsichel-Nebel",
+    "el": "Νεφέλωμα Ημισελήνου",
+    "it": "Nebulosa crescent",
+    "ja": "三日月星云",
+    "ko": "초승달 성운",
+    "la": "Crescens Nebula",
+    "fa": "سحابی هلالی",
+    "es": "Nebulosa del Creciente",
+    "ru": "Туманность Полумесяц",
+    "tr": "Ayça Bulutsusu"
+  },
+  "C 027": {
+    "name": "Crescent Nebula",
+    "ar": "‎سديم الهلال‎",
+    "zh": "眉月星云",
+    "fi": "Sirppisumu",
+    "fr": "Nébuleuse du Croissant",
+    "de": "Mondsichel-Nebel",
+    "el": "Νεφέλωμα Ημισελήνου",
+    "it": "Nebulosa crescent",
+    "ja": "三日月星云",
+    "ko": "초승달 성운",
+    "la": "Crescens Nebula",
+    "fa": "سحابی هلالی",
+    "es": "Nebulosa del Creciente",
+    "ru": "Туманность Полумесяц",
+    "tr": "Ayça Bulutsusu"
+  },
+  "C027": {
+    "name": "Crescent Nebula",
+    "ar": "‎سديم الهلال‎",
+    "zh": "眉月星云",
+    "fi": "Sirppisumu",
+    "fr": "Nébuleuse du Croissant",
+    "de": "Mondsichel-Nebel",
+    "el": "Νεφέλωμα Ημισελήνου",
+    "it": "Nebulosa crescent",
+    "ja": "三日月星云",
+    "ko": "초승달 성운",
+    "la": "Crescens Nebula",
+    "fa": "سحابی هلالی",
+    "es": "Nebulosa del Creciente",
+    "ru": "Туманность Полумесяц",
+    "tr": "Ayça Bulutsusu"
+  },
+  "HD 192163": {
+    "name": "Crescent Nebula",
+    "ar": "‎سديم الهلال‎",
+    "zh": "眉月星云",
+    "fi": "Sirppisumu",
+    "fr": "Nébuleuse du Croissant",
+    "de": "Mondsichel-Nebel",
+    "el": "Νεφέλωμα Ημισελήνου",
+    "it": "Nebulosa crescent",
+    "ja": "三日月星云",
+    "ko": "초승달 성운",
+    "la": "Crescens Nebula",
+    "fa": "سحابی هلالی",
+    "es": "Nebulosa del Creciente",
+    "ru": "Туманность Полумесяц",
+    "tr": "Ayça Bulutsusu"
+  },
+  "HD192163": {
+    "name": "Crescent Nebula",
+    "ar": "‎سديم الهلال‎",
+    "zh": "眉月星云",
+    "fi": "Sirppisumu",
+    "fr": "Nébuleuse du Croissant",
+    "de": "Mondsichel-Nebel",
+    "el": "Νεφέλωμα Ημισελήνου",
+    "it": "Nebulosa crescent",
+    "ja": "三日月星云",
+    "ko": "초승달 성운",
+    "la": "Crescens Nebula",
+    "fa": "سحابی هلالی",
+    "es": "Nebulosa del Creciente",
+    "ru": "Туманность Полумесяц",
+    "tr": "Ayça Bulutsusu"
+  },
+  "HIP 099546": {
+    "name": "Crescent Nebula",
+    "ar": "‎سديم الهلال‎",
+    "zh": "眉月星云",
+    "fi": "Sirppisumu",
+    "fr": "Nébuleuse du Croissant",
+    "de": "Mondsichel-Nebel",
+    "el": "Νεφέλωμα Ημισελήνου",
+    "it": "Nebulosa crescent",
+    "ja": "三日月星云",
+    "ko": "초승달 성운",
+    "la": "Crescens Nebula",
+    "fa": "سحابی هلالی",
+    "es": "Nebulosa del Creciente",
+    "ru": "Туманность Полумесяц",
+    "tr": "Ayça Bulutsusu"
+  },
+  "HIP099546": {
+    "name": "Crescent Nebula",
+    "ar": "‎سديم الهلال‎",
+    "zh": "眉月星云",
+    "fi": "Sirppisumu",
+    "fr": "Nébuleuse du Croissant",
+    "de": "Mondsichel-Nebel",
+    "el": "Νεφέλωμα Ημισελήνου",
+    "it": "Nebulosa crescent",
+    "ja": "三日月星云",
+    "ko": "초승달 성운",
+    "la": "Crescens Nebula",
+    "fa": "سحابی هلالی",
+    "es": "Nebulosa del Creciente",
+    "ru": "Туманность Полумесяц",
+    "tr": "Ayça Bulutsusu"
+  },
+  "LBN 203": {
+    "name": "Crescent Nebula",
+    "ar": "‎سديم الهلال‎",
+    "zh": "眉月星云",
+    "fi": "Sirppisumu",
+    "fr": "Nébuleuse du Croissant",
+    "de": "Mondsichel-Nebel",
+    "el": "Νεφέλωμα Ημισελήνου",
+    "it": "Nebulosa crescent",
+    "ja": "三日月星云",
+    "ko": "초승달 성운",
+    "la": "Crescens Nebula",
+    "fa": "سحابی هلالی",
+    "es": "Nebulosa del Creciente",
+    "ru": "Туманность Полумесяц",
+    "tr": "Ayça Bulutsusu"
+  },
+  "LBN203": {
+    "name": "Crescent Nebula",
+    "ar": "‎سديم الهلال‎",
+    "zh": "眉月星云",
+    "fi": "Sirppisumu",
+    "fr": "Nébuleuse du Croissant",
+    "de": "Mondsichel-Nebel",
+    "el": "Νεφέλωμα Ημισελήνου",
+    "it": "Nebulosa crescent",
+    "ja": "三日月星云",
+    "ko": "초승달 성운",
+    "la": "Crescens Nebula",
+    "fa": "سحابی هلالی",
+    "es": "Nebulosa del Creciente",
+    "ru": "Туманность Полумесяц",
+    "tr": "Ayça Bulutsusu"
+  },
+  "Crescent Nebula": {
+    "name": "Crescent Nebula",
+    "ar": "‎سديم الهلال‎",
+    "zh": "眉月星云",
+    "fi": "Sirppisumu",
+    "fr": "Nébuleuse du Croissant",
+    "de": "Mondsichel-Nebel",
+    "el": "Νεφέλωμα Ημισελήνου",
+    "it": "Nebulosa crescent",
+    "ja": "三日月星云",
+    "ko": "초승달 성운",
+    "la": "Crescens Nebula",
+    "fa": "سحابی هلالی",
+    "es": "Nebulosa del Creciente",
+    "ru": "Туманность Полумесяц",
+    "tr": "Ayça Bulutsusu"
+  },
+  "CrescentNebula": {
+    "name": "Crescent Nebula",
+    "ar": "‎سديم الهلال‎",
+    "zh": "眉月星云",
+    "fi": "Sirppisumu",
+    "fr": "Nébuleuse du Croissant",
+    "de": "Mondsichel-Nebel",
+    "el": "Νεφέλωμα Ημισελήνου",
+    "it": "Nebulosa crescent",
+    "ja": "三日月星云",
+    "ko": "초승달 성운",
+    "la": "Crescens Nebula",
+    "fa": "سحابی هلالی",
+    "es": "Nebulosa del Creciente",
+    "ru": "Туманность Полумесяц",
+    "tr": "Ayça Bulutsusu"
+  },
+  "C 28": {
+    "name": "NGC 752"
+  },
+  "C28": {
+    "name": "NGC 752"
+  },
+  "NGC 752": {
+    "name": "NGC 752"
+  },
+  "NGC752": {
+    "name": "NGC 752"
+  },
+  "C 028": {
+    "name": "NGC 752"
+  },
+  "C028": {
+    "name": "NGC 752"
+  },
+  "MWSC 0151": {
+    "name": "NGC 752"
+  },
+  "MWSC0151": {
+    "name": "NGC 752"
+  },
+  "C 29": {
+    "name": "NGC 5005"
+  },
+  "C29": {
+    "name": "NGC 5005"
+  },
+  "NGC 5005": {
+    "name": "NGC 5005"
+  },
+  "NGC5005": {
+    "name": "NGC 5005"
+  },
+  "2MASX J13105631+3703321": {
+    "name": "NGC 5005"
+  },
+  "2MASXJ13105631+3703321": {
+    "name": "NGC 5005"
+  },
+  "C 029": {
+    "name": "NGC 5005"
+  },
+  "C029": {
+    "name": "NGC 5005"
+  },
+  "IRAS 13086+3719": {
+    "name": "NGC 5005"
+  },
+  "IRAS13086+3719": {
+    "name": "NGC 5005"
+  },
+  "MCG +06-29-052": {
+    "name": "NGC 5005"
+  },
+  "MCG+06-29-052": {
+    "name": "NGC 5005"
+  },
+  "PGC 045749": {
+    "name": "NGC 5005"
+  },
+  "PGC045749": {
+    "name": "NGC 5005"
+  },
+  "UGC 08256": {
+    "name": "NGC 5005"
+  },
+  "UGC08256": {
+    "name": "NGC 5005"
+  },
+  "C 30": {
+    "name": "Deer Lick Group",
+    "ar": "‎‎لعق الغزال‎‎",
+    "zh": "鹿舔星系群",
+    "fi": "Nuolukivijoukko",
+    "fr": "Groupe Deer Lick",
+    "de": "NGC 7331 Gruppe",
+    "it": "Gruppo Deer Lick",
+    "ko": "디어 릭 은하단",
+    "la": "Caetus Deer Lick",
+    "fa": "گروه کهکشانی در فرس اعظم",
+    "es": "Grupo de Ciervos Lamiéndose",
+    "ru": "Солончаковая группа"
+  },
+  "C30": {
+    "name": "Deer Lick Group",
+    "ar": "‎‎لعق الغزال‎‎",
+    "zh": "鹿舔星系群",
+    "fi": "Nuolukivijoukko",
+    "fr": "Groupe Deer Lick",
+    "de": "NGC 7331 Gruppe",
+    "it": "Gruppo Deer Lick",
+    "ko": "디어 릭 은하단",
+    "la": "Caetus Deer Lick",
+    "fa": "گروه کهکشانی در فرس اعظم",
+    "es": "Grupo de Ciervos Lamiéndose",
+    "ru": "Солончаковая группа"
+  },
+  "NGC7331": {
+    "name": "Deer Lick Group",
+    "ar": "‎‎لعق الغزال‎‎",
+    "zh": "鹿舔星系群",
+    "fi": "Nuolukivijoukko",
+    "fr": "Groupe Deer Lick",
+    "de": "NGC 7331 Gruppe",
+    "it": "Gruppo Deer Lick",
+    "ko": "디어 릭 은하단",
+    "la": "Caetus Deer Lick",
+    "fa": "گروه کهکشانی در فرس اعظم",
+    "es": "Grupo de Ciervos Lamiéndose",
+    "ru": "Солончаковая группа"
+  },
+  "2MASX J22370410+3424573": {
+    "name": "Deer Lick Group",
+    "ar": "‎‎لعق الغزال‎‎",
+    "zh": "鹿舔星系群",
+    "fi": "Nuolukivijoukko",
+    "fr": "Groupe Deer Lick",
+    "de": "NGC 7331 Gruppe",
+    "it": "Gruppo Deer Lick",
+    "ko": "디어 릭 은하단",
+    "la": "Caetus Deer Lick",
+    "fa": "گروه کهکشانی در فرس اعظم",
+    "es": "Grupo de Ciervos Lamiéndose",
+    "ru": "Солончаковая группа"
+  },
+  "2MASXJ22370410+3424573": {
+    "name": "Deer Lick Group",
+    "ar": "‎‎لعق الغزال‎‎",
+    "zh": "鹿舔星系群",
+    "fi": "Nuolukivijoukko",
+    "fr": "Groupe Deer Lick",
+    "de": "NGC 7331 Gruppe",
+    "it": "Gruppo Deer Lick",
+    "ko": "디어 릭 은하단",
+    "la": "Caetus Deer Lick",
+    "fa": "گروه کهکشانی در فرس اعظم",
+    "es": "Grupo de Ciervos Lamiéndose",
+    "ru": "Солончаковая группа"
+  },
+  "C 030": {
+    "name": "Deer Lick Group",
+    "ar": "‎‎لعق الغزال‎‎",
+    "zh": "鹿舔星系群",
+    "fi": "Nuolukivijoukko",
+    "fr": "Groupe Deer Lick",
+    "de": "NGC 7331 Gruppe",
+    "it": "Gruppo Deer Lick",
+    "ko": "디어 릭 은하단",
+    "la": "Caetus Deer Lick",
+    "fa": "گروه کهکشانی در فرس اعظم",
+    "es": "Grupo de Ciervos Lamiéndose",
+    "ru": "Солончаковая группа"
+  },
+  "C030": {
+    "name": "Deer Lick Group",
+    "ar": "‎‎لعق الغزال‎‎",
+    "zh": "鹿舔星系群",
+    "fi": "Nuolukivijoukko",
+    "fr": "Groupe Deer Lick",
+    "de": "NGC 7331 Gruppe",
+    "it": "Gruppo Deer Lick",
+    "ko": "디어 릭 은하단",
+    "la": "Caetus Deer Lick",
+    "fa": "گروه کهکشانی در فرس اعظم",
+    "es": "Grupo de Ciervos Lamiéndose",
+    "ru": "Солончаковая группа"
+  },
+  "IRAS 22347+3409": {
+    "name": "Deer Lick Group",
+    "ar": "‎‎لعق الغزال‎‎",
+    "zh": "鹿舔星系群",
+    "fi": "Nuolukivijoukko",
+    "fr": "Groupe Deer Lick",
+    "de": "NGC 7331 Gruppe",
+    "it": "Gruppo Deer Lick",
+    "ko": "디어 릭 은하단",
+    "la": "Caetus Deer Lick",
+    "fa": "گروه کهکشانی در فرس اعظم",
+    "es": "Grupo de Ciervos Lamiéndose",
+    "ru": "Солончаковая группа"
+  },
+  "IRAS22347+3409": {
+    "name": "Deer Lick Group",
+    "ar": "‎‎لعق الغزال‎‎",
+    "zh": "鹿舔星系群",
+    "fi": "Nuolukivijoukko",
+    "fr": "Groupe Deer Lick",
+    "de": "NGC 7331 Gruppe",
+    "it": "Gruppo Deer Lick",
+    "ko": "디어 릭 은하단",
+    "la": "Caetus Deer Lick",
+    "fa": "گروه کهکشانی در فرس اعظم",
+    "es": "Grupo de Ciervos Lamiéndose",
+    "ru": "Солончаковая группа"
+  },
+  "MCG +06-49-045": {
+    "name": "Deer Lick Group",
+    "ar": "‎‎لعق الغزال‎‎",
+    "zh": "鹿舔星系群",
+    "fi": "Nuolukivijoukko",
+    "fr": "Groupe Deer Lick",
+    "de": "NGC 7331 Gruppe",
+    "it": "Gruppo Deer Lick",
+    "ko": "디어 릭 은하단",
+    "la": "Caetus Deer Lick",
+    "fa": "گروه کهکشانی در فرس اعظم",
+    "es": "Grupo de Ciervos Lamiéndose",
+    "ru": "Солончаковая группа"
+  },
+  "MCG+06-49-045": {
+    "name": "Deer Lick Group",
+    "ar": "‎‎لعق الغزال‎‎",
+    "zh": "鹿舔星系群",
+    "fi": "Nuolukivijoukko",
+    "fr": "Groupe Deer Lick",
+    "de": "NGC 7331 Gruppe",
+    "it": "Gruppo Deer Lick",
+    "ko": "디어 릭 은하단",
+    "la": "Caetus Deer Lick",
+    "fa": "گروه کهکشانی در فرس اعظم",
+    "es": "Grupo de Ciervos Lamiéndose",
+    "ru": "Солончаковая группа"
+  },
+  "PGC 069327": {
+    "name": "Deer Lick Group",
+    "ar": "‎‎لعق الغزال‎‎",
+    "zh": "鹿舔星系群",
+    "fi": "Nuolukivijoukko",
+    "fr": "Groupe Deer Lick",
+    "de": "NGC 7331 Gruppe",
+    "it": "Gruppo Deer Lick",
+    "ko": "디어 릭 은하단",
+    "la": "Caetus Deer Lick",
+    "fa": "گروه کهکشانی در فرس اعظم",
+    "es": "Grupo de Ciervos Lamiéndose",
+    "ru": "Солончаковая группа"
+  },
+  "PGC069327": {
+    "name": "Deer Lick Group",
+    "ar": "‎‎لعق الغزال‎‎",
+    "zh": "鹿舔星系群",
+    "fi": "Nuolukivijoukko",
+    "fr": "Groupe Deer Lick",
+    "de": "NGC 7331 Gruppe",
+    "it": "Gruppo Deer Lick",
+    "ko": "디어 릭 은하단",
+    "la": "Caetus Deer Lick",
+    "fa": "گروه کهکشانی در فرس اعظم",
+    "es": "Grupo de Ciervos Lamiéndose",
+    "ru": "Солончаковая группа"
+  },
+  "SDSS J223704.05+342456.8": {
+    "name": "Deer Lick Group",
+    "ar": "‎‎لعق الغزال‎‎",
+    "zh": "鹿舔星系群",
+    "fi": "Nuolukivijoukko",
+    "fr": "Groupe Deer Lick",
+    "de": "NGC 7331 Gruppe",
+    "it": "Gruppo Deer Lick",
+    "ko": "디어 릭 은하단",
+    "la": "Caetus Deer Lick",
+    "fa": "گروه کهکشانی در فرس اعظم",
+    "es": "Grupo de Ciervos Lamiéndose",
+    "ru": "Солончаковая группа"
+  },
+  "SDSSJ223704.05+342456.8": {
+    "name": "Deer Lick Group",
+    "ar": "‎‎لعق الغزال‎‎",
+    "zh": "鹿舔星系群",
+    "fi": "Nuolukivijoukko",
+    "fr": "Groupe Deer Lick",
+    "de": "NGC 7331 Gruppe",
+    "it": "Gruppo Deer Lick",
+    "ko": "디어 릭 은하단",
+    "la": "Caetus Deer Lick",
+    "fa": "گروه کهکشانی در فرس اعظم",
+    "es": "Grupo de Ciervos Lamiéndose",
+    "ru": "Солончаковая группа"
+  },
+  "UGC 12113": {
+    "name": "Deer Lick Group",
+    "ar": "‎‎لعق الغزال‎‎",
+    "zh": "鹿舔星系群",
+    "fi": "Nuolukivijoukko",
+    "fr": "Groupe Deer Lick",
+    "de": "NGC 7331 Gruppe",
+    "it": "Gruppo Deer Lick",
+    "ko": "디어 릭 은하단",
+    "la": "Caetus Deer Lick",
+    "fa": "گروه کهکشانی در فرس اعظم",
+    "es": "Grupo de Ciervos Lamiéndose",
+    "ru": "Солончаковая группа"
+  },
+  "UGC12113": {
+    "name": "Deer Lick Group",
+    "ar": "‎‎لعق الغزال‎‎",
+    "zh": "鹿舔星系群",
+    "fi": "Nuolukivijoukko",
+    "fr": "Groupe Deer Lick",
+    "de": "NGC 7331 Gruppe",
+    "it": "Gruppo Deer Lick",
+    "ko": "디어 릭 은하단",
+    "la": "Caetus Deer Lick",
+    "fa": "گروه کهکشانی در فرس اعظم",
+    "es": "Grupo de Ciervos Lamiéndose",
+    "ru": "Солончаковая группа"
+  },
+  "C 31": {
+    "name": "Flaming Star Nebula",
+    "ar": "‎السّديم اللامع الملتهب‎",
+    "zh": "火焰之星星云",
+    "fi": "Liekehtivä tähtisumu",
+    "fr": "Nébuleuse de l'Étoile flamboyante",
+    "de": "Flammender Stern-Nebel",
+    "el": "Νεφέλωμα Φλεγόμενος Αστέρας",
+    "it": "Nebulosa stella fiammeggiante",
+    "ja": "曲玉星云",
+    "ko": "불꽃별 성운",
+    "fa": "سحابی ستارۀ Flaming",
+    "es": "Nebulosa de la Estrella llameante",
+    "ru": "Туманность Пылающая звезда",
+    "tr": "Parlayan Yıldız Bulutsusu"
+  },
+  "C31": {
+    "name": "Flaming Star Nebula",
+    "ar": "‎السّديم اللامع الملتهب‎",
+    "zh": "火焰之星星云",
+    "fi": "Liekehtivä tähtisumu",
+    "fr": "Nébuleuse de l'Étoile flamboyante",
+    "de": "Flammender Stern-Nebel",
+    "el": "Νεφέλωμα Φλεγόμενος Αστέρας",
+    "it": "Nebulosa stella fiammeggiante",
+    "ja": "曲玉星云",
+    "ko": "불꽃별 성운",
+    "fa": "سحابی ستارۀ Flaming",
+    "es": "Nebulosa de la Estrella llameante",
+    "ru": "Туманность Пылающая звезда",
+    "tr": "Parlayan Yıldız Bulutsusu"
+  },
+  "IC405": {
+    "name": "Flaming Star Nebula",
+    "ar": "‎السّديم اللامع الملتهب‎",
+    "zh": "火焰之星星云",
+    "fi": "Liekehtivä tähtisumu",
+    "fr": "Nébuleuse de l'Étoile flamboyante",
+    "de": "Flammender Stern-Nebel",
+    "el": "Νεφέλωμα Φλεγόμενος Αστέρας",
+    "it": "Nebulosa stella fiammeggiante",
+    "ja": "曲玉星云",
+    "ko": "불꽃별 성운",
+    "fa": "سحابی ستارۀ Flaming",
+    "es": "Nebulosa de la Estrella llameante",
+    "ru": "Туманность Пылающая звезда",
+    "tr": "Parlayan Yıldız Bulutsusu"
+  },
+  "C 031": {
+    "name": "Flaming Star Nebula",
+    "ar": "‎السّديم اللامع الملتهب‎",
+    "zh": "火焰之星星云",
+    "fi": "Liekehtivä tähtisumu",
+    "fr": "Nébuleuse de l'Étoile flamboyante",
+    "de": "Flammender Stern-Nebel",
+    "el": "Νεφέλωμα Φλεγόμενος Αστέρας",
+    "it": "Nebulosa stella fiammeggiante",
+    "ja": "曲玉星云",
+    "ko": "불꽃별 성운",
+    "fa": "سحابی ستارۀ Flaming",
+    "es": "Nebulosa de la Estrella llameante",
+    "ru": "Туманность Пылающая звезда",
+    "tr": "Parlayan Yıldız Bulutsusu"
+  },
+  "C031": {
+    "name": "Flaming Star Nebula",
+    "ar": "‎السّديم اللامع الملتهب‎",
+    "zh": "火焰之星星云",
+    "fi": "Liekehtivä tähtisumu",
+    "fr": "Nébuleuse de l'Étoile flamboyante",
+    "de": "Flammender Stern-Nebel",
+    "el": "Νεφέλωμα Φλεγόμενος Αστέρας",
+    "it": "Nebulosa stella fiammeggiante",
+    "ja": "曲玉星云",
+    "ko": "불꽃별 성운",
+    "fa": "سحابی ستارۀ Flaming",
+    "es": "Nebulosa de la Estrella llameante",
+    "ru": "Туманность Пылающая звезда",
+    "tr": "Parlayan Yıldız Bulutsusu"
+  },
+  "LBN 795": {
+    "name": "Flaming Star Nebula",
+    "ar": "‎السّديم اللامع الملتهب‎",
+    "zh": "火焰之星星云",
+    "fi": "Liekehtivä tähtisumu",
+    "fr": "Nébuleuse de l'Étoile flamboyante",
+    "de": "Flammender Stern-Nebel",
+    "el": "Νεφέλωμα Φλεγόμενος Αστέρας",
+    "it": "Nebulosa stella fiammeggiante",
+    "ja": "曲玉星云",
+    "ko": "불꽃별 성운",
+    "fa": "سحابی ستارۀ Flaming",
+    "es": "Nebulosa de la Estrella llameante",
+    "ru": "Туманность Пылающая звезда",
+    "tr": "Parlayan Yıldız Bulutsusu"
+  },
+  "LBN795": {
+    "name": "Flaming Star Nebula",
+    "ar": "‎السّديم اللامع الملتهب‎",
+    "zh": "火焰之星星云",
+    "fi": "Liekehtivä tähtisumu",
+    "fr": "Nébuleuse de l'Étoile flamboyante",
+    "de": "Flammender Stern-Nebel",
+    "el": "Νεφέλωμα Φλεγόμενος Αστέρας",
+    "it": "Nebulosa stella fiammeggiante",
+    "ja": "曲玉星云",
+    "ko": "불꽃별 성운",
+    "fa": "سحابی ستارۀ Flaming",
+    "es": "Nebulosa de la Estrella llameante",
+    "ru": "Туманность Пылающая звезда",
+    "tr": "Parlayan Yıldız Bulutsusu"
+  },
+  "Flaming Star Nebula": {
+    "name": "Flaming Star Nebula",
+    "ar": "‎السّديم اللامع الملتهب‎",
+    "zh": "火焰之星星云",
+    "fi": "Liekehtivä tähtisumu",
+    "fr": "Nébuleuse de l'Étoile flamboyante",
+    "de": "Flammender Stern-Nebel",
+    "el": "Νεφέλωμα Φλεγόμενος Αστέρας",
+    "it": "Nebulosa stella fiammeggiante",
+    "ja": "曲玉星云",
+    "ko": "불꽃별 성운",
+    "fa": "سحابی ستارۀ Flaming",
+    "es": "Nebulosa de la Estrella llameante",
+    "ru": "Туманность Пылающая звезда",
+    "tr": "Parlayan Yıldız Bulutsusu"
+  },
+  "FlamingStarNebula": {
+    "name": "Flaming Star Nebula",
+    "ar": "‎السّديم اللامع الملتهب‎",
+    "zh": "火焰之星星云",
+    "fi": "Liekehtivä tähtisumu",
+    "fr": "Nébuleuse de l'Étoile flamboyante",
+    "de": "Flammender Stern-Nebel",
+    "el": "Νεφέλωμα Φλεγόμενος Αστέρας",
+    "it": "Nebulosa stella fiammeggiante",
+    "ja": "曲玉星云",
+    "ko": "불꽃별 성운",
+    "fa": "سحابی ستارۀ Flaming",
+    "es": "Nebulosa de la Estrella llameante",
+    "ru": "Туманность Пылающая звезда",
+    "tr": "Parlayan Yıldız Bulutsusu"
+  },
+  "C 32": {
+    "name": "Whale Galaxy",
+    "ar": "‎‎مجرة الحوت‎‎",
+    "zh": "鲸鱼星系",
+    "fi": "Valasgalaksi",
+    "fr": "Galaxie de la Baleine",
+    "de": "Wal-Galaxie",
+    "it": "Galassia Balena",
+    "ko": "고래 은하",
+    "fa": "کهکشان نهنگ",
+    "es": "Galaxia de la ballena",
+    "ru": "Галактика Кит"
+  },
+  "C32": {
+    "name": "Whale Galaxy",
+    "ar": "‎‎مجرة الحوت‎‎",
+    "zh": "鲸鱼星系",
+    "fi": "Valasgalaksi",
+    "fr": "Galaxie de la Baleine",
+    "de": "Wal-Galaxie",
+    "it": "Galassia Balena",
+    "ko": "고래 은하",
+    "fa": "کهکشان نهنگ",
+    "es": "Galaxia de la ballena",
+    "ru": "Галактика Кит"
+  },
+  "NGC4631": {
+    "name": "Whale Galaxy",
+    "ar": "‎‎مجرة الحوت‎‎",
+    "zh": "鲸鱼星系",
+    "fi": "Valasgalaksi",
+    "fr": "Galaxie de la Baleine",
+    "de": "Wal-Galaxie",
+    "it": "Galassia Balena",
+    "ko": "고래 은하",
+    "fa": "کهکشان نهنگ",
+    "es": "Galaxia de la ballena",
+    "ru": "Галактика Кит"
+  },
+  "2MASX J12420800+3232294": {
+    "name": "Whale Galaxy",
+    "ar": "‎‎مجرة الحوت‎‎",
+    "zh": "鲸鱼星系",
+    "fi": "Valasgalaksi",
+    "fr": "Galaxie de la Baleine",
+    "de": "Wal-Galaxie",
+    "it": "Galassia Balena",
+    "ko": "고래 은하",
+    "fa": "کهکشان نهنگ",
+    "es": "Galaxia de la ballena",
+    "ru": "Галактика Кит"
+  },
+  "2MASXJ12420800+3232294": {
+    "name": "Whale Galaxy",
+    "ar": "‎‎مجرة الحوت‎‎",
+    "zh": "鲸鱼星系",
+    "fi": "Valasgalaksi",
+    "fr": "Galaxie de la Baleine",
+    "de": "Wal-Galaxie",
+    "it": "Galassia Balena",
+    "ko": "고래 은하",
+    "fa": "کهکشان نهنگ",
+    "es": "Galaxia de la ballena",
+    "ru": "Галактика Кит"
+  },
+  "C 032": {
+    "name": "Whale Galaxy",
+    "ar": "‎‎مجرة الحوت‎‎",
+    "zh": "鲸鱼星系",
+    "fi": "Valasgalaksi",
+    "fr": "Galaxie de la Baleine",
+    "de": "Wal-Galaxie",
+    "it": "Galassia Balena",
+    "ko": "고래 은하",
+    "fa": "کهکشان نهنگ",
+    "es": "Galaxia de la ballena",
+    "ru": "Галактика Кит"
+  },
+  "C032": {
+    "name": "Whale Galaxy",
+    "ar": "‎‎مجرة الحوت‎‎",
+    "zh": "鲸鱼星系",
+    "fi": "Valasgalaksi",
+    "fr": "Galaxie de la Baleine",
+    "de": "Wal-Galaxie",
+    "it": "Galassia Balena",
+    "ko": "고래 은하",
+    "fa": "کهکشان نهنگ",
+    "es": "Galaxia de la ballena",
+    "ru": "Галактика Кит"
+  },
+  "IRAS 12396+3249": {
+    "name": "Whale Galaxy",
+    "ar": "‎‎مجرة الحوت‎‎",
+    "zh": "鲸鱼星系",
+    "fi": "Valasgalaksi",
+    "fr": "Galaxie de la Baleine",
+    "de": "Wal-Galaxie",
+    "it": "Galassia Balena",
+    "ko": "고래 은하",
+    "fa": "کهکشان نهنگ",
+    "es": "Galaxia de la ballena",
+    "ru": "Галактика Кит"
+  },
+  "IRAS12396+3249": {
+    "name": "Whale Galaxy",
+    "ar": "‎‎مجرة الحوت‎‎",
+    "zh": "鲸鱼星系",
+    "fi": "Valasgalaksi",
+    "fr": "Galaxie de la Baleine",
+    "de": "Wal-Galaxie",
+    "it": "Galassia Balena",
+    "ko": "고래 은하",
+    "fa": "کهکشان نهنگ",
+    "es": "Galaxia de la ballena",
+    "ru": "Галактика Кит"
+  },
+  "MCG +06-28-020": {
+    "name": "Whale Galaxy",
+    "ar": "‎‎مجرة الحوت‎‎",
+    "zh": "鲸鱼星系",
+    "fi": "Valasgalaksi",
+    "fr": "Galaxie de la Baleine",
+    "de": "Wal-Galaxie",
+    "it": "Galassia Balena",
+    "ko": "고래 은하",
+    "fa": "کهکشان نهنگ",
+    "es": "Galaxia de la ballena",
+    "ru": "Галактика Кит"
+  },
+  "MCG+06-28-020": {
+    "name": "Whale Galaxy",
+    "ar": "‎‎مجرة الحوت‎‎",
+    "zh": "鲸鱼星系",
+    "fi": "Valasgalaksi",
+    "fr": "Galaxie de la Baleine",
+    "de": "Wal-Galaxie",
+    "it": "Galassia Balena",
+    "ko": "고래 은하",
+    "fa": "کهکشان نهنگ",
+    "es": "Galaxia de la ballena",
+    "ru": "Галактика Кит"
+  },
+  "PGC 042637": {
+    "name": "Whale Galaxy",
+    "ar": "‎‎مجرة الحوت‎‎",
+    "zh": "鲸鱼星系",
+    "fi": "Valasgalaksi",
+    "fr": "Galaxie de la Baleine",
+    "de": "Wal-Galaxie",
+    "it": "Galassia Balena",
+    "ko": "고래 은하",
+    "fa": "کهکشان نهنگ",
+    "es": "Galaxia de la ballena",
+    "ru": "Галактика Кит"
+  },
+  "PGC042637": {
+    "name": "Whale Galaxy",
+    "ar": "‎‎مجرة الحوت‎‎",
+    "zh": "鲸鱼星系",
+    "fi": "Valasgalaksi",
+    "fr": "Galaxie de la Baleine",
+    "de": "Wal-Galaxie",
+    "it": "Galassia Balena",
+    "ko": "고래 은하",
+    "fa": "کهکشان نهنگ",
+    "es": "Galaxia de la ballena",
+    "ru": "Галактика Кит"
+  },
+  "UGC 07865": {
+    "name": "Whale Galaxy",
+    "ar": "‎‎مجرة الحوت‎‎",
+    "zh": "鲸鱼星系",
+    "fi": "Valasgalaksi",
+    "fr": "Galaxie de la Baleine",
+    "de": "Wal-Galaxie",
+    "it": "Galassia Balena",
+    "ko": "고래 은하",
+    "fa": "کهکشان نهنگ",
+    "es": "Galaxia de la ballena",
+    "ru": "Галактика Кит"
+  },
+  "UGC07865": {
+    "name": "Whale Galaxy",
+    "ar": "‎‎مجرة الحوت‎‎",
+    "zh": "鲸鱼星系",
+    "fi": "Valasgalaksi",
+    "fr": "Galaxie de la Baleine",
+    "de": "Wal-Galaxie",
+    "it": "Galassia Balena",
+    "ko": "고래 은하",
+    "fa": "کهکشان نهنگ",
+    "es": "Galaxia de la ballena",
+    "ru": "Галактика Кит"
+  },
+  "Whale Galaxy": {
+    "name": "Whale Galaxy",
+    "ar": "‎‎مجرة الحوت‎‎",
+    "zh": "鲸鱼星系",
+    "fi": "Valasgalaksi",
+    "fr": "Galaxie de la Baleine",
+    "de": "Wal-Galaxie",
+    "it": "Galassia Balena",
+    "ko": "고래 은하",
+    "fa": "کهکشان نهنگ",
+    "es": "Galaxia de la ballena",
+    "ru": "Галактика Кит"
+  },
+  "WhaleGalaxy": {
+    "name": "Whale Galaxy",
+    "ar": "‎‎مجرة الحوت‎‎",
+    "zh": "鲸鱼星系",
+    "fi": "Valasgalaksi",
+    "fr": "Galaxie de la Baleine",
+    "de": "Wal-Galaxie",
+    "it": "Galassia Balena",
+    "ko": "고래 은하",
+    "fa": "کهکشان نهنگ",
+    "es": "Galaxia de la ballena",
+    "ru": "Галактика Кит"
+  },
+  "C 33": {
+    "name": "East Veil Nebula",
+    "ar": "‎‎سديم الحجاب الشرقي‎‎",
+    "zh": "东面纱星云",
+    "fi": "Itäinen harsosumu",
+    "fr": "Nébuleuse du Voile est",
+    "de": "Östlicher Schleiernebel",
+    "it": "Nebulosa Velo dell'Est",
+    "ja": "网状星云",
+    "ko": "동쪽 면사포 성운",
+    "fa": "سحابی پرده شرقی",
+    "es": "Nebulosa Velo del Este",
+    "ru": "Восточная туманность Вуаль"
+  },
+  "C33": {
+    "name": "East Veil Nebula",
+    "ar": "‎‎سديم الحجاب الشرقي‎‎",
+    "zh": "东面纱星云",
+    "fi": "Itäinen harsosumu",
+    "fr": "Nébuleuse du Voile est",
+    "de": "Östlicher Schleiernebel",
+    "it": "Nebulosa Velo dell'Est",
+    "ja": "网状星云",
+    "ko": "동쪽 면사포 성운",
+    "fa": "سحابی پرده شرقی",
+    "es": "Nebulosa Velo del Este",
+    "ru": "Восточная туманность Вуаль"
+  },
+  "NGC 6992/NGC 5": {
+    "name": "East Veil Nebula",
+    "ar": "‎‎سديم الحجاب الشرقي‎‎",
+    "zh": "东面纱星云",
+    "fi": "Itäinen harsosumu",
+    "fr": "Nébuleuse du Voile est",
+    "de": "Östlicher Schleiernebel",
+    "it": "Nebulosa Velo dell'Est",
+    "ja": "网状星云",
+    "ko": "동쪽 면사포 성운",
+    "fa": "سحابی پرده شرقی",
+    "es": "Nebulosa Velo del Este",
+    "ru": "Восточная туманность Вуаль"
+  },
+  "NGC6992/NGC5": {
+    "name": "East Veil Nebula",
+    "ar": "‎‎سديم الحجاب الشرقي‎‎",
+    "zh": "东面纱星云",
+    "fi": "Itäinen harsosumu",
+    "fr": "Nébuleuse du Voile est",
+    "de": "Östlicher Schleiernebel",
+    "it": "Nebulosa Velo dell'Est",
+    "ja": "网状星云",
+    "ko": "동쪽 면사포 성운",
+    "fa": "سحابی پرده شرقی",
+    "es": "Nebulosa Velo del Este",
+    "ru": "Восточная туманность Вуаль"
+  },
+  "NGC6992": {
+    "name": "East Veil Nebula",
+    "ar": "‎‎سديم الحجاب الشرقي‎‎",
+    "zh": "东面纱星云",
+    "fi": "Itäinen harsosumu",
+    "fr": "Nébuleuse du Voile est",
+    "de": "Östlicher Schleiernebel",
+    "it": "Nebulosa Velo dell'Est",
+    "ja": "网状星云",
+    "ko": "동쪽 면사포 성운",
+    "fa": "سحابی پرده شرقی",
+    "es": "Nebulosa Velo del Este",
+    "ru": "Восточная туманность Вуаль"
+  },
+  "NGC 5": {
+    "name": "East Veil Nebula",
+    "ar": "‎‎سديم الحجاب الشرقي‎‎",
+    "zh": "东面纱星云",
+    "fi": "Itäinen harsosumu",
+    "fr": "Nébuleuse du Voile est",
+    "de": "Östlicher Schleiernebel",
+    "it": "Nebulosa Velo dell'Est",
+    "ja": "网状星云",
+    "ko": "동쪽 면사포 성운",
+    "fa": "سحابی پرده شرقی",
+    "es": "Nebulosa Velo del Este",
+    "ru": "Восточная туманность Вуаль"
+  },
+  "NGC5": {
+    "name": "East Veil Nebula",
+    "ar": "‎‎سديم الحجاب الشرقي‎‎",
+    "zh": "东面纱星云",
+    "fi": "Itäinen harsosumu",
+    "fr": "Nébuleuse du Voile est",
+    "de": "Östlicher Schleiernebel",
+    "it": "Nebulosa Velo dell'Est",
+    "ja": "网状星云",
+    "ko": "동쪽 면사포 성운",
+    "fa": "سحابی پرده شرقی",
+    "es": "Nebulosa Velo del Este",
+    "ru": "Восточная туманность Вуаль"
+  },
+  "C 033": {
+    "name": "East Veil Nebula",
+    "ar": "‎‎سديم الحجاب الشرقي‎‎",
+    "zh": "东面纱星云",
+    "fi": "Itäinen harsosumu",
+    "fr": "Nébuleuse du Voile est",
+    "de": "Östlicher Schleiernebel",
+    "it": "Nebulosa Velo dell'Est",
+    "ja": "网状星云",
+    "ko": "동쪽 면사포 성운",
+    "fa": "سحابی پرده شرقی",
+    "es": "Nebulosa Velo del Este",
+    "ru": "Восточная туманность Вуаль"
+  },
+  "C033": {
+    "name": "East Veil Nebula",
+    "ar": "‎‎سديم الحجاب الشرقي‎‎",
+    "zh": "东面纱星云",
+    "fi": "Itäinen harsosumu",
+    "fr": "Nébuleuse du Voile est",
+    "de": "Östlicher Schleiernebel",
+    "it": "Nebulosa Velo dell'Est",
+    "ja": "网状星云",
+    "ko": "동쪽 면사포 성운",
+    "fa": "سحابی پرده شرقی",
+    "es": "Nebulosa Velo del Este",
+    "ru": "Восточная туманность Вуаль"
+  },
+  "Eastern Veil": {
+    "name": "East Veil Nebula",
+    "ar": "‎‎سديم الحجاب الشرقي‎‎",
+    "zh": "东面纱星云",
+    "fi": "Itäinen harsosumu",
+    "fr": "Nébuleuse du Voile est",
+    "de": "Östlicher Schleiernebel",
+    "it": "Nebulosa Velo dell'Est",
+    "ja": "网状星云",
+    "ko": "동쪽 면사포 성운",
+    "fa": "سحابی پرده شرقی",
+    "es": "Nebulosa Velo del Este",
+    "ru": "Восточная туманность Вуаль"
+  },
+  "EasternVeil": {
+    "name": "East Veil Nebula",
+    "ar": "‎‎سديم الحجاب الشرقي‎‎",
+    "zh": "东面纱星云",
+    "fi": "Itäinen harsosumu",
+    "fr": "Nébuleuse du Voile est",
+    "de": "Östlicher Schleiernebel",
+    "it": "Nebulosa Velo dell'Est",
+    "ja": "网状星云",
+    "ko": "동쪽 면사포 성운",
+    "fa": "سحابی پرده شرقی",
+    "es": "Nebulosa Velo del Este",
+    "ru": "Восточная туманность Вуаль"
+  },
+  "Network Nebula": {
+    "name": "East Veil Nebula",
+    "ar": "‎‎سديم الحجاب الشرقي‎‎",
+    "zh": "东面纱星云",
+    "fi": "Itäinen harsosumu",
+    "fr": "Nébuleuse du Voile est",
+    "de": "Östlicher Schleiernebel",
+    "it": "Nebulosa Velo dell'Est",
+    "ja": "网状星云",
+    "ko": "동쪽 면사포 성운",
+    "fa": "سحابی پرده شرقی",
+    "es": "Nebulosa Velo del Este",
+    "ru": "Восточная туманность Вуаль"
+  },
+  "NetworkNebula": {
+    "name": "East Veil Nebula",
+    "ar": "‎‎سديم الحجاب الشرقي‎‎",
+    "zh": "东面纱星云",
+    "fi": "Itäinen harsosumu",
+    "fr": "Nébuleuse du Voile est",
+    "de": "Östlicher Schleiernebel",
+    "it": "Nebulosa Velo dell'Est",
+    "ja": "网状星云",
+    "ko": "동쪽 면사포 성운",
+    "fa": "سحابی پرده شرقی",
+    "es": "Nebulosa Velo del Este",
+    "ru": "Восточная туманность Вуаль"
+  },
+  "C 34": {
+    "name": "Filamentary Nebula",
+    "ar": "‎‎سديم الفتيل‎‎",
+    "zh": "纤维星云",
+    "fi": "Säiesumu",
+    "fr": "Nébuleuse filamentaire",
+    "de": "Filament-Nebel",
+    "it": "Nebulosa Filamentosa",
+    "ko": "실 모양 성운",
+    "la": "Filamentarica nebula",
+    "fa": "سحابی رشته ای",
+    "es": "Nebulosa Filamentosa",
+    "ru": "Волокнистая туманность"
+  },
+  "C34": {
+    "name": "Filamentary Nebula",
+    "ar": "‎‎سديم الفتيل‎‎",
+    "zh": "纤维星云",
+    "fi": "Säiesumu",
+    "fr": "Nébuleuse filamentaire",
+    "de": "Filament-Nebel",
+    "it": "Nebulosa Filamentosa",
+    "ko": "실 모양 성운",
+    "la": "Filamentarica nebula",
+    "fa": "سحابی رشته ای",
+    "es": "Nebulosa Filamentosa",
+    "ru": "Волокнистая туманность"
+  },
+  "NGC6960": {
+    "name": "Filamentary Nebula",
+    "ar": "‎‎سديم الفتيل‎‎",
+    "zh": "纤维星云",
+    "fi": "Säiesumu",
+    "fr": "Nébuleuse filamentaire",
+    "de": "Filament-Nebel",
+    "it": "Nebulosa Filamentosa",
+    "ko": "실 모양 성운",
+    "la": "Filamentarica nebula",
+    "fa": "سحابی رشته ای",
+    "es": "Nebulosa Filamentosa",
+    "ru": "Волокнистая туманность"
+  },
+  "C 034": {
+    "name": "Filamentary Nebula",
+    "ar": "‎‎سديم الفتيل‎‎",
+    "zh": "纤维星云",
+    "fi": "Säiesumu",
+    "fr": "Nébuleuse filamentaire",
+    "de": "Filament-Nebel",
+    "it": "Nebulosa Filamentosa",
+    "ko": "실 모양 성운",
+    "la": "Filamentarica nebula",
+    "fa": "سحابی رشته ای",
+    "es": "Nebulosa Filamentosa",
+    "ru": "Волокнистая туманность"
+  },
+  "C034": {
+    "name": "Filamentary Nebula",
+    "ar": "‎‎سديم الفتيل‎‎",
+    "zh": "纤维星云",
+    "fi": "Säiesumu",
+    "fr": "Nébuleuse filamentaire",
+    "de": "Filament-Nebel",
+    "it": "Nebulosa Filamentosa",
+    "ko": "실 모양 성운",
+    "la": "Filamentarica nebula",
+    "fa": "سحابی رشته ای",
+    "es": "Nebulosa Filamentosa",
+    "ru": "Волокнистая туманность"
+  },
+  "LBN 191": {
+    "name": "Filamentary Nebula",
+    "ar": "‎‎سديم الفتيل‎‎",
+    "zh": "纤维星云",
+    "fi": "Säiesumu",
+    "fr": "Nébuleuse filamentaire",
+    "de": "Filament-Nebel",
+    "it": "Nebulosa Filamentosa",
+    "ko": "실 모양 성운",
+    "la": "Filamentarica nebula",
+    "fa": "سحابی رشته ای",
+    "es": "Nebulosa Filamentosa",
+    "ru": "Волокнистая туманность"
+  },
+  "LBN191": {
+    "name": "Filamentary Nebula",
+    "ar": "‎‎سديم الفتيل‎‎",
+    "zh": "纤维星云",
+    "fi": "Säiesumu",
+    "fr": "Nébuleuse filamentaire",
+    "de": "Filament-Nebel",
+    "it": "Nebulosa Filamentosa",
+    "ko": "실 모양 성운",
+    "la": "Filamentarica nebula",
+    "fa": "سحابی رشته ای",
+    "es": "Nebulosa Filamentosa",
+    "ru": "Волокнистая туманность"
+  },
+  "Veil Nebula": {
+    "name": "Filamentary Nebula",
+    "ar": "‎‎سديم الفتيل‎‎",
+    "zh": "纤维星云",
+    "fi": "Säiesumu",
+    "fr": "Nébuleuse filamentaire",
+    "de": "Filament-Nebel",
+    "it": "Nebulosa Filamentosa",
+    "ko": "실 모양 성운",
+    "la": "Filamentarica nebula",
+    "fa": "سحابی رشته ای",
+    "es": "Nebulosa Filamentosa",
+    "ru": "Волокнистая туманность"
+  },
+  "VeilNebula": {
+    "name": "Filamentary Nebula",
+    "ar": "‎‎سديم الفتيل‎‎",
+    "zh": "纤维星云",
+    "fi": "Säiesumu",
+    "fr": "Nébuleuse filamentaire",
+    "de": "Filament-Nebel",
+    "it": "Nebulosa Filamentosa",
+    "ko": "실 모양 성운",
+    "la": "Filamentarica nebula",
+    "fa": "سحابی رشته ای",
+    "es": "Nebulosa Filamentosa",
+    "ru": "Волокнистая туманность"
+  },
+  "Filamentary Nebula": {
+    "name": "Filamentary Nebula",
+    "ar": "‎‎سديم الفتيل‎‎",
+    "zh": "纤维星云",
+    "fi": "Säiesumu",
+    "fr": "Nébuleuse filamentaire",
+    "de": "Filament-Nebel",
+    "it": "Nebulosa Filamentosa",
+    "ko": "실 모양 성운",
+    "la": "Filamentarica nebula",
+    "fa": "سحابی رشته ای",
+    "es": "Nebulosa Filamentosa",
+    "ru": "Волокнистая туманность"
+  },
+  "FilamentaryNebula": {
+    "name": "Filamentary Nebula",
+    "ar": "‎‎سديم الفتيل‎‎",
+    "zh": "纤维星云",
+    "fi": "Säiesumu",
+    "fr": "Nébuleuse filamentaire",
+    "de": "Filament-Nebel",
+    "it": "Nebulosa Filamentosa",
+    "ko": "실 모양 성운",
+    "la": "Filamentarica nebula",
+    "fa": "سحابی رشته ای",
+    "es": "Nebulosa Filamentosa",
+    "ru": "Волокнистая туманность"
+  },
+  "Western Veil": {
+    "name": "Filamentary Nebula",
+    "ar": "‎‎سديم الفتيل‎‎",
+    "zh": "纤维星云",
+    "fi": "Säiesumu",
+    "fr": "Nébuleuse filamentaire",
+    "de": "Filament-Nebel",
+    "it": "Nebulosa Filamentosa",
+    "ko": "실 모양 성운",
+    "la": "Filamentarica nebula",
+    "fa": "سحابی رشته ای",
+    "es": "Nebulosa Filamentosa",
+    "ru": "Волокнистая туманность"
+  },
+  "WesternVeil": {
+    "name": "Filamentary Nebula",
+    "ar": "‎‎سديم الفتيل‎‎",
+    "zh": "纤维星云",
+    "fi": "Säiesumu",
+    "fr": "Nébuleuse filamentaire",
+    "de": "Filament-Nebel",
+    "it": "Nebulosa Filamentosa",
+    "ko": "실 모양 성운",
+    "la": "Filamentarica nebula",
+    "fa": "سحابی رشته ای",
+    "es": "Nebulosa Filamentosa",
+    "ru": "Волокнистая туманность"
+  },
+  "C 35": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "C35": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "NGC 4884": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "NGC4884": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "NGC4889": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "2MASX J13000809+2758372": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "2MASXJ13000809+2758372": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "C 035": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "C035": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "MCG +05-31-077": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "MCG+05-31-077": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "PGC 044715": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "PGC044715": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "SDSS J130008.12+275837.0": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "SDSSJ130008.12+275837.0": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "SDSS J130008.13+275836.9": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "SDSSJ130008.13+275836.9": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "SDSS J130008.13+275837.2": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "SDSSJ130008.13+275837.2": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "SDSS J130008.14+275837.2": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "SDSSJ130008.14+275837.2": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "UGC 08110": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "UGC08110": {
+    "name": "Coma B",
+    "ar": "‎‎الذؤابة ب‎‎",
+    "zh": "后发座",
+    "it": "NGC 4889",
+    "ja": "かみのけ座B",
+    "ko": "머리털자리 B",
+    "fa": "برج گیسو B",
+    "ru": "Волосы Вероники B"
+  },
+  "C 36": {
+    "name": "Koi Fish Galaxy",
+    "ar": "‎مجرة سمكة كوي‎",
+    "zh": "锦鲤星系",
+    "fr": "Galaxie de la Carpe Koï",
+    "de": "Koi-Fisch-Galaxie",
+    "it": "Galassia Pesce Koi",
+    "ko": "비단잉어 은하",
+    "es": "Galaxia Pez Koi",
+    "ru": "Галактика Полосатая зубатка"
+  },
+  "C36": {
+    "name": "Koi Fish Galaxy",
+    "ar": "‎مجرة سمكة كوي‎",
+    "zh": "锦鲤星系",
+    "fr": "Galaxie de la Carpe Koï",
+    "de": "Koi-Fisch-Galaxie",
+    "it": "Galassia Pesce Koi",
+    "ko": "비단잉어 은하",
+    "es": "Galaxia Pez Koi",
+    "ru": "Галактика Полосатая зубатка"
+  },
+  "NGC4559": {
+    "name": "Koi Fish Galaxy",
+    "ar": "‎مجرة سمكة كوي‎",
+    "zh": "锦鲤星系",
+    "fr": "Galaxie de la Carpe Koï",
+    "de": "Koi-Fisch-Galaxie",
+    "it": "Galassia Pesce Koi",
+    "ko": "비단잉어 은하",
+    "es": "Galaxia Pez Koi",
+    "ru": "Галактика Полосатая зубатка"
+  },
+  "2MASX J12355768+2757351": {
+    "name": "Koi Fish Galaxy",
+    "ar": "‎مجرة سمكة كوي‎",
+    "zh": "锦鲤星系",
+    "fr": "Galaxie de la Carpe Koï",
+    "de": "Koi-Fisch-Galaxie",
+    "it": "Galassia Pesce Koi",
+    "ko": "비단잉어 은하",
+    "es": "Galaxia Pez Koi",
+    "ru": "Галактика Полосатая зубатка"
+  },
+  "2MASXJ12355768+2757351": {
+    "name": "Koi Fish Galaxy",
+    "ar": "‎مجرة سمكة كوي‎",
+    "zh": "锦鲤星系",
+    "fr": "Galaxie de la Carpe Koï",
+    "de": "Koi-Fisch-Galaxie",
+    "it": "Galassia Pesce Koi",
+    "ko": "비단잉어 은하",
+    "es": "Galaxia Pez Koi",
+    "ru": "Галактика Полосатая зубатка"
+  },
+  "C 036": {
+    "name": "Koi Fish Galaxy",
+    "ar": "‎مجرة سمكة كوي‎",
+    "zh": "锦鲤星系",
+    "fr": "Galaxie de la Carpe Koï",
+    "de": "Koi-Fisch-Galaxie",
+    "it": "Galassia Pesce Koi",
+    "ko": "비단잉어 은하",
+    "es": "Galaxia Pez Koi",
+    "ru": "Галактика Полосатая зубатка"
+  },
+  "C036": {
+    "name": "Koi Fish Galaxy",
+    "ar": "‎مجرة سمكة كوي‎",
+    "zh": "锦鲤星系",
+    "fr": "Galaxie de la Carpe Koï",
+    "de": "Koi-Fisch-Galaxie",
+    "it": "Galassia Pesce Koi",
+    "ko": "비단잉어 은하",
+    "es": "Galaxia Pez Koi",
+    "ru": "Галактика Полосатая зубатка"
+  },
+  "IRAS 12334+2814": {
+    "name": "Koi Fish Galaxy",
+    "ar": "‎مجرة سمكة كوي‎",
+    "zh": "锦鲤星系",
+    "fr": "Galaxie de la Carpe Koï",
+    "de": "Koi-Fisch-Galaxie",
+    "it": "Galassia Pesce Koi",
+    "ko": "비단잉어 은하",
+    "es": "Galaxia Pez Koi",
+    "ru": "Галактика Полосатая зубатка"
+  },
+  "IRAS12334+2814": {
+    "name": "Koi Fish Galaxy",
+    "ar": "‎مجرة سمكة كوي‎",
+    "zh": "锦鲤星系",
+    "fr": "Galaxie de la Carpe Koï",
+    "de": "Koi-Fisch-Galaxie",
+    "it": "Galassia Pesce Koi",
+    "ko": "비단잉어 은하",
+    "es": "Galaxia Pez Koi",
+    "ru": "Галактика Полосатая зубатка"
+  },
+  "MCG +05-30-030": {
+    "name": "Koi Fish Galaxy",
+    "ar": "‎مجرة سمكة كوي‎",
+    "zh": "锦鲤星系",
+    "fr": "Galaxie de la Carpe Koï",
+    "de": "Koi-Fisch-Galaxie",
+    "it": "Galassia Pesce Koi",
+    "ko": "비단잉어 은하",
+    "es": "Galaxia Pez Koi",
+    "ru": "Галактика Полосатая зубатка"
+  },
+  "MCG+05-30-030": {
+    "name": "Koi Fish Galaxy",
+    "ar": "‎مجرة سمكة كوي‎",
+    "zh": "锦鲤星系",
+    "fr": "Galaxie de la Carpe Koï",
+    "de": "Koi-Fisch-Galaxie",
+    "it": "Galassia Pesce Koi",
+    "ko": "비단잉어 은하",
+    "es": "Galaxia Pez Koi",
+    "ru": "Галактика Полосатая зубатка"
+  },
+  "PGC 042002": {
+    "name": "Koi Fish Galaxy",
+    "ar": "‎مجرة سمكة كوي‎",
+    "zh": "锦鲤星系",
+    "fr": "Galaxie de la Carpe Koï",
+    "de": "Koi-Fisch-Galaxie",
+    "it": "Galassia Pesce Koi",
+    "ko": "비단잉어 은하",
+    "es": "Galaxia Pez Koi",
+    "ru": "Галактика Полосатая зубатка"
+  },
+  "PGC042002": {
+    "name": "Koi Fish Galaxy",
+    "ar": "‎مجرة سمكة كوي‎",
+    "zh": "锦鲤星系",
+    "fr": "Galaxie de la Carpe Koï",
+    "de": "Koi-Fisch-Galaxie",
+    "it": "Galassia Pesce Koi",
+    "ko": "비단잉어 은하",
+    "es": "Galaxia Pez Koi",
+    "ru": "Галактика Полосатая зубатка"
+  },
+  "SDSS J123557.64+275735.9": {
+    "name": "Koi Fish Galaxy",
+    "ar": "‎مجرة سمكة كوي‎",
+    "zh": "锦鲤星系",
+    "fr": "Galaxie de la Carpe Koï",
+    "de": "Koi-Fisch-Galaxie",
+    "it": "Galassia Pesce Koi",
+    "ko": "비단잉어 은하",
+    "es": "Galaxia Pez Koi",
+    "ru": "Галактика Полосатая зубатка"
+  },
+  "SDSSJ123557.64+275735.9": {
+    "name": "Koi Fish Galaxy",
+    "ar": "‎مجرة سمكة كوي‎",
+    "zh": "锦鲤星系",
+    "fr": "Galaxie de la Carpe Koï",
+    "de": "Koi-Fisch-Galaxie",
+    "it": "Galassia Pesce Koi",
+    "ko": "비단잉어 은하",
+    "es": "Galaxia Pez Koi",
+    "ru": "Галактика Полосатая зубатка"
+  },
+  "UGC 07766": {
+    "name": "Koi Fish Galaxy",
+    "ar": "‎مجرة سمكة كوي‎",
+    "zh": "锦鲤星系",
+    "fr": "Galaxie de la Carpe Koï",
+    "de": "Koi-Fisch-Galaxie",
+    "it": "Galassia Pesce Koi",
+    "ko": "비단잉어 은하",
+    "es": "Galaxia Pez Koi",
+    "ru": "Галактика Полосатая зубатка"
+  },
+  "UGC07766": {
+    "name": "Koi Fish Galaxy",
+    "ar": "‎مجرة سمكة كوي‎",
+    "zh": "锦鲤星系",
+    "fr": "Galaxie de la Carpe Koï",
+    "de": "Koi-Fisch-Galaxie",
+    "it": "Galassia Pesce Koi",
+    "ko": "비단잉어 은하",
+    "es": "Galaxia Pez Koi",
+    "ru": "Галактика Полосатая зубатка"
+  },
+  "C 37": {
+    "name": "20 Vulpeculae Cluster",
+    "ar": "‎‎حشد 20 الثعلب‎‎",
+    "zh": "狐狸座20星团",
+    "fi": "20 Vulpeculae -joukko",
+    "fr": "Amas 20 Vulpeculae",
+    "de": "20 Vulpeculae Haufen",
+    "it": "Ammasso 20 Vulpeculae",
+    "ja": "こぎつね座20星団",
+    "ko": "여우자리 20 성단",
+    "la": "Congregatio 20 Vulpeculae",
+    "fa": "خوشه 20 روباهک",
+    "es": "Cúmulo 20 Vulpeculae",
+    "ru": "Скопление 20 Лисички"
+  },
+  "C37": {
+    "name": "20 Vulpeculae Cluster",
+    "ar": "‎‎حشد 20 الثعلب‎‎",
+    "zh": "狐狸座20星团",
+    "fi": "20 Vulpeculae -joukko",
+    "fr": "Amas 20 Vulpeculae",
+    "de": "20 Vulpeculae Haufen",
+    "it": "Ammasso 20 Vulpeculae",
+    "ja": "こぎつね座20星団",
+    "ko": "여우자리 20 성단",
+    "la": "Congregatio 20 Vulpeculae",
+    "fa": "خوشه 20 روباهک",
+    "es": "Cúmulo 20 Vulpeculae",
+    "ru": "Скопление 20 Лисички"
+  },
+  "NGC6885": {
+    "name": "20 Vulpeculae Cluster",
+    "ar": "‎‎حشد 20 الثعلب‎‎",
+    "zh": "狐狸座20星团",
+    "fi": "20 Vulpeculae -joukko",
+    "fr": "Amas 20 Vulpeculae",
+    "de": "20 Vulpeculae Haufen",
+    "it": "Ammasso 20 Vulpeculae",
+    "ja": "こぎつね座20星団",
+    "ko": "여우자리 20 성단",
+    "la": "Congregatio 20 Vulpeculae",
+    "fa": "خوشه 20 روباهک",
+    "es": "Cúmulo 20 Vulpeculae",
+    "ru": "Скопление 20 Лисички"
+  },
+  "C 037": {
+    "name": "20 Vulpeculae Cluster",
+    "ar": "‎‎حشد 20 الثعلب‎‎",
+    "zh": "狐狸座20星团",
+    "fi": "20 Vulpeculae -joukko",
+    "fr": "Amas 20 Vulpeculae",
+    "de": "20 Vulpeculae Haufen",
+    "it": "Ammasso 20 Vulpeculae",
+    "ja": "こぎつね座20星団",
+    "ko": "여우자리 20 성단",
+    "la": "Congregatio 20 Vulpeculae",
+    "fa": "خوشه 20 روباهک",
+    "es": "Cúmulo 20 Vulpeculae",
+    "ru": "Скопление 20 Лисички"
+  },
+  "C037": {
+    "name": "20 Vulpeculae Cluster",
+    "ar": "‎‎حشد 20 الثعلب‎‎",
+    "zh": "狐狸座20星团",
+    "fi": "20 Vulpeculae -joukko",
+    "fr": "Amas 20 Vulpeculae",
+    "de": "20 Vulpeculae Haufen",
+    "it": "Ammasso 20 Vulpeculae",
+    "ja": "こぎつね座20星団",
+    "ko": "여우자리 20 성단",
+    "la": "Congregatio 20 Vulpeculae",
+    "fa": "خوشه 20 روباهک",
+    "es": "Cúmulo 20 Vulpeculae",
+    "ru": "Скопление 20 Лисички"
+  },
+  "MWSC 3278": {
+    "name": "20 Vulpeculae Cluster",
+    "ar": "‎‎حشد 20 الثعلب‎‎",
+    "zh": "狐狸座20星团",
+    "fi": "20 Vulpeculae -joukko",
+    "fr": "Amas 20 Vulpeculae",
+    "de": "20 Vulpeculae Haufen",
+    "it": "Ammasso 20 Vulpeculae",
+    "ja": "こぎつね座20星団",
+    "ko": "여우자리 20 성단",
+    "la": "Congregatio 20 Vulpeculae",
+    "fa": "خوشه 20 روباهک",
+    "es": "Cúmulo 20 Vulpeculae",
+    "ru": "Скопление 20 Лисички"
+  },
+  "MWSC3278": {
+    "name": "20 Vulpeculae Cluster",
+    "ar": "‎‎حشد 20 الثعلب‎‎",
+    "zh": "狐狸座20星团",
+    "fi": "20 Vulpeculae -joukko",
+    "fr": "Amas 20 Vulpeculae",
+    "de": "20 Vulpeculae Haufen",
+    "it": "Ammasso 20 Vulpeculae",
+    "ja": "こぎつね座20星団",
+    "ko": "여우자리 20 성단",
+    "la": "Congregatio 20 Vulpeculae",
+    "fa": "خوشه 20 روباهک",
+    "es": "Cúmulo 20 Vulpeculae",
+    "ru": "Скопление 20 Лисички"
+  },
+  "C 38": {
+    "name": "Needle Galaxy",
+    "ar": "‎‎مجرة الإبرة‎‎",
+    "zh": "针状星系",
+    "fi": "Neulagalaksi",
+    "fr": "Galaxie de l'Aiguille",
+    "de": "Nadel-Galaxie",
+    "it": "Galassia Ago",
+    "ko": "바늘 은하",
+    "fa": "کهکشان سوزن",
+    "es": "Galaxia de la Aguja",
+    "ru": "Галактика Игла"
+  },
+  "C38": {
+    "name": "Needle Galaxy",
+    "ar": "‎‎مجرة الإبرة‎‎",
+    "zh": "针状星系",
+    "fi": "Neulagalaksi",
+    "fr": "Galaxie de l'Aiguille",
+    "de": "Nadel-Galaxie",
+    "it": "Galassia Ago",
+    "ko": "바늘 은하",
+    "fa": "کهکشان سوزن",
+    "es": "Galaxia de la Aguja",
+    "ru": "Галактика Игла"
+  },
+  "NGC4565": {
+    "name": "Needle Galaxy",
+    "ar": "‎‎مجرة الإبرة‎‎",
+    "zh": "针状星系",
+    "fi": "Neulagalaksi",
+    "fr": "Galaxie de l'Aiguille",
+    "de": "Nadel-Galaxie",
+    "it": "Galassia Ago",
+    "ko": "바늘 은하",
+    "fa": "کهکشان سوزن",
+    "es": "Galaxia de la Aguja",
+    "ru": "Галактика Игла"
+  },
+  "2MASX J12362080+2559146": {
+    "name": "Needle Galaxy",
+    "ar": "‎‎مجرة الإبرة‎‎",
+    "zh": "针状星系",
+    "fi": "Neulagalaksi",
+    "fr": "Galaxie de l'Aiguille",
+    "de": "Nadel-Galaxie",
+    "it": "Galassia Ago",
+    "ko": "바늘 은하",
+    "fa": "کهکشان سوزن",
+    "es": "Galaxia de la Aguja",
+    "ru": "Галактика Игла"
+  },
+  "2MASXJ12362080+2559146": {
+    "name": "Needle Galaxy",
+    "ar": "‎‎مجرة الإبرة‎‎",
+    "zh": "针状星系",
+    "fi": "Neulagalaksi",
+    "fr": "Galaxie de l'Aiguille",
+    "de": "Nadel-Galaxie",
+    "it": "Galassia Ago",
+    "ko": "바늘 은하",
+    "fa": "کهکشان سوزن",
+    "es": "Galaxia de la Aguja",
+    "ru": "Галактика Игла"
+  },
+  "C 038": {
+    "name": "Needle Galaxy",
+    "ar": "‎‎مجرة الإبرة‎‎",
+    "zh": "针状星系",
+    "fi": "Neulagalaksi",
+    "fr": "Galaxie de l'Aiguille",
+    "de": "Nadel-Galaxie",
+    "it": "Galassia Ago",
+    "ko": "바늘 은하",
+    "fa": "کهکشان سوزن",
+    "es": "Galaxia de la Aguja",
+    "ru": "Галактика Игла"
+  },
+  "C038": {
+    "name": "Needle Galaxy",
+    "ar": "‎‎مجرة الإبرة‎‎",
+    "zh": "针状星系",
+    "fi": "Neulagalaksi",
+    "fr": "Galaxie de l'Aiguille",
+    "de": "Nadel-Galaxie",
+    "it": "Galassia Ago",
+    "ko": "바늘 은하",
+    "fa": "کهکشان سوزن",
+    "es": "Galaxia de la Aguja",
+    "ru": "Галактика Игла"
+  },
+  "IRAS 12338+2615": {
+    "name": "Needle Galaxy",
+    "ar": "‎‎مجرة الإبرة‎‎",
+    "zh": "针状星系",
+    "fi": "Neulagalaksi",
+    "fr": "Galaxie de l'Aiguille",
+    "de": "Nadel-Galaxie",
+    "it": "Galassia Ago",
+    "ko": "바늘 은하",
+    "fa": "کهکشان سوزن",
+    "es": "Galaxia de la Aguja",
+    "ru": "Галактика Игла"
+  },
+  "IRAS12338+2615": {
+    "name": "Needle Galaxy",
+    "ar": "‎‎مجرة الإبرة‎‎",
+    "zh": "针状星系",
+    "fi": "Neulagalaksi",
+    "fr": "Galaxie de l'Aiguille",
+    "de": "Nadel-Galaxie",
+    "it": "Galassia Ago",
+    "ko": "바늘 은하",
+    "fa": "کهکشان سوزن",
+    "es": "Galaxia de la Aguja",
+    "ru": "Галактика Игла"
+  },
+  "MCG +04-30-006": {
+    "name": "Needle Galaxy",
+    "ar": "‎‎مجرة الإبرة‎‎",
+    "zh": "针状星系",
+    "fi": "Neulagalaksi",
+    "fr": "Galaxie de l'Aiguille",
+    "de": "Nadel-Galaxie",
+    "it": "Galassia Ago",
+    "ko": "바늘 은하",
+    "fa": "کهکشان سوزن",
+    "es": "Galaxia de la Aguja",
+    "ru": "Галактика Игла"
+  },
+  "MCG+04-30-006": {
+    "name": "Needle Galaxy",
+    "ar": "‎‎مجرة الإبرة‎‎",
+    "zh": "针状星系",
+    "fi": "Neulagalaksi",
+    "fr": "Galaxie de l'Aiguille",
+    "de": "Nadel-Galaxie",
+    "it": "Galassia Ago",
+    "ko": "바늘 은하",
+    "fa": "کهکشان سوزن",
+    "es": "Galaxia de la Aguja",
+    "ru": "Галактика Игла"
+  },
+  "PGC 042038": {
+    "name": "Needle Galaxy",
+    "ar": "‎‎مجرة الإبرة‎‎",
+    "zh": "针状星系",
+    "fi": "Neulagalaksi",
+    "fr": "Galaxie de l'Aiguille",
+    "de": "Nadel-Galaxie",
+    "it": "Galassia Ago",
+    "ko": "바늘 은하",
+    "fa": "کهکشان سوزن",
+    "es": "Galaxia de la Aguja",
+    "ru": "Галактика Игла"
+  },
+  "PGC042038": {
+    "name": "Needle Galaxy",
+    "ar": "‎‎مجرة الإبرة‎‎",
+    "zh": "针状星系",
+    "fi": "Neulagalaksi",
+    "fr": "Galaxie de l'Aiguille",
+    "de": "Nadel-Galaxie",
+    "it": "Galassia Ago",
+    "ko": "바늘 은하",
+    "fa": "کهکشان سوزن",
+    "es": "Galaxia de la Aguja",
+    "ru": "Галактика Игла"
+  },
+  "UGC 07772": {
+    "name": "Needle Galaxy",
+    "ar": "‎‎مجرة الإبرة‎‎",
+    "zh": "针状星系",
+    "fi": "Neulagalaksi",
+    "fr": "Galaxie de l'Aiguille",
+    "de": "Nadel-Galaxie",
+    "it": "Galassia Ago",
+    "ko": "바늘 은하",
+    "fa": "کهکشان سوزن",
+    "es": "Galaxia de la Aguja",
+    "ru": "Галактика Игла"
+  },
+  "UGC07772": {
+    "name": "Needle Galaxy",
+    "ar": "‎‎مجرة الإبرة‎‎",
+    "zh": "针状星系",
+    "fi": "Neulagalaksi",
+    "fr": "Galaxie de l'Aiguille",
+    "de": "Nadel-Galaxie",
+    "it": "Galassia Ago",
+    "ko": "바늘 은하",
+    "fa": "کهکشان سوزن",
+    "es": "Galaxia de la Aguja",
+    "ru": "Галактика Игла"
+  },
+  "Needle Galaxy": {
+    "name": "Needle Galaxy",
+    "ar": "‎‎مجرة الإبرة‎‎",
+    "zh": "针状星系",
+    "fi": "Neulagalaksi",
+    "fr": "Galaxie de l'Aiguille",
+    "de": "Nadel-Galaxie",
+    "it": "Galassia Ago",
+    "ko": "바늘 은하",
+    "fa": "کهکشان سوزن",
+    "es": "Galaxia de la Aguja",
+    "ru": "Галактика Игла"
+  },
+  "NeedleGalaxy": {
+    "name": "Needle Galaxy",
+    "ar": "‎‎مجرة الإبرة‎‎",
+    "zh": "针状星系",
+    "fi": "Neulagalaksi",
+    "fr": "Galaxie de l'Aiguille",
+    "de": "Nadel-Galaxie",
+    "it": "Galassia Ago",
+    "ko": "바늘 은하",
+    "fa": "کهکشان سوزن",
+    "es": "Galaxia de la Aguja",
+    "ru": "Галактика Игла"
+  },
+  "C 39": {
+    "name": "Eskimo Nebula",
+    "ar": "‎سديم الاسكيمو‎",
+    "zh": "爱斯基摩星云",
+    "fi": "Eskimosumu",
+    "fr": "Nébuleuse Eskimo",
+    "de": "Eskimo-Nebel",
+    "el": "Νεφέλωμα Εσκιμώος",
+    "it": "Nebulosa Eskimo",
+    "ja": "エスキモー星云",
+    "ko": "에스키모 성운",
+    "la": "Nebula Piscivori",
+    "fa": "سحابی اسکیمو",
+    "es": "Nebulosa Esquimal",
+    "ru": "Туманность Эскимос",
+    "tr": "Eskimo Bulutsusu"
+  },
+  "C39": {
+    "name": "Eskimo Nebula",
+    "ar": "‎سديم الاسكيمو‎",
+    "zh": "爱斯基摩星云",
+    "fi": "Eskimosumu",
+    "fr": "Nébuleuse Eskimo",
+    "de": "Eskimo-Nebel",
+    "el": "Νεφέλωμα Εσκιμώος",
+    "it": "Nebulosa Eskimo",
+    "ja": "エスキモー星云",
+    "ko": "에스키모 성운",
+    "la": "Nebula Piscivori",
+    "fa": "سحابی اسکیمو",
+    "es": "Nebulosa Esquimal",
+    "ru": "Туманность Эскимос",
+    "tr": "Eskimo Bulutsusu"
+  },
+  "NGC2392": {
+    "name": "Eskimo Nebula",
+    "ar": "‎سديم الاسكيمو‎",
+    "zh": "爱斯基摩星云",
+    "fi": "Eskimosumu",
+    "fr": "Nébuleuse Eskimo",
+    "de": "Eskimo-Nebel",
+    "el": "Νεφέλωμα Εσκιμώος",
+    "it": "Nebulosa Eskimo",
+    "ja": "エスキモー星云",
+    "ko": "에스키모 성운",
+    "la": "Nebula Piscivori",
+    "fa": "سحابی اسکیمو",
+    "es": "Nebulosa Esquimal",
+    "ru": "Туманность Эскимос",
+    "tr": "Eskimo Bulutsusu"
+  },
+  "C 039": {
+    "name": "Eskimo Nebula",
+    "ar": "‎سديم الاسكيمو‎",
+    "zh": "爱斯基摩星云",
+    "fi": "Eskimosumu",
+    "fr": "Nébuleuse Eskimo",
+    "de": "Eskimo-Nebel",
+    "el": "Νεφέλωμα Εσκιμώος",
+    "it": "Nebulosa Eskimo",
+    "ja": "エスキモー星云",
+    "ko": "에스키모 성운",
+    "la": "Nebula Piscivori",
+    "fa": "سحابی اسکیمو",
+    "es": "Nebulosa Esquimal",
+    "ru": "Туманность Эскимос",
+    "tr": "Eskimo Bulutsusu"
+  },
+  "C039": {
+    "name": "Eskimo Nebula",
+    "ar": "‎سديم الاسكيمو‎",
+    "zh": "爱斯基摩星云",
+    "fi": "Eskimosumu",
+    "fr": "Nébuleuse Eskimo",
+    "de": "Eskimo-Nebel",
+    "el": "Νεφέλωμα Εσκιμώος",
+    "it": "Nebulosa Eskimo",
+    "ja": "エスキモー星云",
+    "ko": "에스키모 성운",
+    "la": "Nebula Piscivori",
+    "fa": "سحابی اسکیمو",
+    "es": "Nebulosa Esquimal",
+    "ru": "Туманность Эскимос",
+    "tr": "Eskimo Bulutsusu"
+  },
+  "IRAS 07262+2100": {
+    "name": "Eskimo Nebula",
+    "ar": "‎سديم الاسكيمو‎",
+    "zh": "爱斯基摩星云",
+    "fi": "Eskimosumu",
+    "fr": "Nébuleuse Eskimo",
+    "de": "Eskimo-Nebel",
+    "el": "Νεφέλωμα Εσκιμώος",
+    "it": "Nebulosa Eskimo",
+    "ja": "エスキモー星云",
+    "ko": "에스키모 성운",
+    "la": "Nebula Piscivori",
+    "fa": "سحابی اسکیمو",
+    "es": "Nebulosa Esquimal",
+    "ru": "Туманность Эскимос",
+    "tr": "Eskimo Bulutsusu"
+  },
+  "IRAS07262+2100": {
+    "name": "Eskimo Nebula",
+    "ar": "‎سديم الاسكيمو‎",
+    "zh": "爱斯基摩星云",
+    "fi": "Eskimosumu",
+    "fr": "Nébuleuse Eskimo",
+    "de": "Eskimo-Nebel",
+    "el": "Νεφέλωμα Εσκιμώος",
+    "it": "Nebulosa Eskimo",
+    "ja": "エスキモー星云",
+    "ko": "에스키모 성운",
+    "la": "Nebula Piscivori",
+    "fa": "سحابی اسکیمو",
+    "es": "Nebulosa Esquimal",
+    "ru": "Туманность Эскимос",
+    "tr": "Eskimo Bulutsusu"
+  },
+  "PN G197.8+17.3": {
+    "name": "Eskimo Nebula",
+    "ar": "‎سديم الاسكيمو‎",
+    "zh": "爱斯基摩星云",
+    "fi": "Eskimosumu",
+    "fr": "Nébuleuse Eskimo",
+    "de": "Eskimo-Nebel",
+    "el": "Νεφέλωμα Εσκιμώος",
+    "it": "Nebulosa Eskimo",
+    "ja": "エスキモー星云",
+    "ko": "에스키모 성운",
+    "la": "Nebula Piscivori",
+    "fa": "سحابی اسکیمو",
+    "es": "Nebulosa Esquimal",
+    "ru": "Туманность Эскимос",
+    "tr": "Eskimo Bulutsusu"
+  },
+  "PNG197.8+17.3": {
+    "name": "Eskimo Nebula",
+    "ar": "‎سديم الاسكيمو‎",
+    "zh": "爱斯基摩星云",
+    "fi": "Eskimosumu",
+    "fr": "Nébuleuse Eskimo",
+    "de": "Eskimo-Nebel",
+    "el": "Νεφέλωμα Εσκιμώος",
+    "it": "Nebulosa Eskimo",
+    "ja": "エスキモー星云",
+    "ko": "에스키모 성운",
+    "la": "Nebula Piscivori",
+    "fa": "سحابی اسکیمو",
+    "es": "Nebulosa Esquimal",
+    "ru": "Туманность Эскимос",
+    "tr": "Eskimo Bulutsusu"
+  },
+  "Eskimo Nebula": {
+    "name": "Eskimo Nebula",
+    "ar": "‎سديم الاسكيمو‎",
+    "zh": "爱斯基摩星云",
+    "fi": "Eskimosumu",
+    "fr": "Nébuleuse Eskimo",
+    "de": "Eskimo-Nebel",
+    "el": "Νεφέλωμα Εσκιμώος",
+    "it": "Nebulosa Eskimo",
+    "ja": "エスキモー星云",
+    "ko": "에스키모 성운",
+    "la": "Nebula Piscivori",
+    "fa": "سحابی اسکیمو",
+    "es": "Nebulosa Esquimal",
+    "ru": "Туманность Эскимос",
+    "tr": "Eskimo Bulutsusu"
+  },
+  "EskimoNebula": {
+    "name": "Eskimo Nebula",
+    "ar": "‎سديم الاسكيمو‎",
+    "zh": "爱斯基摩星云",
+    "fi": "Eskimosumu",
+    "fr": "Nébuleuse Eskimo",
+    "de": "Eskimo-Nebel",
+    "el": "Νεφέλωμα Εσκιμώος",
+    "it": "Nebulosa Eskimo",
+    "ja": "エスキモー星云",
+    "ko": "에스키모 성운",
+    "la": "Nebula Piscivori",
+    "fa": "سحابی اسکیمو",
+    "es": "Nebulosa Esquimal",
+    "ru": "Туманность Эскимос",
+    "tr": "Eskimo Bulutsusu"
+  },
+  "C 40": {
+    "name": "SDSS J112003.81+182124.6"
+  },
+  "C40": {
+    "name": "SDSS J112003.81+182124.6"
+  },
+  "NGC 3632": {
+    "name": "SDSS J112003.81+182124.6"
+  },
+  "NGC3632": {
+    "name": "SDSS J112003.81+182124.6"
+  },
+  "NGC 3626": {
+    "name": "SDSS J112003.81+182124.6"
+  },
+  "NGC3626": {
+    "name": "SDSS J112003.81+182124.6"
+  },
+  "2MASX J11200379+1821244": {
+    "name": "SDSS J112003.81+182124.6"
+  },
+  "2MASXJ11200379+1821244": {
+    "name": "SDSS J112003.81+182124.6"
+  },
+  "C 040": {
+    "name": "SDSS J112003.81+182124.6"
+  },
+  "C040": {
+    "name": "SDSS J112003.81+182124.6"
+  },
+  "MCG +03-29-032": {
+    "name": "SDSS J112003.81+182124.6"
+  },
+  "MCG+03-29-032": {
+    "name": "SDSS J112003.81+182124.6"
+  },
+  "PGC 034684": {
+    "name": "SDSS J112003.81+182124.6"
+  },
+  "PGC034684": {
+    "name": "SDSS J112003.81+182124.6"
+  },
+  "SDSS J112003.81+182124.6": {
+    "name": "SDSS J112003.81+182124.6"
+  },
+  "SDSSJ112003.81+182124.6": {
+    "name": "SDSS J112003.81+182124.6"
+  },
+  "UGC 06343": {
+    "name": "SDSS J112003.81+182124.6"
+  },
+  "UGC06343": {
+    "name": "SDSS J112003.81+182124.6"
+  },
+  "C41": {
+    "name": "Hyades",
+    "ar": "‎‎القلاص‎‎",
+    "zh": "毕星团",
+    "fi": "Hyadit",
+    "de": "Hyaden",
+    "ja": "ヒアデス",
+    "ko": "히아데스",
+    "fa": "افسانه یونانی هیادز",
+    "es": "Híades",
+    "ru": "Гиады"
+  },
+  "C 42": {
+    "name": "NGC 7006"
+  },
+  "C42": {
+    "name": "NGC 7006"
+  },
+  "NGC 7006": {
+    "name": "NGC 7006"
+  },
+  "NGC7006": {
+    "name": "NGC 7006"
+  },
+  "2MASX J21012946+1611164": {
+    "name": "NGC 7006"
+  },
+  "2MASXJ21012946+1611164": {
+    "name": "NGC 7006"
+  },
+  "C 042": {
+    "name": "NGC 7006"
+  },
+  "C042": {
+    "name": "NGC 7006"
+  },
+  "MWSC 3446": {
+    "name": "NGC 7006"
+  },
+  "MWSC3446": {
+    "name": "NGC 7006"
+  },
+  "C 43": {
+    "name": "The Little Sombrero Galaxy",
+    "ar": "‎مجرة القبعة المكسيكية الصغيرة‎",
+    "zh": "小墨西哥帽星系",
+    "fi": "Pieni sombrerogalaksi",
+    "fr": "Galaxie du Petit Sombrero",
+    "de": "Kleine Sombrero-Galaxie",
+    "it": "Galassia del Piccolo Sombrero",
+    "ko": "작은 솜브레오 은하",
+    "la": "Sombrero minor galaxia",
+    "es": "Galaxia del Pequeño Sombrero",
+    "ru": "Галактика Маленькое сомбреро"
+  },
+  "C43": {
+    "name": "The Little Sombrero Galaxy",
+    "ar": "‎مجرة القبعة المكسيكية الصغيرة‎",
+    "zh": "小墨西哥帽星系",
+    "fi": "Pieni sombrerogalaksi",
+    "fr": "Galaxie du Petit Sombrero",
+    "de": "Kleine Sombrero-Galaxie",
+    "it": "Galassia del Piccolo Sombrero",
+    "ko": "작은 솜브레오 은하",
+    "la": "Sombrero minor galaxia",
+    "es": "Galaxia del Pequeño Sombrero",
+    "ru": "Галактика Маленькое сомбреро"
+  },
+  "NGC7814": {
+    "name": "The Little Sombrero Galaxy",
+    "ar": "‎مجرة القبعة المكسيكية الصغيرة‎",
+    "zh": "小墨西哥帽星系",
+    "fi": "Pieni sombrerogalaksi",
+    "fr": "Galaxie du Petit Sombrero",
+    "de": "Kleine Sombrero-Galaxie",
+    "it": "Galassia del Piccolo Sombrero",
+    "ko": "작은 솜브레오 은하",
+    "la": "Sombrero minor galaxia",
+    "es": "Galaxia del Pequeño Sombrero",
+    "ru": "Галактика Маленькое сомбреро"
+  },
+  "2MASX J00031494+1608428": {
+    "name": "The Little Sombrero Galaxy",
+    "ar": "‎مجرة القبعة المكسيكية الصغيرة‎",
+    "zh": "小墨西哥帽星系",
+    "fi": "Pieni sombrerogalaksi",
+    "fr": "Galaxie du Petit Sombrero",
+    "de": "Kleine Sombrero-Galaxie",
+    "it": "Galassia del Piccolo Sombrero",
+    "ko": "작은 솜브레오 은하",
+    "la": "Sombrero minor galaxia",
+    "es": "Galaxia del Pequeño Sombrero",
+    "ru": "Галактика Маленькое сомбреро"
+  },
+  "2MASXJ00031494+1608428": {
+    "name": "The Little Sombrero Galaxy",
+    "ar": "‎مجرة القبعة المكسيكية الصغيرة‎",
+    "zh": "小墨西哥帽星系",
+    "fi": "Pieni sombrerogalaksi",
+    "fr": "Galaxie du Petit Sombrero",
+    "de": "Kleine Sombrero-Galaxie",
+    "it": "Galassia del Piccolo Sombrero",
+    "ko": "작은 솜브레오 은하",
+    "la": "Sombrero minor galaxia",
+    "es": "Galaxia del Pequeño Sombrero",
+    "ru": "Галактика Маленькое сомбреро"
+  },
+  "C 043": {
+    "name": "The Little Sombrero Galaxy",
+    "ar": "‎مجرة القبعة المكسيكية الصغيرة‎",
+    "zh": "小墨西哥帽星系",
+    "fi": "Pieni sombrerogalaksi",
+    "fr": "Galaxie du Petit Sombrero",
+    "de": "Kleine Sombrero-Galaxie",
+    "it": "Galassia del Piccolo Sombrero",
+    "ko": "작은 솜브레오 은하",
+    "la": "Sombrero minor galaxia",
+    "es": "Galaxia del Pequeño Sombrero",
+    "ru": "Галактика Маленькое сомбреро"
+  },
+  "C043": {
+    "name": "The Little Sombrero Galaxy",
+    "ar": "‎مجرة القبعة المكسيكية الصغيرة‎",
+    "zh": "小墨西哥帽星系",
+    "fi": "Pieni sombrerogalaksi",
+    "fr": "Galaxie du Petit Sombrero",
+    "de": "Kleine Sombrero-Galaxie",
+    "it": "Galassia del Piccolo Sombrero",
+    "ko": "작은 솜브레오 은하",
+    "la": "Sombrero minor galaxia",
+    "es": "Galaxia del Pequeño Sombrero",
+    "ru": "Галактика Маленькое сомбреро"
+  },
+  "MCG +03-01-020": {
+    "name": "The Little Sombrero Galaxy",
+    "ar": "‎مجرة القبعة المكسيكية الصغيرة‎",
+    "zh": "小墨西哥帽星系",
+    "fi": "Pieni sombrerogalaksi",
+    "fr": "Galaxie du Petit Sombrero",
+    "de": "Kleine Sombrero-Galaxie",
+    "it": "Galassia del Piccolo Sombrero",
+    "ko": "작은 솜브레오 은하",
+    "la": "Sombrero minor galaxia",
+    "es": "Galaxia del Pequeño Sombrero",
+    "ru": "Галактика Маленькое сомбреро"
+  },
+  "MCG+03-01-020": {
+    "name": "The Little Sombrero Galaxy",
+    "ar": "‎مجرة القبعة المكسيكية الصغيرة‎",
+    "zh": "小墨西哥帽星系",
+    "fi": "Pieni sombrerogalaksi",
+    "fr": "Galaxie du Petit Sombrero",
+    "de": "Kleine Sombrero-Galaxie",
+    "it": "Galassia del Piccolo Sombrero",
+    "ko": "작은 솜브레오 은하",
+    "la": "Sombrero minor galaxia",
+    "es": "Galaxia del Pequeño Sombrero",
+    "ru": "Галактика Маленькое сомбреро"
+  },
+  "PGC 000218": {
+    "name": "The Little Sombrero Galaxy",
+    "ar": "‎مجرة القبعة المكسيكية الصغيرة‎",
+    "zh": "小墨西哥帽星系",
+    "fi": "Pieni sombrerogalaksi",
+    "fr": "Galaxie du Petit Sombrero",
+    "de": "Kleine Sombrero-Galaxie",
+    "it": "Galassia del Piccolo Sombrero",
+    "ko": "작은 솜브레오 은하",
+    "la": "Sombrero minor galaxia",
+    "es": "Galaxia del Pequeño Sombrero",
+    "ru": "Галактика Маленькое сомбреро"
+  },
+  "PGC000218": {
+    "name": "The Little Sombrero Galaxy",
+    "ar": "‎مجرة القبعة المكسيكية الصغيرة‎",
+    "zh": "小墨西哥帽星系",
+    "fi": "Pieni sombrerogalaksi",
+    "fr": "Galaxie du Petit Sombrero",
+    "de": "Kleine Sombrero-Galaxie",
+    "it": "Galassia del Piccolo Sombrero",
+    "ko": "작은 솜브레오 은하",
+    "la": "Sombrero minor galaxia",
+    "es": "Galaxia del Pequeño Sombrero",
+    "ru": "Галактика Маленькое сомбреро"
+  },
+  "SDSS J000315.04+160844.7": {
+    "name": "The Little Sombrero Galaxy",
+    "ar": "‎مجرة القبعة المكسيكية الصغيرة‎",
+    "zh": "小墨西哥帽星系",
+    "fi": "Pieni sombrerogalaksi",
+    "fr": "Galaxie du Petit Sombrero",
+    "de": "Kleine Sombrero-Galaxie",
+    "it": "Galassia del Piccolo Sombrero",
+    "ko": "작은 솜브레오 은하",
+    "la": "Sombrero minor galaxia",
+    "es": "Galaxia del Pequeño Sombrero",
+    "ru": "Галактика Маленькое сомбреро"
+  },
+  "SDSSJ000315.04+160844.7": {
+    "name": "The Little Sombrero Galaxy",
+    "ar": "‎مجرة القبعة المكسيكية الصغيرة‎",
+    "zh": "小墨西哥帽星系",
+    "fi": "Pieni sombrerogalaksi",
+    "fr": "Galaxie du Petit Sombrero",
+    "de": "Kleine Sombrero-Galaxie",
+    "it": "Galassia del Piccolo Sombrero",
+    "ko": "작은 솜브레오 은하",
+    "la": "Sombrero minor galaxia",
+    "es": "Galaxia del Pequeño Sombrero",
+    "ru": "Галактика Маленькое сомбреро"
+  },
+  "SDSS J000315.04+160844.8": {
+    "name": "The Little Sombrero Galaxy",
+    "ar": "‎مجرة القبعة المكسيكية الصغيرة‎",
+    "zh": "小墨西哥帽星系",
+    "fi": "Pieni sombrerogalaksi",
+    "fr": "Galaxie du Petit Sombrero",
+    "de": "Kleine Sombrero-Galaxie",
+    "it": "Galassia del Piccolo Sombrero",
+    "ko": "작은 솜브레오 은하",
+    "la": "Sombrero minor galaxia",
+    "es": "Galaxia del Pequeño Sombrero",
+    "ru": "Галактика Маленькое сомбреро"
+  },
+  "SDSSJ000315.04+160844.8": {
+    "name": "The Little Sombrero Galaxy",
+    "ar": "‎مجرة القبعة المكسيكية الصغيرة‎",
+    "zh": "小墨西哥帽星系",
+    "fi": "Pieni sombrerogalaksi",
+    "fr": "Galaxie du Petit Sombrero",
+    "de": "Kleine Sombrero-Galaxie",
+    "it": "Galassia del Piccolo Sombrero",
+    "ko": "작은 솜브레오 은하",
+    "la": "Sombrero minor galaxia",
+    "es": "Galaxia del Pequeño Sombrero",
+    "ru": "Галактика Маленькое сомбреро"
+  },
+  "UGC 00008": {
+    "name": "The Little Sombrero Galaxy",
+    "ar": "‎مجرة القبعة المكسيكية الصغيرة‎",
+    "zh": "小墨西哥帽星系",
+    "fi": "Pieni sombrerogalaksi",
+    "fr": "Galaxie du Petit Sombrero",
+    "de": "Kleine Sombrero-Galaxie",
+    "it": "Galassia del Piccolo Sombrero",
+    "ko": "작은 솜브레오 은하",
+    "la": "Sombrero minor galaxia",
+    "es": "Galaxia del Pequeño Sombrero",
+    "ru": "Галактика Маленькое сомбреро"
+  },
+  "UGC00008": {
+    "name": "The Little Sombrero Galaxy",
+    "ar": "‎مجرة القبعة المكسيكية الصغيرة‎",
+    "zh": "小墨西哥帽星系",
+    "fi": "Pieni sombrerogalaksi",
+    "fr": "Galaxie du Petit Sombrero",
+    "de": "Kleine Sombrero-Galaxie",
+    "it": "Galassia del Piccolo Sombrero",
+    "ko": "작은 솜브레오 은하",
+    "la": "Sombrero minor galaxia",
+    "es": "Galaxia del Pequeño Sombrero",
+    "ru": "Галактика Маленькое сомбреро"
+  },
+  "C 44": {
+    "name": "Superman Galaxy",
+    "ar": "‎مجرة سوبرمان‎",
+    "zh": "超人星系",
+    "fr": "Galaxie de Superman",
+    "de": "Superman-Galaxie",
+    "it": "Galassia Superman",
+    "ko": "슈퍼맨 은하",
+    "es": "Galaxia Superman",
+    "ru": "Галактика Супермэн"
+  },
+  "C44": {
+    "name": "Superman Galaxy",
+    "ar": "‎مجرة سوبرمان‎",
+    "zh": "超人星系",
+    "fr": "Galaxie de Superman",
+    "de": "Superman-Galaxie",
+    "it": "Galassia Superman",
+    "ko": "슈퍼맨 은하",
+    "es": "Galaxia Superman",
+    "ru": "Галактика Супермэн"
+  },
+  "NGC7479": {
+    "name": "Superman Galaxy",
+    "ar": "‎مجرة سوبرمان‎",
+    "zh": "超人星系",
+    "fr": "Galaxie de Superman",
+    "de": "Superman-Galaxie",
+    "it": "Galassia Superman",
+    "ko": "슈퍼맨 은하",
+    "es": "Galaxia Superman",
+    "ru": "Галактика Супермэн"
+  },
+  "2MASX J23045666+1219223": {
+    "name": "Superman Galaxy",
+    "ar": "‎مجرة سوبرمان‎",
+    "zh": "超人星系",
+    "fr": "Galaxie de Superman",
+    "de": "Superman-Galaxie",
+    "it": "Galassia Superman",
+    "ko": "슈퍼맨 은하",
+    "es": "Galaxia Superman",
+    "ru": "Галактика Супермэн"
+  },
+  "2MASXJ23045666+1219223": {
+    "name": "Superman Galaxy",
+    "ar": "‎مجرة سوبرمان‎",
+    "zh": "超人星系",
+    "fr": "Galaxie de Superman",
+    "de": "Superman-Galaxie",
+    "it": "Galassia Superman",
+    "ko": "슈퍼맨 은하",
+    "es": "Galaxia Superman",
+    "ru": "Галактика Супермэн"
+  },
+  "C 044": {
+    "name": "Superman Galaxy",
+    "ar": "‎مجرة سوبرمان‎",
+    "zh": "超人星系",
+    "fr": "Galaxie de Superman",
+    "de": "Superman-Galaxie",
+    "it": "Galassia Superman",
+    "ko": "슈퍼맨 은하",
+    "es": "Galaxia Superman",
+    "ru": "Галактика Супермэн"
+  },
+  "C044": {
+    "name": "Superman Galaxy",
+    "ar": "‎مجرة سوبرمان‎",
+    "zh": "超人星系",
+    "fr": "Galaxie de Superman",
+    "de": "Superman-Galaxie",
+    "it": "Galassia Superman",
+    "ko": "슈퍼맨 은하",
+    "es": "Galaxia Superman",
+    "ru": "Галактика Супермэн"
+  },
+  "IRAS 23024+1203": {
+    "name": "Superman Galaxy",
+    "ar": "‎مجرة سوبرمان‎",
+    "zh": "超人星系",
+    "fr": "Galaxie de Superman",
+    "de": "Superman-Galaxie",
+    "it": "Galassia Superman",
+    "ko": "슈퍼맨 은하",
+    "es": "Galaxia Superman",
+    "ru": "Галактика Супермэн"
+  },
+  "IRAS23024+1203": {
+    "name": "Superman Galaxy",
+    "ar": "‎مجرة سوبرمان‎",
+    "zh": "超人星系",
+    "fr": "Galaxie de Superman",
+    "de": "Superman-Galaxie",
+    "it": "Galassia Superman",
+    "ko": "슈퍼맨 은하",
+    "es": "Galaxia Superman",
+    "ru": "Галактика Супермэн"
+  },
+  "MCG +02-58-060": {
+    "name": "Superman Galaxy",
+    "ar": "‎مجرة سوبرمان‎",
+    "zh": "超人星系",
+    "fr": "Galaxie de Superman",
+    "de": "Superman-Galaxie",
+    "it": "Galassia Superman",
+    "ko": "슈퍼맨 은하",
+    "es": "Galaxia Superman",
+    "ru": "Галактика Супермэн"
+  },
+  "MCG+02-58-060": {
+    "name": "Superman Galaxy",
+    "ar": "‎مجرة سوبرمان‎",
+    "zh": "超人星系",
+    "fr": "Galaxie de Superman",
+    "de": "Superman-Galaxie",
+    "it": "Galassia Superman",
+    "ko": "슈퍼맨 은하",
+    "es": "Galaxia Superman",
+    "ru": "Галактика Супермэн"
+  },
+  "PGC 070419": {
+    "name": "Superman Galaxy",
+    "ar": "‎مجرة سوبرمان‎",
+    "zh": "超人星系",
+    "fr": "Galaxie de Superman",
+    "de": "Superman-Galaxie",
+    "it": "Galassia Superman",
+    "ko": "슈퍼맨 은하",
+    "es": "Galaxia Superman",
+    "ru": "Галактика Супермэн"
+  },
+  "PGC070419": {
+    "name": "Superman Galaxy",
+    "ar": "‎مجرة سوبرمان‎",
+    "zh": "超人星系",
+    "fr": "Galaxie de Superman",
+    "de": "Superman-Galaxie",
+    "it": "Galassia Superman",
+    "ko": "슈퍼맨 은하",
+    "es": "Galaxia Superman",
+    "ru": "Галактика Супермэн"
+  },
+  "SDSS J230456.65+121922.3": {
+    "name": "Superman Galaxy",
+    "ar": "‎مجرة سوبرمان‎",
+    "zh": "超人星系",
+    "fr": "Galaxie de Superman",
+    "de": "Superman-Galaxie",
+    "it": "Galassia Superman",
+    "ko": "슈퍼맨 은하",
+    "es": "Galaxia Superman",
+    "ru": "Галактика Супермэн"
+  },
+  "SDSSJ230456.65+121922.3": {
+    "name": "Superman Galaxy",
+    "ar": "‎مجرة سوبرمان‎",
+    "zh": "超人星系",
+    "fr": "Galaxie de Superman",
+    "de": "Superman-Galaxie",
+    "it": "Galassia Superman",
+    "ko": "슈퍼맨 은하",
+    "es": "Galaxia Superman",
+    "ru": "Галактика Супермэн"
+  },
+  "UGC 12343": {
+    "name": "Superman Galaxy",
+    "ar": "‎مجرة سوبرمان‎",
+    "zh": "超人星系",
+    "fr": "Galaxie de Superman",
+    "de": "Superman-Galaxie",
+    "it": "Galassia Superman",
+    "ko": "슈퍼맨 은하",
+    "es": "Galaxia Superman",
+    "ru": "Галактика Супермэн"
+  },
+  "UGC12343": {
+    "name": "Superman Galaxy",
+    "ar": "‎مجرة سوبرمان‎",
+    "zh": "超人星系",
+    "fr": "Galaxie de Superman",
+    "de": "Superman-Galaxie",
+    "it": "Galassia Superman",
+    "ko": "슈퍼맨 은하",
+    "es": "Galaxia Superman",
+    "ru": "Галактика Супермэн"
+  },
+  "C 45": {
+    "name": "SDSS J133732.02+085306.6"
+  },
+  "C45": {
+    "name": "SDSS J133732.02+085306.6"
+  },
+  "NGC 5248": {
+    "name": "SDSS J133732.02+085306.6"
+  },
+  "NGC5248": {
+    "name": "SDSS J133732.02+085306.6"
+  },
+  "2MASX J13373206+0853062": {
+    "name": "SDSS J133732.02+085306.6"
+  },
+  "2MASXJ13373206+0853062": {
+    "name": "SDSS J133732.02+085306.6"
+  },
+  "C 045": {
+    "name": "SDSS J133732.02+085306.6"
+  },
+  "C045": {
+    "name": "SDSS J133732.02+085306.6"
+  },
+  "IRAS 13350+0908": {
+    "name": "SDSS J133732.02+085306.6"
+  },
+  "IRAS13350+0908": {
+    "name": "SDSS J133732.02+085306.6"
+  },
+  "MCG +02-35-015": {
+    "name": "SDSS J133732.02+085306.6"
+  },
+  "MCG+02-35-015": {
+    "name": "SDSS J133732.02+085306.6"
+  },
+  "PGC 048130": {
+    "name": "SDSS J133732.02+085306.6"
+  },
+  "PGC048130": {
+    "name": "SDSS J133732.02+085306.6"
+  },
+  "SDSS J133732.02+085306.6": {
+    "name": "SDSS J133732.02+085306.6"
+  },
+  "SDSSJ133732.02+085306.6": {
+    "name": "SDSS J133732.02+085306.6"
+  },
+  "UGC 08616": {
+    "name": "SDSS J133732.02+085306.6"
+  },
+  "UGC08616": {
+    "name": "SDSS J133732.02+085306.6"
+  },
+  "C 46": {
+    "name": "Hubble's Variable Nebula",
+    "ar": "‎سديم هابل المتغير‎",
+    "zh": "哈勃变光星云",
+    "fi": "Hubblen muuttuva sumu",
+    "fr": "Nébuleuse variable de Hubble",
+    "de": "Hubbles Veränderlicher Nebel",
+    "it": "Nebulosa variabile di Hubble",
+    "ja": "ハッブル変光星云",
+    "ko": "허블의 변광 성운",
+    "la": "Nebula Hubblei Variabilis",
+    "es": "Nebulosa variable de Hubble",
+    "ru": "Переменная туманность Хаббла",
+    "tr": "Hubble'ın Değişken Bulutsusu"
+  },
+  "C46": {
+    "name": "Hubble's Variable Nebula",
+    "ar": "‎سديم هابل المتغير‎",
+    "zh": "哈勃变光星云",
+    "fi": "Hubblen muuttuva sumu",
+    "fr": "Nébuleuse variable de Hubble",
+    "de": "Hubbles Veränderlicher Nebel",
+    "it": "Nebulosa variabile di Hubble",
+    "ja": "ハッブル変光星云",
+    "ko": "허블의 변광 성운",
+    "la": "Nebula Hubblei Variabilis",
+    "es": "Nebulosa variable de Hubble",
+    "ru": "Переменная туманность Хаббла",
+    "tr": "Hubble'ın Değişken Bulutsusu"
+  },
+  "NGC2261": {
+    "name": "Hubble's Variable Nebula",
+    "ar": "‎سديم هابل المتغير‎",
+    "zh": "哈勃变光星云",
+    "fi": "Hubblen muuttuva sumu",
+    "fr": "Nébuleuse variable de Hubble",
+    "de": "Hubbles Veränderlicher Nebel",
+    "it": "Nebulosa variabile di Hubble",
+    "ja": "ハッブル変光星云",
+    "ko": "허블의 변광 성운",
+    "la": "Nebula Hubblei Variabilis",
+    "es": "Nebulosa variable de Hubble",
+    "ru": "Переменная туманность Хаббла",
+    "tr": "Hubble'ın Değişken Bulutsusu"
+  },
+  "C 046": {
+    "name": "Hubble's Variable Nebula",
+    "ar": "‎سديم هابل المتغير‎",
+    "zh": "哈勃变光星云",
+    "fi": "Hubblen muuttuva sumu",
+    "fr": "Nébuleuse variable de Hubble",
+    "de": "Hubbles Veränderlicher Nebel",
+    "it": "Nebulosa variabile di Hubble",
+    "ja": "ハッブル変光星云",
+    "ko": "허블의 변광 성운",
+    "la": "Nebula Hubblei Variabilis",
+    "es": "Nebulosa variable de Hubble",
+    "ru": "Переменная туманность Хаббла",
+    "tr": "Hubble'ın Değişken Bulutsusu"
+  },
+  "C046": {
+    "name": "Hubble's Variable Nebula",
+    "ar": "‎سديم هابل المتغير‎",
+    "zh": "哈勃变光星云",
+    "fi": "Hubblen muuttuva sumu",
+    "fr": "Nébuleuse variable de Hubble",
+    "de": "Hubbles Veränderlicher Nebel",
+    "it": "Nebulosa variabile di Hubble",
+    "ja": "ハッブル変光星云",
+    "ko": "허블의 변광 성운",
+    "la": "Nebula Hubblei Variabilis",
+    "es": "Nebulosa variable de Hubble",
+    "ru": "Переменная туманность Хаббла",
+    "tr": "Hubble'ın Değişken Bulutsusu"
+  },
+  "LBN 920": {
+    "name": "Hubble's Variable Nebula",
+    "ar": "‎سديم هابل المتغير‎",
+    "zh": "哈勃变光星云",
+    "fi": "Hubblen muuttuva sumu",
+    "fr": "Nébuleuse variable de Hubble",
+    "de": "Hubbles Veränderlicher Nebel",
+    "it": "Nebulosa variabile di Hubble",
+    "ja": "ハッブル変光星云",
+    "ko": "허블의 변광 성운",
+    "la": "Nebula Hubblei Variabilis",
+    "es": "Nebulosa variable de Hubble",
+    "ru": "Переменная туманность Хаббла",
+    "tr": "Hubble'ın Değişken Bulutsusu"
+  },
+  "LBN920": {
+    "name": "Hubble's Variable Nebula",
+    "ar": "‎سديم هابل المتغير‎",
+    "zh": "哈勃变光星云",
+    "fi": "Hubblen muuttuva sumu",
+    "fr": "Nébuleuse variable de Hubble",
+    "de": "Hubbles Veränderlicher Nebel",
+    "it": "Nebulosa variabile di Hubble",
+    "ja": "ハッブル変光星云",
+    "ko": "허블의 변광 성운",
+    "la": "Nebula Hubblei Variabilis",
+    "es": "Nebulosa variable de Hubble",
+    "ru": "Переменная туманность Хаббла",
+    "tr": "Hubble'ın Değişken Bulutsusu"
+  },
+  "Hubble's Nebula": {
+    "name": "Hubble's Variable Nebula",
+    "ar": "‎سديم هابل المتغير‎",
+    "zh": "哈勃变光星云",
+    "fi": "Hubblen muuttuva sumu",
+    "fr": "Nébuleuse variable de Hubble",
+    "de": "Hubbles Veränderlicher Nebel",
+    "it": "Nebulosa variabile di Hubble",
+    "ja": "ハッブル変光星云",
+    "ko": "허블의 변광 성운",
+    "la": "Nebula Hubblei Variabilis",
+    "es": "Nebulosa variable de Hubble",
+    "ru": "Переменная туманность Хаббла",
+    "tr": "Hubble'ın Değişken Bulutsusu"
+  },
+  "Hubble'sNebula": {
+    "name": "Hubble's Variable Nebula",
+    "ar": "‎سديم هابل المتغير‎",
+    "zh": "哈勃变光星云",
+    "fi": "Hubblen muuttuva sumu",
+    "fr": "Nébuleuse variable de Hubble",
+    "de": "Hubbles Veränderlicher Nebel",
+    "it": "Nebulosa variabile di Hubble",
+    "ja": "ハッブル変光星云",
+    "ko": "허블의 변광 성운",
+    "la": "Nebula Hubblei Variabilis",
+    "es": "Nebulosa variable de Hubble",
+    "ru": "Переменная туманность Хаббла",
+    "tr": "Hubble'ın Değişken Bulutsusu"
+  },
+  "C 47": {
+    "name": "NGC 6934"
+  },
+  "C47": {
+    "name": "NGC 6934"
+  },
+  "NGC 6934": {
+    "name": "NGC 6934"
+  },
+  "NGC6934": {
+    "name": "NGC 6934"
+  },
+  "C 047": {
+    "name": "NGC 6934"
+  },
+  "C047": {
+    "name": "NGC 6934"
+  },
+  "MWSC 3369": {
+    "name": "NGC 6934"
+  },
+  "MWSC3369": {
+    "name": "NGC 6934"
+  },
+  "C 48": {
+    "name": "SDSS J091020.13+070216.8"
+  },
+  "C48": {
+    "name": "SDSS J091020.13+070216.8"
+  },
+  "NGC 2775": {
+    "name": "SDSS J091020.13+070216.8"
+  },
+  "NGC2775": {
+    "name": "SDSS J091020.13+070216.8"
+  },
+  "2MASX J09102011+0702165": {
+    "name": "SDSS J091020.13+070216.8"
+  },
+  "2MASXJ09102011+0702165": {
+    "name": "SDSS J091020.13+070216.8"
+  },
+  "C 048": {
+    "name": "SDSS J091020.13+070216.8"
+  },
+  "C048": {
+    "name": "SDSS J091020.13+070216.8"
+  },
+  "IRAS 09076+0714": {
+    "name": "SDSS J091020.13+070216.8"
+  },
+  "IRAS09076+0714": {
+    "name": "SDSS J091020.13+070216.8"
+  },
+  "MCG +01-24-005": {
+    "name": "SDSS J091020.13+070216.8"
+  },
+  "MCG+01-24-005": {
+    "name": "SDSS J091020.13+070216.8"
+  },
+  "PGC 025861": {
+    "name": "SDSS J091020.13+070216.8"
+  },
+  "PGC025861": {
+    "name": "SDSS J091020.13+070216.8"
+  },
+  "SDSS J091020.13+070216.8": {
+    "name": "SDSS J091020.13+070216.8"
+  },
+  "SDSSJ091020.13+070216.8": {
+    "name": "SDSS J091020.13+070216.8"
+  },
+  "UGC 04820": {
+    "name": "SDSS J091020.13+070216.8"
+  },
+  "UGC04820": {
+    "name": "SDSS J091020.13+070216.8"
+  },
+  "C 49": {
+    "name": "N2237-9"
+  },
+  "C49": {
+    "name": "N2237-9"
+  },
+  "N2237-9": {
+    "name": "N2237-9"
+  },
+  "C 049": {
+    "name": "N2237-9"
+  },
+  "C049": {
+    "name": "N2237-9"
+  },
+  "LBN 948": {
+    "name": "N2237-9"
+  },
+  "LBN948": {
+    "name": "N2237-9"
+  },
+  "Rosette Nebula": {
+    "name": "N2237-9"
+  },
+  "RosetteNebula": {
+    "name": "N2237-9"
+  },
+  "C 50": {
+    "name": "Rosette Nebula",
+    "ar": "‎سديم روزيت‎",
+    "zh": "玫瑰星云",
+    "fi": "Rosettesumu",
+    "fr": "Nébuleuse de Rosette",
+    "de": "Rosetten-Nebel",
+    "el": "Νεφέλωμα Ροζέτα",
+    "it": "Nebulosa rosetta",
+    "ja": "ばら星云",
+    "ko": "로제타 성운",
+    "la": "Rosetta Nebula",
+    "fa": "سحابی گل کاغذی",
+    "es": "Nebulosa de Roseta",
+    "ru": "Туманность Розетка",
+    "tr": "Rozet Bulutsusu"
+  },
+  "C50": {
+    "name": "Rosette Nebula",
+    "ar": "‎سديم روزيت‎",
+    "zh": "玫瑰星云",
+    "fi": "Rosettesumu",
+    "fr": "Nébuleuse de Rosette",
+    "de": "Rosetten-Nebel",
+    "el": "Νεφέλωμα Ροζέτα",
+    "it": "Nebulosa rosetta",
+    "ja": "ばら星云",
+    "ko": "로제타 성운",
+    "la": "Rosetta Nebula",
+    "fa": "سحابی گل کاغذی",
+    "es": "Nebulosa de Roseta",
+    "ru": "Туманность Розетка",
+    "tr": "Rozet Bulutsusu"
+  },
+  "NGC2244": {
+    "name": "Rosette Nebula",
+    "ar": "‎سديم روزيت‎",
+    "zh": "玫瑰星云",
+    "fi": "Rosettesumu",
+    "fr": "Nébuleuse de Rosette",
+    "de": "Rosetten-Nebel",
+    "el": "Νεφέλωμα Ροζέτα",
+    "it": "Nebulosa rosetta",
+    "ja": "ばら星云",
+    "ko": "로제타 성운",
+    "la": "Rosetta Nebula",
+    "fa": "سحابی گل کاغذی",
+    "es": "Nebulosa de Roseta",
+    "ru": "Туманность Розетка",
+    "tr": "Rozet Bulutsusu"
+  },
+  "C 050": {
+    "name": "Rosette Nebula",
+    "ar": "‎سديم روزيت‎",
+    "zh": "玫瑰星云",
+    "fi": "Rosettesumu",
+    "fr": "Nébuleuse de Rosette",
+    "de": "Rosetten-Nebel",
+    "el": "Νεφέλωμα Ροζέτα",
+    "it": "Nebulosa rosetta",
+    "ja": "ばら星云",
+    "ko": "로제타 성운",
+    "la": "Rosetta Nebula",
+    "fa": "سحابی گل کاغذی",
+    "es": "Nebulosa de Roseta",
+    "ru": "Туманность Розетка",
+    "tr": "Rozet Bulutsusu"
+  },
+  "C050": {
+    "name": "Rosette Nebula",
+    "ar": "‎سديم روزيت‎",
+    "zh": "玫瑰星云",
+    "fi": "Rosettesumu",
+    "fr": "Nébuleuse de Rosette",
+    "de": "Rosetten-Nebel",
+    "el": "Νεφέλωμα Ροζέτα",
+    "it": "Nebulosa rosetta",
+    "ja": "ばら星云",
+    "ko": "로제타 성운",
+    "la": "Rosetta Nebula",
+    "fa": "سحابی گل کاغذی",
+    "es": "Nebulosa de Roseta",
+    "ru": "Туманность Розетка",
+    "tr": "Rozet Bulutsusu"
+  },
+  "MWSC 0896": {
+    "name": "Rosette Nebula",
+    "ar": "‎سديم روزيت‎",
+    "zh": "玫瑰星云",
+    "fi": "Rosettesumu",
+    "fr": "Nébuleuse de Rosette",
+    "de": "Rosetten-Nebel",
+    "el": "Νεφέλωμα Ροζέτα",
+    "it": "Nebulosa rosetta",
+    "ja": "ばら星云",
+    "ko": "로제타 성운",
+    "la": "Rosetta Nebula",
+    "fa": "سحابی گل کاغذی",
+    "es": "Nebulosa de Roseta",
+    "ru": "Туманность Розетка",
+    "tr": "Rozet Bulutsusu"
+  },
+  "MWSC0896": {
+    "name": "Rosette Nebula",
+    "ar": "‎سديم روزيت‎",
+    "zh": "玫瑰星云",
+    "fi": "Rosettesumu",
+    "fr": "Nébuleuse de Rosette",
+    "de": "Rosetten-Nebel",
+    "el": "Νεφέλωμα Ροζέτα",
+    "it": "Nebulosa rosetta",
+    "ja": "ばら星云",
+    "ko": "로제타 성운",
+    "la": "Rosetta Nebula",
+    "fa": "سحابی گل کاغذی",
+    "es": "Nebulosa de Roseta",
+    "ru": "Туманность Розетка",
+    "tr": "Rozet Bulutsusu"
+  },
+  "C 51": {
+    "name": "IC 1613"
+  },
+  "C51": {
+    "name": "IC 1613"
+  },
+  "IC 1613": {
+    "name": "IC 1613"
+  },
+  "IC1613": {
+    "name": "IC 1613"
+  },
+  "C 051": {
+    "name": "IC 1613"
+  },
+  "C051": {
+    "name": "IC 1613"
+  },
+  "MCG +00-03-070": {
+    "name": "IC 1613"
+  },
+  "MCG+00-03-070": {
+    "name": "IC 1613"
+  },
+  "PGC 003844": {
+    "name": "IC 1613"
+  },
+  "PGC003844": {
+    "name": "IC 1613"
+  },
+  "UGC 00668": {
+    "name": "IC 1613"
+  },
+  "UGC00668": {
+    "name": "IC 1613"
+  },
+  "C 52": {
+    "name": "NGC 4697"
+  },
+  "C52": {
+    "name": "NGC 4697"
+  },
+  "NGC 4697": {
+    "name": "NGC 4697"
+  },
+  "NGC4697": {
+    "name": "NGC 4697"
+  },
+  "2MASX J12483590-0548030": {
+    "name": "NGC 4697"
+  },
+  "2MASXJ12483590-0548030": {
+    "name": "NGC 4697"
+  },
+  "C 052": {
+    "name": "NGC 4697"
+  },
+  "C052": {
+    "name": "NGC 4697"
+  },
+  "MCG -01-33-010": {
+    "name": "NGC 4697"
+  },
+  "MCG-01-33-010": {
+    "name": "NGC 4697"
+  },
+  "PGC 043276": {
+    "name": "NGC 4697"
+  },
+  "PGC043276": {
+    "name": "NGC 4697"
+  },
+  "UGCA 300": {
+    "name": "NGC 4697"
+  },
+  "UGCA300": {
+    "name": "NGC 4697"
+  },
+  "C 53": {
+    "name": "Spindle Galaxy",
+    "ar": "‎مجرة المغزل‎",
+    "zh": "纺锤星系",
+    "fi": "Värttinägalaksi",
+    "fr": "Galaxie du Fuseau",
+    "de": "Spindel-Galaxie",
+    "el": "Γαλαξίας Ατράκτου",
+    "it": "Galassia fuso",
+    "ja": "纺锤银河",
+    "ko": "방추 은하",
+    "fa": "کهکشان دوکی",
+    "es": "Galaxia del Huso",
+    "ru": "Галактика Веретено",
+    "tr": "Mil Gökadası"
+  },
+  "C53": {
+    "name": "Spindle Galaxy",
+    "ar": "‎مجرة المغزل‎",
+    "zh": "纺锤星系",
+    "fi": "Värttinägalaksi",
+    "fr": "Galaxie du Fuseau",
+    "de": "Spindel-Galaxie",
+    "el": "Γαλαξίας Ατράκτου",
+    "it": "Galassia fuso",
+    "ja": "纺锤银河",
+    "ko": "방추 은하",
+    "fa": "کهکشان دوکی",
+    "es": "Galaxia del Huso",
+    "ru": "Галактика Веретено",
+    "tr": "Mil Gökadası"
+  },
+  "NGC3115": {
+    "name": "Spindle Galaxy",
+    "ar": "‎مجرة المغزل‎",
+    "zh": "纺锤星系",
+    "fi": "Värttinägalaksi",
+    "fr": "Galaxie du Fuseau",
+    "de": "Spindel-Galaxie",
+    "el": "Γαλαξίας Ατράκτου",
+    "it": "Galassia fuso",
+    "ja": "纺锤银河",
+    "ko": "방추 은하",
+    "fa": "کهکشان دوکی",
+    "es": "Galaxia del Huso",
+    "ru": "Галактика Веретено",
+    "tr": "Mil Gökadası"
+  },
+  "2MASX J10051397-0743068": {
+    "name": "Spindle Galaxy",
+    "ar": "‎مجرة المغزل‎",
+    "zh": "纺锤星系",
+    "fi": "Värttinägalaksi",
+    "fr": "Galaxie du Fuseau",
+    "de": "Spindel-Galaxie",
+    "el": "Γαλαξίας Ατράκτου",
+    "it": "Galassia fuso",
+    "ja": "纺锤银河",
+    "ko": "방추 은하",
+    "fa": "کهکشان دوکی",
+    "es": "Galaxia del Huso",
+    "ru": "Галактика Веретено",
+    "tr": "Mil Gökadası"
+  },
+  "2MASXJ10051397-0743068": {
+    "name": "Spindle Galaxy",
+    "ar": "‎مجرة المغزل‎",
+    "zh": "纺锤星系",
+    "fi": "Värttinägalaksi",
+    "fr": "Galaxie du Fuseau",
+    "de": "Spindel-Galaxie",
+    "el": "Γαλαξίας Ατράκτου",
+    "it": "Galassia fuso",
+    "ja": "纺锤银河",
+    "ko": "방추 은하",
+    "fa": "کهکشان دوکی",
+    "es": "Galaxia del Huso",
+    "ru": "Галактика Веретено",
+    "tr": "Mil Gökadası"
+  },
+  "C 053": {
+    "name": "Spindle Galaxy",
+    "ar": "‎مجرة المغزل‎",
+    "zh": "纺锤星系",
+    "fi": "Värttinägalaksi",
+    "fr": "Galaxie du Fuseau",
+    "de": "Spindel-Galaxie",
+    "el": "Γαλαξίας Ατράκτου",
+    "it": "Galassia fuso",
+    "ja": "纺锤银河",
+    "ko": "방추 은하",
+    "fa": "کهکشان دوکی",
+    "es": "Galaxia del Huso",
+    "ru": "Галактика Веретено",
+    "tr": "Mil Gökadası"
+  },
+  "C053": {
+    "name": "Spindle Galaxy",
+    "ar": "‎مجرة المغزل‎",
+    "zh": "纺锤星系",
+    "fi": "Värttinägalaksi",
+    "fr": "Galaxie du Fuseau",
+    "de": "Spindel-Galaxie",
+    "el": "Γαλαξίας Ατράκτου",
+    "it": "Galassia fuso",
+    "ja": "纺锤银河",
+    "ko": "방추 은하",
+    "fa": "کهکشان دوکی",
+    "es": "Galaxia del Huso",
+    "ru": "Галактика Веретено",
+    "tr": "Mil Gökadası"
+  },
+  "MCG -01-26-018": {
+    "name": "Spindle Galaxy",
+    "ar": "‎مجرة المغزل‎",
+    "zh": "纺锤星系",
+    "fi": "Värttinägalaksi",
+    "fr": "Galaxie du Fuseau",
+    "de": "Spindel-Galaxie",
+    "el": "Γαλαξίας Ατράκτου",
+    "it": "Galassia fuso",
+    "ja": "纺锤银河",
+    "ko": "방추 은하",
+    "fa": "کهکشان دوکی",
+    "es": "Galaxia del Huso",
+    "ru": "Галактика Веретено",
+    "tr": "Mil Gökadası"
+  },
+  "MCG-01-26-018": {
+    "name": "Spindle Galaxy",
+    "ar": "‎مجرة المغزل‎",
+    "zh": "纺锤星系",
+    "fi": "Värttinägalaksi",
+    "fr": "Galaxie du Fuseau",
+    "de": "Spindel-Galaxie",
+    "el": "Γαλαξίας Ατράκτου",
+    "it": "Galassia fuso",
+    "ja": "纺锤银河",
+    "ko": "방추 은하",
+    "fa": "کهکشان دوکی",
+    "es": "Galaxia del Huso",
+    "ru": "Галактика Веретено",
+    "tr": "Mil Gökadası"
+  },
+  "PGC 029265": {
+    "name": "Spindle Galaxy",
+    "ar": "‎مجرة المغزل‎",
+    "zh": "纺锤星系",
+    "fi": "Värttinägalaksi",
+    "fr": "Galaxie du Fuseau",
+    "de": "Spindel-Galaxie",
+    "el": "Γαλαξίας Ατράκτου",
+    "it": "Galassia fuso",
+    "ja": "纺锤银河",
+    "ko": "방추 은하",
+    "fa": "کهکشان دوکی",
+    "es": "Galaxia del Huso",
+    "ru": "Галактика Веретено",
+    "tr": "Mil Gökadası"
+  },
+  "PGC029265": {
+    "name": "Spindle Galaxy",
+    "ar": "‎مجرة المغزل‎",
+    "zh": "纺锤星系",
+    "fi": "Värttinägalaksi",
+    "fr": "Galaxie du Fuseau",
+    "de": "Spindel-Galaxie",
+    "el": "Γαλαξίας Ατράκτου",
+    "it": "Galassia fuso",
+    "ja": "纺锤银河",
+    "ko": "방추 은하",
+    "fa": "کهکشان دوکی",
+    "es": "Galaxia del Huso",
+    "ru": "Галактика Веретено",
+    "tr": "Mil Gökadası"
+  },
+  "UGCA 199": {
+    "name": "Spindle Galaxy",
+    "ar": "‎مجرة المغزل‎",
+    "zh": "纺锤星系",
+    "fi": "Värttinägalaksi",
+    "fr": "Galaxie du Fuseau",
+    "de": "Spindel-Galaxie",
+    "el": "Γαλαξίας Ατράκτου",
+    "it": "Galassia fuso",
+    "ja": "纺锤银河",
+    "ko": "방추 은하",
+    "fa": "کهکشان دوکی",
+    "es": "Galaxia del Huso",
+    "ru": "Галактика Веретено",
+    "tr": "Mil Gökadası"
+  },
+  "UGCA199": {
+    "name": "Spindle Galaxy",
+    "ar": "‎مجرة المغزل‎",
+    "zh": "纺锤星系",
+    "fi": "Värttinägalaksi",
+    "fr": "Galaxie du Fuseau",
+    "de": "Spindel-Galaxie",
+    "el": "Γαλαξίας Ατράκτου",
+    "it": "Galassia fuso",
+    "ja": "纺锤银河",
+    "ko": "방추 은하",
+    "fa": "کهکشان دوکی",
+    "es": "Galaxia del Huso",
+    "ru": "Галактика Веретено",
+    "tr": "Mil Gökadası"
+  },
+  "Spindle Galaxy": {
+    "name": "Spindle Galaxy",
+    "ar": "‎مجرة المغزل‎",
+    "zh": "纺锤星系",
+    "fi": "Värttinägalaksi",
+    "fr": "Galaxie du Fuseau",
+    "de": "Spindel-Galaxie",
+    "el": "Γαλαξίας Ατράκτου",
+    "it": "Galassia fuso",
+    "ja": "纺锤银河",
+    "ko": "방추 은하",
+    "fa": "کهکشان دوکی",
+    "es": "Galaxia del Huso",
+    "ru": "Галактика Веретено",
+    "tr": "Mil Gökadası"
+  },
+  "SpindleGalaxy": {
+    "name": "Spindle Galaxy",
+    "ar": "‎مجرة المغزل‎",
+    "zh": "纺锤星系",
+    "fi": "Värttinägalaksi",
+    "fr": "Galaxie du Fuseau",
+    "de": "Spindel-Galaxie",
+    "el": "Γαλαξίας Ατράκτου",
+    "it": "Galassia fuso",
+    "ja": "纺锤银河",
+    "ko": "방추 은하",
+    "fa": "کهکشان دوکی",
+    "es": "Galaxia del Huso",
+    "ru": "Галактика Веретено",
+    "tr": "Mil Gökadası"
+  },
+  "C 54": {
+    "name": "NGC 2506"
+  },
+  "C54": {
+    "name": "NGC 2506"
+  },
+  "NGC 2506": {
+    "name": "NGC 2506"
+  },
+  "NGC2506": {
+    "name": "NGC 2506"
+  },
+  "C 054": {
+    "name": "NGC 2506"
+  },
+  "C054": {
+    "name": "NGC 2506"
+  },
+  "MWSC 1406": {
+    "name": "NGC 2506"
+  },
+  "MWSC1406": {
+    "name": "NGC 2506"
+  },
+  "C 55": {
+    "name": "Saturn Nebula",
+    "ar": "‎سديم زحل‎",
+    "zh": "土星状星云",
+    "fi": "Saturnussumu",
+    "fr": "Nébuleuse de Saturne",
+    "de": "Saturn-Nebel",
+    "el": "Νεφέλωμα Κρόνου",
+    "it": "Nebulosa Saturno",
+    "ja": "土星状星云",
+    "ko": "토성 성운",
+    "fa": "سحابی کیوان",
+    "es": "Nebulosa de Saturno",
+    "ru": "Туманность Сатурн",
+    "tr": "Satürn Bulutsusu"
+  },
+  "C55": {
+    "name": "Saturn Nebula",
+    "ar": "‎سديم زحل‎",
+    "zh": "土星状星云",
+    "fi": "Saturnussumu",
+    "fr": "Nébuleuse de Saturne",
+    "de": "Saturn-Nebel",
+    "el": "Νεφέλωμα Κρόνου",
+    "it": "Nebulosa Saturno",
+    "ja": "土星状星云",
+    "ko": "토성 성운",
+    "fa": "سحابی کیوان",
+    "es": "Nebulosa de Saturno",
+    "ru": "Туманность Сатурн",
+    "tr": "Satürn Bulutsusu"
+  },
+  "NGC7009": {
+    "name": "Saturn Nebula",
+    "ar": "‎سديم زحل‎",
+    "zh": "土星状星云",
+    "fi": "Saturnussumu",
+    "fr": "Nébuleuse de Saturne",
+    "de": "Saturn-Nebel",
+    "el": "Νεφέλωμα Κρόνου",
+    "it": "Nebulosa Saturno",
+    "ja": "土星状星云",
+    "ko": "토성 성운",
+    "fa": "سحابی کیوان",
+    "es": "Nebulosa de Saturno",
+    "ru": "Туманность Сатурн",
+    "tr": "Satürn Bulutsusu"
+  },
+  "2MASX J21041082-1121481": {
+    "name": "Saturn Nebula",
+    "ar": "‎سديم زحل‎",
+    "zh": "土星状星云",
+    "fi": "Saturnussumu",
+    "fr": "Nébuleuse de Saturne",
+    "de": "Saturn-Nebel",
+    "el": "Νεφέλωμα Κρόνου",
+    "it": "Nebulosa Saturno",
+    "ja": "土星状星云",
+    "ko": "토성 성운",
+    "fa": "سحابی کیوان",
+    "es": "Nebulosa de Saturno",
+    "ru": "Туманность Сатурн",
+    "tr": "Satürn Bulutsusu"
+  },
+  "2MASXJ21041082-1121481": {
+    "name": "Saturn Nebula",
+    "ar": "‎سديم زحل‎",
+    "zh": "土星状星云",
+    "fi": "Saturnussumu",
+    "fr": "Nébuleuse de Saturne",
+    "de": "Saturn-Nebel",
+    "el": "Νεφέλωμα Κρόνου",
+    "it": "Nebulosa Saturno",
+    "ja": "土星状星云",
+    "ko": "토성 성운",
+    "fa": "سحابی کیوان",
+    "es": "Nebulosa de Saturno",
+    "ru": "Туманность Сатурн",
+    "tr": "Satürn Bulutsusu"
+  },
+  "C 055": {
+    "name": "Saturn Nebula",
+    "ar": "‎سديم زحل‎",
+    "zh": "土星状星云",
+    "fi": "Saturnussumu",
+    "fr": "Nébuleuse de Saturne",
+    "de": "Saturn-Nebel",
+    "el": "Νεφέλωμα Κρόνου",
+    "it": "Nebulosa Saturno",
+    "ja": "土星状星云",
+    "ko": "토성 성운",
+    "fa": "سحابی کیوان",
+    "es": "Nebulosa de Saturno",
+    "ru": "Туманность Сатурн",
+    "tr": "Satürn Bulutsusu"
+  },
+  "C055": {
+    "name": "Saturn Nebula",
+    "ar": "‎سديم زحل‎",
+    "zh": "土星状星云",
+    "fi": "Saturnussumu",
+    "fr": "Nébuleuse de Saturne",
+    "de": "Saturn-Nebel",
+    "el": "Νεφέλωμα Κρόνου",
+    "it": "Nebulosa Saturno",
+    "ja": "土星状星云",
+    "ko": "토성 성운",
+    "fa": "سحابی کیوان",
+    "es": "Nebulosa de Saturno",
+    "ru": "Туманность Сатурн",
+    "tr": "Satürn Bulutsusu"
+  },
+  "IRAS 21014-1133": {
+    "name": "Saturn Nebula",
+    "ar": "‎سديم زحل‎",
+    "zh": "土星状星云",
+    "fi": "Saturnussumu",
+    "fr": "Nébuleuse de Saturne",
+    "de": "Saturn-Nebel",
+    "el": "Νεφέλωμα Κρόνου",
+    "it": "Nebulosa Saturno",
+    "ja": "土星状星云",
+    "ko": "토성 성운",
+    "fa": "سحابی کیوان",
+    "es": "Nebulosa de Saturno",
+    "ru": "Туманность Сатурн",
+    "tr": "Satürn Bulutsusu"
+  },
+  "IRAS21014-1133": {
+    "name": "Saturn Nebula",
+    "ar": "‎سديم زحل‎",
+    "zh": "土星状星云",
+    "fi": "Saturnussumu",
+    "fr": "Nébuleuse de Saturne",
+    "de": "Saturn-Nebel",
+    "el": "Νεφέλωμα Κρόνου",
+    "it": "Nebulosa Saturno",
+    "ja": "土星状星云",
+    "ko": "토성 성운",
+    "fa": "سحابی کیوان",
+    "es": "Nebulosa de Saturno",
+    "ru": "Туманность Сатурн",
+    "tr": "Satürn Bulutsusu"
+  },
+  "PN G037.7-34.5": {
+    "name": "Saturn Nebula",
+    "ar": "‎سديم زحل‎",
+    "zh": "土星状星云",
+    "fi": "Saturnussumu",
+    "fr": "Nébuleuse de Saturne",
+    "de": "Saturn-Nebel",
+    "el": "Νεφέλωμα Κρόνου",
+    "it": "Nebulosa Saturno",
+    "ja": "土星状星云",
+    "ko": "토성 성운",
+    "fa": "سحابی کیوان",
+    "es": "Nebulosa de Saturno",
+    "ru": "Туманность Сатурн",
+    "tr": "Satürn Bulutsusu"
+  },
+  "PNG037.7-34.5": {
+    "name": "Saturn Nebula",
+    "ar": "‎سديم زحل‎",
+    "zh": "土星状星云",
+    "fi": "Saturnussumu",
+    "fr": "Nébuleuse de Saturne",
+    "de": "Saturn-Nebel",
+    "el": "Νεφέλωμα Κρόνου",
+    "it": "Nebulosa Saturno",
+    "ja": "土星状星云",
+    "ko": "토성 성운",
+    "fa": "سحابی کیوان",
+    "es": "Nebulosa de Saturno",
+    "ru": "Туманность Сатурн",
+    "tr": "Satürn Bulutsusu"
+  },
+  "Saturn Nebula": {
+    "name": "Saturn Nebula",
+    "ar": "‎سديم زحل‎",
+    "zh": "土星状星云",
+    "fi": "Saturnussumu",
+    "fr": "Nébuleuse de Saturne",
+    "de": "Saturn-Nebel",
+    "el": "Νεφέλωμα Κρόνου",
+    "it": "Nebulosa Saturno",
+    "ja": "土星状星云",
+    "ko": "토성 성운",
+    "fa": "سحابی کیوان",
+    "es": "Nebulosa de Saturno",
+    "ru": "Туманность Сатурн",
+    "tr": "Satürn Bulutsusu"
+  },
+  "SaturnNebula": {
+    "name": "Saturn Nebula",
+    "ar": "‎سديم زحل‎",
+    "zh": "土星状星云",
+    "fi": "Saturnussumu",
+    "fr": "Nébuleuse de Saturne",
+    "de": "Saturn-Nebel",
+    "el": "Νεφέλωμα Κρόνου",
+    "it": "Nebulosa Saturno",
+    "ja": "土星状星云",
+    "ko": "토성 성운",
+    "fa": "سحابی کیوان",
+    "es": "Nebulosa de Saturno",
+    "ru": "Туманность Сатурн",
+    "tr": "Satürn Bulutsusu"
+  },
+  "C 56": {
+    "name": "Skull Nebula",
+    "ar": "‎‎سديم الجمجمة‎‎",
+    "zh": "头骨星云",
+    "fi": "Pääkallosumu",
+    "fr": "Nébuleuse du Crâne",
+    "de": "Totenkopfnebel",
+    "it": "Nebulosa Teschio",
+    "ko": "해골 성운",
+    "fa": "سحابی جمجمه ای",
+    "es": "Nebulosa del cráneo",
+    "ru": "Туманность Череп",
+    "tr": "Kafatası Bulutsusu"
+  },
+  "C56": {
+    "name": "Skull Nebula",
+    "ar": "‎‎سديم الجمجمة‎‎",
+    "zh": "头骨星云",
+    "fi": "Pääkallosumu",
+    "fr": "Nébuleuse du Crâne",
+    "de": "Totenkopfnebel",
+    "it": "Nebulosa Teschio",
+    "ko": "해골 성운",
+    "fa": "سحابی جمجمه ای",
+    "es": "Nebulosa del cráneo",
+    "ru": "Туманность Череп",
+    "tr": "Kafatası Bulutsusu"
+  },
+  "NGC246": {
+    "name": "Skull Nebula",
+    "ar": "‎‎سديم الجمجمة‎‎",
+    "zh": "头骨星云",
+    "fi": "Pääkallosumu",
+    "fr": "Nébuleuse du Crâne",
+    "de": "Totenkopfnebel",
+    "it": "Nebulosa Teschio",
+    "ko": "해골 성운",
+    "fa": "سحابی جمجمه ای",
+    "es": "Nebulosa del cráneo",
+    "ru": "Туманность Череп",
+    "tr": "Kafatası Bulutsusu"
+  },
+  "C 056": {
+    "name": "Skull Nebula",
+    "ar": "‎‎سديم الجمجمة‎‎",
+    "zh": "头骨星云",
+    "fi": "Pääkallosumu",
+    "fr": "Nébuleuse du Crâne",
+    "de": "Totenkopfnebel",
+    "it": "Nebulosa Teschio",
+    "ko": "해골 성운",
+    "fa": "سحابی جمجمه ای",
+    "es": "Nebulosa del cráneo",
+    "ru": "Туманность Череп",
+    "tr": "Kafatası Bulutsusu"
+  },
+  "C056": {
+    "name": "Skull Nebula",
+    "ar": "‎‎سديم الجمجمة‎‎",
+    "zh": "头骨星云",
+    "fi": "Pääkallosumu",
+    "fr": "Nébuleuse du Crâne",
+    "de": "Totenkopfnebel",
+    "it": "Nebulosa Teschio",
+    "ko": "해골 성운",
+    "fa": "سحابی جمجمه ای",
+    "es": "Nebulosa del cráneo",
+    "ru": "Туманность Череп",
+    "tr": "Kafatası Bulutsusu"
+  },
+  "PN G118.8-74.7": {
+    "name": "Skull Nebula",
+    "ar": "‎‎سديم الجمجمة‎‎",
+    "zh": "头骨星云",
+    "fi": "Pääkallosumu",
+    "fr": "Nébuleuse du Crâne",
+    "de": "Totenkopfnebel",
+    "it": "Nebulosa Teschio",
+    "ko": "해골 성운",
+    "fa": "سحابی جمجمه ای",
+    "es": "Nebulosa del cráneo",
+    "ru": "Туманность Череп",
+    "tr": "Kafatası Bulutsusu"
+  },
+  "PNG118.8-74.7": {
+    "name": "Skull Nebula",
+    "ar": "‎‎سديم الجمجمة‎‎",
+    "zh": "头骨星云",
+    "fi": "Pääkallosumu",
+    "fr": "Nébuleuse du Crâne",
+    "de": "Totenkopfnebel",
+    "it": "Nebulosa Teschio",
+    "ko": "해골 성운",
+    "fa": "سحابی جمجمه ای",
+    "es": "Nebulosa del cráneo",
+    "ru": "Туманность Череп",
+    "tr": "Kafatası Bulutsusu"
+  },
+  "C 57": {
+    "name": "Barnard's Galaxy",
+    "ar": "‎مجرة برنارد‎",
+    "zh": "巴纳德星系",
+    "fi": "Barnardin galaksi",
+    "fr": "Galaxie de Barnard",
+    "de": "Barnards Galaxie",
+    "el": "Γαλαξίας του Μπάρναρντ",
+    "it": "Galassia di Barnard",
+    "ja": "バーナード银河",
+    "ko": "버나드 은하",
+    "la": "Galaxia Barnardi",
+    "fa": "کهکشان بارنارد",
+    "es": "Galaxia de Barnard",
+    "ru": "Галактика Барнарда",
+    "tr": "Barnard's Gökadası",
+    "he": "גלקסיית ברנרד"
+  },
+  "C57": {
+    "name": "Barnard's Galaxy",
+    "ar": "‎مجرة برنارد‎",
+    "zh": "巴纳德星系",
+    "fi": "Barnardin galaksi",
+    "fr": "Galaxie de Barnard",
+    "de": "Barnards Galaxie",
+    "el": "Γαλαξίας του Μπάρναρντ",
+    "it": "Galassia di Barnard",
+    "ja": "バーナード银河",
+    "ko": "버나드 은하",
+    "la": "Galaxia Barnardi",
+    "fa": "کهکشان بارنارد",
+    "es": "Galaxia de Barnard",
+    "ru": "Галактика Барнарда",
+    "tr": "Barnard's Gökadası",
+    "he": "גלקסיית ברנרד"
+  },
+  "IC 4895": {
+    "name": "Barnard's Galaxy",
+    "ar": "‎مجرة برنارد‎",
+    "zh": "巴纳德星系",
+    "fi": "Barnardin galaksi",
+    "fr": "Galaxie de Barnard",
+    "de": "Barnards Galaxie",
+    "el": "Γαλαξίας του Μπάρναρντ",
+    "it": "Galassia di Barnard",
+    "ja": "バーナード银河",
+    "ko": "버나드 은하",
+    "la": "Galaxia Barnardi",
+    "fa": "کهکشان بارنارد",
+    "es": "Galaxia de Barnard",
+    "ru": "Галактика Барнарда",
+    "tr": "Barnard's Gökadası",
+    "he": "גלקסיית ברנרד"
+  },
+  "IC4895": {
+    "name": "Barnard's Galaxy",
+    "ar": "‎مجرة برنارد‎",
+    "zh": "巴纳德星系",
+    "fi": "Barnardin galaksi",
+    "fr": "Galaxie de Barnard",
+    "de": "Barnards Galaxie",
+    "el": "Γαλαξίας του Μπάρναρντ",
+    "it": "Galassia di Barnard",
+    "ja": "バーナード银河",
+    "ko": "버나드 은하",
+    "la": "Galaxia Barnardi",
+    "fa": "کهکشان بارنارد",
+    "es": "Galaxia de Barnard",
+    "ru": "Галактика Барнарда",
+    "tr": "Barnard's Gökadası",
+    "he": "גלקסיית ברנרד"
+  },
+  "NGC6822": {
+    "name": "Barnard's Galaxy",
+    "ar": "‎مجرة برنارد‎",
+    "zh": "巴纳德星系",
+    "fi": "Barnardin galaksi",
+    "fr": "Galaxie de Barnard",
+    "de": "Barnards Galaxie",
+    "el": "Γαλαξίας του Μπάρναρντ",
+    "it": "Galassia di Barnard",
+    "ja": "バーナード银河",
+    "ko": "버나드 은하",
+    "la": "Galaxia Barnardi",
+    "fa": "کهکشان بارنارد",
+    "es": "Galaxia de Barnard",
+    "ru": "Галактика Барнарда",
+    "tr": "Barnard's Gökadası",
+    "he": "גלקסיית ברנרד"
+  },
+  "2MASX J19445619-1447512": {
+    "name": "Barnard's Galaxy",
+    "ar": "‎مجرة برنارد‎",
+    "zh": "巴纳德星系",
+    "fi": "Barnardin galaksi",
+    "fr": "Galaxie de Barnard",
+    "de": "Barnards Galaxie",
+    "el": "Γαλαξίας του Μπάρναρντ",
+    "it": "Galassia di Barnard",
+    "ja": "バーナード银河",
+    "ko": "버나드 은하",
+    "la": "Galaxia Barnardi",
+    "fa": "کهکشان بارنارد",
+    "es": "Galaxia de Barnard",
+    "ru": "Галактика Барнарда",
+    "tr": "Barnard's Gökadası",
+    "he": "גלקסיית ברנרד"
+  },
+  "2MASXJ19445619-1447512": {
+    "name": "Barnard's Galaxy",
+    "ar": "‎مجرة برنارد‎",
+    "zh": "巴纳德星系",
+    "fi": "Barnardin galaksi",
+    "fr": "Galaxie de Barnard",
+    "de": "Barnards Galaxie",
+    "el": "Γαλαξίας του Μπάρναρντ",
+    "it": "Galassia di Barnard",
+    "ja": "バーナード银河",
+    "ko": "버나드 은하",
+    "la": "Galaxia Barnardi",
+    "fa": "کهکشان بارنارد",
+    "es": "Galaxia de Barnard",
+    "ru": "Галактика Барнарда",
+    "tr": "Barnard's Gökadası",
+    "he": "גלקסיית ברנרד"
+  },
+  "C 057": {
+    "name": "Barnard's Galaxy",
+    "ar": "‎مجرة برنارد‎",
+    "zh": "巴纳德星系",
+    "fi": "Barnardin galaksi",
+    "fr": "Galaxie de Barnard",
+    "de": "Barnards Galaxie",
+    "el": "Γαλαξίας του Μπάρναρντ",
+    "it": "Galassia di Barnard",
+    "ja": "バーナード银河",
+    "ko": "버나드 은하",
+    "la": "Galaxia Barnardi",
+    "fa": "کهکشان بارنارد",
+    "es": "Galaxia de Barnard",
+    "ru": "Галактика Барнарда",
+    "tr": "Barnard's Gökadası",
+    "he": "גלקסיית ברנרד"
+  },
+  "C057": {
+    "name": "Barnard's Galaxy",
+    "ar": "‎مجرة برنارد‎",
+    "zh": "巴纳德星系",
+    "fi": "Barnardin galaksi",
+    "fr": "Galaxie de Barnard",
+    "de": "Barnards Galaxie",
+    "el": "Γαλαξίας του Μπάρναρντ",
+    "it": "Galassia di Barnard",
+    "ja": "バーナード银河",
+    "ko": "버나드 은하",
+    "la": "Galaxia Barnardi",
+    "fa": "کهکشان بارنارد",
+    "es": "Galaxia de Barnard",
+    "ru": "Галактика Барнарда",
+    "tr": "Barnard's Gökadası",
+    "he": "גלקסיית ברנרד"
+  },
+  "IRAS 19420-1450": {
+    "name": "Barnard's Galaxy",
+    "ar": "‎مجرة برنارد‎",
+    "zh": "巴纳德星系",
+    "fi": "Barnardin galaksi",
+    "fr": "Galaxie de Barnard",
+    "de": "Barnards Galaxie",
+    "el": "Γαλαξίας του Μπάρναρντ",
+    "it": "Galassia di Barnard",
+    "ja": "バーナード银河",
+    "ko": "버나드 은하",
+    "la": "Galaxia Barnardi",
+    "fa": "کهکشان بارنارد",
+    "es": "Galaxia de Barnard",
+    "ru": "Галактика Барнарда",
+    "tr": "Barnard's Gökadası",
+    "he": "גלקסיית ברנרד"
+  },
+  "IRAS19420-1450": {
+    "name": "Barnard's Galaxy",
+    "ar": "‎مجرة برنارد‎",
+    "zh": "巴纳德星系",
+    "fi": "Barnardin galaksi",
+    "fr": "Galaxie de Barnard",
+    "de": "Barnards Galaxie",
+    "el": "Γαλαξίας του Μπάρναρντ",
+    "it": "Galassia di Barnard",
+    "ja": "バーナード银河",
+    "ko": "버나드 은하",
+    "la": "Galaxia Barnardi",
+    "fa": "کهکشان بارنارد",
+    "es": "Galaxia de Barnard",
+    "ru": "Галактика Барнарда",
+    "tr": "Barnard's Gökadası",
+    "he": "גלקסיית ברנרד"
+  },
+  "MCG -02-50-006": {
+    "name": "Barnard's Galaxy",
+    "ar": "‎مجرة برنارد‎",
+    "zh": "巴纳德星系",
+    "fi": "Barnardin galaksi",
+    "fr": "Galaxie de Barnard",
+    "de": "Barnards Galaxie",
+    "el": "Γαλαξίας του Μπάρναρντ",
+    "it": "Galassia di Barnard",
+    "ja": "バーナード银河",
+    "ko": "버나드 은하",
+    "la": "Galaxia Barnardi",
+    "fa": "کهکشان بارنارد",
+    "es": "Galaxia de Barnard",
+    "ru": "Галактика Барнарда",
+    "tr": "Barnard's Gökadası",
+    "he": "גלקסיית ברנרד"
+  },
+  "MCG-02-50-006": {
+    "name": "Barnard's Galaxy",
+    "ar": "‎مجرة برنارد‎",
+    "zh": "巴纳德星系",
+    "fi": "Barnardin galaksi",
+    "fr": "Galaxie de Barnard",
+    "de": "Barnards Galaxie",
+    "el": "Γαλαξίας του Μπάρναρντ",
+    "it": "Galassia di Barnard",
+    "ja": "バーナード银河",
+    "ko": "버나드 은하",
+    "la": "Galaxia Barnardi",
+    "fa": "کهکشان بارنارد",
+    "es": "Galaxia de Barnard",
+    "ru": "Галактика Барнарда",
+    "tr": "Barnard's Gökadası",
+    "he": "גלקסיית ברנרד"
+  },
+  "PGC 063616": {
+    "name": "Barnard's Galaxy",
+    "ar": "‎مجرة برنارد‎",
+    "zh": "巴纳德星系",
+    "fi": "Barnardin galaksi",
+    "fr": "Galaxie de Barnard",
+    "de": "Barnards Galaxie",
+    "el": "Γαλαξίας του Μπάρναρντ",
+    "it": "Galassia di Barnard",
+    "ja": "バーナード银河",
+    "ko": "버나드 은하",
+    "la": "Galaxia Barnardi",
+    "fa": "کهکشان بارنارد",
+    "es": "Galaxia de Barnard",
+    "ru": "Галактика Барнарда",
+    "tr": "Barnard's Gökadası",
+    "he": "גלקסיית ברנרד"
+  },
+  "PGC063616": {
+    "name": "Barnard's Galaxy",
+    "ar": "‎مجرة برنارد‎",
+    "zh": "巴纳德星系",
+    "fi": "Barnardin galaksi",
+    "fr": "Galaxie de Barnard",
+    "de": "Barnards Galaxie",
+    "el": "Γαλαξίας του Μπάρναρντ",
+    "it": "Galassia di Barnard",
+    "ja": "バーナード银河",
+    "ko": "버나드 은하",
+    "la": "Galaxia Barnardi",
+    "fa": "کهکشان بارنارد",
+    "es": "Galaxia de Barnard",
+    "ru": "Галактика Барнарда",
+    "tr": "Barnard's Gökadası",
+    "he": "גלקסיית ברנרד"
+  },
+  "Barnard's Galaxy": {
+    "name": "Barnard's Galaxy",
+    "ar": "‎مجرة برنارد‎",
+    "zh": "巴纳德星系",
+    "fi": "Barnardin galaksi",
+    "fr": "Galaxie de Barnard",
+    "de": "Barnards Galaxie",
+    "el": "Γαλαξίας του Μπάρναρντ",
+    "it": "Galassia di Barnard",
+    "ja": "バーナード银河",
+    "ko": "버나드 은하",
+    "la": "Galaxia Barnardi",
+    "fa": "کهکشان بارنارد",
+    "es": "Galaxia de Barnard",
+    "ru": "Галактика Барнарда",
+    "tr": "Barnard's Gökadası",
+    "he": "גלקסיית ברנרד"
+  },
+  "Barnard'sGalaxy": {
+    "name": "Barnard's Galaxy",
+    "ar": "‎مجرة برنارد‎",
+    "zh": "巴纳德星系",
+    "fi": "Barnardin galaksi",
+    "fr": "Galaxie de Barnard",
+    "de": "Barnards Galaxie",
+    "el": "Γαλαξίας του Μπάρναρντ",
+    "it": "Galassia di Barnard",
+    "ja": "バーナード银河",
+    "ko": "버나드 은하",
+    "la": "Galaxia Barnardi",
+    "fa": "کهکشان بارنارد",
+    "es": "Galaxia de Barnard",
+    "ru": "Галактика Барнарда",
+    "tr": "Barnard's Gökadası",
+    "he": "גלקסיית ברנרד"
+  },
+  "C 58": {
+    "name": "Caroline's Cluster",
+    "ar": "‎‎حشد كارولين‎‎",
+    "zh": "卡罗琳星团",
+    "fi": "Carolinen joukko",
+    "fr": "Amas de Caroline",
+    "de": "Carolines Haufen",
+    "it": "Amasso Caroline",
+    "ko": "캐롤라인의 성단",
+    "la": "Congregatio Carolinae",
+    "fa": "خوشه کارولین",
+    "es": "Cúmulo de Carolina",
+    "ru": "Скопление Каролины",
+    "tr": "Karolin'in Yıldız Kümesi"
+  },
+  "C58": {
+    "name": "Caroline's Cluster",
+    "ar": "‎‎حشد كارولين‎‎",
+    "zh": "卡罗琳星团",
+    "fi": "Carolinen joukko",
+    "fr": "Amas de Caroline",
+    "de": "Carolines Haufen",
+    "it": "Amasso Caroline",
+    "ko": "캐롤라인의 성단",
+    "la": "Congregatio Carolinae",
+    "fa": "خوشه کارولین",
+    "es": "Cúmulo de Carolina",
+    "ru": "Скопление Каролины",
+    "tr": "Karolin'in Yıldız Kümesi"
+  },
+  "NGC2360": {
+    "name": "Caroline's Cluster",
+    "ar": "‎‎حشد كارولين‎‎",
+    "zh": "卡罗琳星团",
+    "fi": "Carolinen joukko",
+    "fr": "Amas de Caroline",
+    "de": "Carolines Haufen",
+    "it": "Amasso Caroline",
+    "ko": "캐롤라인의 성단",
+    "la": "Congregatio Carolinae",
+    "fa": "خوشه کارولین",
+    "es": "Cúmulo de Carolina",
+    "ru": "Скопление Каролины",
+    "tr": "Karolin'in Yıldız Kümesi"
+  },
+  "C 058": {
+    "name": "Caroline's Cluster",
+    "ar": "‎‎حشد كارولين‎‎",
+    "zh": "卡罗琳星团",
+    "fi": "Carolinen joukko",
+    "fr": "Amas de Caroline",
+    "de": "Carolines Haufen",
+    "it": "Amasso Caroline",
+    "ko": "캐롤라인의 성단",
+    "la": "Congregatio Carolinae",
+    "fa": "خوشه کارولین",
+    "es": "Cúmulo de Carolina",
+    "ru": "Скопление Каролины",
+    "tr": "Karolin'in Yıldız Kümesi"
+  },
+  "C058": {
+    "name": "Caroline's Cluster",
+    "ar": "‎‎حشد كارولين‎‎",
+    "zh": "卡罗琳星团",
+    "fi": "Carolinen joukko",
+    "fr": "Amas de Caroline",
+    "de": "Carolines Haufen",
+    "it": "Amasso Caroline",
+    "ko": "캐롤라인의 성단",
+    "la": "Congregatio Carolinae",
+    "fa": "خوشه کارولین",
+    "es": "Cúmulo de Carolina",
+    "ru": "Скопление Каролины",
+    "tr": "Karolin'in Yıldız Kümesi"
+  },
+  "MWSC 1165": {
+    "name": "Caroline's Cluster",
+    "ar": "‎‎حشد كارولين‎‎",
+    "zh": "卡罗琳星团",
+    "fi": "Carolinen joukko",
+    "fr": "Amas de Caroline",
+    "de": "Carolines Haufen",
+    "it": "Amasso Caroline",
+    "ko": "캐롤라인의 성단",
+    "la": "Congregatio Carolinae",
+    "fa": "خوشه کارولین",
+    "es": "Cúmulo de Carolina",
+    "ru": "Скопление Каролины",
+    "tr": "Karolin'in Yıldız Kümesi"
+  },
+  "MWSC1165": {
+    "name": "Caroline's Cluster",
+    "ar": "‎‎حشد كارولين‎‎",
+    "zh": "卡罗琳星团",
+    "fi": "Carolinen joukko",
+    "fr": "Amas de Caroline",
+    "de": "Carolines Haufen",
+    "it": "Amasso Caroline",
+    "ko": "캐롤라인의 성단",
+    "la": "Congregatio Carolinae",
+    "fa": "خوشه کارولین",
+    "es": "Cúmulo de Carolina",
+    "ru": "Скопление Каролины",
+    "tr": "Karolin'in Yıldız Kümesi"
+  },
+  "Caroline's Cluster": {
+    "name": "Caroline's Cluster",
+    "ar": "‎‎حشد كارولين‎‎",
+    "zh": "卡罗琳星团",
+    "fi": "Carolinen joukko",
+    "fr": "Amas de Caroline",
+    "de": "Carolines Haufen",
+    "it": "Amasso Caroline",
+    "ko": "캐롤라인의 성단",
+    "la": "Congregatio Carolinae",
+    "fa": "خوشه کارولین",
+    "es": "Cúmulo de Carolina",
+    "ru": "Скопление Каролины",
+    "tr": "Karolin'in Yıldız Kümesi"
+  },
+  "Caroline'sCluster": {
+    "name": "Caroline's Cluster",
+    "ar": "‎‎حشد كارولين‎‎",
+    "zh": "卡罗琳星团",
+    "fi": "Carolinen joukko",
+    "fr": "Amas de Caroline",
+    "de": "Carolines Haufen",
+    "it": "Amasso Caroline",
+    "ko": "캐롤라인의 성단",
+    "la": "Congregatio Carolinae",
+    "fa": "خوشه کارولین",
+    "es": "Cúmulo de Carolina",
+    "ru": "Скопление Каролины",
+    "tr": "Karolin'in Yıldız Kümesi"
+  },
+  "C 59": {
+    "name": "Ghost of Jupiter Nebula",
+    "ar": "‎سديم شبح المشتري‎",
+    "zh": "木魂星云",
+    "fi": "Jupiterin haamu",
+    "fr": "Nébuleuse du Fantôme de Jupiter",
+    "de": "Jupiters Geist-Nebel",
+    "it": "Nebulosa Fantasma di Giove",
+    "ja": "木星状星云",
+    "ko": "목성의 유령 성운",
+    "la": "Spiritus Jovis Nebula",
+    "fa": "سحابی شبح ژوپیتر",
+    "es": "Nebulosa del Fantasma de Júpiter",
+    "ru": "Туманность Призрак Юпитера"
+  },
+  "C59": {
+    "name": "Ghost of Jupiter Nebula",
+    "ar": "‎سديم شبح المشتري‎",
+    "zh": "木魂星云",
+    "fi": "Jupiterin haamu",
+    "fr": "Nébuleuse du Fantôme de Jupiter",
+    "de": "Jupiters Geist-Nebel",
+    "it": "Nebulosa Fantasma di Giove",
+    "ja": "木星状星云",
+    "ko": "목성의 유령 성운",
+    "la": "Spiritus Jovis Nebula",
+    "fa": "سحابی شبح ژوپیتر",
+    "es": "Nebulosa del Fantasma de Júpiter",
+    "ru": "Туманность Призрак Юпитера"
+  },
+  "NGC3242": {
+    "name": "Ghost of Jupiter Nebula",
+    "ar": "‎سديم شبح المشتري‎",
+    "zh": "木魂星云",
+    "fi": "Jupiterin haamu",
+    "fr": "Nébuleuse du Fantôme de Jupiter",
+    "de": "Jupiters Geist-Nebel",
+    "it": "Nebulosa Fantasma di Giove",
+    "ja": "木星状星云",
+    "ko": "목성의 유령 성운",
+    "la": "Spiritus Jovis Nebula",
+    "fa": "سحابی شبح ژوپیتر",
+    "es": "Nebulosa del Fantasma de Júpiter",
+    "ru": "Туманность Призрак Юпитера"
+  },
+  "C 059": {
+    "name": "Ghost of Jupiter Nebula",
+    "ar": "‎سديم شبح المشتري‎",
+    "zh": "木魂星云",
+    "fi": "Jupiterin haamu",
+    "fr": "Nébuleuse du Fantôme de Jupiter",
+    "de": "Jupiters Geist-Nebel",
+    "it": "Nebulosa Fantasma di Giove",
+    "ja": "木星状星云",
+    "ko": "목성의 유령 성운",
+    "la": "Spiritus Jovis Nebula",
+    "fa": "سحابی شبح ژوپیتر",
+    "es": "Nebulosa del Fantasma de Júpiter",
+    "ru": "Туманность Призрак Юпитера"
+  },
+  "C059": {
+    "name": "Ghost of Jupiter Nebula",
+    "ar": "‎سديم شبح المشتري‎",
+    "zh": "木魂星云",
+    "fi": "Jupiterin haamu",
+    "fr": "Nébuleuse du Fantôme de Jupiter",
+    "de": "Jupiters Geist-Nebel",
+    "it": "Nebulosa Fantasma di Giove",
+    "ja": "木星状星云",
+    "ko": "목성의 유령 성운",
+    "la": "Spiritus Jovis Nebula",
+    "fa": "سحابی شبح ژوپیتر",
+    "es": "Nebulosa del Fantasma de Júpiter",
+    "ru": "Туманность Призрак Юпитера"
+  },
+  "ESO 568-005": {
+    "name": "Ghost of Jupiter Nebula",
+    "ar": "‎سديم شبح المشتري‎",
+    "zh": "木魂星云",
+    "fi": "Jupiterin haamu",
+    "fr": "Nébuleuse du Fantôme de Jupiter",
+    "de": "Jupiters Geist-Nebel",
+    "it": "Nebulosa Fantasma di Giove",
+    "ja": "木星状星云",
+    "ko": "목성의 유령 성운",
+    "la": "Spiritus Jovis Nebula",
+    "fa": "سحابی شبح ژوپیتر",
+    "es": "Nebulosa del Fantasma de Júpiter",
+    "ru": "Туманность Призрак Юпитера"
+  },
+  "ESO568-005": {
+    "name": "Ghost of Jupiter Nebula",
+    "ar": "‎سديم شبح المشتري‎",
+    "zh": "木魂星云",
+    "fi": "Jupiterin haamu",
+    "fr": "Nébuleuse du Fantôme de Jupiter",
+    "de": "Jupiters Geist-Nebel",
+    "it": "Nebulosa Fantasma di Giove",
+    "ja": "木星状星云",
+    "ko": "목성의 유령 성운",
+    "la": "Spiritus Jovis Nebula",
+    "fa": "سحابی شبح ژوپیتر",
+    "es": "Nebulosa del Fantasma de Júpiter",
+    "ru": "Туманность Призрак Юпитера"
+  },
+  "IRAS 10223-1823": {
+    "name": "Ghost of Jupiter Nebula",
+    "ar": "‎سديم شبح المشتري‎",
+    "zh": "木魂星云",
+    "fi": "Jupiterin haamu",
+    "fr": "Nébuleuse du Fantôme de Jupiter",
+    "de": "Jupiters Geist-Nebel",
+    "it": "Nebulosa Fantasma di Giove",
+    "ja": "木星状星云",
+    "ko": "목성의 유령 성운",
+    "la": "Spiritus Jovis Nebula",
+    "fa": "سحابی شبح ژوپیتر",
+    "es": "Nebulosa del Fantasma de Júpiter",
+    "ru": "Туманность Призрак Юпитера"
+  },
+  "IRAS10223-1823": {
+    "name": "Ghost of Jupiter Nebula",
+    "ar": "‎سديم شبح المشتري‎",
+    "zh": "木魂星云",
+    "fi": "Jupiterin haamu",
+    "fr": "Nébuleuse du Fantôme de Jupiter",
+    "de": "Jupiters Geist-Nebel",
+    "it": "Nebulosa Fantasma di Giove",
+    "ja": "木星状星云",
+    "ko": "목성의 유령 성운",
+    "la": "Spiritus Jovis Nebula",
+    "fa": "سحابی شبح ژوپیتر",
+    "es": "Nebulosa del Fantasma de Júpiter",
+    "ru": "Туманность Призрак Юпитера"
+  },
+  "PN G261.0+32.0": {
+    "name": "Ghost of Jupiter Nebula",
+    "ar": "‎سديم شبح المشتري‎",
+    "zh": "木魂星云",
+    "fi": "Jupiterin haamu",
+    "fr": "Nébuleuse du Fantôme de Jupiter",
+    "de": "Jupiters Geist-Nebel",
+    "it": "Nebulosa Fantasma di Giove",
+    "ja": "木星状星云",
+    "ko": "목성의 유령 성운",
+    "la": "Spiritus Jovis Nebula",
+    "fa": "سحابی شبح ژوپیتر",
+    "es": "Nebulosa del Fantasma de Júpiter",
+    "ru": "Туманность Призрак Юпитера"
+  },
+  "PNG261.0+32.0": {
+    "name": "Ghost of Jupiter Nebula",
+    "ar": "‎سديم شبح المشتري‎",
+    "zh": "木魂星云",
+    "fi": "Jupiterin haamu",
+    "fr": "Nébuleuse du Fantôme de Jupiter",
+    "de": "Jupiters Geist-Nebel",
+    "it": "Nebulosa Fantasma di Giove",
+    "ja": "木星状星云",
+    "ko": "목성의 유령 성운",
+    "la": "Spiritus Jovis Nebula",
+    "fa": "سحابی شبح ژوپیتر",
+    "es": "Nebulosa del Fantasma de Júpiter",
+    "ru": "Туманность Призрак Юпитера"
+  },
+  "Jupiter's Ghost Nebula": {
+    "name": "Ghost of Jupiter Nebula",
+    "ar": "‎سديم شبح المشتري‎",
+    "zh": "木魂星云",
+    "fi": "Jupiterin haamu",
+    "fr": "Nébuleuse du Fantôme de Jupiter",
+    "de": "Jupiters Geist-Nebel",
+    "it": "Nebulosa Fantasma di Giove",
+    "ja": "木星状星云",
+    "ko": "목성의 유령 성운",
+    "la": "Spiritus Jovis Nebula",
+    "fa": "سحابی شبح ژوپیتر",
+    "es": "Nebulosa del Fantasma de Júpiter",
+    "ru": "Туманность Призрак Юпитера"
+  },
+  "Jupiter'sGhostNebula": {
+    "name": "Ghost of Jupiter Nebula",
+    "ar": "‎سديم شبح المشتري‎",
+    "zh": "木魂星云",
+    "fi": "Jupiterin haamu",
+    "fr": "Nébuleuse du Fantôme de Jupiter",
+    "de": "Jupiters Geist-Nebel",
+    "it": "Nebulosa Fantasma di Giove",
+    "ja": "木星状星云",
+    "ko": "목성의 유령 성운",
+    "la": "Spiritus Jovis Nebula",
+    "fa": "سحابی شبح ژوپیتر",
+    "es": "Nebulosa del Fantasma de Júpiter",
+    "ru": "Туманность Призрак Юпитера"
+  },
+  "C 60": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "C60": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "NGC4038": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "2MASS J12015301-1852034": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "2MASSJ12015301-1852034": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "C 060": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "C060": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "ESO 572-047": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "ESO572-047": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "ESO-LV 572-0470": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "ESO-LV572-0470": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "ESO-LV 572-0481": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "ESO-LV572-0481": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "MCG -03-31-014": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "MCG-03-31-014": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "PGC 037967": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "PGC037967": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "UGCA 264": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "UGCA264": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "Antennae Galaxies": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "AntennaeGalaxies": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "C 61": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "C61": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "NGC4039": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "2MASS J12015350-1853103": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "2MASSJ12015350-1853103": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "C 061": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "C061": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "ESO 572-048": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "ESO572-048": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "ESO-LV 572-0471": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "ESO-LV572-0471": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "ESO-LV 572-0480": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "ESO-LV572-0480": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "MCG -03-31-015": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "MCG-03-31-015": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "PGC 037969": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "PGC037969": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "UGCA 265": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "UGCA265": {
+    "name": "Antennae",
+    "ar": "‎‎قرون الاستشعار‎‎",
+    "zh": "触须星系",
+    "fi": "Tuntosarvigalaksit",
+    "fr": "Galaxies des Antennes",
+    "de": "Antennen",
+    "el": "Κεραίες",
+    "he": "אנטנות",
+    "it": "Antenna",
+    "ja": "アンテナ银河",
+    "ko": "안테나",
+    "fa": "توکان",
+    "es": "Antena",
+    "ru": "Антенна",
+    "tr": "Anten"
+  },
+  "C 62": {
+    "name": "Burbidge Chain",
+    "ar": "‎سلسلة بربيدج‎",
+    "zh": "伯比奇链",
+    "fi": "Burbidgen ketju",
+    "fr": "La Chaîne de Burbidge",
+    "de": "Burbidge-Kette",
+    "it": "Catena Burbidge",
+    "ko": "버브리지의 사슬",
+    "la": "Catena Burbidgei",
+    "es": "Cadena de Burbidge",
+    "ru": "Цепочка Бербиджа",
+    "tr": "Burbidge Zinciri"
+  },
+  "C62": {
+    "name": "Burbidge Chain",
+    "ar": "‎سلسلة بربيدج‎",
+    "zh": "伯比奇链",
+    "fi": "Burbidgen ketju",
+    "fr": "La Chaîne de Burbidge",
+    "de": "Burbidge-Kette",
+    "it": "Catena Burbidge",
+    "ko": "버브리지의 사슬",
+    "la": "Catena Burbidgei",
+    "es": "Cadena de Burbidge",
+    "ru": "Цепочка Бербиджа",
+    "tr": "Burbidge Zinciri"
+  },
+  "NGC247": {
+    "name": "Burbidge Chain",
+    "ar": "‎سلسلة بربيدج‎",
+    "zh": "伯比奇链",
+    "fi": "Burbidgen ketju",
+    "fr": "La Chaîne de Burbidge",
+    "de": "Burbidge-Kette",
+    "it": "Catena Burbidge",
+    "ko": "버브리지의 사슬",
+    "la": "Catena Burbidgei",
+    "es": "Cadena de Burbidge",
+    "ru": "Цепочка Бербиджа",
+    "tr": "Burbidge Zinciri"
+  },
+  "2MASX J00470855-2045374": {
+    "name": "Burbidge Chain",
+    "ar": "‎سلسلة بربيدج‎",
+    "zh": "伯比奇链",
+    "fi": "Burbidgen ketju",
+    "fr": "La Chaîne de Burbidge",
+    "de": "Burbidge-Kette",
+    "it": "Catena Burbidge",
+    "ko": "버브리지의 사슬",
+    "la": "Catena Burbidgei",
+    "es": "Cadena de Burbidge",
+    "ru": "Цепочка Бербиджа",
+    "tr": "Burbidge Zinciri"
+  },
+  "2MASXJ00470855-2045374": {
+    "name": "Burbidge Chain",
+    "ar": "‎سلسلة بربيدج‎",
+    "zh": "伯比奇链",
+    "fi": "Burbidgen ketju",
+    "fr": "La Chaîne de Burbidge",
+    "de": "Burbidge-Kette",
+    "it": "Catena Burbidge",
+    "ko": "버브리지의 사슬",
+    "la": "Catena Burbidgei",
+    "es": "Cadena de Burbidge",
+    "ru": "Цепочка Бербиджа",
+    "tr": "Burbidge Zinciri"
+  },
+  "C 062": {
+    "name": "Burbidge Chain",
+    "ar": "‎سلسلة بربيدج‎",
+    "zh": "伯比奇链",
+    "fi": "Burbidgen ketju",
+    "fr": "La Chaîne de Burbidge",
+    "de": "Burbidge-Kette",
+    "it": "Catena Burbidge",
+    "ko": "버브리지의 사슬",
+    "la": "Catena Burbidgei",
+    "es": "Cadena de Burbidge",
+    "ru": "Цепочка Бербиджа",
+    "tr": "Burbidge Zinciri"
+  },
+  "C062": {
+    "name": "Burbidge Chain",
+    "ar": "‎سلسلة بربيدج‎",
+    "zh": "伯比奇链",
+    "fi": "Burbidgen ketju",
+    "fr": "La Chaîne de Burbidge",
+    "de": "Burbidge-Kette",
+    "it": "Catena Burbidge",
+    "ko": "버브리지의 사슬",
+    "la": "Catena Burbidgei",
+    "es": "Cadena de Burbidge",
+    "ru": "Цепочка Бербиджа",
+    "tr": "Burbidge Zinciri"
+  },
+  "ESO 540-022": {
+    "name": "Burbidge Chain",
+    "ar": "‎سلسلة بربيدج‎",
+    "zh": "伯比奇链",
+    "fi": "Burbidgen ketju",
+    "fr": "La Chaîne de Burbidge",
+    "de": "Burbidge-Kette",
+    "it": "Catena Burbidge",
+    "ko": "버브리지의 사슬",
+    "la": "Catena Burbidgei",
+    "es": "Cadena de Burbidge",
+    "ru": "Цепочка Бербиджа",
+    "tr": "Burbidge Zinciri"
+  },
+  "ESO540-022": {
+    "name": "Burbidge Chain",
+    "ar": "‎سلسلة بربيدج‎",
+    "zh": "伯比奇链",
+    "fi": "Burbidgen ketju",
+    "fr": "La Chaîne de Burbidge",
+    "de": "Burbidge-Kette",
+    "it": "Catena Burbidge",
+    "ko": "버브리지의 사슬",
+    "la": "Catena Burbidgei",
+    "es": "Cadena de Burbidge",
+    "ru": "Цепочка Бербиджа",
+    "tr": "Burbidge Zinciri"
+  },
+  "ESO-LV 540-0220": {
+    "name": "Burbidge Chain",
+    "ar": "‎سلسلة بربيدج‎",
+    "zh": "伯比奇链",
+    "fi": "Burbidgen ketju",
+    "fr": "La Chaîne de Burbidge",
+    "de": "Burbidge-Kette",
+    "it": "Catena Burbidge",
+    "ko": "버브리지의 사슬",
+    "la": "Catena Burbidgei",
+    "es": "Cadena de Burbidge",
+    "ru": "Цепочка Бербиджа",
+    "tr": "Burbidge Zinciri"
+  },
+  "ESO-LV540-0220": {
+    "name": "Burbidge Chain",
+    "ar": "‎سلسلة بربيدج‎",
+    "zh": "伯比奇链",
+    "fi": "Burbidgen ketju",
+    "fr": "La Chaîne de Burbidge",
+    "de": "Burbidge-Kette",
+    "it": "Catena Burbidge",
+    "ko": "버브리지의 사슬",
+    "la": "Catena Burbidgei",
+    "es": "Cadena de Burbidge",
+    "ru": "Цепочка Бербиджа",
+    "tr": "Burbidge Zinciri"
+  },
+  "MCG -04-03-005": {
+    "name": "Burbidge Chain",
+    "ar": "‎سلسلة بربيدج‎",
+    "zh": "伯比奇链",
+    "fi": "Burbidgen ketju",
+    "fr": "La Chaîne de Burbidge",
+    "de": "Burbidge-Kette",
+    "it": "Catena Burbidge",
+    "ko": "버브리지의 사슬",
+    "la": "Catena Burbidgei",
+    "es": "Cadena de Burbidge",
+    "ru": "Цепочка Бербиджа",
+    "tr": "Burbidge Zinciri"
+  },
+  "MCG-04-03-005": {
+    "name": "Burbidge Chain",
+    "ar": "‎سلسلة بربيدج‎",
+    "zh": "伯比奇链",
+    "fi": "Burbidgen ketju",
+    "fr": "La Chaîne de Burbidge",
+    "de": "Burbidge-Kette",
+    "it": "Catena Burbidge",
+    "ko": "버브리지의 사슬",
+    "la": "Catena Burbidgei",
+    "es": "Cadena de Burbidge",
+    "ru": "Цепочка Бербиджа",
+    "tr": "Burbidge Zinciri"
+  },
+  "PGC 002758": {
+    "name": "Burbidge Chain",
+    "ar": "‎سلسلة بربيدج‎",
+    "zh": "伯比奇链",
+    "fi": "Burbidgen ketju",
+    "fr": "La Chaîne de Burbidge",
+    "de": "Burbidge-Kette",
+    "it": "Catena Burbidge",
+    "ko": "버브리지의 사슬",
+    "la": "Catena Burbidgei",
+    "es": "Cadena de Burbidge",
+    "ru": "Цепочка Бербиджа",
+    "tr": "Burbidge Zinciri"
+  },
+  "PGC002758": {
+    "name": "Burbidge Chain",
+    "ar": "‎سلسلة بربيدج‎",
+    "zh": "伯比奇链",
+    "fi": "Burbidgen ketju",
+    "fr": "La Chaîne de Burbidge",
+    "de": "Burbidge-Kette",
+    "it": "Catena Burbidge",
+    "ko": "버브리지의 사슬",
+    "la": "Catena Burbidgei",
+    "es": "Cadena de Burbidge",
+    "ru": "Цепочка Бербиджа",
+    "tr": "Burbidge Zinciri"
+  },
+  "UGCA 011": {
+    "name": "Burbidge Chain",
+    "ar": "‎سلسلة بربيدج‎",
+    "zh": "伯比奇链",
+    "fi": "Burbidgen ketju",
+    "fr": "La Chaîne de Burbidge",
+    "de": "Burbidge-Kette",
+    "it": "Catena Burbidge",
+    "ko": "버브리지의 사슬",
+    "la": "Catena Burbidgei",
+    "es": "Cadena de Burbidge",
+    "ru": "Цепочка Бербиджа",
+    "tr": "Burbidge Zinciri"
+  },
+  "UGCA011": {
+    "name": "Burbidge Chain",
+    "ar": "‎سلسلة بربيدج‎",
+    "zh": "伯比奇链",
+    "fi": "Burbidgen ketju",
+    "fr": "La Chaîne de Burbidge",
+    "de": "Burbidge-Kette",
+    "it": "Catena Burbidge",
+    "ko": "버브리지의 사슬",
+    "la": "Catena Burbidgei",
+    "es": "Cadena de Burbidge",
+    "ru": "Цепочка Бербиджа",
+    "tr": "Burbidge Zinciri"
+  },
+  "C 63": {
+    "name": "Helix Nebula",
+    "ar": "‎سديم هيلكس‎",
+    "zh": "螺旋星云",
+    "fi": "Helix-sumu",
+    "fr": "Nébuleuse de l'Hélice",
+    "de": "Helix-Nebel",
+    "el": "Νεφέλωμα Έλικα",
+    "it": "Nebulosa Elica",
+    "ja": "らせん状星云",
+    "ko": "나사 성운",
+    "la": "Helix nebula",
+    "fa": "سحابی مارپیچ",
+    "es": "Nebulosa de la Hélice",
+    "ru": "Туманность Улитка",
+    "tr": "Helis Bulutsusu",
+    "he": "ערפילית הסליל"
+  },
+  "C63": {
+    "name": "Helix Nebula",
+    "ar": "‎سديم هيلكس‎",
+    "zh": "螺旋星云",
+    "fi": "Helix-sumu",
+    "fr": "Nébuleuse de l'Hélice",
+    "de": "Helix-Nebel",
+    "el": "Νεφέλωμα Έλικα",
+    "it": "Nebulosa Elica",
+    "ja": "らせん状星云",
+    "ko": "나사 성운",
+    "la": "Helix nebula",
+    "fa": "سحابی مارپیچ",
+    "es": "Nebulosa de la Hélice",
+    "ru": "Туманность Улитка",
+    "tr": "Helis Bulutsusu",
+    "he": "ערפילית הסליל"
+  },
+  "NGC7293": {
+    "name": "Helix Nebula",
+    "ar": "‎سديم هيلكس‎",
+    "zh": "螺旋星云",
+    "fi": "Helix-sumu",
+    "fr": "Nébuleuse de l'Hélice",
+    "de": "Helix-Nebel",
+    "el": "Νεφέλωμα Έλικα",
+    "it": "Nebulosa Elica",
+    "ja": "らせん状星云",
+    "ko": "나사 성운",
+    "la": "Helix nebula",
+    "fa": "سحابی مارپیچ",
+    "es": "Nebulosa de la Hélice",
+    "ru": "Туманность Улитка",
+    "tr": "Helis Bulutsusu",
+    "he": "ערפילית הסליל"
+  },
+  "C 063": {
+    "name": "Helix Nebula",
+    "ar": "‎سديم هيلكس‎",
+    "zh": "螺旋星云",
+    "fi": "Helix-sumu",
+    "fr": "Nébuleuse de l'Hélice",
+    "de": "Helix-Nebel",
+    "el": "Νεφέλωμα Έλικα",
+    "it": "Nebulosa Elica",
+    "ja": "らせん状星云",
+    "ko": "나사 성운",
+    "la": "Helix nebula",
+    "fa": "سحابی مارپیچ",
+    "es": "Nebulosa de la Hélice",
+    "ru": "Туманность Улитка",
+    "tr": "Helis Bulutsusu",
+    "he": "ערפילית הסליל"
+  },
+  "C063": {
+    "name": "Helix Nebula",
+    "ar": "‎سديم هيلكس‎",
+    "zh": "螺旋星云",
+    "fi": "Helix-sumu",
+    "fr": "Nébuleuse de l'Hélice",
+    "de": "Helix-Nebel",
+    "el": "Νεφέλωμα Έλικα",
+    "it": "Nebulosa Elica",
+    "ja": "らせん状星云",
+    "ko": "나사 성운",
+    "la": "Helix nebula",
+    "fa": "سحابی مارپیچ",
+    "es": "Nebulosa de la Hélice",
+    "ru": "Туманность Улитка",
+    "tr": "Helis Bulutsusu",
+    "he": "ערפילית הסליל"
+  },
+  "ESO 602-022": {
+    "name": "Helix Nebula",
+    "ar": "‎سديم هيلكس‎",
+    "zh": "螺旋星云",
+    "fi": "Helix-sumu",
+    "fr": "Nébuleuse de l'Hélice",
+    "de": "Helix-Nebel",
+    "el": "Νεφέλωμα Έλικα",
+    "it": "Nebulosa Elica",
+    "ja": "らせん状星云",
+    "ko": "나사 성운",
+    "la": "Helix nebula",
+    "fa": "سحابی مارپیچ",
+    "es": "Nebulosa de la Hélice",
+    "ru": "Туманность Улитка",
+    "tr": "Helis Bulutsusu",
+    "he": "ערפילית הסליל"
+  },
+  "ESO602-022": {
+    "name": "Helix Nebula",
+    "ar": "‎سديم هيلكس‎",
+    "zh": "螺旋星云",
+    "fi": "Helix-sumu",
+    "fr": "Nébuleuse de l'Hélice",
+    "de": "Helix-Nebel",
+    "el": "Νεφέλωμα Έλικα",
+    "it": "Nebulosa Elica",
+    "ja": "らせん状星云",
+    "ko": "나사 성운",
+    "la": "Helix nebula",
+    "fa": "سحابی مارپیچ",
+    "es": "Nebulosa de la Hélice",
+    "ru": "Туманность Улитка",
+    "tr": "Helis Bulutsusu",
+    "he": "ערפילית הסליל"
+  },
+  "PN G036.1-57.1": {
+    "name": "Helix Nebula",
+    "ar": "‎سديم هيلكس‎",
+    "zh": "螺旋星云",
+    "fi": "Helix-sumu",
+    "fr": "Nébuleuse de l'Hélice",
+    "de": "Helix-Nebel",
+    "el": "Νεφέλωμα Έλικα",
+    "it": "Nebulosa Elica",
+    "ja": "らせん状星云",
+    "ko": "나사 성운",
+    "la": "Helix nebula",
+    "fa": "سحابی مارپیچ",
+    "es": "Nebulosa de la Hélice",
+    "ru": "Туманность Улитка",
+    "tr": "Helis Bulutsusu",
+    "he": "ערפילית הסליל"
+  },
+  "PNG036.1-57.1": {
+    "name": "Helix Nebula",
+    "ar": "‎سديم هيلكس‎",
+    "zh": "螺旋星云",
+    "fi": "Helix-sumu",
+    "fr": "Nébuleuse de l'Hélice",
+    "de": "Helix-Nebel",
+    "el": "Νεφέλωμα Έλικα",
+    "it": "Nebulosa Elica",
+    "ja": "らせん状星云",
+    "ko": "나사 성운",
+    "la": "Helix nebula",
+    "fa": "سحابی مارپیچ",
+    "es": "Nebulosa de la Hélice",
+    "ru": "Туманность Улитка",
+    "tr": "Helis Bulutsusu",
+    "he": "ערפילית הסליל"
+  },
+  "Helix Nebula": {
+    "name": "Helix Nebula",
+    "ar": "‎سديم هيلكس‎",
+    "zh": "螺旋星云",
+    "fi": "Helix-sumu",
+    "fr": "Nébuleuse de l'Hélice",
+    "de": "Helix-Nebel",
+    "el": "Νεφέλωμα Έλικα",
+    "it": "Nebulosa Elica",
+    "ja": "らせん状星云",
+    "ko": "나사 성운",
+    "la": "Helix nebula",
+    "fa": "سحابی مارپیچ",
+    "es": "Nebulosa de la Hélice",
+    "ru": "Туманность Улитка",
+    "tr": "Helis Bulutsusu",
+    "he": "ערפילית הסליל"
+  },
+  "HelixNebula": {
+    "name": "Helix Nebula",
+    "ar": "‎سديم هيلكس‎",
+    "zh": "螺旋星云",
+    "fi": "Helix-sumu",
+    "fr": "Nébuleuse de l'Hélice",
+    "de": "Helix-Nebel",
+    "el": "Νεφέλωμα Έλικα",
+    "it": "Nebulosa Elica",
+    "ja": "らせん状星云",
+    "ko": "나사 성운",
+    "la": "Helix nebula",
+    "fa": "سحابی مارپیچ",
+    "es": "Nebulosa de la Hélice",
+    "ru": "Туманность Улитка",
+    "tr": "Helis Bulutsusu",
+    "he": "ערפילית הסליל"
+  },
+  "C 64": {
+    "name": "τ CMa Cluster",
+    "ar": "‎حشد تاو الكلب الأكبر‎",
+    "zh": "弧矢增六星团",
+    "fi": "τ CMa -joukko",
+    "fr": "Amas τ CMa",
+    "de": "τ CMa Haufen",
+    "it": "Ammasso τ CMa",
+    "ja": "おおいぬ座τ星団",
+    "ko": "큰개자리 타우 성단",
+    "es": "Cúmulo τ CMa",
+    "ru": "Скопление τ Малого Пса"
+  },
+  "C64": {
+    "name": "τ CMa Cluster",
+    "ar": "‎حشد تاو الكلب الأكبر‎",
+    "zh": "弧矢增六星团",
+    "fi": "τ CMa -joukko",
+    "fr": "Amas τ CMa",
+    "de": "τ CMa Haufen",
+    "it": "Ammasso τ CMa",
+    "ja": "おおいぬ座τ星団",
+    "ko": "큰개자리 타우 성단",
+    "es": "Cúmulo τ CMa",
+    "ru": "Скопление τ Малого Пса"
+  },
+  "NGC2362": {
+    "name": "τ CMa Cluster",
+    "ar": "‎حشد تاو الكلب الأكبر‎",
+    "zh": "弧矢增六星团",
+    "fi": "τ CMa -joukko",
+    "fr": "Amas τ CMa",
+    "de": "τ CMa Haufen",
+    "it": "Ammasso τ CMa",
+    "ja": "おおいぬ座τ星団",
+    "ko": "큰개자리 타우 성단",
+    "es": "Cúmulo τ CMa",
+    "ru": "Скопление τ Малого Пса"
+  },
+  "C 064": {
+    "name": "τ CMa Cluster",
+    "ar": "‎حشد تاو الكلب الأكبر‎",
+    "zh": "弧矢增六星团",
+    "fi": "τ CMa -joukko",
+    "fr": "Amas τ CMa",
+    "de": "τ CMa Haufen",
+    "it": "Ammasso τ CMa",
+    "ja": "おおいぬ座τ星団",
+    "ko": "큰개자리 타우 성단",
+    "es": "Cúmulo τ CMa",
+    "ru": "Скопление τ Малого Пса"
+  },
+  "C064": {
+    "name": "τ CMa Cluster",
+    "ar": "‎حشد تاو الكلب الأكبر‎",
+    "zh": "弧矢增六星团",
+    "fi": "τ CMa -joukko",
+    "fr": "Amas τ CMa",
+    "de": "τ CMa Haufen",
+    "it": "Ammasso τ CMa",
+    "ja": "おおいぬ座τ星団",
+    "ko": "큰개자리 타우 성단",
+    "es": "Cúmulo τ CMa",
+    "ru": "Скопление τ Малого Пса"
+  },
+  "MWSC 1173": {
+    "name": "τ CMa Cluster",
+    "ar": "‎حشد تاو الكلب الأكبر‎",
+    "zh": "弧矢增六星团",
+    "fi": "τ CMa -joukko",
+    "fr": "Amas τ CMa",
+    "de": "τ CMa Haufen",
+    "it": "Ammasso τ CMa",
+    "ja": "おおいぬ座τ星団",
+    "ko": "큰개자리 타우 성단",
+    "es": "Cúmulo τ CMa",
+    "ru": "Скопление τ Малого Пса"
+  },
+  "MWSC1173": {
+    "name": "τ CMa Cluster",
+    "ar": "‎حشد تاو الكلب الأكبر‎",
+    "zh": "弧矢增六星团",
+    "fi": "τ CMa -joukko",
+    "fr": "Amas τ CMa",
+    "de": "τ CMa Haufen",
+    "it": "Ammasso τ CMa",
+    "ja": "おおいぬ座τ星団",
+    "ko": "큰개자리 타우 성단",
+    "es": "Cúmulo τ CMa",
+    "ru": "Скопление τ Малого Пса"
+  },
+  "Tau CMa": {
+    "name": "τ CMa Cluster",
+    "ar": "‎حشد تاو الكلب الأكبر‎",
+    "zh": "弧矢增六星团",
+    "fi": "τ CMa -joukko",
+    "fr": "Amas τ CMa",
+    "de": "τ CMa Haufen",
+    "it": "Ammasso τ CMa",
+    "ja": "おおいぬ座τ星団",
+    "ko": "큰개자리 타우 성단",
+    "es": "Cúmulo τ CMa",
+    "ru": "Скопление τ Малого Пса"
+  },
+  "TauCMa": {
+    "name": "τ CMa Cluster",
+    "ar": "‎حشد تاو الكلب الأكبر‎",
+    "zh": "弧矢增六星团",
+    "fi": "τ CMa -joukko",
+    "fr": "Amas τ CMa",
+    "de": "τ CMa Haufen",
+    "it": "Ammasso τ CMa",
+    "ja": "おおいぬ座τ星団",
+    "ko": "큰개자리 타우 성단",
+    "es": "Cúmulo τ CMa",
+    "ru": "Скопление τ Малого Пса"
+  },
+  "C 65": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "C65": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "NGC253": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "2MASX J00473313-2517196": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "2MASXJ00473313-2517196": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "C 065": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "C065": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "ESO 474-029": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "ESO474-029": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "ESO-LV 474-0290": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "ESO-LV474-0290": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "IRAS 00450-2533": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "IRAS00450-2533": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "MCG -04-03-009": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "MCG-04-03-009": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "PGC 002789": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "PGC002789": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "UGCA 013": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "UGCA013": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "Sculptor Filament": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "SculptorFilament": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "Silver Coin": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "SilverCoin": {
+    "name": "Sculptor Galaxy",
+    "ar": "‎مجرة النحّات‎",
+    "zh": "玉夫座星系",
+    "fi": "Kuvanveistäjägalaksi",
+    "fr": "Galaxie du Sculpteur",
+    "de": "Sculptor-Galaxie",
+    "el": "Γαλαξίας του Γλύπτη",
+    "it": "Galassia dello Scultore",
+    "ja": "ちょうこくしつ座银河",
+    "ko": "조각자리 은하",
+    "la": "Galaxia Sculptoris",
+    "fa": "کهکشان مجسمه‌ساز",
+    "es": "Galaxia del Escultor",
+    "ru": "Галактика Скульптора",
+    "tr": "Heykeltraş Gökadası",
+    "he": "גלקסיית הפסל"
+  },
+  "C 66": {
+    "name": "NGC 5694"
+  },
+  "C66": {
+    "name": "NGC 5694"
+  },
+  "NGC 5694": {
+    "name": "NGC 5694"
+  },
+  "NGC5694": {
+    "name": "NGC 5694"
+  },
+  "C 066": {
+    "name": "NGC 5694"
+  },
+  "C066": {
+    "name": "NGC 5694"
+  },
+  "MWSC 2238": {
+    "name": "NGC 5694"
+  },
+  "MWSC2238": {
+    "name": "NGC 5694"
+  },
+  "C 67": {
+    "name": "NGC 1097"
+  },
+  "C67": {
+    "name": "NGC 1097"
+  },
+  "NGC 1097": {
+    "name": "NGC 1097"
+  },
+  "NGC1097": {
+    "name": "NGC 1097"
+  },
+  "2MASX J02461905-3016296": {
+    "name": "NGC 1097"
+  },
+  "2MASXJ02461905-3016296": {
+    "name": "NGC 1097"
+  },
+  "C 067": {
+    "name": "NGC 1097"
+  },
+  "C067": {
+    "name": "NGC 1097"
+  },
+  "ESO 416-020": {
+    "name": "NGC 1097"
+  },
+  "ESO416-020": {
+    "name": "NGC 1097"
+  },
+  "ESO-LV 416-0200": {
+    "name": "NGC 1097"
+  },
+  "ESO-LV416-0200": {
+    "name": "NGC 1097"
+  },
+  "IRAS 02441-3029": {
+    "name": "NGC 1097"
+  },
+  "IRAS02441-3029": {
+    "name": "NGC 1097"
+  },
+  "MCG -05-07-024": {
+    "name": "NGC 1097"
+  },
+  "MCG-05-07-024": {
+    "name": "NGC 1097"
+  },
+  "PGC 010488": {
+    "name": "NGC 1097"
+  },
+  "PGC010488": {
+    "name": "NGC 1097"
+  },
+  "UGCA 041": {
+    "name": "NGC 1097"
+  },
+  "UGCA041": {
+    "name": "NGC 1097"
+  },
+  "C 68": {
+    "name": "R CrA Nebula",
+    "ar": "‎‎سديم آر الإكليل الجنوبي‎‎",
+    "zh": "南冕座星云",
+    "fi": "R Coronae Australis -sumu",
+    "fr": "Nébuleuse R CrA",
+    "de": "R CrA Nebel",
+    "it": "Nebulosa R CrA",
+    "ja": "かんむり座R星云",
+    "ko": "R CrA 성운",
+    "fa": "سحابی آر-اکلیل جنوبی",
+    "es": "Nebulosa de R CrA",
+    "ru": "Туманность R Южной короны"
+  },
+  "C68": {
+    "name": "R CrA Nebula",
+    "ar": "‎‎سديم آر الإكليل الجنوبي‎‎",
+    "zh": "南冕座星云",
+    "fi": "R Coronae Australis -sumu",
+    "fr": "Nébuleuse R CrA",
+    "de": "R CrA Nebel",
+    "it": "Nebulosa R CrA",
+    "ja": "かんむり座R星云",
+    "ko": "R CrA 성운",
+    "fa": "سحابی آر-اکلیل جنوبی",
+    "es": "Nebulosa de R CrA",
+    "ru": "Туманность R Южной короны"
+  },
+  "NGC6729": {
+    "name": "R CrA Nebula",
+    "ar": "‎‎سديم آر الإكليل الجنوبي‎‎",
+    "zh": "南冕座星云",
+    "fi": "R Coronae Australis -sumu",
+    "fr": "Nébuleuse R CrA",
+    "de": "R CrA Nebel",
+    "it": "Nebulosa R CrA",
+    "ja": "かんむり座R星云",
+    "ko": "R CrA 성운",
+    "fa": "سحابی آر-اکلیل جنوبی",
+    "es": "Nebulosa de R CrA",
+    "ru": "Туманность R Южной короны"
+  },
+  "C 068": {
+    "name": "R CrA Nebula",
+    "ar": "‎‎سديم آر الإكليل الجنوبي‎‎",
+    "zh": "南冕座星云",
+    "fi": "R Coronae Australis -sumu",
+    "fr": "Nébuleuse R CrA",
+    "de": "R CrA Nebel",
+    "it": "Nebulosa R CrA",
+    "ja": "かんむり座R星云",
+    "ko": "R CrA 성운",
+    "fa": "سحابی آر-اکلیل جنوبی",
+    "es": "Nebulosa de R CrA",
+    "ru": "Туманность R Южной короны"
+  },
+  "C068": {
+    "name": "R CrA Nebula",
+    "ar": "‎‎سديم آر الإكليل الجنوبي‎‎",
+    "zh": "南冕座星云",
+    "fi": "R Coronae Australis -sumu",
+    "fr": "Nébuleuse R CrA",
+    "de": "R CrA Nebel",
+    "it": "Nebulosa R CrA",
+    "ja": "かんむり座R星云",
+    "ko": "R CrA 성운",
+    "fa": "سحابی آر-اکلیل جنوبی",
+    "es": "Nebulosa de R CrA",
+    "ru": "Туманность R Южной короны"
+  },
+  "IRAS 18585-3701": {
+    "name": "R CrA Nebula",
+    "ar": "‎‎سديم آر الإكليل الجنوبي‎‎",
+    "zh": "南冕座星云",
+    "fi": "R Coronae Australis -sumu",
+    "fr": "Nébuleuse R CrA",
+    "de": "R CrA Nebel",
+    "it": "Nebulosa R CrA",
+    "ja": "かんむり座R星云",
+    "ko": "R CrA 성운",
+    "fa": "سحابی آر-اکلیل جنوبی",
+    "es": "Nebulosa de R CrA",
+    "ru": "Туманность R Южной короны"
+  },
+  "IRAS18585-3701": {
+    "name": "R CrA Nebula",
+    "ar": "‎‎سديم آر الإكليل الجنوبي‎‎",
+    "zh": "南冕座星云",
+    "fi": "R Coronae Australis -sumu",
+    "fr": "Nébuleuse R CrA",
+    "de": "R CrA Nebel",
+    "it": "Nebulosa R CrA",
+    "ja": "かんむり座R星云",
+    "ko": "R CrA 성운",
+    "fa": "سحابی آر-اکلیل جنوبی",
+    "es": "Nebulosa de R CrA",
+    "ru": "Туманность R Южной короны"
+  },
+  "C 69": {
+    "name": "Bug Nebula",
+    "ar": "‎سديم البقِّة‎",
+    "zh": "小虫星云",
+    "fi": "Ludesumu",
+    "fr": "Nébuleuse de l'Insecte",
+    "de": "Wanzen-Nebel",
+    "el": "Νεφέλωμα Έντομο",
+    "it": "Nebulosa insetto",
+    "ja": "バグ星云",
+    "ko": "벌레 성운",
+    "fa": "سحابی حشره",
+    "es": "Nebulosa del Insecto",
+    "ru": "Туманность Жук",
+    "tr": "Böcek Bulutsusu"
+  },
+  "C69": {
+    "name": "Bug Nebula",
+    "ar": "‎سديم البقِّة‎",
+    "zh": "小虫星云",
+    "fi": "Ludesumu",
+    "fr": "Nébuleuse de l'Insecte",
+    "de": "Wanzen-Nebel",
+    "el": "Νεφέλωμα Έντομο",
+    "it": "Nebulosa insetto",
+    "ja": "バグ星云",
+    "ko": "벌레 성운",
+    "fa": "سحابی حشره",
+    "es": "Nebulosa del Insecto",
+    "ru": "Туманность Жук",
+    "tr": "Böcek Bulutsusu"
+  },
+  "NGC6302": {
+    "name": "Bug Nebula",
+    "ar": "‎سديم البقِّة‎",
+    "zh": "小虫星云",
+    "fi": "Ludesumu",
+    "fr": "Nébuleuse de l'Insecte",
+    "de": "Wanzen-Nebel",
+    "el": "Νεφέλωμα Έντομο",
+    "it": "Nebulosa insetto",
+    "ja": "バグ星云",
+    "ko": "벌레 성운",
+    "fa": "سحابی حشره",
+    "es": "Nebulosa del Insecto",
+    "ru": "Туманность Жук",
+    "tr": "Böcek Bulutsusu"
+  },
+  "2MASX J17134463-3706111": {
+    "name": "Bug Nebula",
+    "ar": "‎سديم البقِّة‎",
+    "zh": "小虫星云",
+    "fi": "Ludesumu",
+    "fr": "Nébuleuse de l'Insecte",
+    "de": "Wanzen-Nebel",
+    "el": "Νεφέλωμα Έντομο",
+    "it": "Nebulosa insetto",
+    "ja": "バグ星云",
+    "ko": "벌레 성운",
+    "fa": "سحابی حشره",
+    "es": "Nebulosa del Insecto",
+    "ru": "Туманность Жук",
+    "tr": "Böcek Bulutsusu"
+  },
+  "2MASXJ17134463-3706111": {
+    "name": "Bug Nebula",
+    "ar": "‎سديم البقِّة‎",
+    "zh": "小虫星云",
+    "fi": "Ludesumu",
+    "fr": "Nébuleuse de l'Insecte",
+    "de": "Wanzen-Nebel",
+    "el": "Νεφέλωμα Έντομο",
+    "it": "Nebulosa insetto",
+    "ja": "バグ星云",
+    "ko": "벌레 성운",
+    "fa": "سحابی حشره",
+    "es": "Nebulosa del Insecto",
+    "ru": "Туманность Жук",
+    "tr": "Böcek Bulutsusu"
+  },
+  "C 069": {
+    "name": "Bug Nebula",
+    "ar": "‎سديم البقِّة‎",
+    "zh": "小虫星云",
+    "fi": "Ludesumu",
+    "fr": "Nébuleuse de l'Insecte",
+    "de": "Wanzen-Nebel",
+    "el": "Νεφέλωμα Έντομο",
+    "it": "Nebulosa insetto",
+    "ja": "バグ星云",
+    "ko": "벌레 성운",
+    "fa": "سحابی حشره",
+    "es": "Nebulosa del Insecto",
+    "ru": "Туманность Жук",
+    "tr": "Böcek Bulutsusu"
+  },
+  "C069": {
+    "name": "Bug Nebula",
+    "ar": "‎سديم البقِّة‎",
+    "zh": "小虫星云",
+    "fi": "Ludesumu",
+    "fr": "Nébuleuse de l'Insecte",
+    "de": "Wanzen-Nebel",
+    "el": "Νεφέλωμα Έντομο",
+    "it": "Nebulosa insetto",
+    "ja": "バグ星云",
+    "ko": "벌레 성운",
+    "fa": "سحابی حشره",
+    "es": "Nebulosa del Insecto",
+    "ru": "Туманность Жук",
+    "tr": "Böcek Bulutsusu"
+  },
+  "ESO 392-005": {
+    "name": "Bug Nebula",
+    "ar": "‎سديم البقِّة‎",
+    "zh": "小虫星云",
+    "fi": "Ludesumu",
+    "fr": "Nébuleuse de l'Insecte",
+    "de": "Wanzen-Nebel",
+    "el": "Νεφέλωμα Έντομο",
+    "it": "Nebulosa insetto",
+    "ja": "バグ星云",
+    "ko": "벌레 성운",
+    "fa": "سحابی حشره",
+    "es": "Nebulosa del Insecto",
+    "ru": "Туманность Жук",
+    "tr": "Böcek Bulutsusu"
+  },
+  "ESO392-005": {
+    "name": "Bug Nebula",
+    "ar": "‎سديم البقِّة‎",
+    "zh": "小虫星云",
+    "fi": "Ludesumu",
+    "fr": "Nébuleuse de l'Insecte",
+    "de": "Wanzen-Nebel",
+    "el": "Νεφέλωμα Έντομο",
+    "it": "Nebulosa insetto",
+    "ja": "バグ星云",
+    "ko": "벌레 성운",
+    "fa": "سحابی حشره",
+    "es": "Nebulosa del Insecto",
+    "ru": "Туманность Жук",
+    "tr": "Böcek Bulutsusu"
+  },
+  "IRAS 17103-3702": {
+    "name": "Bug Nebula",
+    "ar": "‎سديم البقِّة‎",
+    "zh": "小虫星云",
+    "fi": "Ludesumu",
+    "fr": "Nébuleuse de l'Insecte",
+    "de": "Wanzen-Nebel",
+    "el": "Νεφέλωμα Έντομο",
+    "it": "Nebulosa insetto",
+    "ja": "バグ星云",
+    "ko": "벌레 성운",
+    "fa": "سحابی حشره",
+    "es": "Nebulosa del Insecto",
+    "ru": "Туманность Жук",
+    "tr": "Böcek Bulutsusu"
+  },
+  "IRAS17103-3702": {
+    "name": "Bug Nebula",
+    "ar": "‎سديم البقِّة‎",
+    "zh": "小虫星云",
+    "fi": "Ludesumu",
+    "fr": "Nébuleuse de l'Insecte",
+    "de": "Wanzen-Nebel",
+    "el": "Νεφέλωμα Έντομο",
+    "it": "Nebulosa insetto",
+    "ja": "バグ星云",
+    "ko": "벌레 성운",
+    "fa": "سحابی حشره",
+    "es": "Nebulosa del Insecto",
+    "ru": "Туманность Жук",
+    "tr": "Böcek Bulutsusu"
+  },
+  "PN G349.5+01.0": {
+    "name": "Bug Nebula",
+    "ar": "‎سديم البقِّة‎",
+    "zh": "小虫星云",
+    "fi": "Ludesumu",
+    "fr": "Nébuleuse de l'Insecte",
+    "de": "Wanzen-Nebel",
+    "el": "Νεφέλωμα Έντομο",
+    "it": "Nebulosa insetto",
+    "ja": "バグ星云",
+    "ko": "벌레 성운",
+    "fa": "سحابی حشره",
+    "es": "Nebulosa del Insecto",
+    "ru": "Туманность Жук",
+    "tr": "Böcek Bulutsusu"
+  },
+  "PNG349.5+01.0": {
+    "name": "Bug Nebula",
+    "ar": "‎سديم البقِّة‎",
+    "zh": "小虫星云",
+    "fi": "Ludesumu",
+    "fr": "Nébuleuse de l'Insecte",
+    "de": "Wanzen-Nebel",
+    "el": "Νεφέλωμα Έντομο",
+    "it": "Nebulosa insetto",
+    "ja": "バグ星云",
+    "ko": "벌레 성운",
+    "fa": "سحابی حشره",
+    "es": "Nebulosa del Insecto",
+    "ru": "Туманность Жук",
+    "tr": "Böcek Bulutsusu"
+  },
+  "Bug Nebula": {
+    "name": "Bug Nebula",
+    "ar": "‎سديم البقِّة‎",
+    "zh": "小虫星云",
+    "fi": "Ludesumu",
+    "fr": "Nébuleuse de l'Insecte",
+    "de": "Wanzen-Nebel",
+    "el": "Νεφέλωμα Έντομο",
+    "it": "Nebulosa insetto",
+    "ja": "バグ星云",
+    "ko": "벌레 성운",
+    "fa": "سحابی حشره",
+    "es": "Nebulosa del Insecto",
+    "ru": "Туманность Жук",
+    "tr": "Böcek Bulutsusu"
+  },
+  "BugNebula": {
+    "name": "Bug Nebula",
+    "ar": "‎سديم البقِّة‎",
+    "zh": "小虫星云",
+    "fi": "Ludesumu",
+    "fr": "Nébuleuse de l'Insecte",
+    "de": "Wanzen-Nebel",
+    "el": "Νεφέλωμα Έντομο",
+    "it": "Nebulosa insetto",
+    "ja": "バグ星云",
+    "ko": "벌레 성운",
+    "fa": "سحابی حشره",
+    "es": "Nebulosa del Insecto",
+    "ru": "Туманность Жук",
+    "tr": "Böcek Bulutsusu"
+  },
+  "Butterfly Nebula": {
+    "name": "Bug Nebula",
+    "ar": "‎سديم البقِّة‎",
+    "zh": "小虫星云",
+    "fi": "Ludesumu",
+    "fr": "Nébuleuse de l'Insecte",
+    "de": "Wanzen-Nebel",
+    "el": "Νεφέλωμα Έντομο",
+    "it": "Nebulosa insetto",
+    "ja": "バグ星云",
+    "ko": "벌레 성운",
+    "fa": "سحابی حشره",
+    "es": "Nebulosa del Insecto",
+    "ru": "Туманность Жук",
+    "tr": "Böcek Bulutsusu"
+  },
+  "ButterflyNebula": {
+    "name": "Bug Nebula",
+    "ar": "‎سديم البقِّة‎",
+    "zh": "小虫星云",
+    "fi": "Ludesumu",
+    "fr": "Nébuleuse de l'Insecte",
+    "de": "Wanzen-Nebel",
+    "el": "Νεφέλωμα Έντομο",
+    "it": "Nebulosa insetto",
+    "ja": "バグ星云",
+    "ko": "벌레 성운",
+    "fa": "سحابی حشره",
+    "es": "Nebulosa del Insecto",
+    "ru": "Туманность Жук",
+    "tr": "Böcek Bulutsusu"
+  },
+  "C 70": {
+    "name": "Southern Pinwheel Galaxy",
+    "ar": "‎‎مجرة المروحة الجنوبية‎‎",
+    "zh": "南风车星系",
+    "fi": "Etelän tuulimyllygalaksi",
+    "fr": "Galaxie du Moulinet du Sud",
+    "de": "Südliche Feuerrad-Galaxie",
+    "it": "Galassia Girandola del Sud",
+    "ja": "南の回転花火银河",
+    "ko": "남쪽바람개비 은하",
+    "fa": "کهکشان فرفره جنوبی",
+    "es": "Galaxia Molinillo Austral",
+    "ru": "Галактика Южная вертушка",
+    "tr": "Güney Fırıldak Gökadası"
+  },
+  "C70": {
+    "name": "Southern Pinwheel Galaxy",
+    "ar": "‎‎مجرة المروحة الجنوبية‎‎",
+    "zh": "南风车星系",
+    "fi": "Etelän tuulimyllygalaksi",
+    "fr": "Galaxie du Moulinet du Sud",
+    "de": "Südliche Feuerrad-Galaxie",
+    "it": "Galassia Girandola del Sud",
+    "ja": "南の回転花火银河",
+    "ko": "남쪽바람개비 은하",
+    "fa": "کهکشان فرفره جنوبی",
+    "es": "Galaxia Molinillo Austral",
+    "ru": "Галактика Южная вертушка",
+    "tr": "Güney Fırıldak Gökadası"
+  },
+  "NGC300": {
+    "name": "Southern Pinwheel Galaxy",
+    "ar": "‎‎مجرة المروحة الجنوبية‎‎",
+    "zh": "南风车星系",
+    "fi": "Etelän tuulimyllygalaksi",
+    "fr": "Galaxie du Moulinet du Sud",
+    "de": "Südliche Feuerrad-Galaxie",
+    "it": "Galassia Girandola del Sud",
+    "ja": "南の回転花火银河",
+    "ko": "남쪽바람개비 은하",
+    "fa": "کهکشان فرفره جنوبی",
+    "es": "Galaxia Molinillo Austral",
+    "ru": "Галактика Южная вертушка",
+    "tr": "Güney Fırıldak Gökadası"
+  },
+  "2MASX J00545347-3741037": {
+    "name": "Southern Pinwheel Galaxy",
+    "ar": "‎‎مجرة المروحة الجنوبية‎‎",
+    "zh": "南风车星系",
+    "fi": "Etelän tuulimyllygalaksi",
+    "fr": "Galaxie du Moulinet du Sud",
+    "de": "Südliche Feuerrad-Galaxie",
+    "it": "Galassia Girandola del Sud",
+    "ja": "南の回転花火银河",
+    "ko": "남쪽바람개비 은하",
+    "fa": "کهکشان فرفره جنوبی",
+    "es": "Galaxia Molinillo Austral",
+    "ru": "Галактика Южная вертушка",
+    "tr": "Güney Fırıldak Gökadası"
+  },
+  "2MASXJ00545347-3741037": {
+    "name": "Southern Pinwheel Galaxy",
+    "ar": "‎‎مجرة المروحة الجنوبية‎‎",
+    "zh": "南风车星系",
+    "fi": "Etelän tuulimyllygalaksi",
+    "fr": "Galaxie du Moulinet du Sud",
+    "de": "Südliche Feuerrad-Galaxie",
+    "it": "Galassia Girandola del Sud",
+    "ja": "南の回転花火银河",
+    "ko": "남쪽바람개비 은하",
+    "fa": "کهکشان فرفره جنوبی",
+    "es": "Galaxia Molinillo Austral",
+    "ru": "Галактика Южная вертушка",
+    "tr": "Güney Fırıldak Gökadası"
+  },
+  "C 070": {
+    "name": "Southern Pinwheel Galaxy",
+    "ar": "‎‎مجرة المروحة الجنوبية‎‎",
+    "zh": "南风车星系",
+    "fi": "Etelän tuulimyllygalaksi",
+    "fr": "Galaxie du Moulinet du Sud",
+    "de": "Südliche Feuerrad-Galaxie",
+    "it": "Galassia Girandola del Sud",
+    "ja": "南の回転花火银河",
+    "ko": "남쪽바람개비 은하",
+    "fa": "کهکشان فرفره جنوبی",
+    "es": "Galaxia Molinillo Austral",
+    "ru": "Галактика Южная вертушка",
+    "tr": "Güney Fırıldak Gökadası"
+  },
+  "C070": {
+    "name": "Southern Pinwheel Galaxy",
+    "ar": "‎‎مجرة المروحة الجنوبية‎‎",
+    "zh": "南风车星系",
+    "fi": "Etelän tuulimyllygalaksi",
+    "fr": "Galaxie du Moulinet du Sud",
+    "de": "Südliche Feuerrad-Galaxie",
+    "it": "Galassia Girandola del Sud",
+    "ja": "南の回転花火银河",
+    "ko": "남쪽바람개비 은하",
+    "fa": "کهکشان فرفره جنوبی",
+    "es": "Galaxia Molinillo Austral",
+    "ru": "Галактика Южная вертушка",
+    "tr": "Güney Fırıldak Gökadası"
+  },
+  "ESO 295-020": {
+    "name": "Southern Pinwheel Galaxy",
+    "ar": "‎‎مجرة المروحة الجنوبية‎‎",
+    "zh": "南风车星系",
+    "fi": "Etelän tuulimyllygalaksi",
+    "fr": "Galaxie du Moulinet du Sud",
+    "de": "Südliche Feuerrad-Galaxie",
+    "it": "Galassia Girandola del Sud",
+    "ja": "南の回転花火银河",
+    "ko": "남쪽바람개비 은하",
+    "fa": "کهکشان فرفره جنوبی",
+    "es": "Galaxia Molinillo Austral",
+    "ru": "Галактика Южная вертушка",
+    "tr": "Güney Fırıldak Gökadası"
+  },
+  "ESO295-020": {
+    "name": "Southern Pinwheel Galaxy",
+    "ar": "‎‎مجرة المروحة الجنوبية‎‎",
+    "zh": "南风车星系",
+    "fi": "Etelän tuulimyllygalaksi",
+    "fr": "Galaxie du Moulinet du Sud",
+    "de": "Südliche Feuerrad-Galaxie",
+    "it": "Galassia Girandola del Sud",
+    "ja": "南の回転花火银河",
+    "ko": "남쪽바람개비 은하",
+    "fa": "کهکشان فرفره جنوبی",
+    "es": "Galaxia Molinillo Austral",
+    "ru": "Галактика Южная вертушка",
+    "tr": "Güney Fırıldak Gökadası"
+  },
+  "ESO-LV 295-0200": {
+    "name": "Southern Pinwheel Galaxy",
+    "ar": "‎‎مجرة المروحة الجنوبية‎‎",
+    "zh": "南风车星系",
+    "fi": "Etelän tuulimyllygalaksi",
+    "fr": "Galaxie du Moulinet du Sud",
+    "de": "Südliche Feuerrad-Galaxie",
+    "it": "Galassia Girandola del Sud",
+    "ja": "南の回転花火银河",
+    "ko": "남쪽바람개비 은하",
+    "fa": "کهکشان فرفره جنوبی",
+    "es": "Galaxia Molinillo Austral",
+    "ru": "Галактика Южная вертушка",
+    "tr": "Güney Fırıldak Gökadası"
+  },
+  "ESO-LV295-0200": {
+    "name": "Southern Pinwheel Galaxy",
+    "ar": "‎‎مجرة المروحة الجنوبية‎‎",
+    "zh": "南风车星系",
+    "fi": "Etelän tuulimyllygalaksi",
+    "fr": "Galaxie du Moulinet du Sud",
+    "de": "Südliche Feuerrad-Galaxie",
+    "it": "Galassia Girandola del Sud",
+    "ja": "南の回転花火银河",
+    "ko": "남쪽바람개비 은하",
+    "fa": "کهکشان فرفره جنوبی",
+    "es": "Galaxia Molinillo Austral",
+    "ru": "Галактика Южная вертушка",
+    "tr": "Güney Fırıldak Gökadası"
+  },
+  "IRAS 00525-3757": {
+    "name": "Southern Pinwheel Galaxy",
+    "ar": "‎‎مجرة المروحة الجنوبية‎‎",
+    "zh": "南风车星系",
+    "fi": "Etelän tuulimyllygalaksi",
+    "fr": "Galaxie du Moulinet du Sud",
+    "de": "Südliche Feuerrad-Galaxie",
+    "it": "Galassia Girandola del Sud",
+    "ja": "南の回転花火银河",
+    "ko": "남쪽바람개비 은하",
+    "fa": "کهکشان فرفره جنوبی",
+    "es": "Galaxia Molinillo Austral",
+    "ru": "Галактика Южная вертушка",
+    "tr": "Güney Fırıldak Gökadası"
+  },
+  "IRAS00525-3757": {
+    "name": "Southern Pinwheel Galaxy",
+    "ar": "‎‎مجرة المروحة الجنوبية‎‎",
+    "zh": "南风车星系",
+    "fi": "Etelän tuulimyllygalaksi",
+    "fr": "Galaxie du Moulinet du Sud",
+    "de": "Südliche Feuerrad-Galaxie",
+    "it": "Galassia Girandola del Sud",
+    "ja": "南の回転花火银河",
+    "ko": "남쪽바람개비 은하",
+    "fa": "کهکشان فرفره جنوبی",
+    "es": "Galaxia Molinillo Austral",
+    "ru": "Галактика Южная вертушка",
+    "tr": "Güney Fırıldak Gökadası"
+  },
+  "MCG -06-03-005": {
+    "name": "Southern Pinwheel Galaxy",
+    "ar": "‎‎مجرة المروحة الجنوبية‎‎",
+    "zh": "南风车星系",
+    "fi": "Etelän tuulimyllygalaksi",
+    "fr": "Galaxie du Moulinet du Sud",
+    "de": "Südliche Feuerrad-Galaxie",
+    "it": "Galassia Girandola del Sud",
+    "ja": "南の回転花火银河",
+    "ko": "남쪽바람개비 은하",
+    "fa": "کهکشان فرفره جنوبی",
+    "es": "Galaxia Molinillo Austral",
+    "ru": "Галактика Южная вертушка",
+    "tr": "Güney Fırıldak Gökadası"
+  },
+  "MCG-06-03-005": {
+    "name": "Southern Pinwheel Galaxy",
+    "ar": "‎‎مجرة المروحة الجنوبية‎‎",
+    "zh": "南风车星系",
+    "fi": "Etelän tuulimyllygalaksi",
+    "fr": "Galaxie du Moulinet du Sud",
+    "de": "Südliche Feuerrad-Galaxie",
+    "it": "Galassia Girandola del Sud",
+    "ja": "南の回転花火银河",
+    "ko": "남쪽바람개비 은하",
+    "fa": "کهکشان فرفره جنوبی",
+    "es": "Galaxia Molinillo Austral",
+    "ru": "Галактика Южная вертушка",
+    "tr": "Güney Fırıldak Gökadası"
+  },
+  "PGC 003238": {
+    "name": "Southern Pinwheel Galaxy",
+    "ar": "‎‎مجرة المروحة الجنوبية‎‎",
+    "zh": "南风车星系",
+    "fi": "Etelän tuulimyllygalaksi",
+    "fr": "Galaxie du Moulinet du Sud",
+    "de": "Südliche Feuerrad-Galaxie",
+    "it": "Galassia Girandola del Sud",
+    "ja": "南の回転花火银河",
+    "ko": "남쪽바람개비 은하",
+    "fa": "کهکشان فرفره جنوبی",
+    "es": "Galaxia Molinillo Austral",
+    "ru": "Галактика Южная вертушка",
+    "tr": "Güney Fırıldak Gökadası"
+  },
+  "PGC003238": {
+    "name": "Southern Pinwheel Galaxy",
+    "ar": "‎‎مجرة المروحة الجنوبية‎‎",
+    "zh": "南风车星系",
+    "fi": "Etelän tuulimyllygalaksi",
+    "fr": "Galaxie du Moulinet du Sud",
+    "de": "Südliche Feuerrad-Galaxie",
+    "it": "Galassia Girandola del Sud",
+    "ja": "南の回転花火银河",
+    "ko": "남쪽바람개비 은하",
+    "fa": "کهکشان فرفره جنوبی",
+    "es": "Galaxia Molinillo Austral",
+    "ru": "Галактика Южная вертушка",
+    "tr": "Güney Fırıldak Gökadası"
+  },
+  "C 71": {
+    "name": "Electric Guitar Cluster",
+    "ar": "‎‎حشد الجيتار الكهربائي‎‎",
+    "zh": "电吉他星团",
+    "fi": "Sähkökitarajoukko",
+    "fr": "Amas de la Guitare électrique",
+    "de": "E-Gitarren-Haufen",
+    "it": "Cluster Electric Guitar",
+    "ko": "전자 기타 성단",
+    "fa": "خوشه گیتار الکتریک",
+    "es": "Cúmulo Guitarra Eléctrica",
+    "ru": "Скопление Электрогитара",
+    "tr": "Elektrik Gitar Yıldız Kümesi"
+  },
+  "C71": {
+    "name": "Electric Guitar Cluster",
+    "ar": "‎‎حشد الجيتار الكهربائي‎‎",
+    "zh": "电吉他星团",
+    "fi": "Sähkökitarajoukko",
+    "fr": "Amas de la Guitare électrique",
+    "de": "E-Gitarren-Haufen",
+    "it": "Cluster Electric Guitar",
+    "ko": "전자 기타 성단",
+    "fa": "خوشه گیتار الکتریک",
+    "es": "Cúmulo Guitarra Eléctrica",
+    "ru": "Скопление Электрогитара",
+    "tr": "Elektrik Gitar Yıldız Kümesi"
+  },
+  "NGC2477": {
+    "name": "Electric Guitar Cluster",
+    "ar": "‎‎حشد الجيتار الكهربائي‎‎",
+    "zh": "电吉他星团",
+    "fi": "Sähkökitarajoukko",
+    "fr": "Amas de la Guitare électrique",
+    "de": "E-Gitarren-Haufen",
+    "it": "Cluster Electric Guitar",
+    "ko": "전자 기타 성단",
+    "fa": "خوشه گیتار الکتریک",
+    "es": "Cúmulo Guitarra Eléctrica",
+    "ru": "Скопление Электрогитара",
+    "tr": "Elektrik Gitar Yıldız Kümesi"
+  },
+  "C 071": {
+    "name": "Electric Guitar Cluster",
+    "ar": "‎‎حشد الجيتار الكهربائي‎‎",
+    "zh": "电吉他星团",
+    "fi": "Sähkökitarajoukko",
+    "fr": "Amas de la Guitare électrique",
+    "de": "E-Gitarren-Haufen",
+    "it": "Cluster Electric Guitar",
+    "ko": "전자 기타 성단",
+    "fa": "خوشه گیتار الکتریک",
+    "es": "Cúmulo Guitarra Eléctrica",
+    "ru": "Скопление Электрогитара",
+    "tr": "Elektrik Gitar Yıldız Kümesi"
+  },
+  "C071": {
+    "name": "Electric Guitar Cluster",
+    "ar": "‎‎حشد الجيتار الكهربائي‎‎",
+    "zh": "电吉他星团",
+    "fi": "Sähkökitarajoukko",
+    "fr": "Amas de la Guitare électrique",
+    "de": "E-Gitarren-Haufen",
+    "it": "Cluster Electric Guitar",
+    "ko": "전자 기타 성단",
+    "fa": "خوشه گیتار الکتریک",
+    "es": "Cúmulo Guitarra Eléctrica",
+    "ru": "Скопление Электрогитара",
+    "tr": "Elektrik Gitar Yıldız Kümesi"
+  },
+  "MWSC 1363": {
+    "name": "Electric Guitar Cluster",
+    "ar": "‎‎حشد الجيتار الكهربائي‎‎",
+    "zh": "电吉他星团",
+    "fi": "Sähkökitarajoukko",
+    "fr": "Amas de la Guitare électrique",
+    "de": "E-Gitarren-Haufen",
+    "it": "Cluster Electric Guitar",
+    "ko": "전자 기타 성단",
+    "fa": "خوشه گیتار الکتریک",
+    "es": "Cúmulo Guitarra Eléctrica",
+    "ru": "Скопление Электрогитара",
+    "tr": "Elektrik Gitar Yıldız Kümesi"
+  },
+  "MWSC1363": {
+    "name": "Electric Guitar Cluster",
+    "ar": "‎‎حشد الجيتار الكهربائي‎‎",
+    "zh": "电吉他星团",
+    "fi": "Sähkökitarajoukko",
+    "fr": "Amas de la Guitare électrique",
+    "de": "E-Gitarren-Haufen",
+    "it": "Cluster Electric Guitar",
+    "ko": "전자 기타 성단",
+    "fa": "خوشه گیتار الکتریک",
+    "es": "Cúmulo Guitarra Eléctrica",
+    "ru": "Скопление Электрогитара",
+    "tr": "Elektrik Gitar Yıldız Kümesi"
+  },
+  "C 72": {
+    "name": "String of Pearls",
+    "ar": "‎خيط اللؤلؤ‎",
+    "zh": "珍珠串星系",
+    "fi": "Helminauha",
+    "fr": "Collier de perles",
+    "de": "Perlenschnur",
+    "ko": "진주 고리",
+    "es": "Collar de Perlas",
+    "ru": "Жемчужная нить"
+  },
+  "C72": {
+    "name": "String of Pearls",
+    "ar": "‎خيط اللؤلؤ‎",
+    "zh": "珍珠串星系",
+    "fi": "Helminauha",
+    "fr": "Collier de perles",
+    "de": "Perlenschnur",
+    "ko": "진주 고리",
+    "es": "Collar de Perlas",
+    "ru": "Жемчужная нить"
+  },
+  "NGC55": {
+    "name": "String of Pearls",
+    "ar": "‎خيط اللؤلؤ‎",
+    "zh": "珍珠串星系",
+    "fi": "Helminauha",
+    "fr": "Collier de perles",
+    "de": "Perlenschnur",
+    "ko": "진주 고리",
+    "es": "Collar de Perlas",
+    "ru": "Жемчужная нить"
+  },
+  "2MASX J00145360-3911478": {
+    "name": "String of Pearls",
+    "ar": "‎خيط اللؤلؤ‎",
+    "zh": "珍珠串星系",
+    "fi": "Helminauha",
+    "fr": "Collier de perles",
+    "de": "Perlenschnur",
+    "ko": "진주 고리",
+    "es": "Collar de Perlas",
+    "ru": "Жемчужная нить"
+  },
+  "2MASXJ00145360-3911478": {
+    "name": "String of Pearls",
+    "ar": "‎خيط اللؤلؤ‎",
+    "zh": "珍珠串星系",
+    "fi": "Helminauha",
+    "fr": "Collier de perles",
+    "de": "Perlenschnur",
+    "ko": "진주 고리",
+    "es": "Collar de Perlas",
+    "ru": "Жемчужная нить"
+  },
+  "C 072": {
+    "name": "String of Pearls",
+    "ar": "‎خيط اللؤلؤ‎",
+    "zh": "珍珠串星系",
+    "fi": "Helminauha",
+    "fr": "Collier de perles",
+    "de": "Perlenschnur",
+    "ko": "진주 고리",
+    "es": "Collar de Perlas",
+    "ru": "Жемчужная нить"
+  },
+  "C072": {
+    "name": "String of Pearls",
+    "ar": "‎خيط اللؤلؤ‎",
+    "zh": "珍珠串星系",
+    "fi": "Helminauha",
+    "fr": "Collier de perles",
+    "de": "Perlenschnur",
+    "ko": "진주 고리",
+    "es": "Collar de Perlas",
+    "ru": "Жемчужная нить"
+  },
+  "ESO 293-050": {
+    "name": "String of Pearls",
+    "ar": "‎خيط اللؤلؤ‎",
+    "zh": "珍珠串星系",
+    "fi": "Helminauha",
+    "fr": "Collier de perles",
+    "de": "Perlenschnur",
+    "ko": "진주 고리",
+    "es": "Collar de Perlas",
+    "ru": "Жемчужная нить"
+  },
+  "ESO293-050": {
+    "name": "String of Pearls",
+    "ar": "‎خيط اللؤلؤ‎",
+    "zh": "珍珠串星系",
+    "fi": "Helminauha",
+    "fr": "Collier de perles",
+    "de": "Perlenschnur",
+    "ko": "진주 고리",
+    "es": "Collar de Perlas",
+    "ru": "Жемчужная нить"
+  },
+  "ESO-LV 293-0500": {
+    "name": "String of Pearls",
+    "ar": "‎خيط اللؤلؤ‎",
+    "zh": "珍珠串星系",
+    "fi": "Helminauha",
+    "fr": "Collier de perles",
+    "de": "Perlenschnur",
+    "ko": "진주 고리",
+    "es": "Collar de Perlas",
+    "ru": "Жемчужная нить"
+  },
+  "ESO-LV293-0500": {
+    "name": "String of Pearls",
+    "ar": "‎خيط اللؤلؤ‎",
+    "zh": "珍珠串星系",
+    "fi": "Helminauha",
+    "fr": "Collier de perles",
+    "de": "Perlenschnur",
+    "ko": "진주 고리",
+    "es": "Collar de Perlas",
+    "ru": "Жемчужная нить"
+  },
+  "IRAS 00125-3928": {
+    "name": "String of Pearls",
+    "ar": "‎خيط اللؤلؤ‎",
+    "zh": "珍珠串星系",
+    "fi": "Helminauha",
+    "fr": "Collier de perles",
+    "de": "Perlenschnur",
+    "ko": "진주 고리",
+    "es": "Collar de Perlas",
+    "ru": "Жемчужная нить"
+  },
+  "IRAS00125-3928": {
+    "name": "String of Pearls",
+    "ar": "‎خيط اللؤلؤ‎",
+    "zh": "珍珠串星系",
+    "fi": "Helminauha",
+    "fr": "Collier de perles",
+    "de": "Perlenschnur",
+    "ko": "진주 고리",
+    "es": "Collar de Perlas",
+    "ru": "Жемчужная нить"
+  },
+  "MCG -07-01-013": {
+    "name": "String of Pearls",
+    "ar": "‎خيط اللؤلؤ‎",
+    "zh": "珍珠串星系",
+    "fi": "Helminauha",
+    "fr": "Collier de perles",
+    "de": "Perlenschnur",
+    "ko": "진주 고리",
+    "es": "Collar de Perlas",
+    "ru": "Жемчужная нить"
+  },
+  "MCG-07-01-013": {
+    "name": "String of Pearls",
+    "ar": "‎خيط اللؤلؤ‎",
+    "zh": "珍珠串星系",
+    "fi": "Helminauha",
+    "fr": "Collier de perles",
+    "de": "Perlenschnur",
+    "ko": "진주 고리",
+    "es": "Collar de Perlas",
+    "ru": "Жемчужная нить"
+  },
+  "PGC 001014": {
+    "name": "String of Pearls",
+    "ar": "‎خيط اللؤلؤ‎",
+    "zh": "珍珠串星系",
+    "fi": "Helminauha",
+    "fr": "Collier de perles",
+    "de": "Perlenschnur",
+    "ko": "진주 고리",
+    "es": "Collar de Perlas",
+    "ru": "Жемчужная нить"
+  },
+  "PGC001014": {
+    "name": "String of Pearls",
+    "ar": "‎خيط اللؤلؤ‎",
+    "zh": "珍珠串星系",
+    "fi": "Helminauha",
+    "fr": "Collier de perles",
+    "de": "Perlenschnur",
+    "ko": "진주 고리",
+    "es": "Collar de Perlas",
+    "ru": "Жемчужная нить"
+  },
+  "C 73": {
+    "name": "NGC 1851"
+  },
+  "C73": {
+    "name": "NGC 1851"
+  },
+  "NGC 1851": {
+    "name": "NGC 1851"
+  },
+  "NGC1851": {
+    "name": "NGC 1851"
+  },
+  "C 073": {
+    "name": "NGC 1851"
+  },
+  "C073": {
+    "name": "NGC 1851"
+  },
+  "MWSC 0489": {
+    "name": "NGC 1851"
+  },
+  "MWSC0489": {
+    "name": "NGC 1851"
+  },
+  "C 74": {
+    "name": "Eight-Burst Planetary Nebula",
+    "ar": "‎سديم الإنفجارات الثمانية الكوكبي‎",
+    "zh": "双环星云",
+    "fi": "Kahdeksan purkauksen planetaarinen",
+    "fr": "Nébuleuse planétaire des Huit-Poussées",
+    "de": "Südlicher Ringnebel",
+    "it": "Nebulosa Planetaria Eight-Burst",
+    "ko": "8중 폭발 행성상 성운",
+    "fa": "سحابی سیاره نمای انفجار هشتی",
+    "es": "Nebulosa Planetaria Ocho Estallidos",
+    "ru": "Планетарная туманность Восьмёрка"
+  },
+  "C74": {
+    "name": "Eight-Burst Planetary Nebula",
+    "ar": "‎سديم الإنفجارات الثمانية الكوكبي‎",
+    "zh": "双环星云",
+    "fi": "Kahdeksan purkauksen planetaarinen",
+    "fr": "Nébuleuse planétaire des Huit-Poussées",
+    "de": "Südlicher Ringnebel",
+    "it": "Nebulosa Planetaria Eight-Burst",
+    "ko": "8중 폭발 행성상 성운",
+    "fa": "سحابی سیاره نمای انفجار هشتی",
+    "es": "Nebulosa Planetaria Ocho Estallidos",
+    "ru": "Планетарная туманность Восьмёрка"
+  },
+  "NGC3132": {
+    "name": "Eight-Burst Planetary Nebula",
+    "ar": "‎سديم الإنفجارات الثمانية الكوكبي‎",
+    "zh": "双环星云",
+    "fi": "Kahdeksan purkauksen planetaarinen",
+    "fr": "Nébuleuse planétaire des Huit-Poussées",
+    "de": "Südlicher Ringnebel",
+    "it": "Nebulosa Planetaria Eight-Burst",
+    "ko": "8중 폭발 행성상 성운",
+    "fa": "سحابی سیاره نمای انفجار هشتی",
+    "es": "Nebulosa Planetaria Ocho Estallidos",
+    "ru": "Планетарная туманность Восьмёрка"
+  },
+  "C 074": {
+    "name": "Eight-Burst Planetary Nebula",
+    "ar": "‎سديم الإنفجارات الثمانية الكوكبي‎",
+    "zh": "双环星云",
+    "fi": "Kahdeksan purkauksen planetaarinen",
+    "fr": "Nébuleuse planétaire des Huit-Poussées",
+    "de": "Südlicher Ringnebel",
+    "it": "Nebulosa Planetaria Eight-Burst",
+    "ko": "8중 폭발 행성상 성운",
+    "fa": "سحابی سیاره نمای انفجار هشتی",
+    "es": "Nebulosa Planetaria Ocho Estallidos",
+    "ru": "Планетарная туманность Восьмёрка"
+  },
+  "C074": {
+    "name": "Eight-Burst Planetary Nebula",
+    "ar": "‎سديم الإنفجارات الثمانية الكوكبي‎",
+    "zh": "双环星云",
+    "fi": "Kahdeksan purkauksen planetaarinen",
+    "fr": "Nébuleuse planétaire des Huit-Poussées",
+    "de": "Südlicher Ringnebel",
+    "it": "Nebulosa Planetaria Eight-Burst",
+    "ko": "8중 폭발 행성상 성운",
+    "fa": "سحابی سیاره نمای انفجار هشتی",
+    "es": "Nebulosa Planetaria Ocho Estallidos",
+    "ru": "Планетарная туманность Восьмёрка"
+  },
+  "ESO 316-027": {
+    "name": "Eight-Burst Planetary Nebula",
+    "ar": "‎سديم الإنفجارات الثمانية الكوكبي‎",
+    "zh": "双环星云",
+    "fi": "Kahdeksan purkauksen planetaarinen",
+    "fr": "Nébuleuse planétaire des Huit-Poussées",
+    "de": "Südlicher Ringnebel",
+    "it": "Nebulosa Planetaria Eight-Burst",
+    "ko": "8중 폭발 행성상 성운",
+    "fa": "سحابی سیاره نمای انفجار هشتی",
+    "es": "Nebulosa Planetaria Ocho Estallidos",
+    "ru": "Планетарная туманность Восьмёрка"
+  },
+  "ESO316-027": {
+    "name": "Eight-Burst Planetary Nebula",
+    "ar": "‎سديم الإنفجارات الثمانية الكوكبي‎",
+    "zh": "双环星云",
+    "fi": "Kahdeksan purkauksen planetaarinen",
+    "fr": "Nébuleuse planétaire des Huit-Poussées",
+    "de": "Südlicher Ringnebel",
+    "it": "Nebulosa Planetaria Eight-Burst",
+    "ko": "8중 폭발 행성상 성운",
+    "fa": "سحابی سیاره نمای انفجار هشتی",
+    "es": "Nebulosa Planetaria Ocho Estallidos",
+    "ru": "Планетарная туманность Восьмёрка"
+  },
+  "IRAS 10049-4011": {
+    "name": "Eight-Burst Planetary Nebula",
+    "ar": "‎سديم الإنفجارات الثمانية الكوكبي‎",
+    "zh": "双环星云",
+    "fi": "Kahdeksan purkauksen planetaarinen",
+    "fr": "Nébuleuse planétaire des Huit-Poussées",
+    "de": "Südlicher Ringnebel",
+    "it": "Nebulosa Planetaria Eight-Burst",
+    "ko": "8중 폭발 행성상 성운",
+    "fa": "سحابی سیاره نمای انفجار هشتی",
+    "es": "Nebulosa Planetaria Ocho Estallidos",
+    "ru": "Планетарная туманность Восьмёрка"
+  },
+  "IRAS10049-4011": {
+    "name": "Eight-Burst Planetary Nebula",
+    "ar": "‎سديم الإنفجارات الثمانية الكوكبي‎",
+    "zh": "双环星云",
+    "fi": "Kahdeksan purkauksen planetaarinen",
+    "fr": "Nébuleuse planétaire des Huit-Poussées",
+    "de": "Südlicher Ringnebel",
+    "it": "Nebulosa Planetaria Eight-Burst",
+    "ko": "8중 폭발 행성상 성운",
+    "fa": "سحابی سیاره نمای انفجار هشتی",
+    "es": "Nebulosa Planetaria Ocho Estallidos",
+    "ru": "Планетарная туманность Восьмёрка"
+  },
+  "PN G272.1+12.3": {
+    "name": "Eight-Burst Planetary Nebula",
+    "ar": "‎سديم الإنفجارات الثمانية الكوكبي‎",
+    "zh": "双环星云",
+    "fi": "Kahdeksan purkauksen planetaarinen",
+    "fr": "Nébuleuse planétaire des Huit-Poussées",
+    "de": "Südlicher Ringnebel",
+    "it": "Nebulosa Planetaria Eight-Burst",
+    "ko": "8중 폭발 행성상 성운",
+    "fa": "سحابی سیاره نمای انفجار هشتی",
+    "es": "Nebulosa Planetaria Ocho Estallidos",
+    "ru": "Планетарная туманность Восьмёрка"
+  },
+  "PNG272.1+12.3": {
+    "name": "Eight-Burst Planetary Nebula",
+    "ar": "‎سديم الإنفجارات الثمانية الكوكبي‎",
+    "zh": "双环星云",
+    "fi": "Kahdeksan purkauksen planetaarinen",
+    "fr": "Nébuleuse planétaire des Huit-Poussées",
+    "de": "Südlicher Ringnebel",
+    "it": "Nebulosa Planetaria Eight-Burst",
+    "ko": "8중 폭발 행성상 성운",
+    "fa": "سحابی سیاره نمای انفجار هشتی",
+    "es": "Nebulosa Planetaria Ocho Estallidos",
+    "ru": "Планетарная туманность Восьмёрка"
+  },
+  "Eight-Burst Nebula": {
+    "name": "Eight-Burst Planetary Nebula",
+    "ar": "‎سديم الإنفجارات الثمانية الكوكبي‎",
+    "zh": "双环星云",
+    "fi": "Kahdeksan purkauksen planetaarinen",
+    "fr": "Nébuleuse planétaire des Huit-Poussées",
+    "de": "Südlicher Ringnebel",
+    "it": "Nebulosa Planetaria Eight-Burst",
+    "ko": "8중 폭발 행성상 성운",
+    "fa": "سحابی سیاره نمای انفجار هشتی",
+    "es": "Nebulosa Planetaria Ocho Estallidos",
+    "ru": "Планетарная туманность Восьмёрка"
+  },
+  "Eight-BurstNebula": {
+    "name": "Eight-Burst Planetary Nebula",
+    "ar": "‎سديم الإنفجارات الثمانية الكوكبي‎",
+    "zh": "双环星云",
+    "fi": "Kahdeksan purkauksen planetaarinen",
+    "fr": "Nébuleuse planétaire des Huit-Poussées",
+    "de": "Südlicher Ringnebel",
+    "it": "Nebulosa Planetaria Eight-Burst",
+    "ko": "8중 폭발 행성상 성운",
+    "fa": "سحابی سیاره نمای انفجار هشتی",
+    "es": "Nebulosa Planetaria Ocho Estallidos",
+    "ru": "Планетарная туманность Восьмёрка"
+  },
+  "C 75": {
+    "name": "NGC 6124"
+  },
+  "C75": {
+    "name": "NGC 6124"
+  },
+  "NGC 6124": {
+    "name": "NGC 6124"
+  },
+  "NGC6124": {
+    "name": "NGC 6124"
+  },
+  "C 075": {
+    "name": "NGC 6124"
+  },
+  "C075": {
+    "name": "NGC 6124"
+  },
+  "MWSC 2403": {
+    "name": "NGC 6124"
+  },
+  "MWSC2403": {
+    "name": "NGC 6124"
+  },
+  "C 76": {
+    "name": "False Comet Nebula",
+    "ar": "‎سديم المذنب المزيف‎",
+    "zh": "伪彗星星云",
+    "fi": "Valekomeettasumu",
+    "fr": "Nébuleuse de la Fausse comète",
+    "de": "Scheinkomet-Nebel",
+    "it": "Nebulosa Falsa Cometa",
+    "ko": "가짜 혜성 성단",
+    "es": "Nebulosa del Cometa Falso",
+    "ru": "Туманность Ложная комета"
+  },
+  "C76": {
+    "name": "False Comet Nebula",
+    "ar": "‎سديم المذنب المزيف‎",
+    "zh": "伪彗星星云",
+    "fi": "Valekomeettasumu",
+    "fr": "Nébuleuse de la Fausse comète",
+    "de": "Scheinkomet-Nebel",
+    "it": "Nebulosa Falsa Cometa",
+    "ko": "가짜 혜성 성단",
+    "es": "Nebulosa del Cometa Falso",
+    "ru": "Туманность Ложная комета"
+  },
+  "NGC6231": {
+    "name": "False Comet Nebula",
+    "ar": "‎سديم المذنب المزيف‎",
+    "zh": "伪彗星星云",
+    "fi": "Valekomeettasumu",
+    "fr": "Nébuleuse de la Fausse comète",
+    "de": "Scheinkomet-Nebel",
+    "it": "Nebulosa Falsa Cometa",
+    "ko": "가짜 혜성 성단",
+    "es": "Nebulosa del Cometa Falso",
+    "ru": "Туманность Ложная комета"
+  },
+  "C 076": {
+    "name": "False Comet Nebula",
+    "ar": "‎سديم المذنب المزيف‎",
+    "zh": "伪彗星星云",
+    "fi": "Valekomeettasumu",
+    "fr": "Nébuleuse de la Fausse comète",
+    "de": "Scheinkomet-Nebel",
+    "it": "Nebulosa Falsa Cometa",
+    "ko": "가짜 혜성 성단",
+    "es": "Nebulosa del Cometa Falso",
+    "ru": "Туманность Ложная комета"
+  },
+  "C076": {
+    "name": "False Comet Nebula",
+    "ar": "‎سديم المذنب المزيف‎",
+    "zh": "伪彗星星云",
+    "fi": "Valekomeettasumu",
+    "fr": "Nébuleuse de la Fausse comète",
+    "de": "Scheinkomet-Nebel",
+    "it": "Nebulosa Falsa Cometa",
+    "ko": "가짜 혜성 성단",
+    "es": "Nebulosa del Cometa Falso",
+    "ru": "Туманность Ложная комета"
+  },
+  "MWSC 2481": {
+    "name": "False Comet Nebula",
+    "ar": "‎سديم المذنب المزيف‎",
+    "zh": "伪彗星星云",
+    "fi": "Valekomeettasumu",
+    "fr": "Nébuleuse de la Fausse comète",
+    "de": "Scheinkomet-Nebel",
+    "it": "Nebulosa Falsa Cometa",
+    "ko": "가짜 혜성 성단",
+    "es": "Nebulosa del Cometa Falso",
+    "ru": "Туманность Ложная комета"
+  },
+  "MWSC2481": {
+    "name": "False Comet Nebula",
+    "ar": "‎سديم المذنب المزيف‎",
+    "zh": "伪彗星星云",
+    "fi": "Valekomeettasumu",
+    "fr": "Nébuleuse de la Fausse comète",
+    "de": "Scheinkomet-Nebel",
+    "it": "Nebulosa Falsa Cometa",
+    "ko": "가짜 혜성 성단",
+    "es": "Nebulosa del Cometa Falso",
+    "ru": "Туманность Ложная комета"
+  },
+  "C 77": {
+    "name": "Centaurus A",
+    "ar": "‎‎قنطورس A‎‎",
+    "zh": "半人马座",
+    "fr": "Centaurus A",
+    "el": "Κένταυρος Α",
+    "ja": "ケンタウルス座A",
+    "ko": "센타우루스 알파",
+    "fa": "آ قنطروس",
+    "es": "Centauro A",
+    "ru": "Центавр А",
+    "tr": "Erboğa A",
+    "he": "קנטאור A"
+  },
+  "C77": {
+    "name": "Centaurus A",
+    "ar": "‎‎قنطورس A‎‎",
+    "zh": "半人马座",
+    "fr": "Centaurus A",
+    "el": "Κένταυρος Α",
+    "ja": "ケンタウルス座A",
+    "ko": "센타우루스 알파",
+    "fa": "آ قنطروس",
+    "es": "Centauro A",
+    "ru": "Центавр А",
+    "tr": "Erboğa A",
+    "he": "קנטאור A"
+  },
+  "NGC5128": {
+    "name": "Centaurus A",
+    "ar": "‎‎قنطورس A‎‎",
+    "zh": "半人马座",
+    "fr": "Centaurus A",
+    "el": "Κένταυρος Α",
+    "ja": "ケンタウルス座A",
+    "ko": "센타우루스 알파",
+    "fa": "آ قنطروس",
+    "es": "Centauro A",
+    "ru": "Центавр А",
+    "tr": "Erboğa A",
+    "he": "קנטאור A"
+  },
+  "2MASX J13252775-4301073": {
+    "name": "Centaurus A",
+    "ar": "‎‎قنطورس A‎‎",
+    "zh": "半人马座",
+    "fr": "Centaurus A",
+    "el": "Κένταυρος Α",
+    "ja": "ケンタウルス座A",
+    "ko": "센타우루스 알파",
+    "fa": "آ قنطروس",
+    "es": "Centauro A",
+    "ru": "Центавр А",
+    "tr": "Erboğa A",
+    "he": "קנטאור A"
+  },
+  "2MASXJ13252775-4301073": {
+    "name": "Centaurus A",
+    "ar": "‎‎قنطورس A‎‎",
+    "zh": "半人马座",
+    "fr": "Centaurus A",
+    "el": "Κένταυρος Α",
+    "ja": "ケンタウルス座A",
+    "ko": "센타우루스 알파",
+    "fa": "آ قنطروس",
+    "es": "Centauro A",
+    "ru": "Центавр А",
+    "tr": "Erboğa A",
+    "he": "קנטאור A"
+  },
+  "C 077": {
+    "name": "Centaurus A",
+    "ar": "‎‎قنطورس A‎‎",
+    "zh": "半人马座",
+    "fr": "Centaurus A",
+    "el": "Κένταυρος Α",
+    "ja": "ケンタウルス座A",
+    "ko": "센타우루스 알파",
+    "fa": "آ قنطروس",
+    "es": "Centauro A",
+    "ru": "Центавр А",
+    "tr": "Erboğa A",
+    "he": "קנטאור A"
+  },
+  "C077": {
+    "name": "Centaurus A",
+    "ar": "‎‎قنطورس A‎‎",
+    "zh": "半人马座",
+    "fr": "Centaurus A",
+    "el": "Κένταυρος Α",
+    "ja": "ケンタウルス座A",
+    "ko": "센타우루스 알파",
+    "fa": "آ قنطروس",
+    "es": "Centauro A",
+    "ru": "Центавр А",
+    "tr": "Erboğa A",
+    "he": "קנטאור A"
+  },
+  "ESO 270-009": {
+    "name": "Centaurus A",
+    "ar": "‎‎قنطورس A‎‎",
+    "zh": "半人马座",
+    "fr": "Centaurus A",
+    "el": "Κένταυρος Α",
+    "ja": "ケンタウルス座A",
+    "ko": "센타우루스 알파",
+    "fa": "آ قنطروس",
+    "es": "Centauro A",
+    "ru": "Центавр А",
+    "tr": "Erboğa A",
+    "he": "קנטאור A"
+  },
+  "ESO270-009": {
+    "name": "Centaurus A",
+    "ar": "‎‎قنطورس A‎‎",
+    "zh": "半人马座",
+    "fr": "Centaurus A",
+    "el": "Κένταυρος Α",
+    "ja": "ケンタウルス座A",
+    "ko": "센타우루스 알파",
+    "fa": "آ قنطروس",
+    "es": "Centauro A",
+    "ru": "Центавр А",
+    "tr": "Erboğa A",
+    "he": "קנטאור A"
+  },
+  "ESO-LV 270-0090": {
+    "name": "Centaurus A",
+    "ar": "‎‎قنطورس A‎‎",
+    "zh": "半人马座",
+    "fr": "Centaurus A",
+    "el": "Κένταυρος Α",
+    "ja": "ケンタウルス座A",
+    "ko": "센타우루스 알파",
+    "fa": "آ قنطروس",
+    "es": "Centauro A",
+    "ru": "Центавр А",
+    "tr": "Erboğa A",
+    "he": "קנטאור A"
+  },
+  "ESO-LV270-0090": {
+    "name": "Centaurus A",
+    "ar": "‎‎قنطورس A‎‎",
+    "zh": "半人马座",
+    "fr": "Centaurus A",
+    "el": "Κένταυρος Α",
+    "ja": "ケンタウルス座A",
+    "ko": "센타우루스 알파",
+    "fa": "آ قنطروس",
+    "es": "Centauro A",
+    "ru": "Центавр А",
+    "tr": "Erboğa A",
+    "he": "קנטאור A"
+  },
+  "IRAS 13225-4245": {
+    "name": "Centaurus A",
+    "ar": "‎‎قنطورس A‎‎",
+    "zh": "半人马座",
+    "fr": "Centaurus A",
+    "el": "Κένταυρος Α",
+    "ja": "ケンタウルス座A",
+    "ko": "센타우루스 알파",
+    "fa": "آ قنطروس",
+    "es": "Centauro A",
+    "ru": "Центавр А",
+    "tr": "Erboğa A",
+    "he": "קנטאור A"
+  },
+  "IRAS13225-4245": {
+    "name": "Centaurus A",
+    "ar": "‎‎قنطورس A‎‎",
+    "zh": "半人马座",
+    "fr": "Centaurus A",
+    "el": "Κένταυρος Α",
+    "ja": "ケンタウルス座A",
+    "ko": "센타우루스 알파",
+    "fa": "آ قنطروس",
+    "es": "Centauro A",
+    "ru": "Центавр А",
+    "tr": "Erboğa A",
+    "he": "קנטאור A"
+  },
+  "MCG -07-28-001": {
+    "name": "Centaurus A",
+    "ar": "‎‎قنطورس A‎‎",
+    "zh": "半人马座",
+    "fr": "Centaurus A",
+    "el": "Κένταυρος Α",
+    "ja": "ケンタウルス座A",
+    "ko": "센타우루스 알파",
+    "fa": "آ قنطروس",
+    "es": "Centauro A",
+    "ru": "Центавр А",
+    "tr": "Erboğa A",
+    "he": "קנטאור A"
+  },
+  "MCG-07-28-001": {
+    "name": "Centaurus A",
+    "ar": "‎‎قنطورس A‎‎",
+    "zh": "半人马座",
+    "fr": "Centaurus A",
+    "el": "Κένταυρος Α",
+    "ja": "ケンタウルス座A",
+    "ko": "센타우루스 알파",
+    "fa": "آ قنطروس",
+    "es": "Centauro A",
+    "ru": "Центавр А",
+    "tr": "Erboğa A",
+    "he": "קנטאור A"
+  },
+  "PGC 046957": {
+    "name": "Centaurus A",
+    "ar": "‎‎قنطورس A‎‎",
+    "zh": "半人马座",
+    "fr": "Centaurus A",
+    "el": "Κένταυρος Α",
+    "ja": "ケンタウルス座A",
+    "ko": "센타우루스 알파",
+    "fa": "آ قنطروس",
+    "es": "Centauro A",
+    "ru": "Центавр А",
+    "tr": "Erboğa A",
+    "he": "קנטאור A"
+  },
+  "PGC046957": {
+    "name": "Centaurus A",
+    "ar": "‎‎قنطورس A‎‎",
+    "zh": "半人马座",
+    "fr": "Centaurus A",
+    "el": "Κένταυρος Α",
+    "ja": "ケンタウルス座A",
+    "ko": "센타우루스 알파",
+    "fa": "آ قنطروس",
+    "es": "Centauro A",
+    "ru": "Центавр А",
+    "tr": "Erboğa A",
+    "he": "קנטאור A"
+  },
+  "Centaurus A": {
+    "name": "Centaurus A",
+    "ar": "‎‎قنطورس A‎‎",
+    "zh": "半人马座",
+    "fr": "Centaurus A",
+    "el": "Κένταυρος Α",
+    "ja": "ケンタウルス座A",
+    "ko": "센타우루스 알파",
+    "fa": "آ قنطروس",
+    "es": "Centauro A",
+    "ru": "Центавр А",
+    "tr": "Erboğa A",
+    "he": "קנטאור A"
+  },
+  "CentaurusA": {
+    "name": "Centaurus A",
+    "ar": "‎‎قنطورس A‎‎",
+    "zh": "半人马座",
+    "fr": "Centaurus A",
+    "el": "Κένταυρος Α",
+    "ja": "ケンタウルス座A",
+    "ko": "센타우루스 알파",
+    "fa": "آ قنطروس",
+    "es": "Centauro A",
+    "ru": "Центавр А",
+    "tr": "Erboğa A",
+    "he": "קנטאור A"
+  },
+  "C 78": {
+    "name": "Cacciatore Cluster",
+    "ar": "‎حشد الصياد‎",
+    "zh": "砂锅星团",
+    "de": "Cacciatore-Haufen",
+    "ko": "카시아토레 성단",
+    "es": "Cúmulo Cacciatore",
+    "ru": "Скопление Охотник"
+  },
+  "C78": {
+    "name": "Cacciatore Cluster",
+    "ar": "‎حشد الصياد‎",
+    "zh": "砂锅星团",
+    "de": "Cacciatore-Haufen",
+    "ko": "카시아토레 성단",
+    "es": "Cúmulo Cacciatore",
+    "ru": "Скопление Охотник"
+  },
+  "NGC6541": {
+    "name": "Cacciatore Cluster",
+    "ar": "‎حشد الصياد‎",
+    "zh": "砂锅星团",
+    "de": "Cacciatore-Haufen",
+    "ko": "카시아토레 성단",
+    "es": "Cúmulo Cacciatore",
+    "ru": "Скопление Охотник"
+  },
+  "C 078": {
+    "name": "Cacciatore Cluster",
+    "ar": "‎حشد الصياد‎",
+    "zh": "砂锅星团",
+    "de": "Cacciatore-Haufen",
+    "ko": "카시아토레 성단",
+    "es": "Cúmulo Cacciatore",
+    "ru": "Скопление Охотник"
+  },
+  "C078": {
+    "name": "Cacciatore Cluster",
+    "ar": "‎حشد الصياد‎",
+    "zh": "砂锅星团",
+    "de": "Cacciatore-Haufen",
+    "ko": "카시아토레 성단",
+    "es": "Cúmulo Cacciatore",
+    "ru": "Скопление Охотник"
+  },
+  "MWSC 2813": {
+    "name": "Cacciatore Cluster",
+    "ar": "‎حشد الصياد‎",
+    "zh": "砂锅星团",
+    "de": "Cacciatore-Haufen",
+    "ko": "카시아토레 성단",
+    "es": "Cúmulo Cacciatore",
+    "ru": "Скопление Охотник"
+  },
+  "MWSC2813": {
+    "name": "Cacciatore Cluster",
+    "ar": "‎حشد الصياد‎",
+    "zh": "砂锅星团",
+    "de": "Cacciatore-Haufen",
+    "ko": "카시아토레 성단",
+    "es": "Cúmulo Cacciatore",
+    "ru": "Скопление Охотник"
+  },
+  "C 79": {
+    "name": "NGC 3201"
+  },
+  "C79": {
+    "name": "NGC 3201"
+  },
+  "NGC 3201": {
+    "name": "NGC 3201"
+  },
+  "NGC3201": {
+    "name": "NGC 3201"
+  },
+  "C 079": {
+    "name": "NGC 3201"
+  },
+  "C079": {
+    "name": "NGC 3201"
+  },
+  "MWSC 1788": {
+    "name": "NGC 3201"
+  },
+  "MWSC1788": {
+    "name": "NGC 3201"
+  },
+  "C 80": {
+    "name": "ω Cen Cluster",
+    "ar": "‎‎حشد أوميغا قنطورس‎‎",
+    "zh": "半人马座奥米茄星团",
+    "fi": "ω Centauri -joukko",
+    "fr": "Amas ω Cen",
+    "de": "ω Cen Haufen",
+    "it": "Ammasso ω Cen",
+    "ja": "ω星団",
+    "ko": "센타우루스자리 오메가 성단",
+    "fa": "خوشه امگا قنطورس",
+    "es": "Cluster ω Cen",
+    "ru": "Скопление ω Центавра",
+    "he": "אומגה בקנטאור"
+  },
+  "C80": {
+    "name": "ω Cen Cluster",
+    "ar": "‎‎حشد أوميغا قنطورس‎‎",
+    "zh": "半人马座奥米茄星团",
+    "fi": "ω Centauri -joukko",
+    "fr": "Amas ω Cen",
+    "de": "ω Cen Haufen",
+    "it": "Ammasso ω Cen",
+    "ja": "ω星団",
+    "ko": "센타우루스자리 오메가 성단",
+    "fa": "خوشه امگا قنطورس",
+    "es": "Cluster ω Cen",
+    "ru": "Скопление ω Центавра",
+    "he": "אומגה בקנטאור"
+  },
+  "NGC5139": {
+    "name": "ω Cen Cluster",
+    "ar": "‎‎حشد أوميغا قنطورس‎‎",
+    "zh": "半人马座奥米茄星团",
+    "fi": "ω Centauri -joukko",
+    "fr": "Amas ω Cen",
+    "de": "ω Cen Haufen",
+    "it": "Ammasso ω Cen",
+    "ja": "ω星団",
+    "ko": "센타우루스자리 오메가 성단",
+    "fa": "خوشه امگا قنطورس",
+    "es": "Cluster ω Cen",
+    "ru": "Скопление ω Центавра",
+    "he": "אומגה בקנטאור"
+  },
+  "C 080": {
+    "name": "ω Cen Cluster",
+    "ar": "‎‎حشد أوميغا قنطورس‎‎",
+    "zh": "半人马座奥米茄星团",
+    "fi": "ω Centauri -joukko",
+    "fr": "Amas ω Cen",
+    "de": "ω Cen Haufen",
+    "it": "Ammasso ω Cen",
+    "ja": "ω星団",
+    "ko": "센타우루스자리 오메가 성단",
+    "fa": "خوشه امگا قنطورس",
+    "es": "Cluster ω Cen",
+    "ru": "Скопление ω Центавра",
+    "he": "אומגה בקנטאור"
+  },
+  "C080": {
+    "name": "ω Cen Cluster",
+    "ar": "‎‎حشد أوميغا قنطورس‎‎",
+    "zh": "半人马座奥米茄星团",
+    "fi": "ω Centauri -joukko",
+    "fr": "Amas ω Cen",
+    "de": "ω Cen Haufen",
+    "it": "Ammasso ω Cen",
+    "ja": "ω星団",
+    "ko": "센타우루스자리 오메가 성단",
+    "fa": "خوشه امگا قنطورس",
+    "es": "Cluster ω Cen",
+    "ru": "Скопление ω Центавра",
+    "he": "אומגה בקנטאור"
+  },
+  "MWSC 2125": {
+    "name": "ω Cen Cluster",
+    "ar": "‎‎حشد أوميغا قنطورس‎‎",
+    "zh": "半人马座奥米茄星团",
+    "fi": "ω Centauri -joukko",
+    "fr": "Amas ω Cen",
+    "de": "ω Cen Haufen",
+    "it": "Ammasso ω Cen",
+    "ja": "ω星団",
+    "ko": "센타우루스자리 오메가 성단",
+    "fa": "خوشه امگا قنطورس",
+    "es": "Cluster ω Cen",
+    "ru": "Скопление ω Центавра",
+    "he": "אומגה בקנטאור"
+  },
+  "MWSC2125": {
+    "name": "ω Cen Cluster",
+    "ar": "‎‎حشد أوميغا قنطورس‎‎",
+    "zh": "半人马座奥米茄星团",
+    "fi": "ω Centauri -joukko",
+    "fr": "Amas ω Cen",
+    "de": "ω Cen Haufen",
+    "it": "Ammasso ω Cen",
+    "ja": "ω星団",
+    "ko": "센타우루스자리 오메가 성단",
+    "fa": "خوشه امگا قنطورس",
+    "es": "Cluster ω Cen",
+    "ru": "Скопление ω Центавра",
+    "he": "אומגה בקנטאור"
+  },
+  "Omega Centauri": {
+    "name": "ω Cen Cluster",
+    "ar": "‎‎حشد أوميغا قنطورس‎‎",
+    "zh": "半人马座奥米茄星团",
+    "fi": "ω Centauri -joukko",
+    "fr": "Amas ω Cen",
+    "de": "ω Cen Haufen",
+    "it": "Ammasso ω Cen",
+    "ja": "ω星団",
+    "ko": "센타우루스자리 오메가 성단",
+    "fa": "خوشه امگا قنطورس",
+    "es": "Cluster ω Cen",
+    "ru": "Скопление ω Центавра",
+    "he": "אומגה בקנטאור"
+  },
+  "OmegaCentauri": {
+    "name": "ω Cen Cluster",
+    "ar": "‎‎حشد أوميغا قنطورس‎‎",
+    "zh": "半人马座奥米茄星团",
+    "fi": "ω Centauri -joukko",
+    "fr": "Amas ω Cen",
+    "de": "ω Cen Haufen",
+    "it": "Ammasso ω Cen",
+    "ja": "ω星団",
+    "ko": "센타우루스자리 오메가 성단",
+    "fa": "خوشه امگا قنطورس",
+    "es": "Cluster ω Cen",
+    "ru": "Скопление ω Центавра",
+    "he": "אומגה בקנטאור"
+  },
+  "C 81": {
+    "name": "NGC 6352"
+  },
+  "C81": {
+    "name": "NGC 6352"
+  },
+  "NGC 6352": {
+    "name": "NGC 6352"
+  },
+  "NGC6352": {
+    "name": "NGC 6352"
+  },
+  "C 081": {
+    "name": "NGC 6352"
+  },
+  "C081": {
+    "name": "NGC 6352"
+  },
+  "MWSC 2592": {
+    "name": "NGC 6352"
+  },
+  "MWSC2592": {
+    "name": "NGC 6352"
+  },
+  "C 82": {
+    "name": "NGC 6193"
+  },
+  "C82": {
+    "name": "NGC 6193"
+  },
+  "NGC 6193": {
+    "name": "NGC 6193"
+  },
+  "NGC6193": {
+    "name": "NGC 6193"
+  },
+  "C 082": {
+    "name": "NGC 6193"
+  },
+  "C082": {
+    "name": "NGC 6193"
+  },
+  "MWSC 2444": {
+    "name": "NGC 6193"
+  },
+  "MWSC2444": {
+    "name": "NGC 6193"
+  },
+  "C 83": {
+    "name": "The Tweezers Galaxy",
+    "ar": "‎مجرة الملقاط‎",
+    "zh": "镊子星系",
+    "de": "Pinzetten-Galaxie",
+    "ko": "핀셋 은하",
+    "es": "Galaxia de las Pinzas",
+    "ru": "Галактика Пинцет"
+  },
+  "C83": {
+    "name": "The Tweezers Galaxy",
+    "ar": "‎مجرة الملقاط‎",
+    "zh": "镊子星系",
+    "de": "Pinzetten-Galaxie",
+    "ko": "핀셋 은하",
+    "es": "Galaxia de las Pinzas",
+    "ru": "Галактика Пинцет"
+  },
+  "NGC4945": {
+    "name": "The Tweezers Galaxy",
+    "ar": "‎مجرة الملقاط‎",
+    "zh": "镊子星系",
+    "de": "Pinzetten-Galaxie",
+    "ko": "핀셋 은하",
+    "es": "Galaxia de las Pinzas",
+    "ru": "Галактика Пинцет"
+  },
+  "2MASX J13052727-4928044": {
+    "name": "The Tweezers Galaxy",
+    "ar": "‎مجرة الملقاط‎",
+    "zh": "镊子星系",
+    "de": "Pinzetten-Galaxie",
+    "ko": "핀셋 은하",
+    "es": "Galaxia de las Pinzas",
+    "ru": "Галактика Пинцет"
+  },
+  "2MASXJ13052727-4928044": {
+    "name": "The Tweezers Galaxy",
+    "ar": "‎مجرة الملقاط‎",
+    "zh": "镊子星系",
+    "de": "Pinzetten-Galaxie",
+    "ko": "핀셋 은하",
+    "es": "Galaxia de las Pinzas",
+    "ru": "Галактика Пинцет"
+  },
+  "C 083": {
+    "name": "The Tweezers Galaxy",
+    "ar": "‎مجرة الملقاط‎",
+    "zh": "镊子星系",
+    "de": "Pinzetten-Galaxie",
+    "ko": "핀셋 은하",
+    "es": "Galaxia de las Pinzas",
+    "ru": "Галактика Пинцет"
+  },
+  "C083": {
+    "name": "The Tweezers Galaxy",
+    "ar": "‎مجرة الملقاط‎",
+    "zh": "镊子星系",
+    "de": "Pinzetten-Galaxie",
+    "ko": "핀셋 은하",
+    "es": "Galaxia de las Pinzas",
+    "ru": "Галактика Пинцет"
+  },
+  "ESO 219-024": {
+    "name": "The Tweezers Galaxy",
+    "ar": "‎مجرة الملقاط‎",
+    "zh": "镊子星系",
+    "de": "Pinzetten-Galaxie",
+    "ko": "핀셋 은하",
+    "es": "Galaxia de las Pinzas",
+    "ru": "Галактика Пинцет"
+  },
+  "ESO219-024": {
+    "name": "The Tweezers Galaxy",
+    "ar": "‎مجرة الملقاط‎",
+    "zh": "镊子星系",
+    "de": "Pinzetten-Galaxie",
+    "ko": "핀셋 은하",
+    "es": "Galaxia de las Pinzas",
+    "ru": "Галактика Пинцет"
+  },
+  "ESO-LV 219-0240": {
+    "name": "The Tweezers Galaxy",
+    "ar": "‎مجرة الملقاط‎",
+    "zh": "镊子星系",
+    "de": "Pinzetten-Galaxie",
+    "ko": "핀셋 은하",
+    "es": "Galaxia de las Pinzas",
+    "ru": "Галактика Пинцет"
+  },
+  "ESO-LV219-0240": {
+    "name": "The Tweezers Galaxy",
+    "ar": "‎مجرة الملقاط‎",
+    "zh": "镊子星系",
+    "de": "Pinzetten-Galaxie",
+    "ko": "핀셋 은하",
+    "es": "Galaxia de las Pinzas",
+    "ru": "Галактика Пинцет"
+  },
+  "IRAS 13025-4911": {
+    "name": "The Tweezers Galaxy",
+    "ar": "‎مجرة الملقاط‎",
+    "zh": "镊子星系",
+    "de": "Pinzetten-Galaxie",
+    "ko": "핀셋 은하",
+    "es": "Galaxia de las Pinzas",
+    "ru": "Галактика Пинцет"
+  },
+  "IRAS13025-4911": {
+    "name": "The Tweezers Galaxy",
+    "ar": "‎مجرة الملقاط‎",
+    "zh": "镊子星系",
+    "de": "Pinzetten-Galaxie",
+    "ko": "핀셋 은하",
+    "es": "Galaxia de las Pinzas",
+    "ru": "Галактика Пинцет"
+  },
+  "PGC 045279": {
+    "name": "The Tweezers Galaxy",
+    "ar": "‎مجرة الملقاط‎",
+    "zh": "镊子星系",
+    "de": "Pinzetten-Galaxie",
+    "ko": "핀셋 은하",
+    "es": "Galaxia de las Pinzas",
+    "ru": "Галактика Пинцет"
+  },
+  "PGC045279": {
+    "name": "The Tweezers Galaxy",
+    "ar": "‎مجرة الملقاط‎",
+    "zh": "镊子星系",
+    "de": "Pinzetten-Galaxie",
+    "ko": "핀셋 은하",
+    "es": "Galaxia de las Pinzas",
+    "ru": "Галактика Пинцет"
+  },
+  "C 84": {
+    "name": "NGC 5286"
+  },
+  "C84": {
+    "name": "NGC 5286"
+  },
+  "NGC 5286": {
+    "name": "NGC 5286"
+  },
+  "NGC5286": {
+    "name": "NGC 5286"
+  },
+  "C 084": {
+    "name": "NGC 5286"
+  },
+  "C084": {
+    "name": "NGC 5286"
+  },
+  "MWSC 2160": {
+    "name": "NGC 5286"
+  },
+  "MWSC2160": {
+    "name": "NGC 5286"
+  },
+  "C 85": {
+    "name": "ο Vel Cluster",
+    "ar": "‎‎حشد أوميكرون فيلوروم‎‎",
+    "zh": "船帆座ο星团",
+    "fi": "ο Velorum -joukko",
+    "fr": "Amas de ο Vel",
+    "de": "ο Vel-Haufen",
+    "it": "Ammasso ο Vel",
+    "ja": "ほ座ο星団",
+    "ko": "돛자리 오미크론 성단",
+    "la": "Congregatio ο Vel",
+    "fa": "خوشه اومیکرون-بادبان",
+    "es": "Cúmulo ο Vel",
+    "ru": "Скопление ο Парусов"
+  },
+  "C85": {
+    "name": "ο Vel Cluster",
+    "ar": "‎‎حشد أوميكرون فيلوروم‎‎",
+    "zh": "船帆座ο星团",
+    "fi": "ο Velorum -joukko",
+    "fr": "Amas de ο Vel",
+    "de": "ο Vel-Haufen",
+    "it": "Ammasso ο Vel",
+    "ja": "ほ座ο星団",
+    "ko": "돛자리 오미크론 성단",
+    "la": "Congregatio ο Vel",
+    "fa": "خوشه اومیکرون-بادبان",
+    "es": "Cúmulo ο Vel",
+    "ru": "Скопление ο Парусов"
+  },
+  "IC2391": {
+    "name": "ο Vel Cluster",
+    "ar": "‎‎حشد أوميكرون فيلوروم‎‎",
+    "zh": "船帆座ο星团",
+    "fi": "ο Velorum -joukko",
+    "fr": "Amas de ο Vel",
+    "de": "ο Vel-Haufen",
+    "it": "Ammasso ο Vel",
+    "ja": "ほ座ο星団",
+    "ko": "돛자리 오미크론 성단",
+    "la": "Congregatio ο Vel",
+    "fa": "خوشه اومیکرون-بادبان",
+    "es": "Cúmulo ο Vel",
+    "ru": "Скопление ο Парусов"
+  },
+  "C 085": {
+    "name": "ο Vel Cluster",
+    "ar": "‎‎حشد أوميكرون فيلوروم‎‎",
+    "zh": "船帆座ο星团",
+    "fi": "ο Velorum -joukko",
+    "fr": "Amas de ο Vel",
+    "de": "ο Vel-Haufen",
+    "it": "Ammasso ο Vel",
+    "ja": "ほ座ο星団",
+    "ko": "돛자리 오미크론 성단",
+    "la": "Congregatio ο Vel",
+    "fa": "خوشه اومیکرون-بادبان",
+    "es": "Cúmulo ο Vel",
+    "ru": "Скопление ο Парусов"
+  },
+  "C085": {
+    "name": "ο Vel Cluster",
+    "ar": "‎‎حشد أوميكرون فيلوروم‎‎",
+    "zh": "船帆座ο星团",
+    "fi": "ο Velorum -joukko",
+    "fr": "Amas de ο Vel",
+    "de": "ο Vel-Haufen",
+    "it": "Ammasso ο Vel",
+    "ja": "ほ座ο星団",
+    "ko": "돛자리 오미크론 성단",
+    "la": "Congregatio ο Vel",
+    "fa": "خوشه اومیکرون-بادبان",
+    "es": "Cúmulo ο Vel",
+    "ru": "Скопление ο Парусов"
+  },
+  "MWSC 1529": {
+    "name": "ο Vel Cluster",
+    "ar": "‎‎حشد أوميكرون فيلوروم‎‎",
+    "zh": "船帆座ο星团",
+    "fi": "ο Velorum -joukko",
+    "fr": "Amas de ο Vel",
+    "de": "ο Vel-Haufen",
+    "it": "Ammasso ο Vel",
+    "ja": "ほ座ο星団",
+    "ko": "돛자리 오미크론 성단",
+    "la": "Congregatio ο Vel",
+    "fa": "خوشه اومیکرون-بادبان",
+    "es": "Cúmulo ο Vel",
+    "ru": "Скопление ο Парусов"
+  },
+  "MWSC1529": {
+    "name": "ο Vel Cluster",
+    "ar": "‎‎حشد أوميكرون فيلوروم‎‎",
+    "zh": "船帆座ο星团",
+    "fi": "ο Velorum -joukko",
+    "fr": "Amas de ο Vel",
+    "de": "ο Vel-Haufen",
+    "it": "Ammasso ο Vel",
+    "ja": "ほ座ο星団",
+    "ko": "돛자리 오미크론 성단",
+    "la": "Congregatio ο Vel",
+    "fa": "خوشه اومیکرون-بادبان",
+    "es": "Cúmulo ο Vel",
+    "ru": "Скопление ο Парусов"
+  },
+  "omi Vel Cluster": {
+    "name": "ο Vel Cluster",
+    "ar": "‎‎حشد أوميكرون فيلوروم‎‎",
+    "zh": "船帆座ο星团",
+    "fi": "ο Velorum -joukko",
+    "fr": "Amas de ο Vel",
+    "de": "ο Vel-Haufen",
+    "it": "Ammasso ο Vel",
+    "ja": "ほ座ο星団",
+    "ko": "돛자리 오미크론 성단",
+    "la": "Congregatio ο Vel",
+    "fa": "خوشه اومیکرون-بادبان",
+    "es": "Cúmulo ο Vel",
+    "ru": "Скопление ο Парусов"
+  },
+  "omiVelCluster": {
+    "name": "ο Vel Cluster",
+    "ar": "‎‎حشد أوميكرون فيلوروم‎‎",
+    "zh": "船帆座ο星团",
+    "fi": "ο Velorum -joukko",
+    "fr": "Amas de ο Vel",
+    "de": "ο Vel-Haufen",
+    "it": "Ammasso ο Vel",
+    "ja": "ほ座ο星団",
+    "ko": "돛자리 오미크론 성단",
+    "la": "Congregatio ο Vel",
+    "fa": "خوشه اومیکرون-بادبان",
+    "es": "Cúmulo ο Vel",
+    "ru": "Скопление ο Парусов"
+  },
+  "C 86": {
+    "name": "NGC 6397"
+  },
+  "C86": {
+    "name": "NGC 6397"
+  },
+  "NGC 6397": {
+    "name": "NGC 6397"
+  },
+  "NGC6397": {
+    "name": "NGC 6397"
+  },
+  "C 086": {
+    "name": "NGC 6397"
+  },
+  "C086": {
+    "name": "NGC 6397"
+  },
+  "MWSC 2662": {
+    "name": "NGC 6397"
+  },
+  "MWSC2662": {
+    "name": "NGC 6397"
+  },
+  "C 87": {
+    "name": "NGC 1261"
+  },
+  "C87": {
+    "name": "NGC 1261"
+  },
+  "NGC 1261": {
+    "name": "NGC 1261"
+  },
+  "NGC1261": {
+    "name": "NGC 1261"
+  },
+  "2MASX J03121627-5513070": {
+    "name": "NGC 1261"
+  },
+  "2MASXJ03121627-5513070": {
+    "name": "NGC 1261"
+  },
+  "C 087": {
+    "name": "NGC 1261"
+  },
+  "C087": {
+    "name": "NGC 1261"
+  },
+  "MWSC 0263": {
+    "name": "NGC 1261"
+  },
+  "MWSC0263": {
+    "name": "NGC 1261"
+  },
+  "C 88": {
+    "name": "NGC 5823"
+  },
+  "C88": {
+    "name": "NGC 5823"
+  },
+  "NGC 5823": {
+    "name": "NGC 5823"
+  },
+  "NGC5823": {
+    "name": "NGC 5823"
+  },
+  "C 088": {
+    "name": "NGC 5823"
+  },
+  "C088": {
+    "name": "NGC 5823"
+  },
+  "MWSC 2273": {
+    "name": "NGC 5823"
+  },
+  "MWSC2273": {
+    "name": "NGC 5823"
+  },
+  "C 89": {
+    "name": "S Nor Cluster"
+  },
+  "C89": {
+    "name": "S Nor Cluster"
+  },
+  "NGC 6067": {
+    "name": "S Nor Cluster"
+  },
+  "NGC6067": {
+    "name": "S Nor Cluster"
+  },
+  "C 089": {
+    "name": "S Nor Cluster"
+  },
+  "C089": {
+    "name": "S Nor Cluster"
+  },
+  "MWSC 2382": {
+    "name": "S Nor Cluster"
+  },
+  "MWSC2382": {
+    "name": "S Nor Cluster"
+  },
+  "S Nor Cluster": {
+    "name": "S Nor Cluster"
+  },
+  "SNorCluster": {
+    "name": "S Nor Cluster"
+  },
+  "C 90": {
+    "name": "NGC 2867"
+  },
+  "C90": {
+    "name": "NGC 2867"
+  },
+  "NGC 2867": {
+    "name": "NGC 2867"
+  },
+  "NGC2867": {
+    "name": "NGC 2867"
+  },
+  "2MASX J09212497-5818422": {
+    "name": "NGC 2867"
+  },
+  "2MASXJ09212497-5818422": {
+    "name": "NGC 2867"
+  },
+  "C 090": {
+    "name": "NGC 2867"
+  },
+  "C090": {
+    "name": "NGC 2867"
+  },
+  "ESO 126-008": {
+    "name": "NGC 2867"
+  },
+  "ESO126-008": {
+    "name": "NGC 2867"
+  },
+  "IRAS 09200-5805": {
+    "name": "NGC 2867"
+  },
+  "IRAS09200-5805": {
+    "name": "NGC 2867"
+  },
+  "PN G278.1-05.9": {
+    "name": "NGC 2867"
+  },
+  "PNG278.1-05.9": {
+    "name": "NGC 2867"
+  },
+  "C 91": {
+    "name": "Wishing Well Cluster",
+    "ar": "‎‎حشد بئر الأمنيات‎‎",
+    "zh": "许愿井星团",
+    "fi": "Toivomuskaivojoukko",
+    "fr": "Amas des Bons vœux",
+    "de": "Wünschelbrunnen-Haufen",
+    "it": "Ammasso Pozzo dei desideri",
+    "ko": "소원을 비는 우물 성단",
+    "fa": "خوشه چشمه آرزو",
+    "es": "Cúmulo Deseando Bien",
+    "ru": "Скопление Колодец желаний"
+  },
+  "C91": {
+    "name": "Wishing Well Cluster",
+    "ar": "‎‎حشد بئر الأمنيات‎‎",
+    "zh": "许愿井星团",
+    "fi": "Toivomuskaivojoukko",
+    "fr": "Amas des Bons vœux",
+    "de": "Wünschelbrunnen-Haufen",
+    "it": "Ammasso Pozzo dei desideri",
+    "ko": "소원을 비는 우물 성단",
+    "fa": "خوشه چشمه آرزو",
+    "es": "Cúmulo Deseando Bien",
+    "ru": "Скопление Колодец желаний"
+  },
+  "NGC3532": {
+    "name": "Wishing Well Cluster",
+    "ar": "‎‎حشد بئر الأمنيات‎‎",
+    "zh": "许愿井星团",
+    "fi": "Toivomuskaivojoukko",
+    "fr": "Amas des Bons vœux",
+    "de": "Wünschelbrunnen-Haufen",
+    "it": "Ammasso Pozzo dei desideri",
+    "ko": "소원을 비는 우물 성단",
+    "fa": "خوشه چشمه آرزو",
+    "es": "Cúmulo Deseando Bien",
+    "ru": "Скопление Колодец желаний"
+  },
+  "C 091": {
+    "name": "Wishing Well Cluster",
+    "ar": "‎‎حشد بئر الأمنيات‎‎",
+    "zh": "许愿井星团",
+    "fi": "Toivomuskaivojoukko",
+    "fr": "Amas des Bons vœux",
+    "de": "Wünschelbrunnen-Haufen",
+    "it": "Ammasso Pozzo dei desideri",
+    "ko": "소원을 비는 우물 성단",
+    "fa": "خوشه چشمه آرزو",
+    "es": "Cúmulo Deseando Bien",
+    "ru": "Скопление Колодец желаний"
+  },
+  "C091": {
+    "name": "Wishing Well Cluster",
+    "ar": "‎‎حشد بئر الأمنيات‎‎",
+    "zh": "许愿井星团",
+    "fi": "Toivomuskaivojoukko",
+    "fr": "Amas des Bons vœux",
+    "de": "Wünschelbrunnen-Haufen",
+    "it": "Ammasso Pozzo dei desideri",
+    "ko": "소원을 비는 우물 성단",
+    "fa": "خوشه چشمه آرزو",
+    "es": "Cúmulo Deseando Bien",
+    "ru": "Скопление Колодец желаний"
+  },
+  "MWSC 1890": {
+    "name": "Wishing Well Cluster",
+    "ar": "‎‎حشد بئر الأمنيات‎‎",
+    "zh": "许愿井星团",
+    "fi": "Toivomuskaivojoukko",
+    "fr": "Amas des Bons vœux",
+    "de": "Wünschelbrunnen-Haufen",
+    "it": "Ammasso Pozzo dei desideri",
+    "ko": "소원을 비는 우물 성단",
+    "fa": "خوشه چشمه آرزو",
+    "es": "Cúmulo Deseando Bien",
+    "ru": "Скопление Колодец желаний"
+  },
+  "MWSC1890": {
+    "name": "Wishing Well Cluster",
+    "ar": "‎‎حشد بئر الأمنيات‎‎",
+    "zh": "许愿井星团",
+    "fi": "Toivomuskaivojoukko",
+    "fr": "Amas des Bons vœux",
+    "de": "Wünschelbrunnen-Haufen",
+    "it": "Ammasso Pozzo dei desideri",
+    "ko": "소원을 비는 우물 성단",
+    "fa": "خوشه چشمه آرزو",
+    "es": "Cúmulo Deseando Bien",
+    "ru": "Скопление Колодец желаний"
+  },
+  "Wishing Well Cluster": {
+    "name": "Wishing Well Cluster",
+    "ar": "‎‎حشد بئر الأمنيات‎‎",
+    "zh": "许愿井星团",
+    "fi": "Toivomuskaivojoukko",
+    "fr": "Amas des Bons vœux",
+    "de": "Wünschelbrunnen-Haufen",
+    "it": "Ammasso Pozzo dei desideri",
+    "ko": "소원을 비는 우물 성단",
+    "fa": "خوشه چشمه آرزو",
+    "es": "Cúmulo Deseando Bien",
+    "ru": "Скопление Колодец желаний"
+  },
+  "WishingWellCluster": {
+    "name": "Wishing Well Cluster",
+    "ar": "‎‎حشد بئر الأمنيات‎‎",
+    "zh": "许愿井星团",
+    "fi": "Toivomuskaivojoukko",
+    "fr": "Amas des Bons vœux",
+    "de": "Wünschelbrunnen-Haufen",
+    "it": "Ammasso Pozzo dei desideri",
+    "ko": "소원을 비는 우물 성단",
+    "fa": "خوشه چشمه آرزو",
+    "es": "Cúmulo Deseando Bien",
+    "ru": "Скопление Колодец желаний"
+  },
+  "C 92": {
+    "name": "η Car Nebula",
+    "ar": "‎‎سديم إيتا كارينا‎‎",
+    "zh": "船底座星云",
+    "fi": "η Carinae -sumu",
+    "fr": "Nébuleuse η Car",
+    "de": "η Car Nebel",
+    "it": "Nebulosa η Car",
+    "ja": "エータ・カリーナ星云",
+    "ko": "용골자리 에타 성운",
+    "fa": "سحابی اتومبیل اتا",
+    "es": "Nebulosa de η Car",
+    "ru": "Туманность η Киля",
+    "he": "ערפילית שדרית"
+  },
+  "C92": {
+    "name": "η Car Nebula",
+    "ar": "‎‎سديم إيتا كارينا‎‎",
+    "zh": "船底座星云",
+    "fi": "η Carinae -sumu",
+    "fr": "Nébuleuse η Car",
+    "de": "η Car Nebel",
+    "it": "Nebulosa η Car",
+    "ja": "エータ・カリーナ星云",
+    "ko": "용골자리 에타 성운",
+    "fa": "سحابی اتومبیل اتا",
+    "es": "Nebulosa de η Car",
+    "ru": "Туманность η Киля",
+    "he": "ערפילית שדרית"
+  },
+  "NGC3372": {
+    "name": "η Car Nebula",
+    "ar": "‎‎سديم إيتا كارينا‎‎",
+    "zh": "船底座星云",
+    "fi": "η Carinae -sumu",
+    "fr": "Nébuleuse η Car",
+    "de": "η Car Nebel",
+    "it": "Nebulosa η Car",
+    "ja": "エータ・カリーナ星云",
+    "ko": "용골자리 에타 성운",
+    "fa": "سحابی اتومبیل اتا",
+    "es": "Nebulosa de η Car",
+    "ru": "Туманность η Киля",
+    "he": "ערפילית שדרית"
+  },
+  "C 092": {
+    "name": "η Car Nebula",
+    "ar": "‎‎سديم إيتا كارينا‎‎",
+    "zh": "船底座星云",
+    "fi": "η Carinae -sumu",
+    "fr": "Nébuleuse η Car",
+    "de": "η Car Nebel",
+    "it": "Nebulosa η Car",
+    "ja": "エータ・カリーナ星云",
+    "ko": "용골자리 에타 성운",
+    "fa": "سحابی اتومبیل اتا",
+    "es": "Nebulosa de η Car",
+    "ru": "Туманность η Киля",
+    "he": "ערפילית שדרית"
+  },
+  "C092": {
+    "name": "η Car Nebula",
+    "ar": "‎‎سديم إيتا كارينا‎‎",
+    "zh": "船底座星云",
+    "fi": "η Carinae -sumu",
+    "fr": "Nébuleuse η Car",
+    "de": "η Car Nebel",
+    "it": "Nebulosa η Car",
+    "ja": "エータ・カリーナ星云",
+    "ko": "용골자리 에타 성운",
+    "fa": "سحابی اتومبیل اتا",
+    "es": "Nebulosa de η Car",
+    "ru": "Туманность η Киля",
+    "he": "ערפילית שדרית"
+  },
+  "Carina Nebula": {
+    "name": "η Car Nebula",
+    "ar": "‎‎سديم إيتا كارينا‎‎",
+    "zh": "船底座星云",
+    "fi": "η Carinae -sumu",
+    "fr": "Nébuleuse η Car",
+    "de": "η Car Nebel",
+    "it": "Nebulosa η Car",
+    "ja": "エータ・カリーナ星云",
+    "ko": "용골자리 에타 성운",
+    "fa": "سحابی اتومبیل اتا",
+    "es": "Nebulosa de η Car",
+    "ru": "Туманность η Киля",
+    "he": "ערפילית שדרית"
+  },
+  "CarinaNebula": {
+    "name": "η Car Nebula",
+    "ar": "‎‎سديم إيتا كارينا‎‎",
+    "zh": "船底座星云",
+    "fi": "η Carinae -sumu",
+    "fr": "Nébuleuse η Car",
+    "de": "η Car Nebel",
+    "it": "Nebulosa η Car",
+    "ja": "エータ・カリーナ星云",
+    "ko": "용골자리 에타 성운",
+    "fa": "سحابی اتومبیل اتا",
+    "es": "Nebulosa de η Car",
+    "ru": "Туманность η Киля",
+    "he": "ערפילית שדרית"
+  },
+  "eta Car Nebula": {
+    "name": "η Car Nebula",
+    "ar": "‎‎سديم إيتا كارينا‎‎",
+    "zh": "船底座星云",
+    "fi": "η Carinae -sumu",
+    "fr": "Nébuleuse η Car",
+    "de": "η Car Nebel",
+    "it": "Nebulosa η Car",
+    "ja": "エータ・カリーナ星云",
+    "ko": "용골자리 에타 성운",
+    "fa": "سحابی اتومبیل اتا",
+    "es": "Nebulosa de η Car",
+    "ru": "Туманность η Киля",
+    "he": "ערפילית שדרית"
+  },
+  "etaCarNebula": {
+    "name": "η Car Nebula",
+    "ar": "‎‎سديم إيتا كارينا‎‎",
+    "zh": "船底座星云",
+    "fi": "η Carinae -sumu",
+    "fr": "Nébuleuse η Car",
+    "de": "η Car Nebel",
+    "it": "Nebulosa η Car",
+    "ja": "エータ・カリーナ星云",
+    "ko": "용골자리 에타 성운",
+    "fa": "سحابی اتومبیل اتا",
+    "es": "Nebulosa de η Car",
+    "ru": "Туманность η Киля",
+    "he": "ערפילית שדרית"
+  },
+  "C 93": {
+    "name": "Pavo Globular Cluster",
+    "ar": "‎‎حشد الطاووس الكروي‎‎",
+    "zh": "孔雀座球状星团",
+    "fi": "Riikinkukon pallomainen joukko",
+    "fr": "Amas globulaire du Paon",
+    "de": "Pavo-Kugelsternhaufen",
+    "it": "Ammasso Globulare Pavone",
+    "ja": "くじゃく座球状星団",
+    "ko": "파보 구상성단",
+    "la": "Congregatio globiforma Pavonis",
+    "fa": "خوشه کروی طاووس",
+    "es": "Cúmulo Globular del Pavo",
+    "ru": "Шаровое скопление Павлина"
+  },
+  "C93": {
+    "name": "Pavo Globular Cluster",
+    "ar": "‎‎حشد الطاووس الكروي‎‎",
+    "zh": "孔雀座球状星团",
+    "fi": "Riikinkukon pallomainen joukko",
+    "fr": "Amas globulaire du Paon",
+    "de": "Pavo-Kugelsternhaufen",
+    "it": "Ammasso Globulare Pavone",
+    "ja": "くじゃく座球状星団",
+    "ko": "파보 구상성단",
+    "la": "Congregatio globiforma Pavonis",
+    "fa": "خوشه کروی طاووس",
+    "es": "Cúmulo Globular del Pavo",
+    "ru": "Шаровое скопление Павлина"
+  },
+  "NGC 6777": {
+    "name": "Pavo Globular Cluster",
+    "ar": "‎‎حشد الطاووس الكروي‎‎",
+    "zh": "孔雀座球状星团",
+    "fi": "Riikinkukon pallomainen joukko",
+    "fr": "Amas globulaire du Paon",
+    "de": "Pavo-Kugelsternhaufen",
+    "it": "Ammasso Globulare Pavone",
+    "ja": "くじゃく座球状星団",
+    "ko": "파보 구상성단",
+    "la": "Congregatio globiforma Pavonis",
+    "fa": "خوشه کروی طاووس",
+    "es": "Cúmulo Globular del Pavo",
+    "ru": "Шаровое скопление Павлина"
+  },
+  "NGC6777": {
+    "name": "Pavo Globular Cluster",
+    "ar": "‎‎حشد الطاووس الكروي‎‎",
+    "zh": "孔雀座球状星团",
+    "fi": "Riikinkukon pallomainen joukko",
+    "fr": "Amas globulaire du Paon",
+    "de": "Pavo-Kugelsternhaufen",
+    "it": "Ammasso Globulare Pavone",
+    "ja": "くじゃく座球状星団",
+    "ko": "파보 구상성단",
+    "la": "Congregatio globiforma Pavonis",
+    "fa": "خوشه کروی طاووس",
+    "es": "Cúmulo Globular del Pavo",
+    "ru": "Шаровое скопление Павлина"
+  },
+  "NGC6752": {
+    "name": "Pavo Globular Cluster",
+    "ar": "‎‎حشد الطاووس الكروي‎‎",
+    "zh": "孔雀座球状星团",
+    "fi": "Riikinkukon pallomainen joukko",
+    "fr": "Amas globulaire du Paon",
+    "de": "Pavo-Kugelsternhaufen",
+    "it": "Ammasso Globulare Pavone",
+    "ja": "くじゃく座球状星団",
+    "ko": "파보 구상성단",
+    "la": "Congregatio globiforma Pavonis",
+    "fa": "خوشه کروی طاووس",
+    "es": "Cúmulo Globular del Pavo",
+    "ru": "Шаровое скопление Павлина"
+  },
+  "C 093": {
+    "name": "Pavo Globular Cluster",
+    "ar": "‎‎حشد الطاووس الكروي‎‎",
+    "zh": "孔雀座球状星团",
+    "fi": "Riikinkukon pallomainen joukko",
+    "fr": "Amas globulaire du Paon",
+    "de": "Pavo-Kugelsternhaufen",
+    "it": "Ammasso Globulare Pavone",
+    "ja": "くじゃく座球状星団",
+    "ko": "파보 구상성단",
+    "la": "Congregatio globiforma Pavonis",
+    "fa": "خوشه کروی طاووس",
+    "es": "Cúmulo Globular del Pavo",
+    "ru": "Шаровое скопление Павлина"
+  },
+  "C093": {
+    "name": "Pavo Globular Cluster",
+    "ar": "‎‎حشد الطاووس الكروي‎‎",
+    "zh": "孔雀座球状星团",
+    "fi": "Riikinkukon pallomainen joukko",
+    "fr": "Amas globulaire du Paon",
+    "de": "Pavo-Kugelsternhaufen",
+    "it": "Ammasso Globulare Pavone",
+    "ja": "くじゃく座球状星団",
+    "ko": "파보 구상성단",
+    "la": "Congregatio globiforma Pavonis",
+    "fa": "خوشه کروی طاووس",
+    "es": "Cúmulo Globular del Pavo",
+    "ru": "Шаровое скопление Павлина"
+  },
+  "MWSC 3062": {
+    "name": "Pavo Globular Cluster",
+    "ar": "‎‎حشد الطاووس الكروي‎‎",
+    "zh": "孔雀座球状星团",
+    "fi": "Riikinkukon pallomainen joukko",
+    "fr": "Amas globulaire du Paon",
+    "de": "Pavo-Kugelsternhaufen",
+    "it": "Ammasso Globulare Pavone",
+    "ja": "くじゃく座球状星団",
+    "ko": "파보 구상성단",
+    "la": "Congregatio globiforma Pavonis",
+    "fa": "خوشه کروی طاووس",
+    "es": "Cúmulo Globular del Pavo",
+    "ru": "Шаровое скопление Павлина"
+  },
+  "MWSC3062": {
+    "name": "Pavo Globular Cluster",
+    "ar": "‎‎حشد الطاووس الكروي‎‎",
+    "zh": "孔雀座球状星团",
+    "fi": "Riikinkukon pallomainen joukko",
+    "fr": "Amas globulaire du Paon",
+    "de": "Pavo-Kugelsternhaufen",
+    "it": "Ammasso Globulare Pavone",
+    "ja": "くじゃく座球状星団",
+    "ko": "파보 구상성단",
+    "la": "Congregatio globiforma Pavonis",
+    "fa": "خوشه کروی طاووس",
+    "es": "Cúmulo Globular del Pavo",
+    "ru": "Шаровое скопление Павлина"
+  },
+  "C 94": {
+    "name": "Jewel Box",
+    "ar": "‎‎صندوق المجوهرات‎‎",
+    "zh": "宝盒星团",
+    "fi": "Korulipas",
+    "fr": "Boîte à Bijoux",
+    "de": "Schmuckkästchen",
+    "el": "Κοσμηματοθήκη",
+    "he": "קופסת התכשיטים",
+    "it": "Scrigno di Gioie",
+    "ja": "宝石箱",
+    "ko": "보석 상자",
+    "hi": "ज्वेल बक्सा",
+    "fa": "جعبۀ جواهر",
+    "es": "Joyero",
+    "ru": "Шкатулка",
+    "tr": "Mücevher Kutusu"
+  },
+  "C94": {
+    "name": "Jewel Box",
+    "ar": "‎‎صندوق المجوهرات‎‎",
+    "zh": "宝盒星团",
+    "fi": "Korulipas",
+    "fr": "Boîte à Bijoux",
+    "de": "Schmuckkästchen",
+    "el": "Κοσμηματοθήκη",
+    "he": "קופסת התכשיטים",
+    "it": "Scrigno di Gioie",
+    "ja": "宝石箱",
+    "ko": "보석 상자",
+    "hi": "ज्वेल बक्सा",
+    "fa": "جعبۀ جواهر",
+    "es": "Joyero",
+    "ru": "Шкатулка",
+    "tr": "Mücevher Kutusu"
+  },
+  "NGC4755": {
+    "name": "Jewel Box",
+    "ar": "‎‎صندوق المجوهرات‎‎",
+    "zh": "宝盒星团",
+    "fi": "Korulipas",
+    "fr": "Boîte à Bijoux",
+    "de": "Schmuckkästchen",
+    "el": "Κοσμηματοθήκη",
+    "he": "קופסת התכשיטים",
+    "it": "Scrigno di Gioie",
+    "ja": "宝石箱",
+    "ko": "보석 상자",
+    "hi": "ज्वेल बक्सा",
+    "fa": "جعبۀ جواهر",
+    "es": "Joyero",
+    "ru": "Шкатулка",
+    "tr": "Mücevher Kutusu"
+  },
+  "C 094": {
+    "name": "Jewel Box",
+    "ar": "‎‎صندوق المجوهرات‎‎",
+    "zh": "宝盒星团",
+    "fi": "Korulipas",
+    "fr": "Boîte à Bijoux",
+    "de": "Schmuckkästchen",
+    "el": "Κοσμηματοθήκη",
+    "he": "קופסת התכשיטים",
+    "it": "Scrigno di Gioie",
+    "ja": "宝石箱",
+    "ko": "보석 상자",
+    "hi": "ज्वेल बक्सा",
+    "fa": "جعبۀ جواهر",
+    "es": "Joyero",
+    "ru": "Шкатулка",
+    "tr": "Mücevher Kutusu"
+  },
+  "C094": {
+    "name": "Jewel Box",
+    "ar": "‎‎صندوق المجوهرات‎‎",
+    "zh": "宝盒星团",
+    "fi": "Korulipas",
+    "fr": "Boîte à Bijoux",
+    "de": "Schmuckkästchen",
+    "el": "Κοσμηματοθήκη",
+    "he": "קופסת התכשיטים",
+    "it": "Scrigno di Gioie",
+    "ja": "宝石箱",
+    "ko": "보석 상자",
+    "hi": "ज्वेल बक्सा",
+    "fa": "جعبۀ جواهر",
+    "es": "Joyero",
+    "ru": "Шкатулка",
+    "tr": "Mücevher Kutusu"
+  },
+  "MWSC 2072": {
+    "name": "Jewel Box",
+    "ar": "‎‎صندوق المجوهرات‎‎",
+    "zh": "宝盒星团",
+    "fi": "Korulipas",
+    "fr": "Boîte à Bijoux",
+    "de": "Schmuckkästchen",
+    "el": "Κοσμηματοθήκη",
+    "he": "קופסת התכשיטים",
+    "it": "Scrigno di Gioie",
+    "ja": "宝石箱",
+    "ko": "보석 상자",
+    "hi": "ज्वेल बक्सा",
+    "fa": "جعبۀ جواهر",
+    "es": "Joyero",
+    "ru": "Шкатулка",
+    "tr": "Mücevher Kutusu"
+  },
+  "MWSC2072": {
+    "name": "Jewel Box",
+    "ar": "‎‎صندوق المجوهرات‎‎",
+    "zh": "宝盒星团",
+    "fi": "Korulipas",
+    "fr": "Boîte à Bijoux",
+    "de": "Schmuckkästchen",
+    "el": "Κοσμηματοθήκη",
+    "he": "קופסת התכשיטים",
+    "it": "Scrigno di Gioie",
+    "ja": "宝石箱",
+    "ko": "보석 상자",
+    "hi": "ज्वेल बक्सा",
+    "fa": "جعبۀ جواهر",
+    "es": "Joyero",
+    "ru": "Шкатулка",
+    "tr": "Mücevher Kutusu"
+  },
+  "Herschel's Jewel Box": {
+    "name": "Jewel Box",
+    "ar": "‎‎صندوق المجوهرات‎‎",
+    "zh": "宝盒星团",
+    "fi": "Korulipas",
+    "fr": "Boîte à Bijoux",
+    "de": "Schmuckkästchen",
+    "el": "Κοσμηματοθήκη",
+    "he": "קופסת התכשיטים",
+    "it": "Scrigno di Gioie",
+    "ja": "宝石箱",
+    "ko": "보석 상자",
+    "hi": "ज्वेल बक्सा",
+    "fa": "جعبۀ جواهر",
+    "es": "Joyero",
+    "ru": "Шкатулка",
+    "tr": "Mücevher Kutusu"
+  },
+  "Herschel'sJewelBox": {
+    "name": "Jewel Box",
+    "ar": "‎‎صندوق المجوهرات‎‎",
+    "zh": "宝盒星团",
+    "fi": "Korulipas",
+    "fr": "Boîte à Bijoux",
+    "de": "Schmuckkästchen",
+    "el": "Κοσμηματοθήκη",
+    "he": "קופסת התכשיטים",
+    "it": "Scrigno di Gioie",
+    "ja": "宝石箱",
+    "ko": "보석 상자",
+    "hi": "ज्वेल बक्सा",
+    "fa": "جعبۀ جواهر",
+    "es": "Joyero",
+    "ru": "Шкатулка",
+    "tr": "Mücevher Kutusu"
+  },
+  "kappa Crucis Cluster": {
+    "name": "Jewel Box",
+    "ar": "‎‎صندوق المجوهرات‎‎",
+    "zh": "宝盒星团",
+    "fi": "Korulipas",
+    "fr": "Boîte à Bijoux",
+    "de": "Schmuckkästchen",
+    "el": "Κοσμηματοθήκη",
+    "he": "קופסת התכשיטים",
+    "it": "Scrigno di Gioie",
+    "ja": "宝石箱",
+    "ko": "보석 상자",
+    "hi": "ज्वेल बक्सा",
+    "fa": "جعبۀ جواهر",
+    "es": "Joyero",
+    "ru": "Шкатулка",
+    "tr": "Mücevher Kutusu"
+  },
+  "kappaCrucisCluster": {
+    "name": "Jewel Box",
+    "ar": "‎‎صندوق المجوهرات‎‎",
+    "zh": "宝盒星团",
+    "fi": "Korulipas",
+    "fr": "Boîte à Bijoux",
+    "de": "Schmuckkästchen",
+    "el": "Κοσμηματοθήκη",
+    "he": "קופסת התכשיטים",
+    "it": "Scrigno di Gioie",
+    "ja": "宝石箱",
+    "ko": "보석 상자",
+    "hi": "ज्वेल बक्सा",
+    "fa": "جعبۀ جواهر",
+    "es": "Joyero",
+    "ru": "Шкатулка",
+    "tr": "Mücevher Kutusu"
+  },
+  "C 95": {
+    "name": "NGC 6025"
+  },
+  "C95": {
+    "name": "NGC 6025"
+  },
+  "NGC 6025": {
+    "name": "NGC 6025"
+  },
+  "NGC6025": {
+    "name": "NGC 6025"
+  },
+  "C 095": {
+    "name": "NGC 6025"
+  },
+  "C095": {
+    "name": "NGC 6025"
+  },
+  "MWSC 2347": {
+    "name": "NGC 6025"
+  },
+  "MWSC2347": {
+    "name": "NGC 6025"
+  },
+  "C 96": {
+    "name": "Diamond Cluster",
+    "ar": "‎حشد الألماس‎",
+    "zh": "钻石星团",
+    "fi": "Timanttijoukko",
+    "fr": "Amas du Diamant",
+    "de": "Diamanten-Haufen",
+    "it": "Ammasso Diamante",
+    "ko": "다이아몬드 성단",
+    "es": "Cúmulo del Diamante",
+    "ru": "Скопление Бриллиант",
+    "tr": "Elmas Yıldız Kümesi"
+  },
+  "C96": {
+    "name": "Diamond Cluster",
+    "ar": "‎حشد الألماس‎",
+    "zh": "钻石星团",
+    "fi": "Timanttijoukko",
+    "fr": "Amas du Diamant",
+    "de": "Diamanten-Haufen",
+    "it": "Ammasso Diamante",
+    "ko": "다이아몬드 성단",
+    "es": "Cúmulo del Diamante",
+    "ru": "Скопление Бриллиант",
+    "tr": "Elmas Yıldız Kümesi"
+  },
+  "NGC2516": {
+    "name": "Diamond Cluster",
+    "ar": "‎حشد الألماس‎",
+    "zh": "钻石星团",
+    "fi": "Timanttijoukko",
+    "fr": "Amas du Diamant",
+    "de": "Diamanten-Haufen",
+    "it": "Ammasso Diamante",
+    "ko": "다이아몬드 성단",
+    "es": "Cúmulo del Diamante",
+    "ru": "Скопление Бриллиант",
+    "tr": "Elmas Yıldız Kümesi"
+  },
+  "C 096": {
+    "name": "Diamond Cluster",
+    "ar": "‎حشد الألماس‎",
+    "zh": "钻石星团",
+    "fi": "Timanttijoukko",
+    "fr": "Amas du Diamant",
+    "de": "Diamanten-Haufen",
+    "it": "Ammasso Diamante",
+    "ko": "다이아몬드 성단",
+    "es": "Cúmulo del Diamante",
+    "ru": "Скопление Бриллиант",
+    "tr": "Elmas Yıldız Kümesi"
+  },
+  "C096": {
+    "name": "Diamond Cluster",
+    "ar": "‎حشد الألماس‎",
+    "zh": "钻石星团",
+    "fi": "Timanttijoukko",
+    "fr": "Amas du Diamant",
+    "de": "Diamanten-Haufen",
+    "it": "Ammasso Diamante",
+    "ko": "다이아몬드 성단",
+    "es": "Cúmulo del Diamante",
+    "ru": "Скопление Бриллиант",
+    "tr": "Elmas Yıldız Kümesi"
+  },
+  "MWSC 1393": {
+    "name": "Diamond Cluster",
+    "ar": "‎حشد الألماس‎",
+    "zh": "钻石星团",
+    "fi": "Timanttijoukko",
+    "fr": "Amas du Diamant",
+    "de": "Diamanten-Haufen",
+    "it": "Ammasso Diamante",
+    "ko": "다이아몬드 성단",
+    "es": "Cúmulo del Diamante",
+    "ru": "Скопление Бриллиант",
+    "tr": "Elmas Yıldız Kümesi"
+  },
+  "MWSC1393": {
+    "name": "Diamond Cluster",
+    "ar": "‎حشد الألماس‎",
+    "zh": "钻石星团",
+    "fi": "Timanttijoukko",
+    "fr": "Amas du Diamant",
+    "de": "Diamanten-Haufen",
+    "it": "Ammasso Diamante",
+    "ko": "다이아몬드 성단",
+    "es": "Cúmulo del Diamante",
+    "ru": "Скопление Бриллиант",
+    "tr": "Elmas Yıldız Kümesi"
+  },
+  "C 97": {
+    "name": "Pearl Cluster",
+    "ar": "‎‎حشد اللؤلؤ‎‎",
+    "zh": "珍珠星团",
+    "fi": "Helmijoukko",
+    "fr": "Amas de la Perle",
+    "de": "Perlen-Haufen",
+    "it": "Ammasso Perla",
+    "ko": "진주 은하",
+    "fa": "خوشه مروارید",
+    "es": "Cúmulo Perla",
+    "ru": "Скопление Жемчужина"
+  },
+  "C97": {
+    "name": "Pearl Cluster",
+    "ar": "‎‎حشد اللؤلؤ‎‎",
+    "zh": "珍珠星团",
+    "fi": "Helmijoukko",
+    "fr": "Amas de la Perle",
+    "de": "Perlen-Haufen",
+    "it": "Ammasso Perla",
+    "ko": "진주 은하",
+    "fa": "خوشه مروارید",
+    "es": "Cúmulo Perla",
+    "ru": "Скопление Жемчужина"
+  },
+  "NGC3766": {
+    "name": "Pearl Cluster",
+    "ar": "‎‎حشد اللؤلؤ‎‎",
+    "zh": "珍珠星团",
+    "fi": "Helmijoukko",
+    "fr": "Amas de la Perle",
+    "de": "Perlen-Haufen",
+    "it": "Ammasso Perla",
+    "ko": "진주 은하",
+    "fa": "خوشه مروارید",
+    "es": "Cúmulo Perla",
+    "ru": "Скопление Жемчужина"
+  },
+  "C 097": {
+    "name": "Pearl Cluster",
+    "ar": "‎‎حشد اللؤلؤ‎‎",
+    "zh": "珍珠星团",
+    "fi": "Helmijoukko",
+    "fr": "Amas de la Perle",
+    "de": "Perlen-Haufen",
+    "it": "Ammasso Perla",
+    "ko": "진주 은하",
+    "fa": "خوشه مروارید",
+    "es": "Cúmulo Perla",
+    "ru": "Скопление Жемчужина"
+  },
+  "C097": {
+    "name": "Pearl Cluster",
+    "ar": "‎‎حشد اللؤلؤ‎‎",
+    "zh": "珍珠星团",
+    "fi": "Helmijoukko",
+    "fr": "Amas de la Perle",
+    "de": "Perlen-Haufen",
+    "it": "Ammasso Perla",
+    "ko": "진주 은하",
+    "fa": "خوشه مروارید",
+    "es": "Cúmulo Perla",
+    "ru": "Скопление Жемчужина"
+  },
+  "MWSC 1958": {
+    "name": "Pearl Cluster",
+    "ar": "‎‎حشد اللؤلؤ‎‎",
+    "zh": "珍珠星团",
+    "fi": "Helmijoukko",
+    "fr": "Amas de la Perle",
+    "de": "Perlen-Haufen",
+    "it": "Ammasso Perla",
+    "ko": "진주 은하",
+    "fa": "خوشه مروارید",
+    "es": "Cúmulo Perla",
+    "ru": "Скопление Жемчужина"
+  },
+  "MWSC1958": {
+    "name": "Pearl Cluster",
+    "ar": "‎‎حشد اللؤلؤ‎‎",
+    "zh": "珍珠星团",
+    "fi": "Helmijoukko",
+    "fr": "Amas de la Perle",
+    "de": "Perlen-Haufen",
+    "it": "Ammasso Perla",
+    "ko": "진주 은하",
+    "fa": "خوشه مروارید",
+    "es": "Cúmulo Perla",
+    "ru": "Скопление Жемчужина"
+  },
+  "Pearl Cluster": {
+    "name": "Pearl Cluster",
+    "ar": "‎‎حشد اللؤلؤ‎‎",
+    "zh": "珍珠星团",
+    "fi": "Helmijoukko",
+    "fr": "Amas de la Perle",
+    "de": "Perlen-Haufen",
+    "it": "Ammasso Perla",
+    "ko": "진주 은하",
+    "fa": "خوشه مروارید",
+    "es": "Cúmulo Perla",
+    "ru": "Скопление Жемчужина"
+  },
+  "PearlCluster": {
+    "name": "Pearl Cluster",
+    "ar": "‎‎حشد اللؤلؤ‎‎",
+    "zh": "珍珠星团",
+    "fi": "Helmijoukko",
+    "fr": "Amas de la Perle",
+    "de": "Perlen-Haufen",
+    "it": "Ammasso Perla",
+    "ko": "진주 은하",
+    "fa": "خوشه مروارید",
+    "es": "Cúmulo Perla",
+    "ru": "Скопление Жемчужина"
+  },
+  "C 98": {
+    "name": "Coalsack Cluster",
+    "ar": "‎حشد كيس الفحم‎",
+    "zh": "煤袋星团",
+    "fi": "Hiilisäkkijoukko",
+    "fr": "Amas du Sac à charbon",
+    "de": "Kohlensack-Haufen",
+    "it": "Ammasso Sacco di Carbone",
+    "ja": "コールサック星団",
+    "ko": "콜색 성단",
+    "es": "Cúmulo Saco de Carbón",
+    "ru": "Скопление Угольный мешок"
+  },
+  "C98": {
+    "name": "Coalsack Cluster",
+    "ar": "‎حشد كيس الفحم‎",
+    "zh": "煤袋星团",
+    "fi": "Hiilisäkkijoukko",
+    "fr": "Amas du Sac à charbon",
+    "de": "Kohlensack-Haufen",
+    "it": "Ammasso Sacco di Carbone",
+    "ja": "コールサック星団",
+    "ko": "콜색 성단",
+    "es": "Cúmulo Saco de Carbón",
+    "ru": "Скопление Угольный мешок"
+  },
+  "NGC4609": {
+    "name": "Coalsack Cluster",
+    "ar": "‎حشد كيس الفحم‎",
+    "zh": "煤袋星团",
+    "fi": "Hiilisäkkijoukko",
+    "fr": "Amas du Sac à charbon",
+    "de": "Kohlensack-Haufen",
+    "it": "Ammasso Sacco di Carbone",
+    "ja": "コールサック星団",
+    "ko": "콜색 성단",
+    "es": "Cúmulo Saco de Carbón",
+    "ru": "Скопление Угольный мешок"
+  },
+  "C 098": {
+    "name": "Coalsack Cluster",
+    "ar": "‎حشد كيس الفحم‎",
+    "zh": "煤袋星团",
+    "fi": "Hiilisäkkijoukko",
+    "fr": "Amas du Sac à charbon",
+    "de": "Kohlensack-Haufen",
+    "it": "Ammasso Sacco di Carbone",
+    "ja": "コールサック星団",
+    "ko": "콜색 성단",
+    "es": "Cúmulo Saco de Carbón",
+    "ru": "Скопление Угольный мешок"
+  },
+  "C098": {
+    "name": "Coalsack Cluster",
+    "ar": "‎حشد كيس الفحم‎",
+    "zh": "煤袋星团",
+    "fi": "Hiilisäkkijoukko",
+    "fr": "Amas du Sac à charbon",
+    "de": "Kohlensack-Haufen",
+    "it": "Ammasso Sacco di Carbone",
+    "ja": "コールサック星団",
+    "ko": "콜색 성단",
+    "es": "Cúmulo Saco de Carbón",
+    "ru": "Скопление Угольный мешок"
+  },
+  "MWSC 2062": {
+    "name": "Coalsack Cluster",
+    "ar": "‎حشد كيس الفحم‎",
+    "zh": "煤袋星团",
+    "fi": "Hiilisäkkijoukko",
+    "fr": "Amas du Sac à charbon",
+    "de": "Kohlensack-Haufen",
+    "it": "Ammasso Sacco di Carbone",
+    "ja": "コールサック星団",
+    "ko": "콜색 성단",
+    "es": "Cúmulo Saco de Carbón",
+    "ru": "Скопление Угольный мешок"
+  },
+  "MWSC2062": {
+    "name": "Coalsack Cluster",
+    "ar": "‎حشد كيس الفحم‎",
+    "zh": "煤袋星团",
+    "fi": "Hiilisäkkijoukko",
+    "fr": "Amas du Sac à charbon",
+    "de": "Kohlensack-Haufen",
+    "it": "Ammasso Sacco di Carbone",
+    "ja": "コールサック星団",
+    "ko": "콜색 성단",
+    "es": "Cúmulo Saco de Carbón",
+    "ru": "Скопление Угольный мешок"
+  },
+  "Coalsack Cluster": {
+    "name": "Coalsack Cluster",
+    "ar": "‎حشد كيس الفحم‎",
+    "zh": "煤袋星团",
+    "fi": "Hiilisäkkijoukko",
+    "fr": "Amas du Sac à charbon",
+    "de": "Kohlensack-Haufen",
+    "it": "Ammasso Sacco di Carbone",
+    "ja": "コールサック星団",
+    "ko": "콜색 성단",
+    "es": "Cúmulo Saco de Carbón",
+    "ru": "Скопление Угольный мешок"
+  },
+  "CoalsackCluster": {
+    "name": "Coalsack Cluster",
+    "ar": "‎حشد كيس الفحم‎",
+    "zh": "煤袋星团",
+    "fi": "Hiilisäkkijoukko",
+    "fr": "Amas du Sac à charbon",
+    "de": "Kohlensack-Haufen",
+    "it": "Ammasso Sacco di Carbone",
+    "ja": "コールサック星団",
+    "ko": "콜색 성단",
+    "es": "Cúmulo Saco de Carbón",
+    "ru": "Скопление Угольный мешок"
+  },
+  "C99": {
+    "name": "Coalsack Nebula",
+    "ar": "‎‎سديم كيس الفحم‎‎",
+    "zh": "煤袋星云",
+    "fi": "Hiilisäkki",
+    "fr": "Nébuleuse du Sac à charbon",
+    "de": "Kohlensack",
+    "it": "Nebulosa Sacco di Carbone",
+    "ja": "石炭袋",
+    "ko": "석탄 포대 성운",
+    "fa": "سحابی تاریک کیسه ذغال",
+    "es": "Nebulosa Saco de Carbón",
+    "ru": "Туманность Угольный мешок"
+  },
+  "C 100": {
+    "name": "Running Chicken Nebula",
+    "ar": "‎سديم الدجاجة العداءة‎",
+    "zh": "奔鸡星云",
+    "fi": "Juokseva kana -sumu",
+    "fr": "Nébuleuse du Poulet qui court",
+    "de": "Rennendes Huhn-Nebel",
+    "el": "Νεφέλωμα Όρνιθας",
+    "it": "Nebulosa pollo che corre",
+    "ja": "走るニワトリ星云",
+    "ko": "달리는 닭 성운",
+    "fa": "سحابی جوجۀ در حال دو",
+    "es": "Nebulosa del Pollo corredor",
+    "ru": "Туманность Бегущий цыпленок",
+    "tr": "Koşan Tavuk Bulutsusu"
+  },
+  "C100": {
+    "name": "Running Chicken Nebula",
+    "ar": "‎سديم الدجاجة العداءة‎",
+    "zh": "奔鸡星云",
+    "fi": "Juokseva kana -sumu",
+    "fr": "Nébuleuse du Poulet qui court",
+    "de": "Rennendes Huhn-Nebel",
+    "el": "Νεφέλωμα Όρνιθας",
+    "it": "Nebulosa pollo che corre",
+    "ja": "走るニワトリ星云",
+    "ko": "달리는 닭 성운",
+    "fa": "سحابی جوجۀ در حال دو",
+    "es": "Nebulosa del Pollo corredor",
+    "ru": "Туманность Бегущий цыпленок",
+    "tr": "Koşan Tavuk Bulutsusu"
+  },
+  "IC2944": {
+    "name": "Running Chicken Nebula",
+    "ar": "‎سديم الدجاجة العداءة‎",
+    "zh": "奔鸡星云",
+    "fi": "Juokseva kana -sumu",
+    "fr": "Nébuleuse du Poulet qui court",
+    "de": "Rennendes Huhn-Nebel",
+    "el": "Νεφέλωμα Όρνιθας",
+    "it": "Nebulosa pollo che corre",
+    "ja": "走るニワトリ星云",
+    "ko": "달리는 닭 성운",
+    "fa": "سحابی جوجۀ در حال دو",
+    "es": "Nebulosa del Pollo corredor",
+    "ru": "Туманность Бегущий цыпленок",
+    "tr": "Koşan Tavuk Bulutsusu"
+  },
+  "HD 100841": {
+    "name": "Running Chicken Nebula",
+    "ar": "‎سديم الدجاجة العداءة‎",
+    "zh": "奔鸡星云",
+    "fi": "Juokseva kana -sumu",
+    "fr": "Nébuleuse du Poulet qui court",
+    "de": "Rennendes Huhn-Nebel",
+    "el": "Νεφέλωμα Όρνιθας",
+    "it": "Nebulosa pollo che corre",
+    "ja": "走るニワトリ星云",
+    "ko": "달리는 닭 성운",
+    "fa": "سحابی جوجۀ در حال دو",
+    "es": "Nebulosa del Pollo corredor",
+    "ru": "Туманность Бегущий цыпленок",
+    "tr": "Koşan Tavuk Bulutsusu"
+  },
+  "HD100841": {
+    "name": "Running Chicken Nebula",
+    "ar": "‎سديم الدجاجة العداءة‎",
+    "zh": "奔鸡星云",
+    "fi": "Juokseva kana -sumu",
+    "fr": "Nébuleuse du Poulet qui court",
+    "de": "Rennendes Huhn-Nebel",
+    "el": "Νεφέλωμα Όρνιθας",
+    "it": "Nebulosa pollo che corre",
+    "ja": "走るニワトリ星云",
+    "ko": "달리는 닭 성운",
+    "fa": "سحابی جوجۀ در حال دو",
+    "es": "Nebulosa del Pollo corredor",
+    "ru": "Туманность Бегущий цыпленок",
+    "tr": "Koşan Tavuk Bulutsusu"
+  },
+  "HIP 056561": {
+    "name": "Running Chicken Nebula",
+    "ar": "‎سديم الدجاجة العداءة‎",
+    "zh": "奔鸡星云",
+    "fi": "Juokseva kana -sumu",
+    "fr": "Nébuleuse du Poulet qui court",
+    "de": "Rennendes Huhn-Nebel",
+    "el": "Νεφέλωμα Όρνιθας",
+    "it": "Nebulosa pollo che corre",
+    "ja": "走るニワトリ星云",
+    "ko": "달리는 닭 성운",
+    "fa": "سحابی جوجۀ در حال دو",
+    "es": "Nebulosa del Pollo corredor",
+    "ru": "Туманность Бегущий цыпленок",
+    "tr": "Koşan Tavuk Bulutsusu"
+  },
+  "HIP056561": {
+    "name": "Running Chicken Nebula",
+    "ar": "‎سديم الدجاجة العداءة‎",
+    "zh": "奔鸡星云",
+    "fi": "Juokseva kana -sumu",
+    "fr": "Nébuleuse du Poulet qui court",
+    "de": "Rennendes Huhn-Nebel",
+    "el": "Νεφέλωμα Όρνιθας",
+    "it": "Nebulosa pollo che corre",
+    "ja": "走るニワトリ星云",
+    "ko": "달리는 닭 성운",
+    "fa": "سحابی جوجۀ در حال دو",
+    "es": "Nebulosa del Pollo corredor",
+    "ru": "Туманность Бегущий цыпленок",
+    "tr": "Koşan Tavuk Bulutsusu"
+  },
+  "MWSC 1957": {
+    "name": "Running Chicken Nebula",
+    "ar": "‎سديم الدجاجة العداءة‎",
+    "zh": "奔鸡星云",
+    "fi": "Juokseva kana -sumu",
+    "fr": "Nébuleuse du Poulet qui court",
+    "de": "Rennendes Huhn-Nebel",
+    "el": "Νεφέλωμα Όρνιθας",
+    "it": "Nebulosa pollo che corre",
+    "ja": "走るニワトリ星云",
+    "ko": "달리는 닭 성운",
+    "fa": "سحابی جوجۀ در حال دو",
+    "es": "Nebulosa del Pollo corredor",
+    "ru": "Туманность Бегущий цыпленок",
+    "tr": "Koşan Tavuk Bulutsusu"
+  },
+  "MWSC1957": {
+    "name": "Running Chicken Nebula",
+    "ar": "‎سديم الدجاجة العداءة‎",
+    "zh": "奔鸡星云",
+    "fi": "Juokseva kana -sumu",
+    "fr": "Nébuleuse du Poulet qui court",
+    "de": "Rennendes Huhn-Nebel",
+    "el": "Νεφέλωμα Όρνιθας",
+    "it": "Nebulosa pollo che corre",
+    "ja": "走るニワトリ星云",
+    "ko": "달리는 닭 성운",
+    "fa": "سحابی جوجۀ در حال دو",
+    "es": "Nebulosa del Pollo corredor",
+    "ru": "Туманность Бегущий цыпленок",
+    "tr": "Koşan Tavuk Bulutsusu"
+  },
+  "lam Cen Nebula": {
+    "name": "Running Chicken Nebula",
+    "ar": "‎سديم الدجاجة العداءة‎",
+    "zh": "奔鸡星云",
+    "fi": "Juokseva kana -sumu",
+    "fr": "Nébuleuse du Poulet qui court",
+    "de": "Rennendes Huhn-Nebel",
+    "el": "Νεφέλωμα Όρνιθας",
+    "it": "Nebulosa pollo che corre",
+    "ja": "走るニワトリ星云",
+    "ko": "달리는 닭 성운",
+    "fa": "سحابی جوجۀ در حال دو",
+    "es": "Nebulosa del Pollo corredor",
+    "ru": "Туманность Бегущий цыпленок",
+    "tr": "Koşan Tavuk Bulutsusu"
+  },
+  "lamCenNebula": {
+    "name": "Running Chicken Nebula",
+    "ar": "‎سديم الدجاجة العداءة‎",
+    "zh": "奔鸡星云",
+    "fi": "Juokseva kana -sumu",
+    "fr": "Nébuleuse du Poulet qui court",
+    "de": "Rennendes Huhn-Nebel",
+    "el": "Νεφέλωμα Όρνιθας",
+    "it": "Nebulosa pollo che corre",
+    "ja": "走るニワトリ星云",
+    "ko": "달리는 닭 성운",
+    "fa": "سحابی جوجۀ در حال دو",
+    "es": "Nebulosa del Pollo corredor",
+    "ru": "Туманность Бегущий цыпленок",
+    "tr": "Koşan Tavuk Bulutsusu"
+  },
+  "C 101": {
+    "name": "NGC 6744"
+  },
+  "C101": {
+    "name": "NGC 6744"
+  },
+  "NGC 6744": {
+    "name": "NGC 6744"
+  },
+  "NGC6744": {
+    "name": "NGC 6744"
+  },
+  "2MASX J19094609-6351271": {
+    "name": "NGC 6744"
+  },
+  "2MASXJ19094609-6351271": {
+    "name": "NGC 6744"
+  },
+  "ESO 104-042": {
+    "name": "NGC 6744"
+  },
+  "ESO104-042": {
+    "name": "NGC 6744"
+  },
+  "ESO-LV 104-0420": {
+    "name": "NGC 6744"
+  },
+  "ESO-LV104-0420": {
+    "name": "NGC 6744"
+  },
+  "IRAS 19051-6357": {
+    "name": "NGC 6744"
+  },
+  "IRAS19051-6357": {
+    "name": "NGC 6744"
+  },
+  "PGC 062836": {
+    "name": "NGC 6744"
+  },
+  "PGC062836": {
+    "name": "NGC 6744"
+  },
+  "C 102": {
+    "name": "Southern Pleiades",
+    "ar": "‎‎الثريا الجنوبية‎‎",
+    "zh": "南天七姐妹星团",
+    "fi": "Etelän Seulaset",
+    "fr": "Pléiades du Sud",
+    "de": "Südliche Plejaden",
+    "el": "Νότιες Πλειάδες",
+    "he": "הפליאדות הדרומיות",
+    "it": "Pleiadi meridionali",
+    "ja": "南のプレアデス",
+    "ko": "남쪽 플레이아데스",
+    "la": "Pleiades australes",
+    "hi": "सदर्न प्लेआदेस",
+    "fa": "پروین جنوبی",
+    "es": "Pléyades del Sur",
+    "ru": "Южные Плеяды",
+    "tr": "Güney Ülker"
+  },
+  "C102": {
+    "name": "Southern Pleiades",
+    "ar": "‎‎الثريا الجنوبية‎‎",
+    "zh": "南天七姐妹星团",
+    "fi": "Etelän Seulaset",
+    "fr": "Pléiades du Sud",
+    "de": "Südliche Plejaden",
+    "el": "Νότιες Πλειάδες",
+    "he": "הפליאדות הדרומיות",
+    "it": "Pleiadi meridionali",
+    "ja": "南のプレアデス",
+    "ko": "남쪽 플레이아데스",
+    "la": "Pleiades australes",
+    "hi": "सदर्न प्लेआदेस",
+    "fa": "پروین جنوبی",
+    "es": "Pléyades del Sur",
+    "ru": "Южные Плеяды",
+    "tr": "Güney Ülker"
+  },
+  "IC2602": {
+    "name": "Southern Pleiades",
+    "ar": "‎‎الثريا الجنوبية‎‎",
+    "zh": "南天七姐妹星团",
+    "fi": "Etelän Seulaset",
+    "fr": "Pléiades du Sud",
+    "de": "Südliche Plejaden",
+    "el": "Νότιες Πλειάδες",
+    "he": "הפליאדות הדרומיות",
+    "it": "Pleiadi meridionali",
+    "ja": "南のプレアデス",
+    "ko": "남쪽 플레이아데스",
+    "la": "Pleiades australes",
+    "hi": "सदर्न प्लेआदेस",
+    "fa": "پروین جنوبی",
+    "es": "Pléyades del Sur",
+    "ru": "Южные Плеяды",
+    "tr": "Güney Ülker"
+  },
+  "MWSC 1841": {
+    "name": "Southern Pleiades",
+    "ar": "‎‎الثريا الجنوبية‎‎",
+    "zh": "南天七姐妹星团",
+    "fi": "Etelän Seulaset",
+    "fr": "Pléiades du Sud",
+    "de": "Südliche Plejaden",
+    "el": "Νότιες Πλειάδες",
+    "he": "הפליאדות הדרומיות",
+    "it": "Pleiadi meridionali",
+    "ja": "南のプレアデス",
+    "ko": "남쪽 플레이아데스",
+    "la": "Pleiades australes",
+    "hi": "सदर्न प्लेआदेस",
+    "fa": "پروین جنوبی",
+    "es": "Pléyades del Sur",
+    "ru": "Южные Плеяды",
+    "tr": "Güney Ülker"
+  },
+  "MWSC1841": {
+    "name": "Southern Pleiades",
+    "ar": "‎‎الثريا الجنوبية‎‎",
+    "zh": "南天七姐妹星团",
+    "fi": "Etelän Seulaset",
+    "fr": "Pléiades du Sud",
+    "de": "Südliche Plejaden",
+    "el": "Νότιες Πλειάδες",
+    "he": "הפליאדות הדרומיות",
+    "it": "Pleiadi meridionali",
+    "ja": "南のプレアデス",
+    "ko": "남쪽 플레이아데스",
+    "la": "Pleiades australes",
+    "hi": "सदर्न प्लेआदेस",
+    "fa": "پروین جنوبی",
+    "es": "Pléyades del Sur",
+    "ru": "Южные Плеяды",
+    "tr": "Güney Ülker"
+  },
+  "tet Car Cluster": {
+    "name": "Southern Pleiades",
+    "ar": "‎‎الثريا الجنوبية‎‎",
+    "zh": "南天七姐妹星团",
+    "fi": "Etelän Seulaset",
+    "fr": "Pléiades du Sud",
+    "de": "Südliche Plejaden",
+    "el": "Νότιες Πλειάδες",
+    "he": "הפליאדות הדרומיות",
+    "it": "Pleiadi meridionali",
+    "ja": "南のプレアデス",
+    "ko": "남쪽 플레이아데스",
+    "la": "Pleiades australes",
+    "hi": "सदर्न प्लेआदेस",
+    "fa": "پروین جنوبی",
+    "es": "Pléyades del Sur",
+    "ru": "Южные Плеяды",
+    "tr": "Güney Ülker"
+  },
+  "tetCarCluster": {
+    "name": "Southern Pleiades",
+    "ar": "‎‎الثريا الجنوبية‎‎",
+    "zh": "南天七姐妹星团",
+    "fi": "Etelän Seulaset",
+    "fr": "Pléiades du Sud",
+    "de": "Südliche Plejaden",
+    "el": "Νότιες Πλειάδες",
+    "he": "הפליאדות הדרומיות",
+    "it": "Pleiadi meridionali",
+    "ja": "南のプレアデス",
+    "ko": "남쪽 플레이아데스",
+    "la": "Pleiades australes",
+    "hi": "सदर्न प्लेआदेस",
+    "fa": "پروین جنوبی",
+    "es": "Pléyades del Sur",
+    "ru": "Южные Плеяды",
+    "tr": "Güney Ülker"
+  },
+  "C 103": {
+    "name": "Tarantula Nebula",
+    "ar": "‎‎سديم العنكبوت‎‎",
+    "zh": "狼蛛星云",
+    "fi": "Tarantulasumu",
+    "fr": "Nébuleuse de la Tarentule",
+    "de": "Tarantel-Nebel",
+    "it": "Nebulosa Taratola",
+    "ja": "タランチュラ星云",
+    "ko": "타란툴라 성운",
+    "fa": "سحابی رتیل",
+    "es": "Nebulosa de la Tarántula",
+    "ru": "Туманность Тарантул",
+    "tr": "Tarantula Bulutsusu",
+    "he": "ערפילית הטרנטולה"
+  },
+  "C103": {
+    "name": "Tarantula Nebula",
+    "ar": "‎‎سديم العنكبوت‎‎",
+    "zh": "狼蛛星云",
+    "fi": "Tarantulasumu",
+    "fr": "Nébuleuse de la Tarentule",
+    "de": "Tarantel-Nebel",
+    "it": "Nebulosa Taratola",
+    "ja": "タランチュラ星云",
+    "ko": "타란툴라 성운",
+    "fa": "سحابی رتیل",
+    "es": "Nebulosa de la Tarántula",
+    "ru": "Туманность Тарантул",
+    "tr": "Tarantula Bulutsusu",
+    "he": "ערפילית הטרנטולה"
+  },
+  "NGC2070": {
+    "name": "Tarantula Nebula",
+    "ar": "‎‎سديم العنكبوت‎‎",
+    "zh": "狼蛛星云",
+    "fi": "Tarantulasumu",
+    "fr": "Nébuleuse de la Tarentule",
+    "de": "Tarantel-Nebel",
+    "it": "Nebulosa Taratola",
+    "ja": "タランチュラ星云",
+    "ko": "타란툴라 성운",
+    "fa": "سحابی رتیل",
+    "es": "Nebulosa de la Tarántula",
+    "ru": "Туманность Тарантул",
+    "tr": "Tarantula Bulutsusu",
+    "he": "ערפילית הטרנטולה"
+  },
+  "30 Dor Cluster": {
+    "name": "Tarantula Nebula",
+    "ar": "‎‎سديم العنكبوت‎‎",
+    "zh": "狼蛛星云",
+    "fi": "Tarantulasumu",
+    "fr": "Nébuleuse de la Tarentule",
+    "de": "Tarantel-Nebel",
+    "it": "Nebulosa Taratola",
+    "ja": "タランチュラ星云",
+    "ko": "타란툴라 성운",
+    "fa": "سحابی رتیل",
+    "es": "Nebulosa de la Tarántula",
+    "ru": "Туманность Тарантул",
+    "tr": "Tarantula Bulutsusu",
+    "he": "ערפילית הטרנטולה"
+  },
+  "30DorCluster": {
+    "name": "Tarantula Nebula",
+    "ar": "‎‎سديم العنكبوت‎‎",
+    "zh": "狼蛛星云",
+    "fi": "Tarantulasumu",
+    "fr": "Nébuleuse de la Tarentule",
+    "de": "Tarantel-Nebel",
+    "it": "Nebulosa Taratola",
+    "ja": "タランチュラ星云",
+    "ko": "타란툴라 성운",
+    "fa": "سحابی رتیل",
+    "es": "Nebulosa de la Tarántula",
+    "ru": "Туманность Тарантул",
+    "tr": "Tarantula Bulutsusu",
+    "he": "ערפילית הטרנטולה"
+  },
+  "Tarantula Nebula": {
+    "name": "Tarantula Nebula",
+    "ar": "‎‎سديم العنكبوت‎‎",
+    "zh": "狼蛛星云",
+    "fi": "Tarantulasumu",
+    "fr": "Nébuleuse de la Tarentule",
+    "de": "Tarantel-Nebel",
+    "it": "Nebulosa Taratola",
+    "ja": "タランチュラ星云",
+    "ko": "타란툴라 성운",
+    "fa": "سحابی رتیل",
+    "es": "Nebulosa de la Tarántula",
+    "ru": "Туманность Тарантул",
+    "tr": "Tarantula Bulutsusu",
+    "he": "ערפילית הטרנטולה"
+  },
+  "TarantulaNebula": {
+    "name": "Tarantula Nebula",
+    "ar": "‎‎سديم العنكبوت‎‎",
+    "zh": "狼蛛星云",
+    "fi": "Tarantulasumu",
+    "fr": "Nébuleuse de la Tarentule",
+    "de": "Tarantel-Nebel",
+    "it": "Nebulosa Taratola",
+    "ja": "タランチュラ星云",
+    "ko": "타란툴라 성운",
+    "fa": "سحابی رتیل",
+    "es": "Nebulosa de la Tarántula",
+    "ru": "Туманность Тарантул",
+    "tr": "Tarantula Bulutsusu",
+    "he": "ערפילית הטרנטולה"
+  },
+  "C 104": {
+    "name": "NGC 362"
+  },
+  "C104": {
+    "name": "NGC 362"
+  },
+  "NGC 362": {
+    "name": "NGC 362"
+  },
+  "NGC362": {
+    "name": "NGC 362"
+  },
+  "MWSC 0099": {
+    "name": "NGC 362"
+  },
+  "MWSC0099": {
+    "name": "NGC 362"
+  },
+  "C 105": {
+    "name": "The Southern Butterfly",
+    "ar": "‎الفراشة الجنوبية‎",
+    "zh": "南天蝴蝶星团",
+    "de": "Südlicher Schmetterling",
+    "ko": "남쪽 나비",
+    "es": "Mariposa del Sur",
+    "ru": "Южная бабочка"
+  },
+  "C105": {
+    "name": "The Southern Butterfly",
+    "ar": "‎الفراشة الجنوبية‎",
+    "zh": "南天蝴蝶星团",
+    "de": "Südlicher Schmetterling",
+    "ko": "남쪽 나비",
+    "es": "Mariposa del Sur",
+    "ru": "Южная бабочка"
+  },
+  "NGC4833": {
+    "name": "The Southern Butterfly",
+    "ar": "‎الفراشة الجنوبية‎",
+    "zh": "南天蝴蝶星团",
+    "de": "Südlicher Schmetterling",
+    "ko": "남쪽 나비",
+    "es": "Mariposa del Sur",
+    "ru": "Южная бабочка"
+  },
+  "MWSC 2077": {
+    "name": "The Southern Butterfly",
+    "ar": "‎الفراشة الجنوبية‎",
+    "zh": "南天蝴蝶星团",
+    "de": "Südlicher Schmetterling",
+    "ko": "남쪽 나비",
+    "es": "Mariposa del Sur",
+    "ru": "Южная бабочка"
+  },
+  "MWSC2077": {
+    "name": "The Southern Butterfly",
+    "ar": "‎الفراشة الجنوبية‎",
+    "zh": "南天蝴蝶星团",
+    "de": "Südlicher Schmetterling",
+    "ko": "남쪽 나비",
+    "es": "Mariposa del Sur",
+    "ru": "Южная бабочка"
+  },
+  "C 106": {
+    "name": "47 Tuc",
+    "ar": "‎‎47 الطوقان‎‎",
+    "zh": "杜鹃座47球状星团",
+    "de": "47 Tuc/NGC 104",
+    "el": "47 Τουκάνας",
+    "ja": "きょしちょう座47",
+    "ko": "큰부리새자리 47",
+    "fa": "47 تی یو سی",
+    "ru": "47 Тукана",
+    "he": "47 בטוקאן"
+  },
+  "C106": {
+    "name": "47 Tuc",
+    "ar": "‎‎47 الطوقان‎‎",
+    "zh": "杜鹃座47球状星团",
+    "de": "47 Tuc/NGC 104",
+    "el": "47 Τουκάνας",
+    "ja": "きょしちょう座47",
+    "ko": "큰부리새자리 47",
+    "fa": "47 تی یو سی",
+    "ru": "47 Тукана",
+    "he": "47 בטוקאן"
+  },
+  "NGC104": {
+    "name": "47 Tuc",
+    "ar": "‎‎47 الطوقان‎‎",
+    "zh": "杜鹃座47球状星团",
+    "de": "47 Tuc/NGC 104",
+    "el": "47 Τουκάνας",
+    "ja": "きょしちょう座47",
+    "ko": "큰부리새자리 47",
+    "fa": "47 تی یو سی",
+    "ru": "47 Тукана",
+    "he": "47 בטוקאן"
+  },
+  "2MASX J00240535-7204531": {
+    "name": "47 Tuc",
+    "ar": "‎‎47 الطوقان‎‎",
+    "zh": "杜鹃座47球状星团",
+    "de": "47 Tuc/NGC 104",
+    "el": "47 Τουκάνας",
+    "ja": "きょしちょう座47",
+    "ko": "큰부리새자리 47",
+    "fa": "47 تی یو سی",
+    "ru": "47 Тукана",
+    "he": "47 בטוקאן"
+  },
+  "2MASXJ00240535-7204531": {
+    "name": "47 Tuc",
+    "ar": "‎‎47 الطوقان‎‎",
+    "zh": "杜鹃座47球状星团",
+    "de": "47 Tuc/NGC 104",
+    "el": "47 Τουκάνας",
+    "ja": "きょしちょう座47",
+    "ko": "큰부리새자리 47",
+    "fa": "47 تی یو سی",
+    "ru": "47 Тукана",
+    "he": "47 בטוקאן"
+  },
+  "MWSC 0038": {
+    "name": "47 Tuc",
+    "ar": "‎‎47 الطوقان‎‎",
+    "zh": "杜鹃座47球状星团",
+    "de": "47 Tuc/NGC 104",
+    "el": "47 Τουκάνας",
+    "ja": "きょしちょう座47",
+    "ko": "큰부리새자리 47",
+    "fa": "47 تی یو سی",
+    "ru": "47 Тукана",
+    "he": "47 בטוקאן"
+  },
+  "MWSC0038": {
+    "name": "47 Tuc",
+    "ar": "‎‎47 الطوقان‎‎",
+    "zh": "杜鹃座47球状星团",
+    "de": "47 Tuc/NGC 104",
+    "el": "47 Τουκάνας",
+    "ja": "きょしちょう座47",
+    "ko": "큰부리새자리 47",
+    "fa": "47 تی یو سی",
+    "ru": "47 Тукана",
+    "he": "47 בטוקאן"
+  },
+  "47 Tuc Cluster": {
+    "name": "47 Tuc",
+    "ar": "‎‎47 الطوقان‎‎",
+    "zh": "杜鹃座47球状星团",
+    "de": "47 Tuc/NGC 104",
+    "el": "47 Τουκάνας",
+    "ja": "きょしちょう座47",
+    "ko": "큰부리새자리 47",
+    "fa": "47 تی یو سی",
+    "ru": "47 Тукана",
+    "he": "47 בטוקאן"
+  },
+  "47TucCluster": {
+    "name": "47 Tuc",
+    "ar": "‎‎47 الطوقان‎‎",
+    "zh": "杜鹃座47球状星团",
+    "de": "47 Tuc/NGC 104",
+    "el": "47 Τουκάνας",
+    "ja": "きょしちょう座47",
+    "ko": "큰부리새자리 47",
+    "fa": "47 تی یو سی",
+    "ru": "47 Тукана",
+    "he": "47 בטוקאן"
+  },
+  "C 107": {
+    "name": "NGC 6101"
+  },
+  "C107": {
+    "name": "NGC 6101"
+  },
+  "NGC 6101": {
+    "name": "NGC 6101"
+  },
+  "NGC6101": {
+    "name": "NGC 6101"
+  },
+  "MWSC 2404": {
+    "name": "NGC 6101"
+  },
+  "MWSC2404": {
+    "name": "NGC 6101"
+  },
+  "C 108": {
+    "name": "NGC 4372"
+  },
+  "C108": {
+    "name": "NGC 4372"
+  },
+  "NGC 4372": {
+    "name": "NGC 4372"
+  },
+  "NGC4372": {
+    "name": "NGC 4372"
+  },
+  "MWSC 2029": {
+    "name": "NGC 4372"
+  },
+  "MWSC2029": {
+    "name": "NGC 4372"
+  },
+  "C 109": {
+    "name": "NGC 3195"
+  },
+  "C109": {
+    "name": "NGC 3195"
+  },
+  "NGC 3195": {
+    "name": "NGC 3195"
+  },
+  "NGC3195": {
+    "name": "NGC 3195"
+  },
+  "ESO 019-002": {
+    "name": "NGC 3195"
+  },
+  "ESO019-002": {
+    "name": "NGC 3195"
+  },
+  "IRAS 10099-8036": {
+    "name": "NGC 3195"
+  },
+  "IRAS10099-8036": {
+    "name": "NGC 3195"
+  },
+  "PN G296.6-20.0": {
+    "name": "NGC 3195"
+  },
+  "PNG296.6-20.0": {
+    "name": "NGC 3195"
+  },
+  "M 1": {
+    "name": "M 1"
+  },
+  "M1": {
+    "name": "M 1"
+  },
+  "IRAS 05315+2158": {
+    "name": "M 1"
+  },
+  "IRAS05315+2158": {
+    "name": "M 1"
+  },
+  "LBN 833": {
+    "name": "M 1"
+  },
+  "LBN833": {
+    "name": "M 1"
+  },
+  "Crab Nebula": {
+    "name": "M 1"
+  },
+  "CrabNebula": {
+    "name": "M 1"
+  },
+  "M 2": {
+    "name": "M 2"
+  },
+  "M2": {
+    "name": "M 2"
+  },
+  "MWSC 3526": {
+    "name": "M 2"
+  },
+  "MWSC3526": {
+    "name": "M 2"
+  },
+  "M 3": {
+    "name": "M 3"
+  },
+  "M3": {
+    "name": "M 3"
+  },
+  "MWSC 2152": {
+    "name": "M 3"
+  },
+  "MWSC2152": {
+    "name": "M 3"
+  },
+  "M 4": {
+    "name": "M 4"
+  },
+  "M4": {
+    "name": "M 4"
+  },
+  "MWSC 2396": {
+    "name": "M 4"
+  },
+  "MWSC2396": {
+    "name": "M 4"
+  },
+  "M 5": {
+    "name": "M 5"
+  },
+  "M5": {
+    "name": "M 5"
+  },
+  "MWSC 2286": {
+    "name": "M 5"
+  },
+  "MWSC2286": {
+    "name": "M 5"
+  },
+  "M 6": {
+    "name": "Butterfly Cluster"
+  },
+  "M6": {
+    "name": "Butterfly Cluster"
+  },
+  "MWSC 2661": {
+    "name": "Butterfly Cluster"
+  },
+  "MWSC2661": {
+    "name": "Butterfly Cluster"
+  },
+  "Butterfly Cluster": {
+    "name": "Butterfly Cluster"
+  },
+  "ButterflyCluster": {
+    "name": "Butterfly Cluster"
+  },
+  "M 7": {
+    "name": "Ptolemy's Cluster"
+  },
+  "M7": {
+    "name": "Ptolemy's Cluster"
+  },
+  "MWSC 2739": {
+    "name": "Ptolemy's Cluster"
+  },
+  "MWSC2739": {
+    "name": "Ptolemy's Cluster"
+  },
+  "Ptolemy's Cluster": {
+    "name": "Ptolemy's Cluster"
+  },
+  "Ptolemy'sCluster": {
+    "name": "Ptolemy's Cluster"
+  },
+  "M8": {
+    "name": "Lagoon Nebula",
+    "ar": "‎كجرة لاجون‎",
+    "zh": "礁湖星云",
+    "fi": "Laguunisumu",
+    "fr": "Nébuleuse du Lagon",
+    "de": "Lagunen-Nebel",
+    "el": "Νεφέλωμα Λίμνης",
+    "it": "Nebulosa Laguna",
+    "ja": "干潟星云",
+    "ko": "석호 석운",
+    "la": "Laguna Nebula",
+    "fa": "سحابی مرداب",
+    "es": "Nebulosa del Lago",
+    "ru": "Туманность Лагуна",
+    "tr": "Deniz Kulağı Bulutsusu"
+  },
+  "NGC 6533": {
+    "name": "Lagoon Nebula",
+    "ar": "‎كجرة لاجون‎",
+    "zh": "礁湖星云",
+    "fi": "Laguunisumu",
+    "fr": "Nébuleuse du Lagon",
+    "de": "Lagunen-Nebel",
+    "el": "Νεφέλωμα Λίμνης",
+    "it": "Nebulosa Laguna",
+    "ja": "干潟星云",
+    "ko": "석호 석운",
+    "la": "Laguna Nebula",
+    "fa": "سحابی مرداب",
+    "es": "Nebulosa del Lago",
+    "ru": "Туманность Лагуна",
+    "tr": "Deniz Kulağı Bulutsusu"
+  },
+  "NGC6533": {
+    "name": "Lagoon Nebula",
+    "ar": "‎كجرة لاجون‎",
+    "zh": "礁湖星云",
+    "fi": "Laguunisumu",
+    "fr": "Nébuleuse du Lagon",
+    "de": "Lagunen-Nebel",
+    "el": "Νεφέλωμα Λίμνης",
+    "it": "Nebulosa Laguna",
+    "ja": "干潟星云",
+    "ko": "석호 석운",
+    "la": "Laguna Nebula",
+    "fa": "سحابی مرداب",
+    "es": "Nebulosa del Lago",
+    "ru": "Туманность Лагуна",
+    "tr": "Deniz Kulağı Bulutsusu"
+  },
+  "LBN 25": {
+    "name": "Lagoon Nebula",
+    "ar": "‎كجرة لاجون‎",
+    "zh": "礁湖星云",
+    "fi": "Laguunisumu",
+    "fr": "Nébuleuse du Lagon",
+    "de": "Lagunen-Nebel",
+    "el": "Νεφέλωμα Λίμνης",
+    "it": "Nebulosa Laguna",
+    "ja": "干潟星云",
+    "ko": "석호 석운",
+    "la": "Laguna Nebula",
+    "fa": "سحابی مرداب",
+    "es": "Nebulosa del Lago",
+    "ru": "Туманность Лагуна",
+    "tr": "Deniz Kulağı Bulutsusu"
+  },
+  "LBN25": {
+    "name": "Lagoon Nebula",
+    "ar": "‎كجرة لاجون‎",
+    "zh": "礁湖星云",
+    "fi": "Laguunisumu",
+    "fr": "Nébuleuse du Lagon",
+    "de": "Lagunen-Nebel",
+    "el": "Νεφέλωμα Λίμνης",
+    "it": "Nebulosa Laguna",
+    "ja": "干潟星云",
+    "ko": "석호 석운",
+    "la": "Laguna Nebula",
+    "fa": "سحابی مرداب",
+    "es": "Nebulosa del Lago",
+    "ru": "Туманность Лагуна",
+    "tr": "Deniz Kulağı Bulutsusu"
+  },
+  "Lagoon Nebula": {
+    "name": "Lagoon Nebula",
+    "ar": "‎كجرة لاجون‎",
+    "zh": "礁湖星云",
+    "fi": "Laguunisumu",
+    "fr": "Nébuleuse du Lagon",
+    "de": "Lagunen-Nebel",
+    "el": "Νεφέλωμα Λίμνης",
+    "it": "Nebulosa Laguna",
+    "ja": "干潟星云",
+    "ko": "석호 석운",
+    "la": "Laguna Nebula",
+    "fa": "سحابی مرداب",
+    "es": "Nebulosa del Lago",
+    "ru": "Туманность Лагуна",
+    "tr": "Deniz Kulağı Bulutsusu"
+  },
+  "LagoonNebula": {
+    "name": "Lagoon Nebula",
+    "ar": "‎كجرة لاجون‎",
+    "zh": "礁湖星云",
+    "fi": "Laguunisumu",
+    "fr": "Nébuleuse du Lagon",
+    "de": "Lagunen-Nebel",
+    "el": "Νεφέλωμα Λίμνης",
+    "it": "Nebulosa Laguna",
+    "ja": "干潟星云",
+    "ko": "석호 석운",
+    "la": "Laguna Nebula",
+    "fa": "سحابی مرداب",
+    "es": "Nebulosa del Lago",
+    "ru": "Туманность Лагуна",
+    "tr": "Deniz Kulağı Bulutsusu"
+  },
+  "M 9": {
+    "name": "M 9"
+  },
+  "M9": {
+    "name": "M 9"
+  },
+  "MWSC 2567": {
+    "name": "M 9"
+  },
+  "MWSC2567": {
+    "name": "M 9"
+  },
+  "M 10": {
+    "name": "M 10"
+  },
+  "M10": {
+    "name": "M 10"
+  },
+  "MWSC 2498": {
+    "name": "M 10"
+  },
+  "MWSC2498": {
+    "name": "M 10"
+  },
+  "M 11": {
+    "name": "Amas de l'Ecu de Sobieski"
+  },
+  "M11": {
+    "name": "Amas de l'Ecu de Sobieski"
+  },
+  "MWSC 3008": {
+    "name": "Amas de l'Ecu de Sobieski"
+  },
+  "MWSC3008": {
+    "name": "Amas de l'Ecu de Sobieski"
+  },
+  "Amas de l'Ecu de Sobieski": {
+    "name": "Amas de l'Ecu de Sobieski"
+  },
+  "Amasdel'EcudeSobieski": {
+    "name": "Amas de l'Ecu de Sobieski"
+  },
+  "Wild Duck Cluster": {
+    "name": "Amas de l'Ecu de Sobieski"
+  },
+  "WildDuckCluster": {
+    "name": "Amas de l'Ecu de Sobieski"
+  },
+  "M 12": {
+    "name": "M 12"
+  },
+  "M12": {
+    "name": "M 12"
+  },
+  "MWSC 2464": {
+    "name": "M 12"
+  },
+  "MWSC2464": {
+    "name": "M 12"
+  },
+  "M 13": {
+    "name": "Hercules Globular Cluster"
+  },
+  "M13": {
+    "name": "Hercules Globular Cluster"
+  },
+  "2MASX J16414163+3627407": {
+    "name": "Hercules Globular Cluster"
+  },
+  "2MASXJ16414163+3627407": {
+    "name": "Hercules Globular Cluster"
+  },
+  "MWSC 2445": {
+    "name": "Hercules Globular Cluster"
+  },
+  "MWSC2445": {
+    "name": "Hercules Globular Cluster"
+  },
+  "Hercules Globular Cluster": {
+    "name": "Hercules Globular Cluster"
+  },
+  "HerculesGlobularCluster": {
+    "name": "Hercules Globular Cluster"
+  },
+  "M 14": {
+    "name": "M 14"
+  },
+  "M14": {
+    "name": "M 14"
+  },
+  "MWSC 2643": {
+    "name": "M 14"
+  },
+  "MWSC2643": {
+    "name": "M 14"
+  },
+  "M 15": {
+    "name": "M 15"
+  },
+  "M15": {
+    "name": "M 15"
+  },
+  "IRAS 21274+1156": {
+    "name": "M 15"
+  },
+  "IRAS21274+1156": {
+    "name": "M 15"
+  },
+  "MWSC 3518": {
+    "name": "M 15"
+  },
+  "MWSC3518": {
+    "name": "M 15"
+  },
+  "PN G065.0-27.3": {
+    "name": "M 15"
+  },
+  "PNG065.0-27.3": {
+    "name": "M 15"
+  },
+  "M 16": {
+    "name": "Eagle Nebula"
+  },
+  "M16": {
+    "name": "Eagle Nebula"
+  },
+  "LBN 67": {
+    "name": "Eagle Nebula"
+  },
+  "LBN67": {
+    "name": "Eagle Nebula"
+  },
+  "MWSC 2886": {
+    "name": "Eagle Nebula"
+  },
+  "MWSC2886": {
+    "name": "Eagle Nebula"
+  },
+  "Eagle Nebula": {
+    "name": "Eagle Nebula"
+  },
+  "EagleNebula": {
+    "name": "Eagle Nebula"
+  },
+  "M 17": {
+    "name": "Lobster Nebula"
+  },
+  "M17": {
+    "name": "Lobster Nebula"
+  },
+  "LBN 60": {
+    "name": "Lobster Nebula"
+  },
+  "LBN60": {
+    "name": "Lobster Nebula"
+  },
+  "MWSC 2896": {
+    "name": "Lobster Nebula"
+  },
+  "MWSC2896": {
+    "name": "Lobster Nebula"
+  },
+  "Checkmark Nebula": {
+    "name": "Lobster Nebula"
+  },
+  "CheckmarkNebula": {
+    "name": "Lobster Nebula"
+  },
+  "Lobster Nebula": {
+    "name": "Lobster Nebula"
+  },
+  "LobsterNebula": {
+    "name": "Lobster Nebula"
+  },
+  "Swan Nebula": {
+    "name": "Lobster Nebula"
+  },
+  "SwanNebula": {
+    "name": "Lobster Nebula"
+  },
+  "omega Nebula": {
+    "name": "Lobster Nebula"
+  },
+  "omegaNebula": {
+    "name": "Lobster Nebula"
+  },
+  "M 18": {
+    "name": "M 18"
+  },
+  "M18": {
+    "name": "M 18"
+  },
+  "MWSC 2892": {
+    "name": "M 18"
+  },
+  "MWSC2892": {
+    "name": "M 18"
+  },
+  "M 19": {
+    "name": "M 19"
+  },
+  "M19": {
+    "name": "M 19"
+  },
+  "MWSC 2519": {
+    "name": "M 19"
+  },
+  "MWSC2519": {
+    "name": "M 19"
+  },
+  "M 20": {
+    "name": "Trifid Nebula"
+  },
+  "M20": {
+    "name": "Trifid Nebula"
+  },
+  "LBN 27": {
+    "name": "Trifid Nebula"
+  },
+  "LBN27": {
+    "name": "Trifid Nebula"
+  },
+  "MWSC 2789": {
+    "name": "Trifid Nebula"
+  },
+  "MWSC2789": {
+    "name": "Trifid Nebula"
+  },
+  "Trifid Nebula": {
+    "name": "Trifid Nebula"
+  },
+  "TrifidNebula": {
+    "name": "Trifid Nebula"
+  },
+  "M 21": {
+    "name": "M 21"
+  },
+  "M21": {
+    "name": "M 21"
+  },
+  "MWSC 2796": {
+    "name": "M 21"
+  },
+  "MWSC2796": {
+    "name": "M 21"
+  },
+  "M 22": {
+    "name": "M 22"
+  },
+  "M22": {
+    "name": "M 22"
+  },
+  "MWSC 2961": {
+    "name": "M 22"
+  },
+  "MWSC2961": {
+    "name": "M 22"
+  },
+  "M 23": {
+    "name": "M 23"
+  },
+  "M23": {
+    "name": "M 23"
+  },
+  "MWSC 2757": {
+    "name": "M 23"
+  },
+  "MWSC2757": {
+    "name": "M 23"
+  },
+  "M24": {
+    "name": "Small Sagittarius Star Cloud",
+    "ar": "‎‎سحابة نجوم القوس الصغيرة‎‎",
+    "zh": "人马座恒星云",
+    "fi": "Jousimiehen pieni tähtipilvi",
+    "fr": "Petit nuage d'étoiles du Sagittaire",
+    "de": "Kleine Sagittarius-Sternwolke",
+    "it": "Piccola Nube stellare del Sagittario",
+    "ko": "궁수자리 소성단",
+    "es": "Nube Estelar Pequeño Sagitario",
+    "ru": "Малое звёздное облако Стрельца"
+  },
+  "Small Sgr Star Cloud": {
+    "name": "Small Sagittarius Star Cloud",
+    "ar": "‎‎سحابة نجوم القوس الصغيرة‎‎",
+    "zh": "人马座恒星云",
+    "fi": "Jousimiehen pieni tähtipilvi",
+    "fr": "Petit nuage d'étoiles du Sagittaire",
+    "de": "Kleine Sagittarius-Sternwolke",
+    "it": "Piccola Nube stellare del Sagittario",
+    "ko": "궁수자리 소성단",
+    "es": "Nube Estelar Pequeño Sagitario",
+    "ru": "Малое звёздное облако Стрельца"
+  },
+  "SmallSgrStarCloud": {
+    "name": "Small Sagittarius Star Cloud",
+    "ar": "‎‎سحابة نجوم القوس الصغيرة‎‎",
+    "zh": "人马座恒星云",
+    "fi": "Jousimiehen pieni tähtipilvi",
+    "fr": "Petit nuage d'étoiles du Sagittaire",
+    "de": "Kleine Sagittarius-Sternwolke",
+    "it": "Piccola Nube stellare del Sagittario",
+    "ko": "궁수자리 소성단",
+    "es": "Nube Estelar Pequeño Sagitario",
+    "ru": "Малое звёздное облако Стрельца"
+  },
+  "M 25": {
+    "name": "M 25"
+  },
+  "M25": {
+    "name": "M 25"
+  },
+  "MWSC 2940": {
+    "name": "M 25"
+  },
+  "MWSC2940": {
+    "name": "M 25"
+  },
+  "M 26": {
+    "name": "M 26"
+  },
+  "M26": {
+    "name": "M 26"
+  },
+  "MWSC 2987": {
+    "name": "M 26"
+  },
+  "MWSC2987": {
+    "name": "M 26"
+  },
+  "M 27": {
+    "name": "Dumbbell Nebula"
+  },
+  "M27": {
+    "name": "Dumbbell Nebula"
+  },
+  "2MASX J19593637+2243157": {
+    "name": "Dumbbell Nebula"
+  },
+  "2MASXJ19593637+2243157": {
+    "name": "Dumbbell Nebula"
+  },
+  "PN G060.8-03.6": {
+    "name": "Dumbbell Nebula"
+  },
+  "PNG060.8-03.6": {
+    "name": "Dumbbell Nebula"
+  },
+  "Dumbbell Nebula": {
+    "name": "Dumbbell Nebula"
+  },
+  "DumbbellNebula": {
+    "name": "Dumbbell Nebula"
+  },
+  "M 28": {
+    "name": "M 28"
+  },
+  "M28": {
+    "name": "M 28"
+  },
+  "MWSC 2908": {
+    "name": "M 28"
+  },
+  "MWSC2908": {
+    "name": "M 28"
+  },
+  "M 29": {
+    "name": "M 29"
+  },
+  "M29": {
+    "name": "M 29"
+  },
+  "MWSC 3329": {
+    "name": "M 29"
+  },
+  "MWSC3329": {
+    "name": "M 29"
+  },
+  "M 30": {
+    "name": "M 30"
+  },
+  "M30": {
+    "name": "M 30"
+  },
+  "MWSC 3543": {
+    "name": "M 30"
+  },
+  "MWSC3543": {
+    "name": "M 30"
+  },
+  "M 31": {
+    "name": "Andromeda Galaxy"
+  },
+  "M31": {
+    "name": "Andromeda Galaxy"
+  },
+  "2MASX J00424433+4116074": {
+    "name": "Andromeda Galaxy"
+  },
+  "2MASXJ00424433+4116074": {
+    "name": "Andromeda Galaxy"
+  },
+  "IRAS 00400+4059": {
+    "name": "Andromeda Galaxy"
+  },
+  "IRAS00400+4059": {
+    "name": "Andromeda Galaxy"
+  },
+  "MCG +07-02-016": {
+    "name": "Andromeda Galaxy"
+  },
+  "MCG+07-02-016": {
+    "name": "Andromeda Galaxy"
+  },
+  "PGC 002557": {
+    "name": "Andromeda Galaxy"
+  },
+  "PGC002557": {
+    "name": "Andromeda Galaxy"
+  },
+  "UGC 00454": {
+    "name": "Andromeda Galaxy"
+  },
+  "UGC00454": {
+    "name": "Andromeda Galaxy"
+  },
+  "Andromeda Galaxy": {
+    "name": "Andromeda Galaxy"
+  },
+  "AndromedaGalaxy": {
+    "name": "Andromeda Galaxy"
+  },
+  "M 32": {
+    "name": "M 32"
+  },
+  "M32": {
+    "name": "M 32"
+  },
+  "2MASX J00424182+4051546": {
+    "name": "M 32"
+  },
+  "2MASXJ00424182+4051546": {
+    "name": "M 32"
+  },
+  "IRAS 00399+4035": {
+    "name": "M 32"
+  },
+  "IRAS00399+4035": {
+    "name": "M 32"
+  },
+  "MCG +07-02-015": {
+    "name": "M 32"
+  },
+  "MCG+07-02-015": {
+    "name": "M 32"
+  },
+  "PGC 002555": {
+    "name": "M 32"
+  },
+  "PGC002555": {
+    "name": "M 32"
+  },
+  "UGC 00452": {
+    "name": "M 32"
+  },
+  "UGC00452": {
+    "name": "M 32"
+  },
+  "M 33": {
+    "name": "Triangulum Galaxy"
+  },
+  "M33": {
+    "name": "Triangulum Galaxy"
+  },
+  "2MASX J01335090+3039357": {
+    "name": "Triangulum Galaxy"
+  },
+  "2MASXJ01335090+3039357": {
+    "name": "Triangulum Galaxy"
+  },
+  "IRAS 01310+3024": {
+    "name": "Triangulum Galaxy"
+  },
+  "IRAS01310+3024": {
+    "name": "Triangulum Galaxy"
+  },
+  "MCG +05-04-069": {
+    "name": "Triangulum Galaxy"
+  },
+  "MCG+05-04-069": {
+    "name": "Triangulum Galaxy"
+  },
+  "PGC 005818": {
+    "name": "Triangulum Galaxy"
+  },
+  "PGC005818": {
+    "name": "Triangulum Galaxy"
+  },
+  "UGC 01117": {
+    "name": "Triangulum Galaxy"
+  },
+  "UGC01117": {
+    "name": "Triangulum Galaxy"
+  },
+  "Triangulum Galaxy": {
+    "name": "Triangulum Galaxy"
+  },
+  "TriangulumGalaxy": {
+    "name": "Triangulum Galaxy"
+  },
+  "Triangulum Pinwheel": {
+    "name": "Triangulum Galaxy"
+  },
+  "TriangulumPinwheel": {
+    "name": "Triangulum Galaxy"
+  },
+  "M 34": {
+    "name": "M 34"
+  },
+  "M34": {
+    "name": "M 34"
+  },
+  "MWSC 0223": {
+    "name": "M 34"
+  },
+  "MWSC0223": {
+    "name": "M 34"
+  },
+  "M 35": {
+    "name": "M 35"
+  },
+  "M35": {
+    "name": "M 35"
+  },
+  "MWSC 0754": {
+    "name": "M 35"
+  },
+  "MWSC0754": {
+    "name": "M 35"
+  },
+  "M 36": {
+    "name": "M 36"
+  },
+  "M36": {
+    "name": "M 36"
+  },
+  "MWSC 0594": {
+    "name": "M 36"
+  },
+  "MWSC0594": {
+    "name": "M 36"
+  },
+  "M 37": {
+    "name": "M 37"
+  },
+  "M37": {
+    "name": "M 37"
+  },
+  "MWSC 0689": {
+    "name": "M 37"
+  },
+  "MWSC0689": {
+    "name": "M 37"
+  },
+  "M 38": {
+    "name": "M 38"
+  },
+  "M38": {
+    "name": "M 38"
+  },
+  "MWSC 0557": {
+    "name": "M 38"
+  },
+  "MWSC0557": {
+    "name": "M 38"
+  },
+  "M 39": {
+    "name": "M 39"
+  },
+  "M39": {
+    "name": "M 39"
+  },
+  "MWSC 3521": {
+    "name": "M 39"
+  },
+  "MWSC3521": {
+    "name": "M 39"
+  },
+  "M40": {
+    "name": "Winnecke 4",
+    "ar": "‎‎ويننيكي 4‎‎",
+    "zh": "温内克4",
+    "ko": "위넥 4",
+    "ru": "Виннеке 4"
+  },
+  "M 41": {
+    "name": "M 41"
+  },
+  "M41": {
+    "name": "M 41"
+  },
+  "MWSC 0978": {
+    "name": "M 41"
+  },
+  "MWSC0978": {
+    "name": "M 41"
+  },
+  "M 42": {
+    "name": "Great Orion Nebula"
+  },
+  "M42": {
+    "name": "Great Orion Nebula"
+  },
+  "LBN 974": {
+    "name": "Great Orion Nebula"
+  },
+  "LBN974": {
+    "name": "Great Orion Nebula"
+  },
+  "MWSC 0582": {
+    "name": "Great Orion Nebula"
+  },
+  "MWSC0582": {
+    "name": "Great Orion Nebula"
+  },
+  "Great Orion Nebula": {
+    "name": "Great Orion Nebula"
+  },
+  "GreatOrionNebula": {
+    "name": "Great Orion Nebula"
+  },
+  "Orion Nebula": {
+    "name": "Great Orion Nebula"
+  },
+  "OrionNebula": {
+    "name": "Great Orion Nebula"
+  },
+  "M 43": {
+    "name": "2MASS J05353135-0516026"
+  },
+  "M43": {
+    "name": "2MASS J05353135-0516026"
+  },
+  "2MASS J05353135-0516026": {
+    "name": "2MASS J05353135-0516026"
+  },
+  "2MASSJ05353135-0516026": {
+    "name": "2MASS J05353135-0516026"
+  },
+  "Mairan's Nebula": {
+    "name": "2MASS J05353135-0516026"
+  },
+  "Mairan'sNebula": {
+    "name": "2MASS J05353135-0516026"
+  },
+  "M 44": {
+    "name": "Beehive"
+  },
+  "M44": {
+    "name": "Beehive"
+  },
+  "MWSC 1527": {
+    "name": "Beehive"
+  },
+  "MWSC1527": {
+    "name": "Beehive"
+  },
+  "Beehive": {
+    "name": "Beehive"
+  },
+  "Praesepe Cluster": {
+    "name": "Beehive"
+  },
+  "PraesepeCluster": {
+    "name": "Beehive"
+  },
+  "M45": {
+    "name": "Pleiades",
+    "ar": "‎‎الثريا‎‎",
+    "zh": "昴星团",
+    "fi": "Seulaset",
+    "fr": "Pléiades",
+    "de": "Plejaden",
+    "el": "Πλειάδες",
+    "he": "פליאדות",
+    "it": "Pleiadi",
+    "ja": "プレアデス",
+    "ko": "플레이아데스",
+    "hi": "प्लेयादेस",
+    "fa": "خوشۀ پروین",
+    "es": "Pléyades",
+    "ru": "Плеяды",
+    "tr": "Ülker"
+  },
+  "M 46": {
+    "name": "M 46"
+  },
+  "M46": {
+    "name": "M 46"
+  },
+  "MWSC 1313": {
+    "name": "M 46"
+  },
+  "MWSC1313": {
+    "name": "M 46"
+  },
+  "M 47": {
+    "name": "M 47"
+  },
+  "M47": {
+    "name": "M 47"
+  },
+  "NGC 2478": {
+    "name": "M 47"
+  },
+  "NGC2478": {
+    "name": "M 47"
+  },
+  "MWSC 1278": {
+    "name": "M 47"
+  },
+  "MWSC1278": {
+    "name": "M 47"
+  },
+  "M 48": {
+    "name": "M 48"
+  },
+  "M48": {
+    "name": "M 48"
+  },
+  "MWSC 1454": {
+    "name": "M 48"
+  },
+  "MWSC1454": {
+    "name": "M 48"
+  },
+  "M 49": {
+    "name": "SDSS J122946.76+080001.7"
+  },
+  "M49": {
+    "name": "SDSS J122946.76+080001.7"
+  },
+  "2MASX J12294679+0800014": {
+    "name": "SDSS J122946.76+080001.7"
+  },
+  "2MASXJ12294679+0800014": {
+    "name": "SDSS J122946.76+080001.7"
+  },
+  "MCG +01-32-083": {
+    "name": "SDSS J122946.76+080001.7"
+  },
+  "MCG+01-32-083": {
+    "name": "SDSS J122946.76+080001.7"
+  },
+  "PGC 041220": {
+    "name": "SDSS J122946.76+080001.7"
+  },
+  "PGC041220": {
+    "name": "SDSS J122946.76+080001.7"
+  },
+  "SDSS J122946.76+080001.7": {
+    "name": "SDSS J122946.76+080001.7"
+  },
+  "SDSSJ122946.76+080001.7": {
+    "name": "SDSS J122946.76+080001.7"
+  },
+  "UGC 07629": {
+    "name": "SDSS J122946.76+080001.7"
+  },
+  "UGC07629": {
+    "name": "SDSS J122946.76+080001.7"
+  },
+  "M 50": {
+    "name": "M 50"
+  },
+  "M50": {
+    "name": "M 50"
+  },
+  "MWSC 1072": {
+    "name": "M 50"
+  },
+  "MWSC1072": {
+    "name": "M 50"
+  },
+  "M 51": {
+    "name": "Whirlpool Galaxy"
+  },
+  "M51": {
+    "name": "Whirlpool Galaxy"
+  },
+  "2MASX J13295269+4711429": {
+    "name": "Whirlpool Galaxy"
+  },
+  "2MASXJ13295269+4711429": {
+    "name": "Whirlpool Galaxy"
+  },
+  "IRAS 13277+4727": {
+    "name": "Whirlpool Galaxy"
+  },
+  "IRAS13277+4727": {
+    "name": "Whirlpool Galaxy"
+  },
+  "MCG +08-25-012": {
+    "name": "Whirlpool Galaxy"
+  },
+  "MCG+08-25-012": {
+    "name": "Whirlpool Galaxy"
+  },
+  "PGC 047404": {
+    "name": "Whirlpool Galaxy"
+  },
+  "PGC047404": {
+    "name": "Whirlpool Galaxy"
+  },
+  "UGC 08493": {
+    "name": "Whirlpool Galaxy"
+  },
+  "UGC08493": {
+    "name": "Whirlpool Galaxy"
+  },
+  "Whirlpool Galaxy": {
+    "name": "Whirlpool Galaxy"
+  },
+  "WhirlpoolGalaxy": {
+    "name": "Whirlpool Galaxy"
+  },
+  "M 52": {
+    "name": "M 52"
+  },
+  "M52": {
+    "name": "M 52"
+  },
+  "MWSC 3725": {
+    "name": "M 52"
+  },
+  "MWSC3725": {
+    "name": "M 52"
+  },
+  "M 53": {
+    "name": "M 53"
+  },
+  "M53": {
+    "name": "M 53"
+  },
+  "MWSC 2094": {
+    "name": "M 53"
+  },
+  "MWSC2094": {
+    "name": "M 53"
+  },
+  "M 54": {
+    "name": "M 54"
+  },
+  "M54": {
+    "name": "M 54"
+  },
+  "MWSC 3023": {
+    "name": "M 54"
+  },
+  "MWSC3023": {
+    "name": "M 54"
+  },
+  "M 55": {
+    "name": "M 55"
+  },
+  "M55": {
+    "name": "M 55"
+  },
+  "MWSC 3150": {
+    "name": "M 55"
+  },
+  "MWSC3150": {
+    "name": "M 55"
+  },
+  "M 56": {
+    "name": "M 56"
+  },
+  "M56": {
+    "name": "M 56"
+  },
+  "MWSC 3077": {
+    "name": "M 56"
+  },
+  "MWSC3077": {
+    "name": "M 56"
+  },
+  "M 57": {
+    "name": "Ring Nebula"
+  },
+  "M57": {
+    "name": "Ring Nebula"
+  },
+  "IRAS 18517+3257": {
+    "name": "Ring Nebula"
+  },
+  "IRAS18517+3257": {
+    "name": "Ring Nebula"
+  },
+  "PN G063.1+13.9": {
+    "name": "Ring Nebula"
+  },
+  "PNG063.1+13.9": {
+    "name": "Ring Nebula"
+  },
+  "Ring Nebula": {
+    "name": "Ring Nebula"
+  },
+  "RingNebula": {
+    "name": "Ring Nebula"
+  },
+  "M 58": {
+    "name": "SDSS J123743.52+114905.4"
+  },
+  "M58": {
+    "name": "SDSS J123743.52+114905.4"
+  },
+  "2MASX J12374359+1149051": {
+    "name": "SDSS J123743.52+114905.4"
+  },
+  "2MASXJ12374359+1149051": {
+    "name": "SDSS J123743.52+114905.4"
+  },
+  "IRAS 12351+1205": {
+    "name": "SDSS J123743.52+114905.4"
+  },
+  "IRAS12351+1205": {
+    "name": "SDSS J123743.52+114905.4"
+  },
+  "MCG +02-32-160": {
+    "name": "SDSS J123743.52+114905.4"
+  },
+  "MCG+02-32-160": {
+    "name": "SDSS J123743.52+114905.4"
+  },
+  "PGC 042168": {
+    "name": "SDSS J123743.52+114905.4"
+  },
+  "PGC042168": {
+    "name": "SDSS J123743.52+114905.4"
+  },
+  "SDSS J123743.52+114905.4": {
+    "name": "SDSS J123743.52+114905.4"
+  },
+  "SDSSJ123743.52+114905.4": {
+    "name": "SDSS J123743.52+114905.4"
+  },
+  "UGC 07796": {
+    "name": "SDSS J123743.52+114905.4"
+  },
+  "UGC07796": {
+    "name": "SDSS J123743.52+114905.4"
+  },
+  "M 59": {
+    "name": "SDSS J124202.25+113848.8"
+  },
+  "M59": {
+    "name": "SDSS J124202.25+113848.8"
+  },
+  "2MASX J12420232+1138489": {
+    "name": "SDSS J124202.25+113848.8"
+  },
+  "2MASXJ12420232+1138489": {
+    "name": "SDSS J124202.25+113848.8"
+  },
+  "MCG +02-32-183": {
+    "name": "SDSS J124202.25+113848.8"
+  },
+  "MCG+02-32-183": {
+    "name": "SDSS J124202.25+113848.8"
+  },
+  "PGC 042628": {
+    "name": "SDSS J124202.25+113848.8"
+  },
+  "PGC042628": {
+    "name": "SDSS J124202.25+113848.8"
+  },
+  "SDSS J124202.25+113848.8": {
+    "name": "SDSS J124202.25+113848.8"
+  },
+  "SDSSJ124202.25+113848.8": {
+    "name": "SDSS J124202.25+113848.8"
+  },
+  "UGC 07858": {
+    "name": "SDSS J124202.25+113848.8"
+  },
+  "UGC07858": {
+    "name": "SDSS J124202.25+113848.8"
+  },
+  "M 60": {
+    "name": "2MASS J12434000+1133099"
+  },
+  "M60": {
+    "name": "2MASS J12434000+1133099"
+  },
+  "2MASS J12434000+1133099": {
+    "name": "2MASS J12434000+1133099"
+  },
+  "2MASSJ12434000+1133099": {
+    "name": "2MASS J12434000+1133099"
+  },
+  "2MASX J12434000+1133093": {
+    "name": "2MASS J12434000+1133099"
+  },
+  "2MASXJ12434000+1133093": {
+    "name": "2MASS J12434000+1133099"
+  },
+  "MCG +02-33-002": {
+    "name": "2MASS J12434000+1133099"
+  },
+  "MCG+02-33-002": {
+    "name": "2MASS J12434000+1133099"
+  },
+  "PGC 042831": {
+    "name": "2MASS J12434000+1133099"
+  },
+  "PGC042831": {
+    "name": "2MASS J12434000+1133099"
+  },
+  "SDSS J124339.97+113309.7": {
+    "name": "2MASS J12434000+1133099"
+  },
+  "SDSSJ124339.97+113309.7": {
+    "name": "2MASS J12434000+1133099"
+  },
+  "UGC 07898": {
+    "name": "2MASS J12434000+1133099"
+  },
+  "UGC07898": {
+    "name": "2MASS J12434000+1133099"
+  },
+  "M 61": {
+    "name": "SDSS J122154.92+042825.6"
+  },
+  "M61": {
+    "name": "SDSS J122154.92+042825.6"
+  },
+  "2MASX J12215494+0428249": {
+    "name": "SDSS J122154.92+042825.6"
+  },
+  "2MASXJ12215494+0428249": {
+    "name": "SDSS J122154.92+042825.6"
+  },
+  "IRAS 12194+0444": {
+    "name": "SDSS J122154.92+042825.6"
+  },
+  "IRAS12194+0444": {
+    "name": "SDSS J122154.92+042825.6"
+  },
+  "MCG +01-32-022": {
+    "name": "SDSS J122154.92+042825.6"
+  },
+  "MCG+01-32-022": {
+    "name": "SDSS J122154.92+042825.6"
+  },
+  "PGC 040001": {
+    "name": "SDSS J122154.92+042825.6"
+  },
+  "PGC040001": {
+    "name": "SDSS J122154.92+042825.6"
+  },
+  "SDSS J122154.92+042825.6": {
+    "name": "SDSS J122154.92+042825.6"
+  },
+  "SDSSJ122154.92+042825.6": {
+    "name": "SDSS J122154.92+042825.6"
+  },
+  "UGC 07420": {
+    "name": "SDSS J122154.92+042825.6"
+  },
+  "UGC07420": {
+    "name": "SDSS J122154.92+042825.6"
+  },
+  "M 62": {
+    "name": "M 62"
+  },
+  "M62": {
+    "name": "M 62"
+  },
+  "MWSC 2512": {
+    "name": "M 62"
+  },
+  "MWSC2512": {
+    "name": "M 62"
+  },
+  "M 63": {
+    "name": "SDSS J131549.26+420145.8"
+  },
+  "M63": {
+    "name": "SDSS J131549.26+420145.8"
+  },
+  "2MASX J13154932+4201454": {
+    "name": "SDSS J131549.26+420145.8"
+  },
+  "2MASXJ13154932+4201454": {
+    "name": "SDSS J131549.26+420145.8"
+  },
+  "IRAS 13135+4217": {
+    "name": "SDSS J131549.26+420145.8"
+  },
+  "IRAS13135+4217": {
+    "name": "SDSS J131549.26+420145.8"
+  },
+  "MCG +07-27-054": {
+    "name": "SDSS J131549.26+420145.8"
+  },
+  "MCG+07-27-054": {
+    "name": "SDSS J131549.26+420145.8"
+  },
+  "PGC 046153": {
+    "name": "SDSS J131549.26+420145.8"
+  },
+  "PGC046153": {
+    "name": "SDSS J131549.26+420145.8"
+  },
+  "SDSS J131549.26+420145.8": {
+    "name": "SDSS J131549.26+420145.8"
+  },
+  "SDSSJ131549.26+420145.8": {
+    "name": "SDSS J131549.26+420145.8"
+  },
+  "UGC 08334": {
+    "name": "SDSS J131549.26+420145.8"
+  },
+  "UGC08334": {
+    "name": "SDSS J131549.26+420145.8"
+  },
+  "Sunflower Galaxy": {
+    "name": "SDSS J131549.26+420145.8"
+  },
+  "SunflowerGalaxy": {
+    "name": "SDSS J131549.26+420145.8"
+  },
+  "M 64": {
+    "name": "Black Eye Galaxy"
+  },
+  "M64": {
+    "name": "Black Eye Galaxy"
+  },
+  "2MASX J12564369+2140575": {
+    "name": "Black Eye Galaxy"
+  },
+  "2MASXJ12564369+2140575": {
+    "name": "Black Eye Galaxy"
+  },
+  "IRAS 12542+2157": {
+    "name": "Black Eye Galaxy"
+  },
+  "IRAS12542+2157": {
+    "name": "Black Eye Galaxy"
+  },
+  "MCG +04-31-001": {
+    "name": "Black Eye Galaxy"
+  },
+  "MCG+04-31-001": {
+    "name": "Black Eye Galaxy"
+  },
+  "PGC 044182": {
+    "name": "Black Eye Galaxy"
+  },
+  "PGC044182": {
+    "name": "Black Eye Galaxy"
+  },
+  "UGC 08062": {
+    "name": "Black Eye Galaxy"
+  },
+  "UGC08062": {
+    "name": "Black Eye Galaxy"
+  },
+  "Black Eye Galaxy": {
+    "name": "Black Eye Galaxy"
+  },
+  "BlackEyeGalaxy": {
+    "name": "Black Eye Galaxy"
+  },
+  "Evil Eye Galaxy": {
+    "name": "Black Eye Galaxy"
+  },
+  "EvilEyeGalaxy": {
+    "name": "Black Eye Galaxy"
+  },
+  "M 65": {
+    "name": "M 65"
+  },
+  "M65": {
+    "name": "M 65"
+  },
+  "2MASX J11185595+1305319": {
+    "name": "M 65"
+  },
+  "2MASXJ11185595+1305319": {
+    "name": "M 65"
+  },
+  "IRAS 11163+1322": {
+    "name": "M 65"
+  },
+  "IRAS11163+1322": {
+    "name": "M 65"
+  },
+  "MCG +02-29-018": {
+    "name": "M 65"
+  },
+  "MCG+02-29-018": {
+    "name": "M 65"
+  },
+  "PGC 034612": {
+    "name": "M 65"
+  },
+  "PGC034612": {
+    "name": "M 65"
+  },
+  "UGC 06328": {
+    "name": "M 65"
+  },
+  "UGC06328": {
+    "name": "M 65"
+  },
+  "M 66": {
+    "name": "SDSS J112014.98+125929.4"
+  },
+  "M66": {
+    "name": "SDSS J112014.98+125929.4"
+  },
+  "2MASX J11201502+1259286": {
+    "name": "SDSS J112014.98+125929.4"
+  },
+  "2MASXJ11201502+1259286": {
+    "name": "SDSS J112014.98+125929.4"
+  },
+  "IRAS 11176+1315": {
+    "name": "SDSS J112014.98+125929.4"
+  },
+  "IRAS11176+1315": {
+    "name": "SDSS J112014.98+125929.4"
+  },
+  "MCG +02-29-019": {
+    "name": "SDSS J112014.98+125929.4"
+  },
+  "MCG+02-29-019": {
+    "name": "SDSS J112014.98+125929.4"
+  },
+  "PGC 034695": {
+    "name": "SDSS J112014.98+125929.4"
+  },
+  "PGC034695": {
+    "name": "SDSS J112014.98+125929.4"
+  },
+  "SDSS J112014.98+125929.4": {
+    "name": "SDSS J112014.98+125929.4"
+  },
+  "SDSSJ112014.98+125929.4": {
+    "name": "SDSS J112014.98+125929.4"
+  },
+  "UGC 06346": {
+    "name": "SDSS J112014.98+125929.4"
+  },
+  "UGC06346": {
+    "name": "SDSS J112014.98+125929.4"
+  },
+  "M 67": {
+    "name": "M 67"
+  },
+  "M67": {
+    "name": "M 67"
+  },
+  "MWSC 1585": {
+    "name": "M 67"
+  },
+  "MWSC1585": {
+    "name": "M 67"
+  },
+  "M 68": {
+    "name": "M 68"
+  },
+  "M68": {
+    "name": "M 68"
+  },
+  "MWSC 2059": {
+    "name": "M 68"
+  },
+  "MWSC2059": {
+    "name": "M 68"
+  },
+  "M 69": {
+    "name": "M 69"
+  },
+  "M69": {
+    "name": "M 69"
+  },
+  "NGC 6634": {
+    "name": "M 69"
+  },
+  "NGC6634": {
+    "name": "M 69"
+  },
+  "MWSC 2936": {
+    "name": "M 69"
+  },
+  "MWSC2936": {
+    "name": "M 69"
+  },
+  "M 70": {
+    "name": "M 70"
+  },
+  "M70": {
+    "name": "M 70"
+  },
+  "MWSC 2981": {
+    "name": "M 70"
+  },
+  "MWSC2981": {
+    "name": "M 70"
+  },
+  "M 71": {
+    "name": "M 71"
+  },
+  "M71": {
+    "name": "M 71"
+  },
+  "NGC 6839": {
+    "name": "M 71"
+  },
+  "NGC6839": {
+    "name": "M 71"
+  },
+  "MWSC 3200": {
+    "name": "M 71"
+  },
+  "MWSC3200": {
+    "name": "M 71"
+  },
+  "M 72": {
+    "name": "M 72"
+  },
+  "M72": {
+    "name": "M 72"
+  },
+  "MWSC 3419": {
+    "name": "M 72"
+  },
+  "MWSC3419": {
+    "name": "M 72"
+  },
+  "M 73": {
+    "name": "M 73"
+  },
+  "M73": {
+    "name": "M 73"
+  },
+  "M 74": {
+    "name": "M 74"
+  },
+  "M74": {
+    "name": "M 74"
+  },
+  "2MASX J01364177+1547004": {
+    "name": "M 74"
+  },
+  "2MASXJ01364177+1547004": {
+    "name": "M 74"
+  },
+  "IRAS 01340+1532": {
+    "name": "M 74"
+  },
+  "IRAS01340+1532": {
+    "name": "M 74"
+  },
+  "MCG +03-05-011": {
+    "name": "M 74"
+  },
+  "MCG+03-05-011": {
+    "name": "M 74"
+  },
+  "PGC 005974": {
+    "name": "M 74"
+  },
+  "PGC005974": {
+    "name": "M 74"
+  },
+  "UGC 01149": {
+    "name": "M 74"
+  },
+  "UGC01149": {
+    "name": "M 74"
+  },
+  "M 75": {
+    "name": "M 75"
+  },
+  "M75": {
+    "name": "M 75"
+  },
+  "2MASX J20060484-2155201": {
+    "name": "M 75"
+  },
+  "2MASXJ20060484-2155201": {
+    "name": "M 75"
+  },
+  "MWSC 3254": {
+    "name": "M 75"
+  },
+  "MWSC3254": {
+    "name": "M 75"
+  },
+  "M 76": {
+    "name": "Little Dumbbell Nebula",
+    "ar": "‎‎سديم الأثقال الصغير‎‎",
+    "zh": "小哑铃星云",
+    "fi": "Pieni nostopainosumu",
+    "fr": "Nébuleuse de la Petite haltère",
+    "de": "Kleiner Hantelnebel",
+    "it": "Nebulosa Piccola Campana",
+    "ja": "小亜铃星云",
+    "ko": "작은아령 성운",
+    "fa": "سحابی دمبل کوچک",
+    "es": "Pequeña Nebulosa Dumbbell",
+    "ru": "Туманность Малая гантель",
+    "tr": "Küçük Halter Bulutsusu"
+  },
+  "M76": {
+    "name": "Little Dumbbell Nebula",
+    "ar": "‎‎سديم الأثقال الصغير‎‎",
+    "zh": "小哑铃星云",
+    "fi": "Pieni nostopainosumu",
+    "fr": "Nébuleuse de la Petite haltère",
+    "de": "Kleiner Hantelnebel",
+    "it": "Nebulosa Piccola Campana",
+    "ja": "小亜铃星云",
+    "ko": "작은아령 성운",
+    "fa": "سحابی دمبل کوچک",
+    "es": "Pequeña Nebulosa Dumbbell",
+    "ru": "Туманность Малая гантель",
+    "tr": "Küçük Halter Bulutsusu"
+  },
+  "NGC651": {
+    "name": "Little Dumbbell Nebula",
+    "ar": "‎‎سديم الأثقال الصغير‎‎",
+    "zh": "小哑铃星云",
+    "fi": "Pieni nostopainosumu",
+    "fr": "Nébuleuse de la Petite haltère",
+    "de": "Kleiner Hantelnebel",
+    "it": "Nebulosa Piccola Campana",
+    "ja": "小亜铃星云",
+    "ko": "작은아령 성운",
+    "fa": "سحابی دمبل کوچک",
+    "es": "Pequeña Nebulosa Dumbbell",
+    "ru": "Туманность Малая гантель",
+    "tr": "Küçük Halter Bulutsusu"
+  },
+  "2MASX J01421808+5134243": {
+    "name": "Little Dumbbell Nebula",
+    "ar": "‎‎سديم الأثقال الصغير‎‎",
+    "zh": "小哑铃星云",
+    "fi": "Pieni nostopainosumu",
+    "fr": "Nébuleuse de la Petite haltère",
+    "de": "Kleiner Hantelnebel",
+    "it": "Nebulosa Piccola Campana",
+    "ja": "小亜铃星云",
+    "ko": "작은아령 성운",
+    "fa": "سحابی دمبل کوچک",
+    "es": "Pequeña Nebulosa Dumbbell",
+    "ru": "Туманность Малая гантель",
+    "tr": "Küçük Halter Bulutsusu"
+  },
+  "2MASXJ01421808+5134243": {
+    "name": "Little Dumbbell Nebula",
+    "ar": "‎‎سديم الأثقال الصغير‎‎",
+    "zh": "小哑铃星云",
+    "fi": "Pieni nostopainosumu",
+    "fr": "Nébuleuse de la Petite haltère",
+    "de": "Kleiner Hantelnebel",
+    "it": "Nebulosa Piccola Campana",
+    "ja": "小亜铃星云",
+    "ko": "작은아령 성운",
+    "fa": "سحابی دمبل کوچک",
+    "es": "Pequeña Nebulosa Dumbbell",
+    "ru": "Туманность Малая гантель",
+    "tr": "Küçük Halter Bulutsusu"
+  },
+  "IRAS 01391+5119": {
+    "name": "Little Dumbbell Nebula",
+    "ar": "‎‎سديم الأثقال الصغير‎‎",
+    "zh": "小哑铃星云",
+    "fi": "Pieni nostopainosumu",
+    "fr": "Nébuleuse de la Petite haltère",
+    "de": "Kleiner Hantelnebel",
+    "it": "Nebulosa Piccola Campana",
+    "ja": "小亜铃星云",
+    "ko": "작은아령 성운",
+    "fa": "سحابی دمبل کوچک",
+    "es": "Pequeña Nebulosa Dumbbell",
+    "ru": "Туманность Малая гантель",
+    "tr": "Küçük Halter Bulutsusu"
+  },
+  "IRAS01391+5119": {
+    "name": "Little Dumbbell Nebula",
+    "ar": "‎‎سديم الأثقال الصغير‎‎",
+    "zh": "小哑铃星云",
+    "fi": "Pieni nostopainosumu",
+    "fr": "Nébuleuse de la Petite haltère",
+    "de": "Kleiner Hantelnebel",
+    "it": "Nebulosa Piccola Campana",
+    "ja": "小亜铃星云",
+    "ko": "작은아령 성운",
+    "fa": "سحابی دمبل کوچک",
+    "es": "Pequeña Nebulosa Dumbbell",
+    "ru": "Туманность Малая гантель",
+    "tr": "Küçük Halter Bulutsusu"
+  },
+  "PN G130.9-10.5": {
+    "name": "Little Dumbbell Nebula",
+    "ar": "‎‎سديم الأثقال الصغير‎‎",
+    "zh": "小哑铃星云",
+    "fi": "Pieni nostopainosumu",
+    "fr": "Nébuleuse de la Petite haltère",
+    "de": "Kleiner Hantelnebel",
+    "it": "Nebulosa Piccola Campana",
+    "ja": "小亜铃星云",
+    "ko": "작은아령 성운",
+    "fa": "سحابی دمبل کوچک",
+    "es": "Pequeña Nebulosa Dumbbell",
+    "ru": "Туманность Малая гантель",
+    "tr": "Küçük Halter Bulutsusu"
+  },
+  "PNG130.9-10.5": {
+    "name": "Little Dumbbell Nebula",
+    "ar": "‎‎سديم الأثقال الصغير‎‎",
+    "zh": "小哑铃星云",
+    "fi": "Pieni nostopainosumu",
+    "fr": "Nébuleuse de la Petite haltère",
+    "de": "Kleiner Hantelnebel",
+    "it": "Nebulosa Piccola Campana",
+    "ja": "小亜铃星云",
+    "ko": "작은아령 성운",
+    "fa": "سحابی دمبل کوچک",
+    "es": "Pequeña Nebulosa Dumbbell",
+    "ru": "Туманность Малая гантель",
+    "tr": "Küçük Halter Bulutsusu"
+  },
+  "Barbell Nebula": {
+    "name": "Little Dumbbell Nebula",
+    "ar": "‎‎سديم الأثقال الصغير‎‎",
+    "zh": "小哑铃星云",
+    "fi": "Pieni nostopainosumu",
+    "fr": "Nébuleuse de la Petite haltère",
+    "de": "Kleiner Hantelnebel",
+    "it": "Nebulosa Piccola Campana",
+    "ja": "小亜铃星云",
+    "ko": "작은아령 성운",
+    "fa": "سحابی دمبل کوچک",
+    "es": "Pequeña Nebulosa Dumbbell",
+    "ru": "Туманность Малая гантель",
+    "tr": "Küçük Halter Bulutsusu"
+  },
+  "BarbellNebula": {
+    "name": "Little Dumbbell Nebula",
+    "ar": "‎‎سديم الأثقال الصغير‎‎",
+    "zh": "小哑铃星云",
+    "fi": "Pieni nostopainosumu",
+    "fr": "Nébuleuse de la Petite haltère",
+    "de": "Kleiner Hantelnebel",
+    "it": "Nebulosa Piccola Campana",
+    "ja": "小亜铃星云",
+    "ko": "작은아령 성운",
+    "fa": "سحابی دمبل کوچک",
+    "es": "Pequeña Nebulosa Dumbbell",
+    "ru": "Туманность Малая гантель",
+    "tr": "Küçük Halter Bulutsusu"
+  },
+  "Cork Nebula": {
+    "name": "Little Dumbbell Nebula",
+    "ar": "‎‎سديم الأثقال الصغير‎‎",
+    "zh": "小哑铃星云",
+    "fi": "Pieni nostopainosumu",
+    "fr": "Nébuleuse de la Petite haltère",
+    "de": "Kleiner Hantelnebel",
+    "it": "Nebulosa Piccola Campana",
+    "ja": "小亜铃星云",
+    "ko": "작은아령 성운",
+    "fa": "سحابی دمبل کوچک",
+    "es": "Pequeña Nebulosa Dumbbell",
+    "ru": "Туманность Малая гантель",
+    "tr": "Küçük Halter Bulutsusu"
+  },
+  "CorkNebula": {
+    "name": "Little Dumbbell Nebula",
+    "ar": "‎‎سديم الأثقال الصغير‎‎",
+    "zh": "小哑铃星云",
+    "fi": "Pieni nostopainosumu",
+    "fr": "Nébuleuse de la Petite haltère",
+    "de": "Kleiner Hantelnebel",
+    "it": "Nebulosa Piccola Campana",
+    "ja": "小亜铃星云",
+    "ko": "작은아령 성운",
+    "fa": "سحابی دمبل کوچک",
+    "es": "Pequeña Nebulosa Dumbbell",
+    "ru": "Туманность Малая гантель",
+    "tr": "Küçük Halter Bulutsusu"
+  },
+  "Little Dumbbell Nebula": {
+    "name": "Little Dumbbell Nebula",
+    "ar": "‎‎سديم الأثقال الصغير‎‎",
+    "zh": "小哑铃星云",
+    "fi": "Pieni nostopainosumu",
+    "fr": "Nébuleuse de la Petite haltère",
+    "de": "Kleiner Hantelnebel",
+    "it": "Nebulosa Piccola Campana",
+    "ja": "小亜铃星云",
+    "ko": "작은아령 성운",
+    "fa": "سحابی دمبل کوچک",
+    "es": "Pequeña Nebulosa Dumbbell",
+    "ru": "Туманность Малая гантель",
+    "tr": "Küçük Halter Bulutsusu"
+  },
+  "LittleDumbbellNebula": {
+    "name": "Little Dumbbell Nebula",
+    "ar": "‎‎سديم الأثقال الصغير‎‎",
+    "zh": "小哑铃星云",
+    "fi": "Pieni nostopainosumu",
+    "fr": "Nébuleuse de la Petite haltère",
+    "de": "Kleiner Hantelnebel",
+    "it": "Nebulosa Piccola Campana",
+    "ja": "小亜铃星云",
+    "ko": "작은아령 성운",
+    "fa": "سحابی دمبل کوچک",
+    "es": "Pequeña Nebulosa Dumbbell",
+    "ru": "Туманность Малая гантель",
+    "tr": "Küçük Halter Bulutsusu"
+  },
+  "M 77": {
+    "name": "M 77"
+  },
+  "M77": {
+    "name": "M 77"
+  },
+  "2MASX J02424077-0000478": {
+    "name": "M 77"
+  },
+  "2MASXJ02424077-0000478": {
+    "name": "M 77"
+  },
+  "IRAS 02401-0013": {
+    "name": "M 77"
+  },
+  "IRAS02401-0013": {
+    "name": "M 77"
+  },
+  "MCG +00-07-083": {
+    "name": "M 77"
+  },
+  "MCG+00-07-083": {
+    "name": "M 77"
+  },
+  "PGC 010266": {
+    "name": "M 77"
+  },
+  "PGC010266": {
+    "name": "M 77"
+  },
+  "UGC 02188": {
+    "name": "M 77"
+  },
+  "UGC02188": {
+    "name": "M 77"
+  },
+  "M 78": {
+    "name": "M 78"
+  },
+  "M78": {
+    "name": "M 78"
+  },
+  "MWSC 0664": {
+    "name": "M 78"
+  },
+  "MWSC0664": {
+    "name": "M 78"
+  },
+  "M 79": {
+    "name": "M 79"
+  },
+  "M79": {
+    "name": "M 79"
+  },
+  "MWSC 0528": {
+    "name": "M 79"
+  },
+  "MWSC0528": {
+    "name": "M 79"
+  },
+  "M 80": {
+    "name": "M 80"
+  },
+  "M80": {
+    "name": "M 80"
+  },
+  "MWSC 2376": {
+    "name": "M 80"
+  },
+  "MWSC2376": {
+    "name": "M 80"
+  },
+  "M 81": {
+    "name": "SDSS J095533.16+690355.1"
+  },
+  "M81": {
+    "name": "SDSS J095533.16+690355.1"
+  },
+  "2MASX J09553318+6903549": {
+    "name": "SDSS J095533.16+690355.1"
+  },
+  "2MASXJ09553318+6903549": {
+    "name": "SDSS J095533.16+690355.1"
+  },
+  "IRAS 09514+6918": {
+    "name": "SDSS J095533.16+690355.1"
+  },
+  "IRAS09514+6918": {
+    "name": "SDSS J095533.16+690355.1"
+  },
+  "MCG +12-10-010": {
+    "name": "SDSS J095533.16+690355.1"
+  },
+  "MCG+12-10-010": {
+    "name": "SDSS J095533.16+690355.1"
+  },
+  "PGC 028630": {
+    "name": "SDSS J095533.16+690355.1"
+  },
+  "PGC028630": {
+    "name": "SDSS J095533.16+690355.1"
+  },
+  "SDSS J095533.16+690355.1": {
+    "name": "SDSS J095533.16+690355.1"
+  },
+  "SDSSJ095533.16+690355.1": {
+    "name": "SDSS J095533.16+690355.1"
+  },
+  "UGC 05318": {
+    "name": "SDSS J095533.16+690355.1"
+  },
+  "UGC05318": {
+    "name": "SDSS J095533.16+690355.1"
+  },
+  "Bode's Galaxy": {
+    "name": "SDSS J095533.16+690355.1"
+  },
+  "Bode'sGalaxy": {
+    "name": "SDSS J095533.16+690355.1"
+  },
+  "M 82": {
+    "name": "SDSS J095551.73+694048.6"
+  },
+  "M82": {
+    "name": "SDSS J095551.73+694048.6"
+  },
+  "2MASX J09555243+6940469": {
+    "name": "SDSS J095551.73+694048.6"
+  },
+  "2MASXJ09555243+6940469": {
+    "name": "SDSS J095551.73+694048.6"
+  },
+  "IRAS 09517+6954": {
+    "name": "SDSS J095551.73+694048.6"
+  },
+  "IRAS09517+6954": {
+    "name": "SDSS J095551.73+694048.6"
+  },
+  "MCG +12-10-011": {
+    "name": "SDSS J095551.73+694048.6"
+  },
+  "MCG+12-10-011": {
+    "name": "SDSS J095551.73+694048.6"
+  },
+  "PGC 028655": {
+    "name": "SDSS J095551.73+694048.6"
+  },
+  "PGC028655": {
+    "name": "SDSS J095551.73+694048.6"
+  },
+  "SDSS J095551.73+694048.6": {
+    "name": "SDSS J095551.73+694048.6"
+  },
+  "SDSSJ095551.73+694048.6": {
+    "name": "SDSS J095551.73+694048.6"
+  },
+  "UGC 05322": {
+    "name": "SDSS J095551.73+694048.6"
+  },
+  "UGC05322": {
+    "name": "SDSS J095551.73+694048.6"
+  },
+  "Cigar Galaxy": {
+    "name": "SDSS J095551.73+694048.6"
+  },
+  "CigarGalaxy": {
+    "name": "SDSS J095551.73+694048.6"
+  },
+  "M 83": {
+    "name": "Southern Pinwheel Galaxy"
+  },
+  "M83": {
+    "name": "Southern Pinwheel Galaxy"
+  },
+  "2MASX J13370091-2951567": {
+    "name": "Southern Pinwheel Galaxy"
+  },
+  "2MASXJ13370091-2951567": {
+    "name": "Southern Pinwheel Galaxy"
+  },
+  "ESO 444-081": {
+    "name": "Southern Pinwheel Galaxy"
+  },
+  "ESO444-081": {
+    "name": "Southern Pinwheel Galaxy"
+  },
+  "ESO-LV 444-0810": {
+    "name": "Southern Pinwheel Galaxy"
+  },
+  "ESO-LV444-0810": {
+    "name": "Southern Pinwheel Galaxy"
+  },
+  "IRAS 13341-2936": {
+    "name": "Southern Pinwheel Galaxy"
+  },
+  "IRAS13341-2936": {
+    "name": "Southern Pinwheel Galaxy"
+  },
+  "MCG -05-32-050": {
+    "name": "Southern Pinwheel Galaxy"
+  },
+  "MCG-05-32-050": {
+    "name": "Southern Pinwheel Galaxy"
+  },
+  "PGC 048082": {
+    "name": "Southern Pinwheel Galaxy"
+  },
+  "PGC048082": {
+    "name": "Southern Pinwheel Galaxy"
+  },
+  "UGCA 366": {
+    "name": "Southern Pinwheel Galaxy"
+  },
+  "UGCA366": {
+    "name": "Southern Pinwheel Galaxy"
+  },
+  "Southern Pinwheel Galaxy": {
+    "name": "Southern Pinwheel Galaxy"
+  },
+  "SouthernPinwheelGalaxy": {
+    "name": "Southern Pinwheel Galaxy"
+  },
+  "M 84": {
+    "name": "SDSS J122503.74+125312.8"
+  },
+  "M84": {
+    "name": "SDSS J122503.74+125312.8"
+  },
+  "2MASX J12250377+1253130": {
+    "name": "SDSS J122503.74+125312.8"
+  },
+  "2MASXJ12250377+1253130": {
+    "name": "SDSS J122503.74+125312.8"
+  },
+  "IRAS 12224+1309": {
+    "name": "SDSS J122503.74+125312.8"
+  },
+  "IRAS12224+1309": {
+    "name": "SDSS J122503.74+125312.8"
+  },
+  "MCG +02-32-034": {
+    "name": "SDSS J122503.74+125312.8"
+  },
+  "MCG+02-32-034": {
+    "name": "SDSS J122503.74+125312.8"
+  },
+  "PGC 040455": {
+    "name": "SDSS J122503.74+125312.8"
+  },
+  "PGC040455": {
+    "name": "SDSS J122503.74+125312.8"
+  },
+  "SDSS J122503.74+125312.8": {
+    "name": "SDSS J122503.74+125312.8"
+  },
+  "SDSSJ122503.74+125312.8": {
+    "name": "SDSS J122503.74+125312.8"
+  },
+  "UGC 07494": {
+    "name": "SDSS J122503.74+125312.8"
+  },
+  "UGC07494": {
+    "name": "SDSS J122503.74+125312.8"
+  },
+  "M 85": {
+    "name": "SDSS J122524.06+181127.7"
+  },
+  "M85": {
+    "name": "SDSS J122524.06+181127.7"
+  },
+  "2MASX J12252405+1811278": {
+    "name": "SDSS J122524.06+181127.7"
+  },
+  "2MASXJ12252405+1811278": {
+    "name": "SDSS J122524.06+181127.7"
+  },
+  "MCG +03-32-029": {
+    "name": "SDSS J122524.06+181127.7"
+  },
+  "MCG+03-32-029": {
+    "name": "SDSS J122524.06+181127.7"
+  },
+  "PGC 040515": {
+    "name": "SDSS J122524.06+181127.7"
+  },
+  "PGC040515": {
+    "name": "SDSS J122524.06+181127.7"
+  },
+  "SDSS J122524.06+181127.7": {
+    "name": "SDSS J122524.06+181127.7"
+  },
+  "SDSSJ122524.06+181127.7": {
+    "name": "SDSS J122524.06+181127.7"
+  },
+  "UGC 07508": {
+    "name": "SDSS J122524.06+181127.7"
+  },
+  "UGC07508": {
+    "name": "SDSS J122524.06+181127.7"
+  },
+  "M 86": {
+    "name": "SDSS J122611.75+125646.3"
+  },
+  "M86": {
+    "name": "SDSS J122611.75+125646.3"
+  },
+  "2MASX J12261181+1256454": {
+    "name": "SDSS J122611.75+125646.3"
+  },
+  "2MASXJ12261181+1256454": {
+    "name": "SDSS J122611.75+125646.3"
+  },
+  "MCG +02-32-046": {
+    "name": "SDSS J122611.75+125646.3"
+  },
+  "MCG+02-32-046": {
+    "name": "SDSS J122611.75+125646.3"
+  },
+  "PGC 040653": {
+    "name": "SDSS J122611.75+125646.3"
+  },
+  "PGC040653": {
+    "name": "SDSS J122611.75+125646.3"
+  },
+  "SDSS J122611.75+125646.3": {
+    "name": "SDSS J122611.75+125646.3"
+  },
+  "SDSSJ122611.75+125646.3": {
+    "name": "SDSS J122611.75+125646.3"
+  },
+  "UGC 07532": {
+    "name": "SDSS J122611.75+125646.3"
+  },
+  "UGC07532": {
+    "name": "SDSS J122611.75+125646.3"
+  },
+  "M 87": {
+    "name": "SDSS J123049.41+122328.1"
+  },
+  "M87": {
+    "name": "SDSS J123049.41+122328.1"
+  },
+  "2MASX J12304942+1223279": {
+    "name": "SDSS J123049.41+122328.1"
+  },
+  "2MASXJ12304942+1223279": {
+    "name": "SDSS J123049.41+122328.1"
+  },
+  "IRAS 12282+1240": {
+    "name": "SDSS J123049.41+122328.1"
+  },
+  "IRAS12282+1240": {
+    "name": "SDSS J123049.41+122328.1"
+  },
+  "MCG +02-32-105": {
+    "name": "SDSS J123049.41+122328.1"
+  },
+  "MCG+02-32-105": {
+    "name": "SDSS J123049.41+122328.1"
+  },
+  "PGC 041361": {
+    "name": "SDSS J123049.41+122328.1"
+  },
+  "PGC041361": {
+    "name": "SDSS J123049.41+122328.1"
+  },
+  "SDSS J123049.41+122328.1": {
+    "name": "SDSS J123049.41+122328.1"
+  },
+  "SDSSJ123049.41+122328.1": {
+    "name": "SDSS J123049.41+122328.1"
+  },
+  "UGC 07654": {
+    "name": "SDSS J123049.41+122328.1"
+  },
+  "UGC07654": {
+    "name": "SDSS J123049.41+122328.1"
+  },
+  "Virgo Galaxy": {
+    "name": "SDSS J123049.41+122328.1"
+  },
+  "VirgoGalaxy": {
+    "name": "SDSS J123049.41+122328.1"
+  },
+  "M 88": {
+    "name": "M 88"
+  },
+  "M88": {
+    "name": "M 88"
+  },
+  "2MASX J12315921+1425134": {
+    "name": "M 88"
+  },
+  "2MASXJ12315921+1425134": {
+    "name": "M 88"
+  },
+  "IRAS 12294+1441": {
+    "name": "M 88"
+  },
+  "IRAS12294+1441": {
+    "name": "M 88"
+  },
+  "MCG +03-32-059": {
+    "name": "M 88"
+  },
+  "MCG+03-32-059": {
+    "name": "M 88"
+  },
+  "PGC 041517": {
+    "name": "M 88"
+  },
+  "PGC041517": {
+    "name": "M 88"
+  },
+  "UGC 07675": {
+    "name": "M 88"
+  },
+  "UGC07675": {
+    "name": "M 88"
+  },
+  "M 89": {
+    "name": "SDSS J123539.80+123322.8"
+  },
+  "M89": {
+    "name": "SDSS J123539.80+123322.8"
+  },
+  "2MASX J12353988+1233217": {
+    "name": "SDSS J123539.80+123322.8"
+  },
+  "2MASXJ12353988+1233217": {
+    "name": "SDSS J123539.80+123322.8"
+  },
+  "MCG +02-32-149": {
+    "name": "SDSS J123539.80+123322.8"
+  },
+  "MCG+02-32-149": {
+    "name": "SDSS J123539.80+123322.8"
+  },
+  "PGC 041968": {
+    "name": "SDSS J123539.80+123322.8"
+  },
+  "PGC041968": {
+    "name": "SDSS J123539.80+123322.8"
+  },
+  "SDSS J123539.80+123322.8": {
+    "name": "SDSS J123539.80+123322.8"
+  },
+  "SDSSJ123539.80+123322.8": {
+    "name": "SDSS J123539.80+123322.8"
+  },
+  "UGC 07760": {
+    "name": "SDSS J123539.80+123322.8"
+  },
+  "UGC07760": {
+    "name": "SDSS J123539.80+123322.8"
+  },
+  "M 90": {
+    "name": "SDSS J123649.79+130946.5"
+  },
+  "M90": {
+    "name": "SDSS J123649.79+130946.5"
+  },
+  "2MASX J12364981+1309463": {
+    "name": "SDSS J123649.79+130946.5"
+  },
+  "2MASXJ12364981+1309463": {
+    "name": "SDSS J123649.79+130946.5"
+  },
+  "IRAS 12343+1326": {
+    "name": "SDSS J123649.79+130946.5"
+  },
+  "IRAS12343+1326": {
+    "name": "SDSS J123649.79+130946.5"
+  },
+  "MCG +02-32-155": {
+    "name": "SDSS J123649.79+130946.5"
+  },
+  "MCG+02-32-155": {
+    "name": "SDSS J123649.79+130946.5"
+  },
+  "PGC 042089": {
+    "name": "SDSS J123649.79+130946.5"
+  },
+  "PGC042089": {
+    "name": "SDSS J123649.79+130946.5"
+  },
+  "SDSS J123649.79+130946.5": {
+    "name": "SDSS J123649.79+130946.5"
+  },
+  "SDSSJ123649.79+130946.5": {
+    "name": "SDSS J123649.79+130946.5"
+  },
+  "UGC 07786": {
+    "name": "SDSS J123649.79+130946.5"
+  },
+  "UGC07786": {
+    "name": "SDSS J123649.79+130946.5"
+  },
+  "M 91": {
+    "name": "SDSS J123526.45+142946.8"
+  },
+  "M91": {
+    "name": "SDSS J123526.45+142946.8"
+  },
+  "2MASX J12352642+1429467": {
+    "name": "SDSS J123526.45+142946.8"
+  },
+  "2MASXJ12352642+1429467": {
+    "name": "SDSS J123526.45+142946.8"
+  },
+  "IRAS 12328+1446": {
+    "name": "SDSS J123526.45+142946.8"
+  },
+  "IRAS12328+1446": {
+    "name": "SDSS J123526.45+142946.8"
+  },
+  "MCG +03-32-075": {
+    "name": "SDSS J123526.45+142946.8"
+  },
+  "MCG+03-32-075": {
+    "name": "SDSS J123526.45+142946.8"
+  },
+  "PGC 041934": {
+    "name": "SDSS J123526.45+142946.8"
+  },
+  "PGC041934": {
+    "name": "SDSS J123526.45+142946.8"
+  },
+  "SDSS J123526.45+142946.8": {
+    "name": "SDSS J123526.45+142946.8"
+  },
+  "SDSSJ123526.45+142946.8": {
+    "name": "SDSS J123526.45+142946.8"
+  },
+  "UGC 07753": {
+    "name": "SDSS J123526.45+142946.8"
+  },
+  "UGC07753": {
+    "name": "SDSS J123526.45+142946.8"
+  },
+  "M 92": {
+    "name": "M 92"
+  },
+  "M92": {
+    "name": "M 92"
+  },
+  "MWSC 2557": {
+    "name": "M 92"
+  },
+  "MWSC2557": {
+    "name": "M 92"
+  },
+  "M 93": {
+    "name": "M 93"
+  },
+  "M93": {
+    "name": "M 93"
+  },
+  "MWSC 1324": {
+    "name": "M 93"
+  },
+  "MWSC1324": {
+    "name": "M 93"
+  },
+  "M 94": {
+    "name": "M 94"
+  },
+  "M94": {
+    "name": "M 94"
+  },
+  "2MASX J12505314+4107125": {
+    "name": "M 94"
+  },
+  "2MASXJ12505314+4107125": {
+    "name": "M 94"
+  },
+  "IRAS 12485+4123": {
+    "name": "M 94"
+  },
+  "IRAS12485+4123": {
+    "name": "M 94"
+  },
+  "MCG +07-26-058": {
+    "name": "M 94"
+  },
+  "MCG+07-26-058": {
+    "name": "M 94"
+  },
+  "PGC 043495": {
+    "name": "M 94"
+  },
+  "PGC043495": {
+    "name": "M 94"
+  },
+  "UGC 07996": {
+    "name": "M 94"
+  },
+  "UGC07996": {
+    "name": "M 94"
+  },
+  "M 95": {
+    "name": "SDSS J104357.69+114213.6"
+  },
+  "M95": {
+    "name": "SDSS J104357.69+114213.6"
+  },
+  "2MASX J10435773+1142129": {
+    "name": "SDSS J104357.69+114213.6"
+  },
+  "2MASXJ10435773+1142129": {
+    "name": "SDSS J104357.69+114213.6"
+  },
+  "IRAS 10413+1158": {
+    "name": "SDSS J104357.69+114213.6"
+  },
+  "IRAS10413+1158": {
+    "name": "SDSS J104357.69+114213.6"
+  },
+  "MCG +02-28-001": {
+    "name": "SDSS J104357.69+114213.6"
+  },
+  "MCG+02-28-001": {
+    "name": "SDSS J104357.69+114213.6"
+  },
+  "PGC 032007": {
+    "name": "SDSS J104357.69+114213.6"
+  },
+  "PGC032007": {
+    "name": "SDSS J104357.69+114213.6"
+  },
+  "SDSS J104357.69+114213.6": {
+    "name": "SDSS J104357.69+114213.6"
+  },
+  "SDSSJ104357.69+114213.6": {
+    "name": "SDSS J104357.69+114213.6"
+  },
+  "SDSS J104357.70+114213.7": {
+    "name": "SDSS J104357.69+114213.6"
+  },
+  "SDSSJ104357.70+114213.7": {
+    "name": "SDSS J104357.69+114213.6"
+  },
+  "UGC 05850": {
+    "name": "SDSS J104357.69+114213.6"
+  },
+  "UGC05850": {
+    "name": "SDSS J104357.69+114213.6"
+  },
+  "M 96": {
+    "name": "SDSS J104645.67+114911.8"
+  },
+  "M96": {
+    "name": "SDSS J104645.67+114911.8"
+  },
+  "2MASX J10464574+1149117": {
+    "name": "SDSS J104645.67+114911.8"
+  },
+  "2MASXJ10464574+1149117": {
+    "name": "SDSS J104645.67+114911.8"
+  },
+  "IRAS 10441+1205": {
+    "name": "SDSS J104645.67+114911.8"
+  },
+  "IRAS10441+1205": {
+    "name": "SDSS J104645.67+114911.8"
+  },
+  "MCG +02-28-006": {
+    "name": "SDSS J104645.67+114911.8"
+  },
+  "MCG+02-28-006": {
+    "name": "SDSS J104645.67+114911.8"
+  },
+  "PGC 032192": {
+    "name": "SDSS J104645.67+114911.8"
+  },
+  "PGC032192": {
+    "name": "SDSS J104645.67+114911.8"
+  },
+  "SDSS J104645.67+114911.8": {
+    "name": "SDSS J104645.67+114911.8"
+  },
+  "SDSSJ104645.67+114911.8": {
+    "name": "SDSS J104645.67+114911.8"
+  },
+  "UGC 05882": {
+    "name": "SDSS J104645.67+114911.8"
+  },
+  "UGC05882": {
+    "name": "SDSS J104645.67+114911.8"
+  },
+  "M 97": {
+    "name": "SDSS J111447.71+550108.5"
+  },
+  "M97": {
+    "name": "SDSS J111447.71+550108.5"
+  },
+  "IRAS 11119+5517": {
+    "name": "SDSS J111447.71+550108.5"
+  },
+  "IRAS11119+5517": {
+    "name": "SDSS J111447.71+550108.5"
+  },
+  "PN G148.4+57.0": {
+    "name": "SDSS J111447.71+550108.5"
+  },
+  "PNG148.4+57.0": {
+    "name": "SDSS J111447.71+550108.5"
+  },
+  "SDSS J111447.71+550108.5": {
+    "name": "SDSS J111447.71+550108.5"
+  },
+  "SDSSJ111447.71+550108.5": {
+    "name": "SDSS J111447.71+550108.5"
+  },
+  "Owl Nebula": {
+    "name": "SDSS J111447.71+550108.5"
+  },
+  "OwlNebula": {
+    "name": "SDSS J111447.71+550108.5"
+  },
+  "M 98": {
+    "name": "SDSS J121348.28+145401.6"
+  },
+  "M98": {
+    "name": "SDSS J121348.28+145401.6"
+  },
+  "2MASX J12134829+1454016": {
+    "name": "SDSS J121348.28+145401.6"
+  },
+  "2MASXJ12134829+1454016": {
+    "name": "SDSS J121348.28+145401.6"
+  },
+  "IRAS 12112+1510": {
+    "name": "SDSS J121348.28+145401.6"
+  },
+  "IRAS12112+1510": {
+    "name": "SDSS J121348.28+145401.6"
+  },
+  "MCG +03-31-079": {
+    "name": "SDSS J121348.28+145401.6"
+  },
+  "MCG+03-31-079": {
+    "name": "SDSS J121348.28+145401.6"
+  },
+  "PGC 039028": {
+    "name": "SDSS J121348.28+145401.6"
+  },
+  "PGC039028": {
+    "name": "SDSS J121348.28+145401.6"
+  },
+  "SDSS J121348.28+145401.6": {
+    "name": "SDSS J121348.28+145401.6"
+  },
+  "SDSSJ121348.28+145401.6": {
+    "name": "SDSS J121348.28+145401.6"
+  },
+  "UGC 07231": {
+    "name": "SDSS J121348.28+145401.6"
+  },
+  "UGC07231": {
+    "name": "SDSS J121348.28+145401.6"
+  },
+  "M 99": {
+    "name": "SDSS J121849.60+142459.4"
+  },
+  "M99": {
+    "name": "SDSS J121849.60+142459.4"
+  },
+  "2MASX J12184962+1424593": {
+    "name": "SDSS J121849.60+142459.4"
+  },
+  "2MASXJ12184962+1424593": {
+    "name": "SDSS J121849.60+142459.4"
+  },
+  "IRAS 12162+1441": {
+    "name": "SDSS J121849.60+142459.4"
+  },
+  "IRAS12162+1441": {
+    "name": "SDSS J121849.60+142459.4"
+  },
+  "MCG +03-31-099": {
+    "name": "SDSS J121849.60+142459.4"
+  },
+  "MCG+03-31-099": {
+    "name": "SDSS J121849.60+142459.4"
+  },
+  "PGC 039578": {
+    "name": "SDSS J121849.60+142459.4"
+  },
+  "PGC039578": {
+    "name": "SDSS J121849.60+142459.4"
+  },
+  "SDSS J121849.60+142459.4": {
+    "name": "SDSS J121849.60+142459.4"
+  },
+  "SDSSJ121849.60+142459.4": {
+    "name": "SDSS J121849.60+142459.4"
+  },
+  "UGC 07345": {
+    "name": "SDSS J121849.60+142459.4"
+  },
+  "UGC07345": {
+    "name": "SDSS J121849.60+142459.4"
+  },
+  "Coma Pinwheel": {
+    "name": "SDSS J121849.60+142459.4"
+  },
+  "ComaPinwheel": {
+    "name": "SDSS J121849.60+142459.4"
+  },
+  "Virgo Cluster Pinwheel": {
+    "name": "SDSS J121849.60+142459.4"
+  },
+  "VirgoClusterPinwheel": {
+    "name": "SDSS J121849.60+142459.4"
+  },
+  "M 100": {
+    "name": "SDSS J122254.91+154920.2"
+  },
+  "M100": {
+    "name": "SDSS J122254.91+154920.2"
+  },
+  "2MASX J12225489+1549205": {
+    "name": "SDSS J122254.91+154920.2"
+  },
+  "2MASXJ12225489+1549205": {
+    "name": "SDSS J122254.91+154920.2"
+  },
+  "IRAS 12204+1605": {
+    "name": "SDSS J122254.91+154920.2"
+  },
+  "IRAS12204+1605": {
+    "name": "SDSS J122254.91+154920.2"
+  },
+  "MCG +03-32-015": {
+    "name": "SDSS J122254.91+154920.2"
+  },
+  "MCG+03-32-015": {
+    "name": "SDSS J122254.91+154920.2"
+  },
+  "PGC 040153": {
+    "name": "SDSS J122254.91+154920.2"
+  },
+  "PGC040153": {
+    "name": "SDSS J122254.91+154920.2"
+  },
+  "SDSS J122254.91+154920.2": {
+    "name": "SDSS J122254.91+154920.2"
+  },
+  "SDSSJ122254.91+154920.2": {
+    "name": "SDSS J122254.91+154920.2"
+  },
+  "UGC 07450": {
+    "name": "SDSS J122254.91+154920.2"
+  },
+  "UGC07450": {
+    "name": "SDSS J122254.91+154920.2"
+  },
+  "M 101": {
+    "name": "SDSS J140312.52+542056.2"
+  },
+  "M101": {
+    "name": "SDSS J140312.52+542056.2"
+  },
+  "IRAS 14013+5435": {
+    "name": "SDSS J140312.52+542056.2"
+  },
+  "IRAS14013+5435": {
+    "name": "SDSS J140312.52+542056.2"
+  },
+  "MCG +09-23-028": {
+    "name": "SDSS J140312.52+542056.2"
+  },
+  "MCG+09-23-028": {
+    "name": "SDSS J140312.52+542056.2"
+  },
+  "PGC 050063": {
+    "name": "SDSS J140312.52+542056.2"
+  },
+  "PGC050063": {
+    "name": "SDSS J140312.52+542056.2"
+  },
+  "SDSS J140312.52+542056.2": {
+    "name": "SDSS J140312.52+542056.2"
+  },
+  "SDSSJ140312.52+542056.2": {
+    "name": "SDSS J140312.52+542056.2"
+  },
+  "UGC 08981": {
+    "name": "SDSS J140312.52+542056.2"
+  },
+  "UGC08981": {
+    "name": "SDSS J140312.52+542056.2"
+  },
+  "M 102": {
+    "name": "M 102"
+  },
+  "M102": {
+    "name": "M 102"
+  },
+  "M 103": {
+    "name": "M 103"
+  },
+  "M103": {
+    "name": "M 103"
+  },
+  "MWSC 0124": {
+    "name": "M 103"
+  },
+  "MWSC0124": {
+    "name": "M 103"
+  },
+  "M 104": {
+    "name": "Sombrero Galaxy"
+  },
+  "M104": {
+    "name": "Sombrero Galaxy"
+  },
+  "2MASX J12395949-1137230": {
+    "name": "Sombrero Galaxy"
+  },
+  "2MASXJ12395949-1137230": {
+    "name": "Sombrero Galaxy"
+  },
+  "IRAS 12373-1120": {
+    "name": "Sombrero Galaxy"
+  },
+  "IRAS12373-1120": {
+    "name": "Sombrero Galaxy"
+  },
+  "MCG -02-32-020": {
+    "name": "Sombrero Galaxy"
+  },
+  "MCG-02-32-020": {
+    "name": "Sombrero Galaxy"
+  },
+  "PGC 042407": {
+    "name": "Sombrero Galaxy"
+  },
+  "PGC042407": {
+    "name": "Sombrero Galaxy"
+  },
+  "UGCA 293": {
+    "name": "Sombrero Galaxy"
+  },
+  "UGCA293": {
+    "name": "Sombrero Galaxy"
+  },
+  "Sombrero Galaxy": {
+    "name": "Sombrero Galaxy"
+  },
+  "SombreroGalaxy": {
+    "name": "Sombrero Galaxy"
+  },
+  "M 105": {
+    "name": "M 105"
+  },
+  "M105": {
+    "name": "M 105"
+  },
+  "2MASX J10474959+1234538": {
+    "name": "M 105"
+  },
+  "2MASXJ10474959+1234538": {
+    "name": "M 105"
+  },
+  "MCG +02-28-011": {
+    "name": "M 105"
+  },
+  "MCG+02-28-011": {
+    "name": "M 105"
+  },
+  "PGC 032256": {
+    "name": "M 105"
+  },
+  "PGC032256": {
+    "name": "M 105"
+  },
+  "UGC 05902": {
+    "name": "M 105"
+  },
+  "UGC05902": {
+    "name": "M 105"
+  },
+  "M 106": {
+    "name": "SDSS J121857.50+471814.2"
+  },
+  "M106": {
+    "name": "SDSS J121857.50+471814.2"
+  },
+  "2MASX J12185761+4718133": {
+    "name": "SDSS J121857.50+471814.2"
+  },
+  "2MASXJ12185761+4718133": {
+    "name": "SDSS J121857.50+471814.2"
+  },
+  "MCG +08-22-104": {
+    "name": "SDSS J121857.50+471814.2"
+  },
+  "MCG+08-22-104": {
+    "name": "SDSS J121857.50+471814.2"
+  },
+  "PGC 039600": {
+    "name": "SDSS J121857.50+471814.2"
+  },
+  "PGC039600": {
+    "name": "SDSS J121857.50+471814.2"
+  },
+  "SDSS J121857.50+471814.2": {
+    "name": "SDSS J121857.50+471814.2"
+  },
+  "SDSSJ121857.50+471814.2": {
+    "name": "SDSS J121857.50+471814.2"
+  },
+  "UGC 07353": {
+    "name": "SDSS J121857.50+471814.2"
+  },
+  "UGC07353": {
+    "name": "SDSS J121857.50+471814.2"
+  },
+  "M 107": {
+    "name": "M 107"
+  },
+  "M107": {
+    "name": "M 107"
+  },
+  "MWSC 2422": {
+    "name": "M 107"
+  },
+  "MWSC2422": {
+    "name": "M 107"
+  },
+  "M 108": {
+    "name": "SDSS J111131.06+554027.4"
+  },
+  "M108": {
+    "name": "SDSS J111131.06+554027.4"
+  },
+  "2MASX J11113096+5540268": {
+    "name": "SDSS J111131.06+554027.4"
+  },
+  "2MASXJ11113096+5540268": {
+    "name": "SDSS J111131.06+554027.4"
+  },
+  "IRAS 11085+5556": {
+    "name": "SDSS J111131.06+554027.4"
+  },
+  "IRAS11085+5556": {
+    "name": "SDSS J111131.06+554027.4"
+  },
+  "MCG +09-18-098": {
+    "name": "SDSS J111131.06+554027.4"
+  },
+  "MCG+09-18-098": {
+    "name": "SDSS J111131.06+554027.4"
+  },
+  "PGC 034030": {
+    "name": "SDSS J111131.06+554027.4"
+  },
+  "PGC034030": {
+    "name": "SDSS J111131.06+554027.4"
+  },
+  "SDSS J111131.06+554027.4": {
+    "name": "SDSS J111131.06+554027.4"
+  },
+  "SDSSJ111131.06+554027.4": {
+    "name": "SDSS J111131.06+554027.4"
+  },
+  "UGC 06225": {
+    "name": "SDSS J111131.06+554027.4"
+  },
+  "UGC06225": {
+    "name": "SDSS J111131.06+554027.4"
+  },
+  "M 109": {
+    "name": "SDSS J115735.96+532228.9"
+  },
+  "M109": {
+    "name": "SDSS J115735.96+532228.9"
+  },
+  "2MASX J11573598+5322282": {
+    "name": "SDSS J115735.96+532228.9"
+  },
+  "2MASXJ11573598+5322282": {
+    "name": "SDSS J115735.96+532228.9"
+  },
+  "IRAS 11549+5339": {
+    "name": "SDSS J115735.96+532228.9"
+  },
+  "IRAS11549+5339": {
+    "name": "SDSS J115735.96+532228.9"
+  },
+  "MCG +09-20-044": {
+    "name": "SDSS J115735.96+532228.9"
+  },
+  "MCG+09-20-044": {
+    "name": "SDSS J115735.96+532228.9"
+  },
+  "PGC 037617": {
+    "name": "SDSS J115735.96+532228.9"
+  },
+  "PGC037617": {
+    "name": "SDSS J115735.96+532228.9"
+  },
+  "SDSS J115735.96+532228.9": {
+    "name": "SDSS J115735.96+532228.9"
+  },
+  "SDSSJ115735.96+532228.9": {
+    "name": "SDSS J115735.96+532228.9"
+  },
+  "UGC 06937": {
+    "name": "SDSS J115735.96+532228.9"
+  },
+  "UGC06937": {
+    "name": "SDSS J115735.96+532228.9"
+  },
+  "M 110": {
+    "name": "M 110"
+  },
+  "M110": {
+    "name": "M 110"
+  },
+  "2MASX J00402207+4141070": {
+    "name": "M 110"
+  },
+  "2MASXJ00402207+4141070": {
+    "name": "M 110"
+  },
+  "IRAS 00376+4124": {
+    "name": "M 110"
+  },
+  "IRAS00376+4124": {
+    "name": "M 110"
+  },
+  "MCG +07-02-014": {
+    "name": "M 110"
+  },
+  "MCG+07-02-014": {
+    "name": "M 110"
+  },
+  "PGC 002429": {
+    "name": "M 110"
+  },
+  "PGC002429": {
+    "name": "M 110"
+  },
+  "UGC 00426": {
+    "name": "M 110"
+  },
+  "UGC00426": {
+    "name": "M 110"
+  },
+  "Cr39": {
+    "name": "α Persei Cluster"
+  },
+  "Mel20": {
+    "name": "α Persei Cluster"
+  },
+  "Cr 140": {
+    "name": "Cr 140"
+  },
+  "Cr140": {
+    "name": "Cr 140"
+  },
+  "Cr256": {
+    "name": "Coma Star Cluster"
+  },
+  "Mel111": {
+    "name": "Coma Star Cluster"
+  },
+  "NGC292": {
+    "name": "Small Magellanic Cloud",
+    "ar": "‎‎السحابة الماجلانية الصغيرة‎‎",
+    "zh": "小麦哲伦云",
+    "fi": "Pieni Magellanin pilvi",
+    "fr": "Petit nuage de Magellan",
+    "de": "Kleine Magellanische Wolke",
+    "el": "Μικρό Μαγγελανικό Νέφος",
+    "it": "Piccola nube di Magellano",
+    "ja": "小マゼラン云",
+    "ko": "소마젤란 성운",
+    "la": "Nubecula Minor",
+    "fa": "ابر کوچک ماژلانی",
+    "es": "Pequeña nube de Magallanes",
+    "ru": "Малое Магелланово облако",
+    "tr": "Küçük Macellan Bulutsusu",
+    "he": "ענן מגלן הקטן"
+  },
+  "SMC": {
+    "name": "Small Magellanic Cloud",
+    "ar": "‎‎السحابة الماجلانية الصغيرة‎‎",
+    "zh": "小麦哲伦云",
+    "fi": "Pieni Magellanin pilvi",
+    "fr": "Petit nuage de Magellan",
+    "de": "Kleine Magellanische Wolke",
+    "el": "Μικρό Μαγγελανικό Νέφος",
+    "it": "Piccola nube di Magellano",
+    "ja": "小マゼラン云",
+    "ko": "소마젤란 성운",
+    "la": "Nubecula Minor",
+    "fa": "ابر کوچک ماژلانی",
+    "es": "Pequeña nube de Magallanes",
+    "ru": "Малое Магелланово облако",
+    "tr": "Küçük Macellan Bulutsusu",
+    "he": "ענן מגלן הקטן"
+  },
+  "Cr399": {
+    "name": "Coathanger",
+    "ar": "‎‎سديم علاقة الملابس‎‎",
+    "zh": "衣架星团",
+    "fi": "Vaateripustin",
+    "fr": "Le Cintre",
+    "de": "Kleiderhaken",
+    "it": "Appendiabiti",
+    "ko": "옷걸이",
+    "es": "Perchero",
+    "ru": "Вешалка"
+  },
+  "NGC2264": {
+    "name": "Fox Fur Nebula",
+    "ar": "‎سديم فرو الثعلب‎",
+    "zh": "狐皮星云",
+    "fr": "Nébuleuse de la Fourrure de Renard",
+    "de": "Fuchsfell-Nebel",
+    "it": "Nebulosa Pelliccia di Volpe",
+    "ko": "여우털 성운",
+    "es": "Nebulosa Pelaje de Zorro",
+    "ru": "Туманность Лисий мех"
+  },
+  "NGC2451": {
+    "name": "Stinging Scorpion Cluster",
+    "ar": "‎حشد العقرب اللادغ‎",
+    "zh": "刺蝎星团",
+    "fi": "Pistävä skorpioni",
+    "fr": "Amas du Scorpion qui pique",
+    "de": "Stechender Skorpion-Haufen",
+    "it": "Ammasso Scorpione Pungente",
+    "ko": "쐐기 전갈 성단",
+    "es": "Cúmulo del Escorpión Ortigante",
+    "ru": "Скопление Жалящий скорпион"
+  },
+  "GC": {
+    "name": "GalCtr"
+  },
+  "GalCtr": {
+    "name": "GalCtr"
+  },
+  "PGC17223": {
+    "name": "Large Magellanic Cloud",
+    "ar": "‎‎سحابة ماجلان الكبيرة‎‎",
+    "zh": "大麦哲伦云",
+    "fi": "Suuri Magellanin pilvi",
+    "fr": "Grand Nuage de Magellan",
+    "de": "Große Magellanwolke",
+    "it": "Grande Nube di Magellano",
+    "ja": "大マゼラン云",
+    "ko": "대마젤란 성운",
+    "la": "Nubecula Maior",
+    "fa": "ابرماژلانی بزرگ",
+    "es": "Gran Nube de Magallanes",
+    "ru": "Большое Магелланово облако",
+    "he": "ענן מגלן הגדול"
+  },
+  "LMC": {
+    "name": "Large Magellanic Cloud",
+    "ar": "‎‎سحابة ماجلان الكبيرة‎‎",
+    "zh": "大麦哲伦云",
+    "fi": "Suuri Magellanin pilvi",
+    "fr": "Grand Nuage de Magellan",
+    "de": "Große Magellanwolke",
+    "it": "Grande Nube di Magellano",
+    "ja": "大マゼラン云",
+    "ko": "대마젤란 성운",
+    "la": "Nubecula Maior",
+    "fa": "ابرماژلانی بزرگ",
+    "es": "Gran Nube de Magallanes",
+    "ru": "Большое Магелланово облако",
+    "he": "ענן מגלן הגדול"
+  },
+  "Mel 25": {
+    "name": "Hyades",
+    "ar": "‎‎القلاص‎‎",
+    "zh": "毕星团",
+    "fi": "Hyadit",
+    "de": "Hyaden",
+    "ja": "ヒアデス",
+    "ko": "히아데스",
+    "fa": "افسانه یونانی هیادز",
+    "es": "Híades",
+    "ru": "Гиады"
+  },
+  "NGC 6882": {
+    "name": "20 Vulpeculae Cluster",
+    "ar": "‎‎حشد 20 الثعلب‎‎",
+    "zh": "狐狸座20星团",
+    "fi": "20 Vulpeculae -joukko",
+    "fr": "Amas 20 Vulpeculae",
+    "de": "20 Vulpeculae Haufen",
+    "it": "Ammasso 20 Vulpeculae",
+    "ja": "こぎつね座20星団",
+    "ko": "여우자리 20 성단",
+    "la": "Congregatio 20 Vulpeculae",
+    "fa": "خوشه 20 روباهک",
+    "es": "Cúmulo 20 Vulpeculae",
+    "ru": "Скопление 20 Лисички"
+  },
+  "NGC 2239": {
+    "name": "Rosette Nebula",
+    "ar": "‎سديم روزيت‎",
+    "zh": "玫瑰星云",
+    "fi": "Rosettesumu",
+    "fr": "Nébuleuse de Rosette",
+    "de": "Rosetten-Nebel",
+    "el": "Νεφέλωμα Ροζέτα",
+    "it": "Nebulosa rosetta",
+    "ja": "ばら星云",
+    "ko": "로제타 성운",
+    "la": "Rosetta Nebula",
+    "fa": "سحابی گل کاغذی",
+    "es": "Nebulosa de Roseta",
+    "ru": "Туманность Розетка",
+    "tr": "Rozet Bulutsusu"
+  },
+  "NGC 7089": {
+    "name": "M 2"
+  },
+  "NGC 5272": {
+    "name": "M 3"
+  },
+  "NGC 6333": {
+    "name": "M 9"
+  },
+  "NGC 6254": {
+    "name": "M 10"
+  },
+  "NGC 6402": {
+    "name": "M 14"
+  },
+  "NGC 6273": {
+    "name": "M 19"
+  },
+  "NGC 6494": {
+    "name": "M 23"
+  },
+  "IC 4715": {
+    "name": "Small Sagittarius Star Cloud",
+    "ar": "‎‎سحابة نجوم القوس الصغيرة‎‎",
+    "zh": "人马座恒星云",
+    "fi": "Jousimiehen pieni tähtipilvi",
+    "fr": "Petit nuage d'étoiles du Sagittaire",
+    "de": "Kleine Sagittarius-Sternwolke",
+    "it": "Piccola Nube stellare del Sagittario",
+    "ko": "궁수자리 소성단",
+    "es": "Nube Estelar Pequeño Sagitario",
+    "ru": "Малое звёздное облако Стрельца"
+  },
+  "IC 4725": {
+    "name": "M 25"
+  },
+  "NGC 6694": {
+    "name": "M 26"
+  },
+  "NGC 6626": {
+    "name": "M 28"
+  },
+  "NGC 221": {
+    "name": "M 32"
+  },
+  "NGC 7092": {
+    "name": "M 39"
+  },
+  "NGC 2437": {
+    "name": "M 46"
+  },
+  "NGC 2422": {
+    "name": "M 47"
+  },
+  "NGC 2548": {
+    "name": "M 48"
+  },
+  "NGC 4472": {
+    "name": "SDSS J122946.76+080001.7"
+  },
+  "NGC 5024": {
+    "name": "M 53"
+  },
+  "NGC 6715": {
+    "name": "M 54"
+  },
+  "NGC 6779": {
+    "name": "M 56"
+  },
+  "NGC 4579": {
+    "name": "SDSS J123743.52+114905.4"
+  },
+  "NGC 4621": {
+    "name": "SDSS J124202.25+113848.8"
+  },
+  "NGC 4649": {
+    "name": "2MASS J12434000+1133099"
+  },
+  "NGC 4590": {
+    "name": "M 68"
+  },
+  "NGC 6637": {
+    "name": "M 69"
+  },
+  "NGC 6681": {
+    "name": "M 70"
+  },
+  "NGC 6981": {
+    "name": "M 72"
+  },
+  "NGC 6994": {
+    "name": "M 73"
+  },
+  "NGC 6864": {
+    "name": "M 75"
+  },
+  "NGC 1904": {
+    "name": "M 79"
+  },
+  "NGC 6093": {
+    "name": "M 80"
+  },
+  "NGC 4382": {
+    "name": "SDSS J122524.06+181127.7"
+  },
+  "NGC 4501": {
+    "name": "M 88"
+  },
+  "NGC 4552": {
+    "name": "SDSS J123539.80+123322.8"
+  },
+  "NGC 4569": {
+    "name": "SDSS J123649.79+130946.5"
+  },
+  "NGC 4548": {
+    "name": "SDSS J123526.45+142946.8"
+  },
+  "NGC 6341": {
+    "name": "M 92"
+  },
+  "NGC 3351": {
+    "name": "SDSS J104357.69+114213.6"
+  },
+  "NGC 3368": {
+    "name": "SDSS J104645.67+114911.8"
+  },
+  "NGC 4192": {
+    "name": "SDSS J121348.28+145401.6"
+  },
+  "NGC 581": {
+    "name": "M 103"
+  },
+  "NGC 3379": {
+    "name": "M 105"
+  },
+  "NGC 4258": {
+    "name": "SDSS J121857.50+471814.2"
+  },
+  "NGC 205": {
+    "name": "M 110"
   }
 });
 window.registerSkyData("dsonames.json", window.__RSO_LOCAL_DATA__["deep-sky/dsonames.json"]);
