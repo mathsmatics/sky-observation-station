@@ -46,7 +46,12 @@ export function longitudeFallbackZone(lon) {
   return normalizeZone(candidate) || "UTC";
 }
 
-export function safeZoneForCoordinates(lat, lon, preferred, tzlookup = window.tzlookup) {
+export function safeZoneForCoordinates(
+  lat,
+  lon,
+  preferred,
+  tzlookup = window.tzlookup,
+) {
   return (
     normalizeZone(preferred) ||
     lookupZone(lat, lon, tzlookup) ||

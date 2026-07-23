@@ -17,16 +17,20 @@ export function createPlanetOverlayController(options) {
   } = options;
 
   function drawMoonPhaseDisk(ctx, point, style, ephemeris) {
-    const illumination = Math.max(0, Math.min(1, Number(ephemeris.illumination)));
+    const illumination = Math.max(
+      0,
+      Math.min(1, Number(ephemeris.illumination)),
+    );
     const phaseAngle = Number(ephemeris.phaseAngleDeg);
-    if (!Number.isFinite(illumination) || !Number.isFinite(phaseAngle)) return false;
+    if (!Number.isFinite(illumination) || !Number.isFinite(phaseAngle))
+      return false;
     const diameter = Math.max(
         Number(cfg("moonPhase.overlayMinSize", 16)) || 16,
         Number(style.size) || 17,
       ),
       radius = diameter / 2,
       step = Math.max(0.6, radius / 18),
-      waxing = (((phaseAngle % 360) + 360) % 360) < 180,
+      waxing = ((phaseAngle % 360) + 360) % 360 < 180,
       lightFill = cfg("moonPhase.lightFill", style.color || "#f5f7ff"),
       darkFill = cfg("moonPhase.darkFill", "rgba(8,12,22,.92)"),
       outline = cfg("moonPhase.outline", "rgba(245,247,255,.82)");
@@ -53,7 +57,10 @@ export function createPlanetOverlayController(options) {
     ctx.beginPath();
     ctx.arc(point[0], point[1], radius, 0, Math.PI * 2);
     ctx.strokeStyle = outline;
-    ctx.lineWidth = Math.max(0.8, Number(cfg("moonPhase.outlineWidth", 1)) || 1);
+    ctx.lineWidth = Math.max(
+      0.8,
+      Number(cfg("moonPhase.outlineWidth", 1)) || 1,
+    );
     ctx.stroke();
     ctx.restore();
     return true;

@@ -11,9 +11,19 @@ import {
 import { CITIES, citySearchText } from "./data/cities";
 import {
   westernConstellationCoordinateMap,
+  westernConstellationBoundaryFeatures,
   westernConstellationLinePath,
   westernConstellationNameFeatures,
 } from "./data/constellations";
+import {
+  diagnoseConstellationBoundaries,
+  logConstellationBoundaryDiagnostics,
+} from "./data/boundary-diagnostics";
+import { buildBrightStarRankMap } from "./data/bright-star-ranking";
+import {
+  CHINESE_ASTERISM_CULTURE,
+  WESTERN_CONSTELLATION_CULTURE,
+} from "./data/culture-notes";
 import {
   deepSkyCoordinateMap,
   deepSkyFeatures,
@@ -34,14 +44,17 @@ import {
   julianDateFromDate,
   precisionStatusForYear,
 } from "./astronomy/time";
-import {
-  safeZoneForCoordinates as safeTimezoneForCoordinates,
-} from "./astronomy/timezone";
+import { safeZoneForCoordinates as safeTimezoneForCoordinates } from "./astronomy/timezone";
 import { localSiderealDegrees } from "./astronomy/sidereal";
 import { calculateCurrentPlanetPositions } from "./astronomy/bodies-simple";
 import { createAppAnimationController } from "./runtime/app-animation";
 import { createDefaultState } from "./state/defaults";
-import { getProjectStorage, readJsonFromStorage, removeStorageKey, writeJsonToStorage } from "./state/storage";
+import {
+  getProjectStorage,
+  readJsonFromStorage,
+  removeStorageKey,
+  writeJsonToStorage,
+} from "./state/storage";
 import { createObserverLocationController } from "./time/observer-location";
 import { createTimeInputActions } from "./time/time-input-actions";
 import { createAppShellController } from "./ui/app-shell";
@@ -105,9 +118,7 @@ import {
   updatePoleAxisDiagnostics,
 } from "./sky/view-control";
 import { createViewModeController } from "./sky/view-mode-switching";
-import {
-  selectionNodes as getLayerSelectionNodes,
-} from "./sky/layers";
+import { selectionNodes as getLayerSelectionNodes } from "./sky/layers";
 import {
   elementRect as getElementRect,
   isMobileLayout as isMobileLayoutByWidth,
@@ -301,11 +312,24 @@ import {
   const STAR_NAMES = starNames();
   const DSO_NAMES = deepSkyNames();
   const ORIGINAL_STARS = starFeatures();
+  const BRIGHT_STAR_RANKS = buildBrightStarRankMap(ORIGINAL_STARS, 100);
   const ORIGINAL_STAR_COORDS = starCoordinateMap();
   const ORIGINAL_DSO_COORDS = deepSkyCoordinateMap(),
     ORIGINAL_CONSTELLATION_COORDS = westernConstellationCoordinateMap(),
     ORIGINAL_ASTERISM_COORDS = chineseAsterismCoordinateMap();
   const CN_ASTERISM_NAMES = chineseAsterismNameMap();
+  if (cfg("debug.boundaryDiagnostics", false)) {
+    try {
+      logConstellationBoundaryDiagnostics(
+        diagnoseConstellationBoundaries({
+          boundaryFeatures: westernConstellationBoundaryFeatures(),
+          constellationFeatures: westernConstellationNameFeatures(),
+        }),
+      );
+    } catch (error) {
+      console.warn("[RSO] 星座边界诊断失败", error);
+    }
+  }
 
   const getStorage = getProjectStorage;
   function t(key) {
@@ -353,7 +377,8 @@ import {
         const raw = JSON.parse(storage.getItem(STORAGE_KEY) || "null");
         if (raw && typeof raw === "object") {
           const schemaOk = raw.storageSchemaVersion === STORAGE_SCHEMA_VERSION;
-          const astronomyOk = raw.astronomyModelVersion === ASTRONOMY_MODEL_VERSION;
+          const astronomyOk =
+            raw.astronomyModelVersion === ASTRONOMY_MODEL_VERSION;
           if (schemaOk && astronomyOk) {
             state = { ...defaults, ...raw };
             astronomyModelDebug.cacheMigration = "current";
@@ -379,7 +404,10 @@ import {
     }
     state.storageSchemaVersion = STORAGE_SCHEMA_VERSION;
     state.astronomyModelVersion = ASTRONOMY_MODEL_VERSION;
-    if (!DateTime || !DateTime.fromISO(String(state.instant || ""), { zone: "utc" }).isValid)
+    if (
+      !DateTime ||
+      !DateTime.fromISO(String(state.instant || ""), { zone: "utc" }).isValid
+    )
       state.instant = defaults.instant;
     if (!Number.isFinite(Number(state.lat)) || Math.abs(Number(state.lat)) > 90)
       state.lat = defaults.lat;
@@ -439,7 +467,9 @@ import {
       Number(state.fontScale) <= 0
     )
       state.fontScale = defaults.fontScale;
-    const starNameMin = Number(cfg("sky.stars.properNameMagnitudeLimitMin", 2.1)),
+    const starNameMin = Number(
+        cfg("sky.stars.properNameMagnitudeLimitMin", 2.1),
+      ),
       starNameMax = Number(cfg("sky.stars.properNameMagnitudeLimitMax", 4.0)),
       starNameDefault = Number(defaults.starNameMagnitudeLimit);
     state.starNameMagnitudeLimit = clamp(
@@ -482,20 +512,30 @@ import {
   }
   function timeZoneOffsetDebug(dt) {
     if (!dt || !dt.isValid)
-      return { timezone: state.zone || "-", utcOffset: "-", utcOffsetNote: "unknown" };
+      return {
+        timezone: state.zone || "-",
+        utcOffset: "-",
+        utcOffsetNote: "unknown",
+      };
     const seconds = Math.round(Number(dt.offset) * 60),
-      hasHistoricalSeconds = Number.isFinite(seconds) && Math.abs(seconds % 60) !== 0,
+      hasHistoricalSeconds =
+        Number.isFinite(seconds) && Math.abs(seconds % 60) !== 0,
       historicalYear = Number.isFinite(dt.year) && dt.year < 1970;
     return {
       timezone: dt.zoneName || state.zone || "-",
       utcOffset: formatOffsetDetailed(dt.offset),
-      utcOffsetNote: historicalYear || hasHistoricalSeconds ? "iana-historical" : "zone-rule",
+      utcOffsetNote:
+        historicalYear || hasHistoricalSeconds
+          ? "iana-historical"
+          : "zone-rule",
     };
   }
 
   function currentInstantDate() {
     const dt = DateTime.fromISO(String(state.instant || ""), { zone: "utc" });
-    return (dt.isValid ? dt : DateTime.fromISO(defaults.instant, { zone: "utc" })).toJSDate();
+    return (
+      dt.isValid ? dt : DateTime.fromISO(defaults.instant, { zone: "utc" })
+    ).toJSDate();
   }
 
   function renderDebugFromDateTime(dt, date = null) {
@@ -529,7 +569,9 @@ import {
   }
 
   function updateActiveTimeDebug(extra = {}) {
-    const active = DateTime.fromISO(String(state.instant || ""), { zone: "utc" });
+    const active = DateTime.fromISO(String(state.instant || ""), {
+      zone: "utc",
+    });
     const data = renderDebugFromDateTime(active);
     noteTimeRenderDebug({
       activeDisplay: data.display,
@@ -587,7 +629,10 @@ import {
     const key = TIME_FIELD_ID_TO_KEY[id];
     const index = TIME_FIELD_KEYS.indexOf(key);
     if (index < 0) return;
-    const next = TIME_FIELD_KEYS[Math.max(0, Math.min(TIME_FIELD_KEYS.length - 1, index + delta))];
+    const next =
+      TIME_FIELD_KEYS[
+        Math.max(0, Math.min(TIME_FIELD_KEYS.length - 1, index + delta))
+      ];
     focusTimeField(next);
   }
 
@@ -713,7 +758,10 @@ import {
     if (!snapshot) return false;
     state.instant = snapshot.instant;
     playing = snapshot.playing;
-    state.mapScale = viewMapScale({ mapScale: snapshot.mapScale }, state.mapScale);
+    state.mapScale = viewMapScale(
+      { mapScale: snapshot.mapScale },
+      state.mapScale,
+    );
     let ok = true;
     try {
       if (window.Celestial && snapshot.center) {
@@ -744,7 +792,9 @@ import {
       inputStatus: stage === "input" ? "invalid" : "valid",
       updateSource: source,
       errorStage: stage,
-      lastFailedCandidate: candidateData ? candidateData.display : timeRenderDebug.candidate,
+      lastFailedCandidate: candidateData
+        ? candidateData.display
+        : timeRenderDebug.candidate,
       originalError: debugErrorText(err),
       errorStack: debugStackText(err),
       refreshHealth: "failed",
@@ -800,19 +850,29 @@ import {
     if (!ok) {
       markTimeUpdateFailure({
         source,
-        stage: timeRenderDebug.errorStage === "-" ? "render" : timeRenderDebug.errorStage,
-        err: timeRenderDebug.originalError || timeRenderDebug.lastError || "render failed",
+        stage:
+          timeRenderDebug.errorStage === "-"
+            ? "render"
+            : timeRenderDebug.errorStage,
+        err:
+          timeRenderDebug.originalError ||
+          timeRenderDebug.lastError ||
+          "render failed",
         candidateData,
       });
       restoreRenderSnapshot(snapshot, source);
       if (syncInputs) syncTimeInputs();
       showToast(
-        state.lang === "zh" ? "星图刷新失败，已恢复上一个有效时间" : "Sky refresh failed; restored the previous valid time",
+        state.lang === "zh"
+          ? "星图刷新失败，已恢复上一个有效时间"
+          : "Sky refresh failed; restored the previous valid time",
         true,
       );
       return false;
     }
-    const usedFallback = timeRenderDebug.skyviewStatus === "failed" && timeRenderDebug.fallbackStatus === "ok";
+    const usedFallback =
+      timeRenderDebug.skyviewStatus === "failed" &&
+      timeRenderDebug.fallbackStatus === "ok";
     updateActiveTimeDebug({
       inputStatus: "valid",
       activeField: timeRenderDebug.activeField,
@@ -822,7 +882,9 @@ import {
       refreshHealth: usedFallback ? "recovered" : "healthy",
       errorStage: usedFallback ? "skyview-fallback" : "-",
       originalError: usedFallback ? timeRenderDebug.originalError : "-",
-      recoveredOriginalError: usedFallback ? timeRenderDebug.originalError : "-",
+      recoveredOriginalError: usedFallback
+        ? timeRenderDebug.originalError
+        : "-",
       currentFatalError: "-",
       errorStack: usedFallback ? timeRenderDebug.errorStack : "-",
       lastError: usedFallback
@@ -1012,23 +1074,31 @@ import {
   }
 
   function updateDebugToggleTitle() {
-    return debugOverlayController && debugOverlayController.updateDebugToggleTitle();
+    return (
+      debugOverlayController && debugOverlayController.updateDebugToggleTitle()
+    );
   }
 
   function debugRefreshIntervalMs() {
-    return debugOverlayController ? debugOverlayController.debugRefreshIntervalMs() : 200;
+    return debugOverlayController
+      ? debugOverlayController.debugRefreshIntervalMs()
+      : 200;
   }
 
   function noteDebugLastAction(action) {
-    if (debugOverlayController) debugOverlayController.noteDebugLastAction(action);
+    if (debugOverlayController)
+      debugOverlayController.noteDebugLastAction(action);
   }
 
   function updateDebugOverlay(force = false) {
-    return debugOverlayController && debugOverlayController.updateDebugOverlay(force);
+    return (
+      debugOverlayController && debugOverlayController.updateDebugOverlay(force)
+    );
   }
 
   function queueDebugOverlayUpdate() {
-    if (debugOverlayController) debugOverlayController.queueDebugOverlayUpdate();
+    if (debugOverlayController)
+      debugOverlayController.queueDebugOverlayUpdate();
   }
 
   function setDebugVisible(open) {
@@ -1044,7 +1114,8 @@ import {
   }
 
   function setDebugPointer(active, coord = null) {
-    if (debugOverlayController) debugOverlayController.setPointer(active, coord);
+    if (debugOverlayController)
+      debugOverlayController.setPointer(active, coord);
   }
   function syncInternalZoomForMetrics(metrics = projectionCanvasMetrics()) {
     syncCelestialInternalZoomForMetrics(metrics, window.Celestial);
@@ -1083,7 +1154,11 @@ import {
     return normalizeControlCenter(center, poleAxisConstraintEnabled());
   }
 
-  function updatePoleAxisDebug(pointerCoord = null, center = null, status = null) {
+  function updatePoleAxisDebug(
+    pointerCoord = null,
+    center = null,
+    status = null,
+  ) {
     const canvas = document.querySelector("#celestial-map canvas"),
       rect = canvas ? canvas.getBoundingClientRect() : null;
     return updatePoleAxisDiagnostics({
@@ -1116,7 +1191,11 @@ import {
   function syncRotationFromCurrentView(reason = "sync") {
     const center = currentCelestialCenter();
     if (center) rotationController.syncFromCenter(center, reason);
-    updatePoleAxisDebug(null, center, poleAxisConstraintEnabled() ? "euler-constrained" : "quaternion-free");
+    updatePoleAxisDebug(
+      null,
+      center,
+      poleAxisConstraintEnabled() ? "euler-constrained" : "quaternion-free",
+    );
     return center;
   }
 
@@ -1128,11 +1207,20 @@ import {
     // 开关开启时欧拉角是主拖动状态，但这里仍同步四元数，便于用户之后
     // 切回自由模式或在 Debug 中比较两套姿态，不让内部状态长期陈旧。
     rotationController.syncFromCenter(normalized, reason);
-    updatePoleAxisDebug(null, normalized, poleAxisConstraintEnabled() ? "euler-constrained" : "quaternion-free");
+    updatePoleAxisDebug(
+      null,
+      normalized,
+      poleAxisConstraintEnabled() ? "euler-constrained" : "quaternion-free",
+    );
     return true;
   }
 
-  function applyQuaternionPointerDelta(dx, dy, rect, reason = "quaternion drag fallback") {
+  function applyQuaternionPointerDelta(
+    dx,
+    dy,
+    rect,
+    reason = "quaternion drag fallback",
+  ) {
     if (!window.Celestial || !rect) return false;
     const nextCenter = rotationController.applyPointerDelta({
       dx,
@@ -1149,10 +1237,21 @@ import {
   }
 
   function invertSkyCoordinateAtClient(clientX, clientY, canvas = null) {
-    return invertSkyCoordinateFromClient(clientX, clientY, canvas, window.Celestial);
+    return invertSkyCoordinateFromClient(
+      clientX,
+      clientY,
+      canvas,
+      window.Celestial,
+    );
   }
 
-  function applyQuaternionGrabDrag(anchorCoord, currentCoord, dx, dy, reason = "quaternion grab drag") {
+  function applyQuaternionGrabDrag(
+    anchorCoord,
+    currentCoord,
+    dx,
+    dy,
+    reason = "quaternion grab drag",
+  ) {
     if (!window.Celestial || !anchorCoord || !currentCoord) return false;
     const nextCenter = rotationController.applyGrabDrag({
       anchorCoord,
@@ -1168,11 +1267,23 @@ import {
     return true;
   }
 
-  function applyEulerConstrainedPointerDelta(dx, dy, rect, currentCoord = null, reason = "euler constrained drag") {
+  function applyEulerConstrainedPointerDelta(
+    dx,
+    dy,
+    rect,
+    currentCoord = null,
+    reason = "euler constrained drag",
+  ) {
     if (!window.Celestial || !rect) return false;
     const center = normalizeCenterForControlMode(currentCelestialCenter());
     const metrics = projectionCanvasMetrics();
-    const shortSide = Math.max(180, Math.min(Number(metrics.virtualWidth) || Number(rect.width) || 0, Number(metrics.virtualHeight) || Number(rect.height) || 0));
+    const shortSide = Math.max(
+      180,
+      Math.min(
+        Number(metrics.virtualWidth) || Number(rect.width) || 0,
+        Number(metrics.virtualHeight) || Number(rect.height) || 0,
+      ),
+    );
     const sensitivity = Number(cfg("interaction.dragSensitivity", 1)) || 1;
     const degreesPerPixel = (180 / shortSide) * sensitivity;
     const guard = evaluatePoleGuard(currentCoord, center);
@@ -1194,7 +1305,11 @@ import {
     ];
     noteDebugLastAction(guard.guardActive ? "pole guard active" : "euler drag");
     setCelestialCenter(next, reason);
-    updatePoleAxisDebug(currentCoord, next, guard.guardActive ? "guard-active" : "euler-constrained");
+    updatePoleAxisDebug(
+      currentCoord,
+      next,
+      guard.guardActive ? "guard-active" : "euler-constrained",
+    );
     redrawAndSyncMapBox(reason);
     queueDebugOverlayUpdate();
     return true;
@@ -1268,7 +1383,9 @@ import {
     metrics = projectionCanvasMetrics(),
   ) {
     let ok = true;
-    const hasFollowUpRedraw = /time|location|observer|sky view|playback/i.test(String(reason));
+    const hasFollowUpRedraw = /time|location|observer|sky view|playback/i.test(
+      String(reason),
+    );
     try {
       const totalStarted = performance.now();
       const syncStarted = performance.now();
@@ -1337,15 +1454,25 @@ import {
     return ok;
   }
 
-  function resizeCelestialCanvas(metrics = projectionCanvasMetrics(), reason = "resize") {
+  function resizeCelestialCanvas(
+    metrics = projectionCanvasMetrics(),
+    reason = "resize",
+  ) {
     applyMapBoxMetrics(metrics);
     let redrew = false;
     try {
       if (skyReady && window.Celestial) {
         Celestial.resize(metrics.width);
         applyMapBoxMetrics(metrics);
-        if (metrics.renderMode === "VIEWPORT_CANVAS" && Celestial.mapProjection && Celestial.mapProjection.translate) {
-          Celestial.mapProjection.translate([metrics.width / 2, metrics.height / 2]);
+        if (
+          metrics.renderMode === "VIEWPORT_CANVAS" &&
+          Celestial.mapProjection &&
+          Celestial.mapProjection.translate
+        ) {
+          Celestial.mapProjection.translate([
+            metrics.width / 2,
+            metrics.height / 2,
+          ]);
         }
         syncInternalZoomForMetrics(metrics);
         redrawAndSyncMapBox(reason, metrics);
@@ -1358,7 +1485,10 @@ import {
     return metrics;
   }
 
-  function scheduleCelestialCanvasResize(metrics = projectionCanvasMetrics(), reason = "scheduled resize") {
+  function scheduleCelestialCanvasResize(
+    metrics = projectionCanvasMetrics(),
+    reason = "scheduled resize",
+  ) {
     pendingCanvasResizeMetrics = metrics;
     pendingCanvasResizeReason = reason;
     applyMapBoxMetrics(metrics);
@@ -1426,7 +1556,10 @@ import {
     state.mapScale = next;
     const metrics = projectionCanvasMetrics(state.projection, next);
     if (options.deferRedraw) {
-      scheduleCelestialCanvasResize(metrics, options.reason || "scheduled map scale");
+      scheduleCelestialCanvasResize(
+        metrics,
+        options.reason || "scheduled map scale",
+      );
     } else {
       resizeCelestialCanvas(metrics, options.reason || "map scale");
     }
@@ -1565,7 +1698,10 @@ import {
   }
 
   function equatorialFromHorizontal(azimuth, altitude) {
-    return referenceOverlayController.equatorialFromHorizontal(azimuth, altitude);
+    return referenceOverlayController.equatorialFromHorizontal(
+      azimuth,
+      altitude,
+    );
   }
 
   function scaleFont(font) {
@@ -1626,6 +1762,11 @@ import {
     cityName,
     formatLocalLong,
     objectLabel,
+    extendedCulture: {
+      westernConstellations: WESTERN_CONSTELLATION_CULTURE,
+      chineseAsterisms: CHINESE_ASTERISM_CULTURE,
+    },
+    brightStarRanks: BRIGHT_STAR_RANKS,
   });
   const objectSearchController = createObjectSearchController({
     $,
@@ -1676,24 +1817,25 @@ import {
     simplifyChinese,
     scaleFont,
   });
-  const traditionalRegionsOverlayController = createTraditionalRegionsOverlayController({
-    getCelestial: () => window.Celestial,
-    state,
-    cfg,
-    traditionalRegionPath,
-    traditionalRegionLabelPath,
-    projectionCoordinateTransform,
-    redrawAndSyncMapBox,
-    regionVisible,
-    simplifyChinese,
-    scaleFont,
-    setTraditionalRegionsReady: (ready) => {
-      traditionalRegionsReady = ready;
-    },
-    setTraditionalLabelsReady: (ready) => {
-      traditionalLabelsReady = ready;
-    },
-  });
+  const traditionalRegionsOverlayController =
+    createTraditionalRegionsOverlayController({
+      getCelestial: () => window.Celestial,
+      state,
+      cfg,
+      traditionalRegionPath,
+      traditionalRegionLabelPath,
+      projectionCoordinateTransform,
+      redrawAndSyncMapBox,
+      regionVisible,
+      simplifyChinese,
+      scaleFont,
+      setTraditionalRegionsReady: (ready) => {
+        traditionalRegionsReady = ready;
+      },
+      setTraditionalLabelsReady: (ready) => {
+        traditionalLabelsReady = ready;
+      },
+    });
   const cultureOverlayController = createCultureOverlayController({
     getCelestial: () => window.Celestial,
     state,
@@ -1900,7 +2042,8 @@ import {
         };
     }
     showObjectInfo(currentSelected);
-    if (skyReady && window.Celestial) redrawAndSyncMapBox("selected object refresh");
+    if (skyReady && window.Celestial)
+      redrawAndSyncMapBox("selected object refresh");
   }
 
   function ensureFloatingObjectInfo() {
@@ -2092,7 +2235,10 @@ import {
     else showToast(t("cultureReady"));
   }
 
-  function applyHorizontalSkyViewFallback(reason = "horizontal fallback", originalError = null) {
+  function applyHorizontalSkyViewFallback(
+    reason = "horizontal fallback",
+    originalError = null,
+  ) {
     try {
       const date = currentInstantDate(),
         lst = localSiderealDegrees(date, state.lon),
@@ -2102,10 +2248,18 @@ import {
       noteTimeRenderDebug({
         fallbackStatus: "ok",
         errorStage: originalError ? "skyview-fallback" : "-",
-        originalError: originalError ? debugErrorText(originalError) : timeRenderDebug.originalError || "-",
-        errorStack: originalError ? debugStackText(originalError) : timeRenderDebug.errorStack || "-",
-        refreshHealth: originalError ? "recovered" : timeRenderDebug.refreshHealth || "healthy",
-        recoveredOriginalError: originalError ? debugErrorText(originalError) : timeRenderDebug.recoveredOriginalError || "-",
+        originalError: originalError
+          ? debugErrorText(originalError)
+          : timeRenderDebug.originalError || "-",
+        errorStack: originalError
+          ? debugStackText(originalError)
+          : timeRenderDebug.errorStack || "-",
+        refreshHealth: originalError
+          ? "recovered"
+          : timeRenderDebug.refreshHealth || "healthy",
+        recoveredOriginalError: originalError
+          ? debugErrorText(originalError)
+          : timeRenderDebug.recoveredOriginalError || "-",
         currentFatalError: "-",
         lastError: originalError
           ? `skyview fallback recovered after: ${debugErrorText(originalError)}`
@@ -2134,7 +2288,10 @@ import {
    */
   function updateSkyView(force = false, reason = "sky view") {
     if (!skyReady || !window.Celestial || !DateTime) {
-      noteTimeRenderDebug({ skyviewStatus: "skipped", fallbackStatus: "unused" });
+      noteTimeRenderDebug({
+        skyviewStatus: "skipped",
+        fallbackStatus: "unused",
+      });
       return true;
     }
     try {
@@ -2149,14 +2306,25 @@ import {
           });
           if (poleAxisConstraintEnabled()) {
             const skyviewCenter = currentCelestialCenter();
-            if (skyviewCenter) setCelestialCenter(skyviewCenter, "horizontal skyview constrained");
+            if (skyviewCenter)
+              setCelestialCenter(
+                skyviewCenter,
+                "horizontal skyview constrained",
+              );
           }
           syncRotationFromCurrentView("horizontal skyview");
-          noteTimeRenderDebug({ skyviewStatus: "ok", fallbackStatus: "unused" });
-          if (force) redrawOk = redrawAndSyncMapBox(reason || "horizontal sky view");
+          noteTimeRenderDebug({
+            skyviewStatus: "ok",
+            fallbackStatus: "unused",
+          });
+          if (force)
+            redrawOk = redrawAndSyncMapBox(reason || "horizontal sky view");
           else syncMapBoxAfterRedraw(projectionCanvasMetrics());
         } catch (skyviewErr) {
-          console.warn("Celestial skyview failed; trying local sidereal fallback", skyviewErr);
+          console.warn(
+            "Celestial skyview failed; trying local sidereal fallback",
+            skyviewErr,
+          );
           noteTimeRenderDebug({
             skyviewStatus: "failed",
             fallbackStatus: "pending",
@@ -2166,10 +2334,16 @@ import {
             errorStack: debugStackText(skyviewErr),
             lastError: `skyview failed: ${debugErrorText(skyviewErr)}`,
           });
-          redrawOk = applyHorizontalSkyViewFallback(reason || "horizontal skyview fallback", skyviewErr);
+          redrawOk = applyHorizontalSkyViewFallback(
+            reason || "horizontal skyview fallback",
+            skyviewErr,
+          );
         }
       } else {
-        noteTimeRenderDebug({ skyviewStatus: "skipped", fallbackStatus: "unused" });
+        noteTimeRenderDebug({
+          skyviewStatus: "skipped",
+          fallbackStatus: "unused",
+        });
         if (force) redrawOk = redrawAndSyncMapBox(reason || "sky view");
       }
       try {
@@ -2357,7 +2531,12 @@ import {
   }
 
   function applyKeyboardPanDelta(lonDelta, latDelta, reason = "keyboard pan") {
-    if (!skyReady || !window.Celestial || isTextEditingTarget(document.activeElement)) return false;
+    if (
+      !skyReady ||
+      !window.Celestial ||
+      isTextEditingTarget(document.activeElement)
+    )
+      return false;
     const center = Celestial.rotate();
     if (!Array.isArray(center)) return false;
     const next = normalizeCenterForControlMode(center);
@@ -2370,9 +2549,14 @@ import {
     return true;
   }
 
-  function panSkyByKeyboard(key, step = Number(cfg("interaction.keyboardPanDegrees", 4)) || 4) {
+  function panSkyByKeyboard(
+    key,
+    step = Number(cfg("interaction.keyboardPanDegrees", 4)) || 4,
+  ) {
     const delta = keyboardPanDeltaForKey(key, step);
-    return delta ? applyKeyboardPanDelta(delta.lon, delta.lat, "keyboard pan") : false;
+    return delta
+      ? applyKeyboardPanDelta(delta.lon, delta.lat, "keyboard pan")
+      : false;
   }
 
   function flushKeyboardPanView() {
@@ -2393,7 +2577,8 @@ import {
     try {
       if (storage) {
         Object.keys(storage).forEach((key) => {
-          if (/^(real-sky-observatory|rso-|__rso_)/i.test(key)) removeStorageKey(key);
+          if (/^(real-sky-observatory|rso-|__rso_)/i.test(key))
+            removeStorageKey(key);
         });
         removeStorageKey(STORAGE_KEY);
       }

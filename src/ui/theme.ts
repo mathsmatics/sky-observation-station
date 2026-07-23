@@ -4,7 +4,10 @@
  *
  * 这里只处理“配置值如何落到 DOM 样式变量”，不读取应用状态，也不绑定控件事件。
  */
-export function applyConfigCssVariables(cfg, rootStyle = document.documentElement.style) {
+export function applyConfigCssVariables(
+  cfg,
+  rootStyle = document.documentElement.style,
+) {
   const vars = {
     "--bg": cfg("theme.pageBackground", "#02050d"),
     "--panel": cfg("theme.panelBackground", "#07101f"),
@@ -49,10 +52,15 @@ export function applyConfigCssVariables(cfg, rootStyle = document.documentElemen
     "--info-text": cfg("components.infoTextColor", "#d8e8f5"),
     "--info-muted": cfg("components.infoMutedColor", "#8da4bb"),
   };
-  Object.entries(vars).forEach(([key, value]) => rootStyle.setProperty(key, value));
+  Object.entries(vars).forEach(([key, value]) =>
+    rootStyle.setProperty(key, value),
+  );
 }
 
-export function applyRootFontScale(fontScale, rootStyle = document.documentElement.style) {
+export function applyRootFontScale(
+  fontScale,
+  rootStyle = document.documentElement.style,
+) {
   const scale = Number(fontScale);
   rootStyle.setProperty(
     "--rso-font-scale",

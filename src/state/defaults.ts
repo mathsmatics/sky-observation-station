@@ -4,7 +4,11 @@
  *
  * 默认值依赖 window.RSO_CONFIG，因此这里保留生成器形式，避免静态复制出第二套状态源。
  */
-export function createDefaultState(cfg, storageSchemaVersion, astronomyModelVersion) {
+export function createDefaultState(
+  cfg,
+  storageSchemaVersion,
+  astronomyModelVersion,
+) {
   return {
     lat: Number(cfg("defaults.latitude", 39.9042)),
     lon: Number(cfg("defaults.longitude", 116.4074)),
@@ -38,7 +42,10 @@ export function createDefaultState(cfg, storageSchemaVersion, astronomyModelVers
     deepSky: !!cfg("defaults.showDeepSky", false),
     speed: Number(cfg("defaults.timeSpeed", 3600)),
     panelOpen: !!cfg("defaults.panelOpen", true),
-    poleAxisConstraintEnabled: !!cfg("defaults.poleAxisConstraintEnabled", true),
+    poleAxisConstraintEnabled: !!cfg(
+      "defaults.poleAxisConstraintEnabled",
+      true,
+    ),
     projection: cfg("defaults.projection", "airy"),
     coordinateSystem: cfg("defaults.coordinateSystem", "horizontal"),
     menuCollapsed: Array.isArray(cfg("defaults.menuCollapsed", []))

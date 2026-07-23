@@ -9,7 +9,10 @@ export function getInternalZoom(celestial = window.Celestial) {
   }
 }
 
-export function syncInternalZoomForMetrics(metrics, celestial = window.Celestial) {
+export function syncInternalZoomForMetrics(
+  metrics,
+  celestial = window.Celestial,
+) {
   try {
     const target = Math.max(1, Number(metrics && metrics.internalZoom) || 1);
     const current = getInternalZoom(celestial);
@@ -34,11 +37,21 @@ export function currentCelestialCenter(celestial = window.Celestial) {
   }
 }
 
-export function invertSkyCoordinateAtClient(clientX, clientY, canvas = null, celestial = window.Celestial) {
+export function invertSkyCoordinateAtClient(
+  clientX,
+  clientY,
+  canvas = null,
+  celestial = window.Celestial,
+) {
   try {
-    if (!celestial || !celestial.mapProjection || !celestial.mapProjection.invert)
+    if (
+      !celestial ||
+      !celestial.mapProjection ||
+      !celestial.mapProjection.invert
+    )
       return null;
-    const targetCanvas = canvas || document.querySelector("#celestial-map canvas");
+    const targetCanvas =
+      canvas || document.querySelector("#celestial-map canvas");
     if (!targetCanvas) return null;
     const rect = targetCanvas.getBoundingClientRect();
     const x = Number(clientX) - rect.left;

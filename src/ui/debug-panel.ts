@@ -129,7 +129,8 @@ export function debugOffsetNoteValue(note, zh) {
 }
 
 export function debugRefreshHealthValue(value, zh) {
-  if (value === "recovered") return zh ? "fallback 已恢复" : "recovered by fallback";
+  if (value === "recovered")
+    return zh ? "fallback 已恢复" : "recovered by fallback";
   if (value === "failed") return zh ? "失败" : "failed";
   if (value === "pending") return zh ? "刷新中" : "pending";
   return zh ? "正常" : "healthy";

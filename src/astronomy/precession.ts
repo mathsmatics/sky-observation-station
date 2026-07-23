@@ -65,13 +65,21 @@ function fromVector(v: [number, number, number]): EquatorialCoordinate {
   return [ra, dec];
 }
 
-function rotateZ(v: [number, number, number], angleRad: number): [number, number, number] {
-  const c = Math.cos(angleRad), s = Math.sin(angleRad);
+function rotateZ(
+  v: [number, number, number],
+  angleRad: number,
+): [number, number, number] {
+  const c = Math.cos(angleRad),
+    s = Math.sin(angleRad);
   return [c * v[0] - s * v[1], s * v[0] + c * v[1], v[2]];
 }
 
-function rotateY(v: [number, number, number], angleRad: number): [number, number, number] {
-  const c = Math.cos(angleRad), s = Math.sin(angleRad);
+function rotateY(
+  v: [number, number, number],
+  angleRad: number,
+): [number, number, number] {
+  const c = Math.cos(angleRad),
+    s = Math.sin(angleRad);
   return [c * v[0] + s * v[2], v[1], -s * v[0] + c * v[2]];
 }
 
@@ -79,7 +87,11 @@ function rotateY(v: [number, number, number], angleRad: number): [number, number
  * IAU 1976 低阶岁差角，单位为角秒。
  * 本项目只要求天象馆级可视化一致性，因此不加入章动和更高阶历表项。
  */
-function precessionAnglesArcsec(t: number): { zeta: number; z: number; theta: number } {
+function precessionAnglesArcsec(t: number): {
+  zeta: number;
+  z: number;
+  theta: number;
+} {
   const zeta = 2306.2181 * t + 0.30188 * t * t + 0.017998 * t * t * t;
   const z = 2306.2181 * t + 1.09468 * t * t + 0.018203 * t * t * t;
   const theta = 2004.3109 * t - 0.42665 * t * t - 0.041833 * t * t * t;
@@ -124,19 +136,27 @@ export function precessEquatorialDateToJ2000(
 /** 当前日期平均黄赤交角，用于黄道相关显示和 debug。 */
 export function meanObliquityDegrees(date: Date): number {
   const t = julianCenturiesFromJ2000(date);
-  const seconds = 21.448 - 46.8150 * t - 0.00059 * t * t + 0.001813 * t * t * t;
+  const seconds = 21.448 - 46.815 * t - 0.00059 * t * t + 0.001813 * t * t * t;
   return 23 + 26 / 60 + seconds / 3600;
 }
 
 /** J2000 黄道坐标转 J2000 赤道坐标；之后再由岁差模块转到当前日期显示框架。 */
-export function eclipticJ2000ToEquatorialJ2000(lambdaDeg: number, betaDeg = 0): EquatorialCoordinate {
+export function eclipticJ2000ToEquatorialJ2000(
+  lambdaDeg: number,
+  betaDeg = 0,
+): EquatorialCoordinate {
   const eps = 23.439291111 * DEG_TO_RAD;
   const lambda = Number(lambdaDeg) * DEG_TO_RAD;
   const beta = Number(betaDeg) * DEG_TO_RAD;
-  const sinDec = Math.sin(beta) * Math.cos(eps) + Math.cos(beta) * Math.sin(eps) * Math.sin(lambda);
+  const sinDec =
+    Math.sin(beta) * Math.cos(eps) +
+    Math.cos(beta) * Math.sin(eps) * Math.sin(lambda);
   const y = Math.sin(lambda) * Math.cos(eps) - Math.tan(beta) * Math.sin(eps);
   const x = Math.cos(lambda);
-  return [normalizeSignedDegrees(Math.atan2(y, x) * RAD_TO_DEG), Math.asin(Math.max(-1, Math.min(1, sinDec))) * RAD_TO_DEG];
+  return [
+    normalizeSignedDegrees(Math.atan2(y, x) * RAD_TO_DEG),
+    Math.asin(Math.max(-1, Math.min(1, sinDec))) * RAD_TO_DEG,
+  ];
 }
 
 /** 生成 debug 面板需要的天文模型边界信息。 */

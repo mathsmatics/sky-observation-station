@@ -1,6 +1,11 @@
 import { degToRad, normalizeDegrees, radToDeg } from "./angle";
 import { julianDateFromDate } from "./time";
-import { calculateMeeusSun, eclipticToEquatorialDeg, julianCenturyFromJulianDate, meanObliquityMeeusDeg } from "./meeus-sun";
+import {
+  calculateMeeusSun,
+  eclipticToEquatorialDeg,
+  julianCenturyFromJulianDate,
+  meanObliquityMeeusDeg,
+} from "./meeus-sun";
 import { calculateMoonPhase, type MoonPhaseInfo } from "./moon-phase";
 
 /**
@@ -169,11 +174,37 @@ export function calculateMeeusMoon(date: Date): MeeusMoonPosition | null {
   const T2 = T * T;
   const T3 = T2 * T;
   const T4 = T3 * T;
-  const Lp = normalizeDegrees(218.3164477 + 481267.88123421 * T - 0.0015786 * T2 + T3 / 538841 - T4 / 65194000);
-  const D = normalizeDegrees(297.8501921 + 445267.1114034 * T - 0.0018819 * T2 + T3 / 545868 - T4 / 113065000);
-  const M = normalizeDegrees(357.5291092 + 35999.0502909 * T - 0.0001536 * T2 + T3 / 24490000);
-  const Mp = normalizeDegrees(134.9633964 + 477198.8675055 * T + 0.0087414 * T2 + T3 / 69699 - T4 / 14712000);
-  const F = normalizeDegrees(93.2720950 + 483202.0175233 * T - 0.0036539 * T2 - T3 / 3526000 + T4 / 863310000);
+  const Lp = normalizeDegrees(
+    218.3164477 +
+      481267.88123421 * T -
+      0.0015786 * T2 +
+      T3 / 538841 -
+      T4 / 65194000,
+  );
+  const D = normalizeDegrees(
+    297.8501921 +
+      445267.1114034 * T -
+      0.0018819 * T2 +
+      T3 / 545868 -
+      T4 / 113065000,
+  );
+  const M = normalizeDegrees(
+    357.5291092 + 35999.0502909 * T - 0.0001536 * T2 + T3 / 24490000,
+  );
+  const Mp = normalizeDegrees(
+    134.9633964 +
+      477198.8675055 * T +
+      0.0087414 * T2 +
+      T3 / 69699 -
+      T4 / 14712000,
+  );
+  const F = normalizeDegrees(
+    93.272095 +
+      483202.0175233 * T -
+      0.0036539 * T2 -
+      T3 / 3526000 +
+      T4 / 863310000,
+  );
   const E = 1 - 0.002516 * T - 0.0000074 * T2;
 
   let sumLongitude = 0;
@@ -210,7 +241,10 @@ export function calculateMeeusMoon(date: Date): MeeusMoonPosition | null {
   const obliquity = meanObliquityMeeusDeg(T);
   const [ra, dec] = eclipticToEquatorialDeg(longitude, latitude, obliquity);
   const sun = calculateMeeusSun(date);
-  const phase = calculateMoonPhase(longitude, sun ? sun.apparentLongitudeDeg : longitude);
+  const phase = calculateMoonPhase(
+    longitude,
+    sun ? sun.apparentLongitudeDeg : longitude,
+  );
 
   return {
     julianDate: jd as number,
@@ -221,7 +255,9 @@ export function calculateMeeusMoon(date: Date): MeeusMoonPosition | null {
     rightAscensionDeg: ra,
     declinationDeg: dec,
     meanLongitudeDeg: Lp,
-    elongationDeg: normalizeDegrees(longitude - (sun ? sun.apparentLongitudeDeg : longitude)),
+    elongationDeg: normalizeDegrees(
+      longitude - (sun ? sun.apparentLongitudeDeg : longitude),
+    ),
     sunMeanAnomalyDeg: M,
     moonMeanAnomalyDeg: Mp,
     argumentOfLatitudeDeg: F,

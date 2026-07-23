@@ -39,7 +39,8 @@ export function createEpochFrameController(options) {
       normalizeCelestialLongitude(coord[0]),
       Number(coord[1]),
     ];
-    if (!Number.isFinite(equatorial[0]) || !Number.isFinite(equatorial[1])) return null;
+    if (!Number.isFinite(equatorial[0]) || !Number.isFinite(equatorial[1]))
+      return null;
     if (projectionCoordinateTransform() === "equatorial") return equatorial;
     try {
       return Celestial.getPoint(equatorial, projectionCoordinateTransform());
@@ -66,7 +67,9 @@ export function createEpochFrameController(options) {
         Number.isFinite(Number(value[1]))
       ) {
         const mapped = mapper([Number(value[0]), Number(value[1])]);
-        return mapped ? [mapped[0], mapped[1]] : [Number(value[0]), Number(value[1])];
+        return mapped
+          ? [mapped[0], mapped[1]]
+          : [Number(value[0]), Number(value[1])];
       }
       return Array.isArray(value) ? value.map(mapCoord) : value;
     };
@@ -92,7 +95,7 @@ export function createEpochFrameController(options) {
 
   function syncMilkyWayBackgroundMaskGeometry() {
     const sourceNode =
-      selectionNodes(".milkyWay")[0] || selectionNodes(".mw")[0],
+        selectionNodes(".milkyWay")[0] || selectionNodes(".mw")[0],
       sourceFeature = sourceNode && sourceNode.__data__,
       sourceCoordinates =
         sourceFeature &&
@@ -124,16 +127,26 @@ export function createEpochFrameController(options) {
   }
 
   function prepareDatasetForEpoch(path, data) {
-    if (!data || data.type !== "FeatureCollection" || !Array.isArray(data.features)) return data;
+    if (
+      !data ||
+      data.type !== "FeatureCollection" ||
+      !Array.isArray(data.features)
+    )
+      return data;
     if (useNativeGalacticFixedSkyFrame()) {
-      astronomyModelDebug.fixedLayerPrecession = "native galactic fixed-sky frame";
+      astronomyModelDebug.fixedLayerPrecession =
+        "native galactic fixed-sky frame";
       astronomyModelDebug.lastPrecessionError = "-";
       return data;
     }
     const date = currentInstantDate();
     let transformed = 0;
     data.features.forEach((feature) => {
-      if (applyFeatureGeometryFrame(feature, (coord) => epochEquatorialFromJ2000(coord, date)))
+      if (
+        applyFeatureGeometryFrame(feature, (coord) =>
+          epochEquatorialFromJ2000(coord, date),
+        )
+      )
         transformed += 1;
     });
     astronomyModelDebug.fixedLayerPrecession = `${transformed} features prepared`;
@@ -159,7 +172,9 @@ export function createEpochFrameController(options) {
       const diag = diagnosticsForDate(date);
       astronomyModelDebug.sourceEpoch = diag.sourceEpoch;
       astronomyModelDebug.displayEpoch = diag.displayEpoch;
-      astronomyModelDebug.precessionStatus = astronomyModelEnabled() ? diag.precessionStatus : "disabled";
+      astronomyModelDebug.precessionStatus = astronomyModelEnabled()
+        ? diag.precessionStatus
+        : "disabled";
       astronomyModelDebug.precessionModel = diag.modelName;
       astronomyModelDebug.nutation = "off";
       astronomyModelDebug.properMotion = "off";
@@ -172,7 +187,8 @@ export function createEpochFrameController(options) {
       astronomyModelDebug.moonPhaseModel = "Meeus phase approximation";
       astronomyModelDebug.planetModel = "simple orbital model";
       astronomyModelDebug.vsop87 = "off";
-      astronomyModelDebug.precisionBoundary = "visual reference, not precision ephemeris";
+      astronomyModelDebug.precisionBoundary =
+        "visual reference, not precision ephemeris";
       astronomyModelDebug.planetEpochHandling = "connected to display frame";
       astronomyModelDebug.storageSchemaVersion = storageSchemaVersion;
       astronomyModelDebug.astronomyModelVersion = astronomyModelVersion;
@@ -186,7 +202,8 @@ export function createEpochFrameController(options) {
     if (!Celestial || !Celestial.container) return;
     updateAstronomyModelDebug();
     if (useNativeGalacticFixedSkyFrame()) {
-      astronomyModelDebug.fixedLayerPrecession = "native galactic fixed-sky frame";
+      astronomyModelDebug.fixedLayerPrecession =
+        "native galactic fixed-sky frame";
       astronomyModelDebug.lastPrecessionError = "-";
       return;
     }
@@ -214,13 +231,18 @@ export function createEpochFrameController(options) {
         });
       });
       const syncedMilkyWayMasks = syncMilkyWayBackgroundMaskGeometry();
-      astronomyModelDebug.fixedLayerPrecession = transformed ? `${transformed} displayed features` : "no loaded feature geometry";
+      astronomyModelDebug.fixedLayerPrecession = transformed
+        ? `${transformed} displayed features`
+        : "no loaded feature geometry";
       if (syncedMilkyWayMasks)
         astronomyModelDebug.fixedLayerPrecession += `, ${syncedMilkyWayMasks} Milky Way masks synced`;
-      astronomyModelDebug.boundaryPrecession = transformed ? "connected" : astronomyModelDebug.boundaryPrecession;
-      astronomyModelDebug.asterismPrecession = transformed ? "connected" : astronomyModelDebug.asterismPrecession;
-      if (onDisplayedFeaturesTransformed)
-        onDisplayedFeaturesTransformed();
+      astronomyModelDebug.boundaryPrecession = transformed
+        ? "connected"
+        : astronomyModelDebug.boundaryPrecession;
+      astronomyModelDebug.asterismPrecession = transformed
+        ? "connected"
+        : astronomyModelDebug.asterismPrecession;
+      if (onDisplayedFeaturesTransformed) onDisplayedFeaturesTransformed();
       astronomyModelDebug.lastPrecessionError = "-";
     } catch (err) {
       astronomyModelDebug.lastPrecessionError = debugErrorText(err);

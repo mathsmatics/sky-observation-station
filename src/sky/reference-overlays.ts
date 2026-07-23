@@ -123,7 +123,11 @@ export function createReferenceOverlayController(options) {
       Celestial.context,
       text,
       point,
-      { ...style, font: scaleFont(style.font), baseline: style.baseline || "middle" },
+      {
+        ...style,
+        font: scaleFont(style.font),
+        baseline: style.baseline || "middle",
+      },
       align,
     );
   }
@@ -253,7 +257,8 @@ export function createReferenceOverlayController(options) {
       const pt = Celestial.mapProjection(display);
       if (pt && Number.isFinite(pt[0]) && Number.isFinite(pt[1])) point = pt;
     }
-    if (!point && currentSelected.coord) point = projectEquatorialCoordinate(currentSelected.coord);
+    if (!point && currentSelected.coord)
+      point = projectEquatorialCoordinate(currentSelected.coord);
     if (!point) return;
     drawSelectionReticle(Celestial.context, point, {
       stroke: cfg("selectionMarker.stroke", "#8eeaff"),
@@ -290,7 +295,9 @@ export function createReferenceOverlayController(options) {
     const points = [];
     for (let lon = -180; lon <= 180; lon += 2) {
       const coord = [lon, 0];
-      points.push(Celestial.clip(coord) ? Celestial.mapProjection(coord) : null);
+      points.push(
+        Celestial.clip(coord) ? Celestial.mapProjection(coord) : null,
+      );
     }
     drawProjectedLine(points, style);
   }

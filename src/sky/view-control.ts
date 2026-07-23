@@ -11,8 +11,12 @@ import { degToRad, radToDeg } from "../astronomy/angle";
 export function normalizeControlCenter(center, constrained) {
   const source = Array.isArray(center) ? center.slice() : [0, 0, 0];
   const next = [
-    Number.isFinite(Number(source[0])) ? normalizeCelestialLongitude(Number(source[0])) : 0,
-    Number.isFinite(Number(source[1])) ? Math.max(-89.5, Math.min(89.5, Number(source[1]))) : 0,
+    Number.isFinite(Number(source[0]))
+      ? normalizeCelestialLongitude(Number(source[0]))
+      : 0,
+    Number.isFinite(Number(source[1]))
+      ? Math.max(-89.5, Math.min(89.5, Number(source[1])))
+      : 0,
     Number.isFinite(Number(source[2])) ? Number(source[2]) : 0,
   ];
   if (constrained) next[2] = 0;
@@ -24,7 +28,7 @@ export function normalizeCelestialLongitude(deg) {
 }
 
 function normalizeSkyLongitude(deg) {
-  return ((Number(deg) || 0) % 360 + 360) % 360;
+  return (((Number(deg) || 0) % 360) + 360) % 360;
 }
 
 export function finiteSkyCoord(coord) {
@@ -108,7 +112,8 @@ export function updatePoleAxisDiagnostics(options) {
     constrained,
   } = options;
   const poles = currentCoordinatePoles(coordinateSystem, lang);
-  debug.status = status || (constrained ? "euler-constrained" : "quaternion-free");
+  debug.status =
+    status || (constrained ? "euler-constrained" : "quaternion-free");
   if (!poles) {
     Object.assign(debug, {
       guardActive: false,
@@ -135,8 +140,14 @@ export function updatePoleAxisDiagnostics(options) {
       canvasRect && Number.isFinite(canvasRect.width)
         ? canvasRect.width / 2
         : metrics.width / 2,
-    positivePoint = projectCurrentCoordinatePoint(celestial, poles.positiveCoord),
-    negativePoint = projectCurrentCoordinatePoint(celestial, poles.negativeCoord),
+    positivePoint = projectCurrentCoordinatePoint(
+      celestial,
+      poles.positiveCoord,
+    ),
+    negativePoint = projectCurrentCoordinatePoint(
+      celestial,
+      poles.negativeCoord,
+    ),
     positiveDx = positivePoint ? positivePoint.x - centerlineX : NaN,
     negativeDx = negativePoint ? negativePoint.x - centerlineX : NaN;
   let axisAngleDeg = NaN;
@@ -149,10 +160,18 @@ export function updatePoleAxisDiagnostics(options) {
     positiveName: poles.positiveName,
     negativeName: poles.negativeName,
     polesDefined: true,
-    pointerPositiveDeg: pointer ? angularDistanceDeg(pointer, poles.positiveCoord) : NaN,
-    pointerNegativeDeg: pointer ? angularDistanceDeg(pointer, poles.negativeCoord) : NaN,
-    centerPositiveDeg: viewCenter ? angularDistanceDeg(viewCenter, poles.positiveCoord) : NaN,
-    centerNegativeDeg: viewCenter ? angularDistanceDeg(viewCenter, poles.negativeCoord) : NaN,
+    pointerPositiveDeg: pointer
+      ? angularDistanceDeg(pointer, poles.positiveCoord)
+      : NaN,
+    pointerNegativeDeg: pointer
+      ? angularDistanceDeg(pointer, poles.negativeCoord)
+      : NaN,
+    centerPositiveDeg: viewCenter
+      ? angularDistanceDeg(viewCenter, poles.positiveCoord)
+      : NaN,
+    centerNegativeDeg: viewCenter
+      ? angularDistanceDeg(viewCenter, poles.negativeCoord)
+      : NaN,
     positivePoint,
     negativePoint,
     centerlineX,
@@ -164,21 +183,35 @@ export function updatePoleAxisDiagnostics(options) {
 }
 
 export function evaluatePointerPoleGuard(options) {
-  const { debug, pointerCoord, center, enterDeg, exitDeg, pointerGuardEnabled, updateDiagnostics } = options;
+  const {
+    debug,
+    pointerCoord,
+    center,
+    enterDeg,
+    exitDeg,
+    pointerGuardEnabled,
+    updateDiagnostics,
+  } = options;
   const threshold = debug.guardActive ? exitDeg : enterDeg;
   const diag = updateDiagnostics(pointerCoord, center);
-  const candidates = (pointerGuardEnabled
-    ? [
-        ["pointer-near-positive-pole", diag.pointerPositiveDeg],
-        ["pointer-near-negative-pole", diag.pointerNegativeDeg],
-      ]
-    : [])
+  const candidates = (
+    pointerGuardEnabled
+      ? [
+          ["pointer-near-positive-pole", diag.pointerPositiveDeg],
+          ["pointer-near-negative-pole", diag.pointerNegativeDeg],
+        ]
+      : []
+  )
     .filter((item) => Number.isFinite(Number(item[1])))
     .sort((a, b) => Number(a[1]) - Number(b[1]));
   const nearest = candidates[0];
   const active = !!nearest && Number(nearest[1]) <= threshold;
   debug.guardActive = active;
-  debug.guardReason = active ? nearest[0] : candidates.length ? "none" : "undefined";
+  debug.guardReason = active
+    ? nearest[0]
+    : candidates.length
+      ? "none"
+      : "undefined";
   debug.status = active ? "guard-active" : debug.status;
   return debug;
 }

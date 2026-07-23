@@ -17,5 +17,7 @@ export function elementRect(selector: string): DOMRect | null {
 
 export function isTextEditingTarget(target: any): boolean {
   if (!target || !target.closest) return false;
-  return !!target.closest("input,select,textarea,[contenteditable='true'],.modal,#debug-overlay");
+  return !!target.closest(
+    "input,select,textarea,[contenteditable='true'],.modal,#debug-overlay",
+  );
 }

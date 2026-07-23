@@ -564,8 +564,10 @@ input[type="range"] {
   transition: 0.35s ease;
 }
 .loading.hidden {
+  display: none;
   opacity: 0;
   visibility: hidden;
+  pointer-events: none;
 }
 .loader-box {
   text-align: center;
@@ -1443,7 +1445,7 @@ select optgroup {
     padding-bottom: max(10px, calc(env(safe-area-inset-bottom) + 10px));
   }
   input[type="number"],
-    input[type="text"],
+  input[type="text"],
   select {
     min-height: 42px;
     font-size: calc(16px * var(--rso-font-scale));
@@ -1834,7 +1836,9 @@ select optgroup {
   flex: 0 0 auto;
 }
 .view-tools-grid {
-  grid-template-columns: minmax(2.8em, 0.6fr) minmax(2.8em, 0.6fr) minmax(0, 1fr) minmax(0, 1fr) minmax(2.8em, 0.6fr) minmax(2.8em, 0.6fr);
+  grid-template-columns:
+    minmax(2.8em, 0.6fr) minmax(2.8em, 0.6fr) minmax(0, 1fr)
+    minmax(0, 1fr) minmax(2.8em, 0.6fr) minmax(2.8em, 0.6fr);
 }
 .view-tools-grid button,
 .calendar-shifts button,
@@ -1852,7 +1856,10 @@ select optgroup {
 #debug-toggle,
 #explain-btn,
 #reset-defaults-btn {
-  height: max(calc(var(--top-control-size, 36px) * var(--rso-font-scale)), 36px);
+  height: max(
+    calc(var(--top-control-size, 36px) * var(--rso-font-scale)),
+    36px
+  );
 }
 #panel-toggle.panel-toggle-button,
 #explain-btn,
@@ -1935,7 +1942,10 @@ select optgroup {
 
 /* Limited 5.3.x fix: keep brand fixed below top buttons, keep HUD in the collapsible panel, equalize top button height, and keep the guide selector as a native dropdown. */
 :root {
-  --rso-top-control-size: max(var(--panel-toggle-size, 36px), calc(var(--panel-toggle-size, 36px) * var(--rso-font-scale)));
+  --rso-top-control-size: max(
+    var(--panel-toggle-size, 36px),
+    calc(var(--panel-toggle-size, 36px) * var(--rso-font-scale))
+  );
   --rso-top-control-touch-size: max(42px, calc(42px * var(--rso-font-scale)));
 }
 #sidebar-head {

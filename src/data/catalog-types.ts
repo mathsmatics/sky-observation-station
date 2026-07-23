@@ -55,6 +55,7 @@ export interface StarNameEntry {
   hip?: string | number;
   hd?: string | number;
   c?: string;
+  var?: string;
 }
 
 export interface DeepSkyObject extends GeoJsonFeature<{

@@ -262,21 +262,47 @@ export function createCelestialDisplayController(options) {
   function dataLayerCount(selector) {
     const Celestial = getCelestial();
     try {
-      const sel = Celestial.container && Celestial.container.selectAll(selector);
+      const sel =
+        Celestial.container && Celestial.container.selectAll(selector);
       return sel && sel[0] ? sel[0].length : 0;
     } catch (_) {
       return 0;
     }
   }
 
-  function waitForCanvas(viewState = null, generation = appState.getRebuildGeneration()) {
+  function localDataLoadCount(file) {
+    const counts = window.__RSO_LOAD_COUNTS__ || {};
+    return Number(counts[file] || counts[`src/data/${file}`] || 0) || 0;
+  }
+
+  function canvasIsDrawable(canvas) {
+    if (!canvas) return false;
+    const rect = canvas.getBoundingClientRect();
+    return (
+      Number(canvas.width) > 0 ||
+      Number(canvas.height) > 0 ||
+      Number(rect.width) > 0 ||
+      Number(rect.height) > 0
+    );
+  }
+
+  function waitForCanvas(
+    viewState = null,
+    generation = appState.getRebuildGeneration(),
+  ) {
     clearTimeout(appState.getLoadTimer());
     const started = performance.now();
     const check = () => {
       if (generation !== appState.getRebuildGeneration()) return;
       const canvas = document.querySelector("#celestial-map canvas");
-      const starsLoaded = dataLayerCount(".star") > 0;
-      if (canvas && starsLoaded) {
+      const starsLoaded =
+        dataLayerCount(".star") > 0 ||
+        localDataLoadCount("stars/stars.6.json") > 0 ||
+        localDataLoadCount("stars.6.json") > 0;
+      const canvasReady =
+        canvasIsDrawable(canvas) &&
+        (starsLoaded || performance.now() - started > 800);
+      if (canvasReady) {
         appState.setSkyReady(true);
         view.syncRenderedMapBox();
         stabilizeDataSelections();
@@ -295,9 +321,15 @@ export function createCelestialDisplayController(options) {
           current.projectionViews && current.projectionViews[view.viewKey()];
         const shouldRestoreViewState = viewState && !view.isHorizontalView();
         if (shouldRestoreViewState) view.restoreView(viewState);
-        else if (savedView && !view.isHorizontalView()) view.restoreView(savedView);
+        else if (savedView && !view.isHorizontalView())
+          view.restoreView(savedView);
         else if (view.isHorizontalView())
-          view.setMapScale(view.viewMapScale(savedView || view.desiredView(), current.mapScale));
+          view.setMapScale(
+            view.viewMapScale(
+              savedView || view.desiredView(),
+              current.mapScale,
+            ),
+          );
         actions.updateSelectedObject();
         setTimeout(() => {
           if (generation !== appState.getRebuildGeneration()) return;
@@ -335,7 +367,10 @@ export function createCelestialDisplayController(options) {
       appState.setSuppressResizeUntil(performance.now() + 1200);
       const generation = appState.incrementRebuildGeneration();
       const current = state();
-      current.mapScale = view.viewMapScale(viewState || view.desiredView(), current.mapScale);
+      current.mapScale = view.viewMapScale(
+        viewState || view.desiredView(),
+        current.mapScale,
+      );
       $("celestial-map").innerHTML = "";
       appState.setSkyReady(false);
       overlays.registerChineseOverlay();

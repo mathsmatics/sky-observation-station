@@ -44,7 +44,11 @@
     });
   };
 
-  if (window.d3 && typeof window.d3.json === "function" && !window.__RSO_D3_JSON_PATCHED__) {
+  if (
+    window.d3 &&
+    typeof window.d3.json === "function" &&
+    !window.__RSO_D3_JSON_PATCHED__
+  ) {
     var originalJson = window.d3.json;
     window.__RSO_D3_JSON_PATCHED__ = true;
     window.d3.json = function (url, callback) {
@@ -58,9 +62,14 @@
         var copy = cloneData(data);
         if (typeof window.__RSO_PREPARE_SKY_DATASET__ === "function") {
           try {
-            copy = window.__RSO_PREPARE_SKY_DATASET__(clean || name, copy) || copy;
+            copy =
+              window.__RSO_PREPARE_SKY_DATASET__(clean || name, copy) || copy;
           } catch (error) {
-            console.warn("RSO sky data preparation failed", clean || name, error);
+            console.warn(
+              "RSO sky data preparation failed",
+              clean || name,
+              error,
+            );
           }
         }
         if (typeof callback === "function") {

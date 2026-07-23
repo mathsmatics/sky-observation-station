@@ -36,12 +36,21 @@ export function clampMapScale(value: number, min: number, max: number): number {
   const safeMin = Number.isFinite(min) ? min : 1;
   const safeMax = Math.max(safeMin, Number.isFinite(max) ? max : safeMin);
   const number = Number(value);
-  return Math.max(safeMin, Math.min(safeMax, Number.isFinite(number) ? number : safeMin));
+  return Math.max(
+    safeMin,
+    Math.min(safeMax, Number.isFinite(number) ? number : safeMin),
+  );
 }
 
-export function viewMapScale(view: any, fallback: number, clamp: (value: number) => number): number {
-  if (view && Object.prototype.hasOwnProperty.call(view, "mapScale")) return clamp(view.mapScale);
-  if (view && Object.prototype.hasOwnProperty.call(view, "zoom")) return clamp(view.zoom);
+export function viewMapScale(
+  view: any,
+  fallback: number,
+  clamp: (value: number) => number,
+): number {
+  if (view && Object.prototype.hasOwnProperty.call(view, "mapScale"))
+    return clamp(view.mapScale);
+  if (view && Object.prototype.hasOwnProperty.call(view, "zoom"))
+    return clamp(view.zoom);
   return clamp(fallback);
 }
 
@@ -78,7 +87,10 @@ export function desiredView(options: {
   if (options.isHorizontalView) {
     return {
       ...options.fallbackView,
-      mapScale: options.viewMapScale(options.savedView || options.fallbackView, options.fallbackView.mapScale),
+      mapScale: options.viewMapScale(
+        options.savedView || options.fallbackView,
+        options.fallbackView.mapScale,
+      ),
     };
   }
   return options.savedView || options.fallbackView;

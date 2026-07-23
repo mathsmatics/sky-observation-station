@@ -110,7 +110,8 @@ export function createHelpRenderer(deps: HelpRendererDeps) {
       copyParts.push(section.title);
       (section.blocks || []).forEach((block: any) => {
         sectionEl.appendChild(createGuideElement(block));
-        if (block.html) copyParts.push(String(block.html).replace(/<[^>]+>/g, ""));
+        if (block.html)
+          copyParts.push(String(block.html).replace(/<[^>]+>/g, ""));
         if (block.text) copyParts.push(block.text);
         if (block.items) copyParts.push(block.items.join("\n"));
       });
@@ -120,10 +121,12 @@ export function createHelpRenderer(deps: HelpRendererDeps) {
   }
 
   function initializeGuidePagination(): void {
-    document.querySelectorAll<HTMLElement>(".doc[data-doc-lang]").forEach((article) => {
-      const lang = article.dataset.docLang || "zh";
-      renderGuideArticle(article, deps.helpManualForLanguage(lang));
-    });
+    document
+      .querySelectorAll<HTMLElement>(".doc[data-doc-lang]")
+      .forEach((article) => {
+        const lang = article.dataset.docLang || "zh";
+        renderGuideArticle(article, deps.helpManualForLanguage(lang));
+      });
   }
 
   function guidePages(article: HTMLElement): HTMLElement[] {
@@ -132,7 +135,9 @@ export function createHelpRenderer(deps: HelpRendererDeps) {
 
   function guidePageTitle(page: HTMLElement): string {
     const heading = page.querySelector("h3");
-    return String(heading?.textContent || (guideLang() === "zh" ? "说明" : "Guide")).trim();
+    return String(
+      heading?.textContent || (guideLang() === "zh" ? "说明" : "Guide"),
+    ).trim();
   }
 
   function closeGuidePageDropdown(): void {
@@ -150,7 +155,9 @@ export function createHelpRenderer(deps: HelpRendererDeps) {
     if (!dropdown || !trigger || !menu) return;
     dropdown.classList.add("open");
     trigger.setAttribute("aria-expanded", "true");
-    const active = menu.querySelector('[aria-selected="true"]') as HTMLElement | null;
+    const active = menu.querySelector(
+      '[aria-selected="true"]',
+    ) as HTMLElement | null;
     active?.scrollIntoView({ block: "nearest" });
   }
 
@@ -164,7 +171,9 @@ export function createHelpRenderer(deps: HelpRendererDeps) {
   function focusGuidePageOption(offset: number): void {
     const menu = $("guide-page-menu");
     if (!menu) return;
-    const options = Array.from(menu.querySelectorAll<HTMLElement>(".guide-page-option"));
+    const options = Array.from(
+      menu.querySelectorAll<HTMLElement>(".guide-page-option"),
+    );
     if (!options.length) return;
     const active = document.activeElement;
     const current = Math.max(0, options.indexOf(active as HTMLElement));
@@ -172,7 +181,10 @@ export function createHelpRenderer(deps: HelpRendererDeps) {
     options[next].focus();
   }
 
-  function renderGuidePageDropdown(sections: HTMLElement[], activeIndex: number): void {
+  function renderGuidePageDropdown(
+    sections: HTMLElement[],
+    activeIndex: number,
+  ): void {
     const trigger = $("guide-page-trigger");
     const label = $("guide-page-label");
     const menu = $("guide-page-menu");
@@ -180,7 +192,9 @@ export function createHelpRenderer(deps: HelpRendererDeps) {
     const ariaLabel = deps.t("guideSelectLabel");
     trigger.setAttribute("aria-label", ariaLabel);
     menu.setAttribute("aria-label", ariaLabel);
-    label.textContent = sections[activeIndex] ? guidePageTitle(sections[activeIndex]) : ariaLabel;
+    label.textContent = sections[activeIndex]
+      ? guidePageTitle(sections[activeIndex])
+      : ariaLabel;
     menu.textContent = "";
     sections.forEach((section, index) => {
       const option = document.createElement("button");
@@ -231,7 +245,10 @@ export function createHelpRenderer(deps: HelpRendererDeps) {
     if (!article) return;
     const sections = guidePages(article);
     const lang = guideLang();
-    pageByLang[lang] = Math.max(0, Math.min(index, Math.max(0, sections.length - 1)));
+    pageByLang[lang] = Math.max(
+      0,
+      Math.min(index, Math.max(0, sections.length - 1)),
+    );
     updateGuidePaginationUI(true);
   }
 
@@ -240,7 +257,10 @@ export function createHelpRenderer(deps: HelpRendererDeps) {
     if (!article) return;
     const sections = guidePages(article);
     const lang = guideLang();
-    pageByLang[lang] = Math.max(0, Math.min(pageByLang[lang] + offset, Math.max(0, sections.length - 1)));
+    pageByLang[lang] = Math.max(
+      0,
+      Math.min(pageByLang[lang] + offset, Math.max(0, sections.length - 1)),
+    );
     updateGuidePaginationUI(true);
   }
 

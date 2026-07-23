@@ -29,7 +29,17 @@ import {
  */
 export function createDebugOverlayController(services) {
   const {
-    dom: { $, document, window, navigator, screen, performance, setTimeout, clearTimeout, requestAnimationFrame },
+    dom: {
+      $,
+      document,
+      window,
+      navigator,
+      screen,
+      performance,
+      setTimeout,
+      clearTimeout,
+      requestAnimationFrame,
+    },
     appState,
     config: { cfg, getMapScale },
     layout: { elementRect },
@@ -63,10 +73,7 @@ export function createDebugOverlayController(services) {
   const { timeRenderDebug, timeFieldDebugText } = time;
   const { astronomyModelDebug } = astronomy;
   const { poleAxisDebug } = interaction;
-  const {
-    mobileResizeDebug,
-    getLayerSelectionNodes,
-  } = layers;
+  const { mobileResizeDebug, getLayerSelectionNodes } = layers;
 
   let debugVisible = !!initialVisible,
     lastDebugUpdate = 0,
@@ -108,7 +115,10 @@ export function createDebugOverlayController(services) {
 
   function debugRefreshIntervalMs() {
     const configured = Number(cfg("debug.refreshMs", 200));
-    return Math.max(100, Math.min(500, Number.isFinite(configured) ? configured : 200));
+    return Math.max(
+      100,
+      Math.min(500, Number.isFinite(configured) ? configured : 200),
+    );
   }
 
   function noteDebugLastAction(action) {
@@ -116,7 +126,9 @@ export function createDebugOverlayController(services) {
   }
 
   function currentViewControlMode() {
-    return poleAxisConstraintEnabled() ? "Euler constrained" : "Quaternion free";
+    return poleAxisConstraintEnabled()
+      ? "Euler constrained"
+      : "Quaternion free";
   }
 
   function pressedArrowKeysLabel() {
@@ -156,12 +168,20 @@ export function createDebugOverlayController(services) {
   }
 
   function currentStarMagnitudeStats() {
-    const loadedStars = Array.isArray(ORIGINAL_STARS) ? ORIGINAL_STARS.length : 0;
+    const loadedStars = Array.isArray(ORIGINAL_STARS)
+      ? ORIGINAL_STARS.length
+      : 0;
     const threshold = Number(state.magnitude);
     const starsWithinMagnitude = Array.isArray(ORIGINAL_STARS)
       ? ORIGINAL_STARS.filter((feature) => {
-          const mag = Number(feature && feature.properties && feature.properties.mag);
-          return Number.isFinite(mag) && Number.isFinite(threshold) && mag <= threshold;
+          const mag = Number(
+            feature && feature.properties && feature.properties.mag,
+          );
+          return (
+            Number.isFinite(mag) &&
+            Number.isFinite(threshold) &&
+            mag <= threshold
+          );
         }).length
       : 0;
     return {
@@ -258,12 +278,20 @@ export function createDebugOverlayController(services) {
     const constrained = poleAxisConstraintEnabled();
     if (paneDrag)
       return constrained
-        ? zh ? "星图留白欧拉角约束拖动" : "pane-margin Euler constrained drag"
-        : zh ? "星图留白抓点式拖动" : "pane-margin grab drag";
+        ? zh
+          ? "星图留白欧拉角约束拖动"
+          : "pane-margin Euler constrained drag"
+        : zh
+          ? "星图留白抓点式拖动"
+          : "pane-margin grab drag";
     if (rotationPointerDrag)
       return constrained
-        ? zh ? "Canvas 欧拉角约束拖动" : "canvas Euler constrained drag"
-        : zh ? "Canvas 抓点式拖动" : "canvas grab drag";
+        ? zh
+          ? "Canvas 欧拉角约束拖动"
+          : "canvas Euler constrained drag"
+        : zh
+          ? "Canvas 抓点式拖动"
+          : "canvas grab drag";
     if (dragging) return zh ? "Canvas 拖动" : "canvas drag";
     if (clickStart) return zh ? "等待区分点击/拖动" : "click-or-drag pending";
     return zh ? "空闲" : "idle";
@@ -272,67 +300,113 @@ export function createDebugOverlayController(services) {
   function debugRenderedViewParts(center) {
     if (!Array.isArray(center)) return [debugValue("unavailable")];
     return [
-      debugSep("lon="), debugValue(formatAngle(center[0])),
-      debugSep(" lat="), debugValue(formatAngle(center[1])),
-      debugSep(" roll="), debugValue(formatAngle(center[2] || 0)),
+      debugSep("lon="),
+      debugValue(formatAngle(center[0])),
+      debugSep(" lat="),
+      debugValue(formatAngle(center[1])),
+      debugSep(" roll="),
+      debugValue(formatAngle(center[2] || 0)),
     ];
   }
 
   function debugEulerStateParts(center, active) {
     if (!active) return [debugValue("inactive")];
     return [
-      debugSep("longitude="), debugValue(formatAngle(center && center[0])),
-      debugSep(" latitude="), debugValue(formatAngle(center && center[1])),
-      debugSep(" roll="), debugValue(formatAngle(center && center[2])),
+      debugSep("longitude="),
+      debugValue(formatAngle(center && center[0])),
+      debugSep(" latitude="),
+      debugValue(formatAngle(center && center[1])),
+      debugSep(" roll="),
+      debugValue(formatAngle(center && center[2])),
     ];
   }
 
   function debugQuaternionStateParts(rotationStats, active) {
     if (!active) return [debugValue("inactive")];
-    const q = rotationStats && rotationStats.quaternion ? rotationStats.quaternion : {};
+    const q =
+      rotationStats && rotationStats.quaternion ? rotationStats.quaternion : {};
     return [
-      debugSep("qx="), debugValue(Number(q.x).toFixed(6)),
-      debugSep(" qy="), debugValue(Number(q.y).toFixed(6)),
-      debugSep(" qz="), debugValue(Number(q.z).toFixed(6)),
-      debugSep(" qw="), debugValue(Number(q.w).toFixed(6)),
-      debugSep(" |q|="), debugValue(Number(rotationStats.norm).toFixed(6)),
+      debugSep("qx="),
+      debugValue(Number(q.x).toFixed(6)),
+      debugSep(" qy="),
+      debugValue(Number(q.y).toFixed(6)),
+      debugSep(" qz="),
+      debugValue(Number(q.z).toFixed(6)),
+      debugSep(" qw="),
+      debugValue(Number(q.w).toFixed(6)),
+      debugSep(" |q|="),
+      debugValue(Number(rotationStats.norm).toFixed(6)),
     ];
   }
 
   function debugPolePointParts(point) {
     if (!point) return [debugValue("unavailable")];
     return [
-      debugSep("x="), debugValue(Math.round(point.x)),
-      debugSep(" y="), debugValue(Math.round(point.y)),
-      debugSep(" "), debugValue(point.visible ? "visible" : "unavailable"),
+      debugSep("x="),
+      debugValue(Math.round(point.x)),
+      debugSep(" y="),
+      debugValue(Math.round(point.y)),
+      debugSep(" "),
+      debugValue(point.visible ? "visible" : "unavailable"),
     ];
   }
 
-  function debugStatusSummary({ view, poleStats, rotationStats, controlMode, uiMatches }) {
+  function debugStatusSummary({
+    view,
+    poleStats,
+    rotationStats,
+    controlMode,
+    uiMatches,
+  }) {
     const errors = [];
     const warnings = [];
     const center = view && view.center;
     const eulerActive = controlMode === "Euler constrained";
     const quaternionActive = controlMode === "Quaternion free";
     if (!uiMatches) errors.push("toggle mismatch");
-    if (!Object.prototype.hasOwnProperty.call(PROJECTION_DEFAULTS, state.projection))
+    if (
+      !Object.prototype.hasOwnProperty.call(
+        PROJECTION_DEFAULTS,
+        state.projection,
+      )
+    )
       errors.push("projection invalid");
-    if (!["horizontal", "equatorial", "ecliptic", "galactic"].includes(state.coordinateSystem))
+    if (
+      !["horizontal", "equatorial", "ecliptic", "galactic"].includes(
+        state.coordinateSystem,
+      )
+    )
       errors.push("coordinate invalid");
-    if (!Array.isArray(center) || center.slice(0, 3).some((value) => !Number.isFinite(Number(value))))
+    if (
+      !Array.isArray(center) ||
+      center.slice(0, 3).some((value) => !Number.isFinite(Number(value)))
+    )
       errors.push("rendered view non-finite");
     if (eulerActive && !poleStats.polesDefined) errors.push("poles undefined");
     if (quaternionActive) {
       const norm = Number(rotationStats.norm);
-      if (!Number.isFinite(norm) || Math.abs(norm - 1) > 0.05) errors.push("quaternion norm error");
-      else if (Math.abs(norm - 1) > 0.001) warnings.push("quaternion norm drift");
+      if (!Number.isFinite(norm) || Math.abs(norm - 1) > 0.05)
+        errors.push("quaternion norm error");
+      else if (Math.abs(norm - 1) > 0.001)
+        warnings.push("quaternion norm drift");
     }
     if (poleStats.guardActive) warnings.push("pole guard active");
-    if (poleStats.polesDefined && (!poleStats.positivePoint || !poleStats.negativePoint))
+    if (
+      poleStats.polesDefined &&
+      (!poleStats.positivePoint || !poleStats.negativePoint)
+    )
       warnings.push("pole projection unavailable");
-    if (eulerActive && Number.isFinite(Number(poleStats.axisAngleDeg)) && Math.abs(Number(poleStats.axisAngleDeg)) > 5)
+    if (
+      eulerActive &&
+      Number.isFinite(Number(poleStats.axisAngleDeg)) &&
+      Math.abs(Number(poleStats.axisAngleDeg)) > 5
+    )
       warnings.push("axis not vertical");
-    if (eulerActive && Array.isArray(center) && Math.abs(Number(center[1])) > 85)
+    if (
+      eulerActive &&
+      Array.isArray(center) &&
+      Math.abs(Number(center[1])) > 85
+    )
       warnings.push("euler latitude near singularity");
     const level = errors.length ? "ERROR" : warnings.length ? "WARNING" : "OK";
     const detail = errors.concat(warnings).join("; ");
@@ -662,12 +736,17 @@ export function createDebugOverlayController(services) {
       eulerActive = controlMode === "Euler constrained",
       quaternionActive = controlMode === "Quaternion free",
       poleToggle = $("pole-axis-constraint"),
-      poleToggleMatchesState = !poleToggle || !!poleToggle.checked === poleAxisConstraintEnabled(),
+      poleToggleMatchesState =
+        !poleToggle || !!poleToggle.checked === poleAxisConstraintEnabled(),
       debugPointerCoord = debugPointerActive ? debugPointerSkyCoord : null;
     const poleStats = updatePoleAxisDebug(
       debugPointerCoord,
       view.center,
-      poleAxisDebug.guardActive ? "guard-active" : eulerActive ? "euler-constrained" : "quaternion-free",
+      poleAxisDebug.guardActive
+        ? "guard-active"
+        : eulerActive
+          ? "euler-constrained"
+          : "quaternion-free",
     );
     const debugStatus = debugStatusSummary({
       view,
@@ -683,22 +762,56 @@ export function createDebugOverlayController(services) {
         label.viewport,
         debugSizeParts(window.innerWidth, window.innerHeight),
       ),
-      debugLine(zh ? "文档视口 documentElement" : "documentElement viewport",
-        debugSizeParts(document.documentElement.clientWidth, document.documentElement.clientHeight)),
-      debugLine(zh ? "visualViewport 尺寸" : "visualViewport size",
-        window.visualViewport ? debugSizeParts(window.visualViewport.width, window.visualViewport.height) : [debugValue("-")]),
-      debugLine(zh ? "visualViewport scale/offset" : "visualViewport scale/offset",
-        window.visualViewport ? [
-          debugSep("scale="), debugValue(Number(window.visualViewport.scale || 1).toFixed(3)),
-          debugSep(" offset="), debugValue(Math.round(window.visualViewport.offsetLeft || 0)),
-          debugSep(","), debugValue(Math.round(window.visualViewport.offsetTop || 0)),
-        ] : [debugValue("-")]),
-      debugLine(zh ? "屏幕 screen" : "screen", debugSizeParts(screen.width, screen.height)),
-      debugLine(zh ? "屏幕方向" : "orientation", [debugValue(screen.orientation?.type || String(window.orientation ?? "-"))]),
-      debugLine(zh ? "最后 resize 来源" : "last resize source", [debugValue(mobileResizeDebug.lastSource)]),
-      debugLine(zh ? "最后 resize 状态" : "last resize status", [debugValue(mobileResizeDebug.lastStatus)]),
-      debugLine(zh ? "最后 resize 时间" : "last resize time", [debugValue(mobileResizeDebug.lastAt)]),
-      debugLine(zh ? "最后 resize 错误" : "last resize error", [debugValue(mobileResizeDebug.lastError)]),
+      debugLine(
+        zh ? "文档视口 documentElement" : "documentElement viewport",
+        debugSizeParts(
+          document.documentElement.clientWidth,
+          document.documentElement.clientHeight,
+        ),
+      ),
+      debugLine(
+        zh ? "visualViewport 尺寸" : "visualViewport size",
+        window.visualViewport
+          ? debugSizeParts(
+              window.visualViewport.width,
+              window.visualViewport.height,
+            )
+          : [debugValue("-")],
+      ),
+      debugLine(
+        zh ? "visualViewport scale/offset" : "visualViewport scale/offset",
+        window.visualViewport
+          ? [
+              debugSep("scale="),
+              debugValue(Number(window.visualViewport.scale || 1).toFixed(3)),
+              debugSep(" offset="),
+              debugValue(Math.round(window.visualViewport.offsetLeft || 0)),
+              debugSep(","),
+              debugValue(Math.round(window.visualViewport.offsetTop || 0)),
+            ]
+          : [debugValue("-")],
+      ),
+      debugLine(
+        zh ? "屏幕 screen" : "screen",
+        debugSizeParts(screen.width, screen.height),
+      ),
+      debugLine(zh ? "屏幕方向" : "orientation", [
+        debugValue(
+          screen.orientation?.type || String(window.orientation ?? "-"),
+        ),
+      ]),
+      debugLine(zh ? "最后 resize 来源" : "last resize source", [
+        debugValue(mobileResizeDebug.lastSource),
+      ]),
+      debugLine(zh ? "最后 resize 状态" : "last resize status", [
+        debugValue(mobileResizeDebug.lastStatus),
+      ]),
+      debugLine(zh ? "最后 resize 时间" : "last resize time", [
+        debugValue(mobileResizeDebug.lastAt),
+      ]),
+      debugLine(zh ? "最后 resize 错误" : "last resize error", [
+        debugValue(mobileResizeDebug.lastError),
+      ]),
       debugLine(label.dpr, [
         debugValue(Number(window.devicePixelRatio || 1).toFixed(2)),
       ]),
@@ -724,13 +837,30 @@ export function createDebugOverlayController(services) {
       debugLine(label.mapScale, debugScaleParts(metrics.scale)),
       debugLine(label.renderMode, [debugValue(metrics.renderMode || "FULL")]),
       debugLine(label.viewportTriggerRule, [
-        debugValue("virtualSkyWidth > viewportWidth && virtualSkyHeight > viewportHeight"),
+        debugValue(
+          "virtualSkyWidth > viewportWidth && virtualSkyHeight > viewportHeight",
+        ),
       ]),
-      debugLine(label.viewportTriggerResult, debugBoolParts(!!metrics.viewportTrigger)),
-      debugLine(label.baseSkySize, debugSizeParts(metrics.baseWidth, metrics.baseHeight)),
-      debugLine(label.virtualSkySize, debugSizeParts(metrics.virtualWidth, metrics.virtualHeight)),
-      debugLine(label.canvasCssTarget, debugSizeParts(metrics.canvasCssWidth, metrics.canvasCssHeight)),
-      debugLine(label.canvasBitmapTarget, debugSizeParts(metrics.canvasBitmapWidth, metrics.canvasBitmapHeight)),
+      debugLine(
+        label.viewportTriggerResult,
+        debugBoolParts(!!metrics.viewportTrigger),
+      ),
+      debugLine(
+        label.baseSkySize,
+        debugSizeParts(metrics.baseWidth, metrics.baseHeight),
+      ),
+      debugLine(
+        label.virtualSkySize,
+        debugSizeParts(metrics.virtualWidth, metrics.virtualHeight),
+      ),
+      debugLine(
+        label.canvasCssTarget,
+        debugSizeParts(metrics.canvasCssWidth, metrics.canvasCssHeight),
+      ),
+      debugLine(
+        label.canvasBitmapTarget,
+        debugSizeParts(metrics.canvasBitmapWidth, metrics.canvasBitmapHeight),
+      ),
       debugLine(label.overflow, [
         debugSep("X="),
         debugValue(Math.round(metrics.overflowX)),
@@ -741,7 +871,10 @@ export function createDebugOverlayController(services) {
       ]),
       debugLine(label.paneCenter, debugPointParts(paneCenter)),
       debugLine(label.mapCenter, debugPointParts(mapCenter)),
-      debugLine(label.centerDelta, debugCenterDeltaParts(centerDelta, formatSigned)),
+      debugLine(
+        label.centerDelta,
+        debugCenterDeltaParts(centerDelta, formatSigned),
+      ),
       debugLine(label.canvasCenter, debugPointParts(canvasCenter)),
       debugLine(
         label.canvasCenterDelta,
@@ -791,16 +924,27 @@ export function createDebugOverlayController(services) {
       debugLine(zh ? "注册数据集" : "registered datasets", [
         debugValue(
           Object.keys(window.__RSO_LOCAL_DATA__ || {}).filter(
-            (key) => key.includes("/") && key.endsWith(".json") && !key.startsWith("src/data/"),
+            (key) =>
+              key.includes("/") &&
+              key.endsWith(".json") &&
+              !key.startsWith("src/data/"),
           ).length,
         ),
       ]),
-      debugLine(label.starStats, [debugValue(zh ? "当前星等阈值对应数量" : "current magnitude threshold count")]),
-      debugLine(label.loadedStars, [debugValue(starMagnitudeStats.loadedStars)]),
+      debugLine(label.starStats, [
+        debugValue(
+          zh ? "当前星等阈值对应数量" : "current magnitude threshold count",
+        ),
+      ]),
+      debugLine(label.loadedStars, [
+        debugValue(starMagnitudeStats.loadedStars),
+      ]),
       debugLine(label.starLimit, [
         debugValue(Number(starMagnitudeStats.threshold || 0).toFixed(2)),
       ]),
-      debugLine(label.starsWithinMagnitude, [debugValue(starMagnitudeStats.starsWithinMagnitude)]),
+      debugLine(label.starsWithinMagnitude, [
+        debugValue(starMagnitudeStats.starsWithinMagnitude),
+      ]),
       debugLine(zh ? "当前时区" : "current time zone", [
         debugValue(timeRenderDebug.timezone || state.zone || "-"),
       ]),
@@ -889,9 +1033,10 @@ export function createDebugOverlayController(services) {
       debugLine(zh ? "远日期精度" : "date precision", [
         debugValue(timeRenderDebug.precision || "-"),
       ]),
-      debugLine(zh ? "已恢复的 skyview 原始错误" : "recovered skyview original error", [
-        debugValue(timeRenderDebug.recoveredOriginalError || "-"),
-      ]),
+      debugLine(
+        zh ? "已恢复的 skyview 原始错误" : "recovered skyview original error",
+        [debugValue(timeRenderDebug.recoveredOriginalError || "-")],
+      ),
       debugLine(zh ? "当前致命错误" : "current fatal error", [
         debugValue(timeRenderDebug.currentFatalError || "-"),
       ]),
@@ -902,7 +1047,9 @@ export function createDebugOverlayController(services) {
         debugValue(timeRenderDebug.errorStack || "-"),
       ]),
       debugBlankLine(),
-      debugGroup(zh ? "天文模型 / 历元一致性" : "Astronomy model / epoch consistency"),
+      debugGroup(
+        zh ? "天文模型 / 历元一致性" : "Astronomy model / epoch consistency",
+      ),
       debugLine(zh ? "源数据历元" : "source epoch", [
         debugValue(astronomyModelDebug.sourceEpoch || "-"),
       ]),
@@ -915,9 +1062,14 @@ export function createDebugOverlayController(services) {
       debugLine(zh ? "岁差模型" : "precession model", [
         debugValue(astronomyModelDebug.precessionModel || "-"),
       ]),
-      debugLine(zh ? "章动 / 自行 / 折射" : "nutation / proper motion / refraction", [
-        debugValue(`${astronomyModelDebug.nutation} / ${astronomyModelDebug.properMotion} / ${astronomyModelDebug.refraction}`),
-      ]),
+      debugLine(
+        zh ? "章动 / 自行 / 折射" : "nutation / proper motion / refraction",
+        [
+          debugValue(
+            `${astronomyModelDebug.nutation} / ${astronomyModelDebug.properMotion} / ${astronomyModelDebug.refraction}`,
+          ),
+        ],
+      ),
       debugLine(zh ? "J2000 起算儒略世纪 T" : "Julian centuries from J2000", [
         debugValue(astronomyModelDebug.julianCenturiesT || "-"),
       ]),
@@ -950,7 +1102,9 @@ export function createDebugOverlayController(services) {
         debugValue(astronomyModelDebug.fixedLayerPrecession || "-"),
       ]),
       debugLine(zh ? "边界 / 星官岁差" : "boundary / asterism precession", [
-        debugValue(`${astronomyModelDebug.boundaryPrecession || "-"} / ${astronomyModelDebug.asterismPrecession || "-"}`),
+        debugValue(
+          `${astronomyModelDebug.boundaryPrecession || "-"} / ${astronomyModelDebug.asterismPrecession || "-"}`,
+        ),
       ]),
       debugLine(zh ? "搜索/拾取坐标框架" : "search/pick coordinate frame", [
         debugValue(astronomyModelDebug.searchPickFrame || "-"),
@@ -991,7 +1145,9 @@ export function createDebugOverlayController(services) {
       debugLine(label.poleAxisConstraint, [
         debugValue(poleAxisConstraintEnabled() ? "ON" : "OFF"),
         debugSep(" ui="),
-        debugValue(poleToggle ? (poleToggle.checked ? "ON" : "OFF") : "unavailable"),
+        debugValue(
+          poleToggle ? (poleToggle.checked ? "ON" : "OFF") : "unavailable",
+        ),
       ]),
       debugLine(label.viewControlMode, [
         debugValue(controlMode),
@@ -1000,21 +1156,37 @@ export function createDebugOverlayController(services) {
       // Debug 里分开最终渲染视角、欧拉状态和四元数状态：渲染视角来自
       // Celestial.rotate()，欧拉/四元数只在各自控制模式 active 时显示，避免旧缓存误导。
       debugLine(label.renderedViewState, debugRenderedViewParts(view.center)),
-      debugLine(label.eulerState, debugEulerStateParts(view.center, eulerActive)),
-      debugLine(label.quaternionState, debugQuaternionStateParts(rotationStats, quaternionActive)),
+      debugLine(
+        label.eulerState,
+        debugEulerStateParts(view.center, eulerActive),
+      ),
+      debugLine(
+        label.quaternionState,
+        debugQuaternionStateParts(rotationStats, quaternionActive),
+      ),
       // 方向键长按只显示 active/idle 和当前按键，不显示每帧移动量；
       // 每帧 delta 太快且难截图，真正有价值的是动画帧循环是否启动和是否释放。
-      debugLine(label.keyboardPan, [debugValue(skyPanKeys.size ? "active" : "idle")]),
+      debugLine(label.keyboardPan, [
+        debugValue(skyPanKeys.size ? "active" : "idle"),
+      ]),
       debugLine(label.pressedArrowKeys, [debugValue(pressedArrowKeysLabel())]),
-      debugLine(label.poleGuard, [debugValue(poleStats.guardActive ? "ON" : "OFF")]),
-      debugLine(label.poleGuardReason, [debugValue(poleStats.guardReason || "none")]),
+      debugLine(label.poleGuard, [
+        debugValue(poleStats.guardActive ? "ON" : "OFF"),
+      ]),
+      debugLine(label.poleGuardReason, [
+        debugValue(poleStats.guardReason || "none"),
+      ]),
       debugLine(label.poleGuardThreshold, [
-        debugSep("enter="), debugValue(formatAngle(poleGuardEnterDeg())),
-        debugSep(" exit="), debugValue(formatAngle(poleGuardExitDeg())),
+        debugSep("enter="),
+        debugValue(formatAngle(poleGuardEnterDeg())),
+        debugSep(" exit="),
+        debugValue(formatAngle(poleGuardExitDeg())),
       ]),
       debugLine(label.currentPoles, [
-        debugSep("+="), debugValue(poleStats.positiveName || "undefined"),
-        debugSep(" -="), debugValue(poleStats.negativeName || "undefined"),
+        debugSep("+="),
+        debugValue(poleStats.positiveName || "undefined"),
+        debugSep(" -="),
+        debugValue(poleStats.negativeName || "undefined"),
       ]),
       debugLine(label.pointerPositivePoleDistance, [
         debugValue(formatAngleOrUnavailable(poleStats.pointerPositiveDeg)),
@@ -1022,16 +1194,34 @@ export function createDebugOverlayController(services) {
       debugLine(label.pointerNegativePoleDistance, [
         debugValue(formatAngleOrUnavailable(poleStats.pointerNegativeDeg)),
       ]),
-      debugLine(label.positivePolePoint, debugPolePointParts(poleStats.positivePoint)),
-      debugLine(label.negativePolePoint, debugPolePointParts(poleStats.negativePoint)),
+      debugLine(
+        label.positivePolePoint,
+        debugPolePointParts(poleStats.positivePoint),
+      ),
+      debugLine(
+        label.negativePolePoint,
+        debugPolePointParts(poleStats.negativePoint),
+      ),
       debugLine(label.poleCenterline, [
-        debugSep("x="), debugValue(Number.isFinite(poleStats.centerlineX) ? Math.round(poleStats.centerlineX) : "-"), debugUnit("px"),
+        debugSep("x="),
+        debugValue(
+          Number.isFinite(poleStats.centerlineX)
+            ? Math.round(poleStats.centerlineX)
+            : "-",
+        ),
+        debugUnit("px"),
       ]),
       debugLine(label.poleDx, [
-        debugSep("+="), debugValue(formatSigned(poleStats.positiveDx)), debugUnit("px"),
-        debugSep(" -="), debugValue(formatSigned(poleStats.negativeDx)), debugUnit("px"),
+        debugSep("+="),
+        debugValue(formatSigned(poleStats.positiveDx)),
+        debugUnit("px"),
+        debugSep(" -="),
+        debugValue(formatSigned(poleStats.negativeDx)),
+        debugUnit("px"),
       ]),
-      debugLine(label.poleAxisAngle, [debugValue(formatAngle(poleStats.axisAngleDeg))]),
+      debugLine(label.poleAxisAngle, [
+        debugValue(formatAngle(poleStats.axisAngleDeg)),
+      ]),
       debugLine(label.poleAxisAngleRule, [
         debugValue("0° = vertical, 90° = horizontal"),
       ]),
@@ -1086,7 +1276,10 @@ export function createDebugOverlayController(services) {
     // Debug 面板会读取 DOM 尺寸、投影坐标和旋转状态；拖动/方向键长按期间如果
     // 每个事件都重写整块 DOM，Debug 本身就会制造卡顿。这里按配置节流到
     // 约 5–10 FPS，并把多次请求合并到下一次 animation frame。
-    const delay = Math.max(0, debugRefreshIntervalMs() - (performance.now() - lastDebugUpdate));
+    const delay = Math.max(
+      0,
+      debugRefreshIntervalMs() - (performance.now() - lastDebugUpdate),
+    );
     setTimeout(() => {
       requestAnimationFrame(() => {
         debugFramePending = false;
@@ -1138,7 +1331,6 @@ export function createDebugOverlayController(services) {
     }
     setDebugVisible(debugVisible);
   }
-
 
   return {
     updateDebugToggleTitle,

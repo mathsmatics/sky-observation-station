@@ -20,7 +20,9 @@ export function timeFieldByKey($, key) {
 }
 
 export function timeFieldDebugText($) {
-  return TIME_FIELD_KEYS.map((key) => `${key}=${timeFieldByKey($, key)?.value || ""}`).join(" ");
+  return TIME_FIELD_KEYS.map(
+    (key) => `${key}=${timeFieldByKey($, key)?.value || ""}`,
+  ).join(" ");
 }
 
 export function displayTimeParts(dt) {

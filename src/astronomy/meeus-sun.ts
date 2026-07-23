@@ -38,11 +38,16 @@ export function meanObliquityMeeusDeg(T: number): number {
 }
 
 /** 黄道坐标转赤道坐标；输入黄经黄纬和黄赤交角均为 degree。 */
-export function eclipticToEquatorialDeg(longitudeDeg: number, latitudeDeg: number, obliquityDeg: number): [number, number] {
+export function eclipticToEquatorialDeg(
+  longitudeDeg: number,
+  latitudeDeg: number,
+  obliquityDeg: number,
+): [number, number] {
   const lambda = degToRad(longitudeDeg);
   const beta = degToRad(latitudeDeg);
   const epsilon = degToRad(obliquityDeg);
-  const sinAlpha = Math.sin(lambda) * Math.cos(epsilon) - Math.tan(beta) * Math.sin(epsilon);
+  const sinAlpha =
+    Math.sin(lambda) * Math.cos(epsilon) - Math.tan(beta) * Math.sin(epsilon);
   const cosAlpha = Math.cos(lambda);
   const alpha = normalizeDegrees(radToDeg(Math.atan2(sinAlpha, cosAlpha)));
   const delta = radToDeg(
@@ -59,7 +64,9 @@ export function calculateMeeusSun(date: Date): MeeusSunPosition | null {
   if (!Number.isFinite(jd as number)) return null;
   const T = julianCenturyFromJulianDate(jd as number);
   const L0 = normalizeDegrees(280.46646 + 36000.76983 * T + 0.0003032 * T * T);
-  const M = normalizeDegrees(357.52911 + 35999.05029 * T - 0.0001537 * T * T + (T * T * T) / 24490000);
+  const M = normalizeDegrees(
+    357.52911 + 35999.05029 * T - 0.0001537 * T * T + (T * T * T) / 24490000,
+  );
   const Mrad = degToRad(M);
   const e = 0.016708634 - T * (0.000042037 + 0.0000001267 * T);
   const C =
@@ -69,11 +76,17 @@ export function calculateMeeusSun(date: Date): MeeusSunPosition | null {
   const trueLongitude = L0 + C;
   const trueAnomaly = M + C;
   const omega = 125.04 - 1934.136 * T;
-  const apparentLongitude = trueLongitude - 0.00569 - 0.00478 * Math.sin(degToRad(omega));
+  const apparentLongitude =
+    trueLongitude - 0.00569 - 0.00478 * Math.sin(degToRad(omega));
   const meanObliquity = meanObliquityMeeusDeg(T);
   const trueObliquity = meanObliquity + 0.00256 * Math.cos(degToRad(omega));
-  const [ra, dec] = eclipticToEquatorialDeg(apparentLongitude, 0, trueObliquity);
-  const distanceAu = (1.000001018 * (1 - e * e)) / (1 + e * Math.cos(degToRad(trueAnomaly)));
+  const [ra, dec] = eclipticToEquatorialDeg(
+    apparentLongitude,
+    0,
+    trueObliquity,
+  );
+  const distanceAu =
+    (1.000001018 * (1 - e * e)) / (1 + e * Math.cos(degToRad(trueAnomaly)));
   return {
     julianDate: jd as number,
     julianCentury: T,

@@ -194,8 +194,12 @@ export function createEventBindings(services) {
         markTimeFieldSelected(field);
       });
       field.addEventListener("input", () => {
-        field.value = field.value.replace(id === "time-year" ? /[^0-9-]/g : /\D/g, "");
-        if (id === "time-year") field.value = field.value.replace(/(?!^)-/g, "");
+        field.value = field.value.replace(
+          id === "time-year" ? /[^0-9-]/g : /\D/g,
+          "",
+        );
+        if (id === "time-year")
+          field.value = field.value.replace(/(?!^)-/g, "");
         setTimeFieldWidths();
         noteTimeRenderDebug({
           inputStatus: "draft",
@@ -207,7 +211,8 @@ export function createEventBindings(services) {
         field.classList.remove("time-part-active");
         field.dataset.replaceOnType = "1";
         const shell = $("observer-time-fields");
-        if (shell && event.relatedTarget && shell.contains(event.relatedTarget)) return;
+        if (shell && event.relatedTarget && shell.contains(event.relatedTarget))
+          return;
         syncTimeInputs();
       });
       field.addEventListener("keydown", (e) => {
@@ -262,8 +267,12 @@ export function createEventBindings(services) {
         }
       });
     });
-    $("time-step-minus").addEventListener("click", () => shiftObserverTimeByControl(-1));
-    $("time-step-plus").addEventListener("click", () => shiftObserverTimeByControl(1));
+    $("time-step-minus").addEventListener("click", () =>
+      shiftObserverTimeByControl(-1),
+    );
+    $("time-step-plus").addEventListener("click", () =>
+      shiftObserverTimeByControl(1),
+    );
     $("time-step-value").addEventListener("keydown", (e) => {
       if (e.key === "Enter" && !e.isComposing) {
         e.preventDefault();
@@ -279,7 +288,11 @@ export function createEventBindings(services) {
       .querySelectorAll("[data-shift-unit]")
       .forEach((btn) =>
         btn.addEventListener("click", () =>
-          shiftObserverTime(btn.dataset.shiftUnit, btn.dataset.shiftValue, "shortcut"),
+          shiftObserverTime(
+            btn.dataset.shiftUnit,
+            btn.dataset.shiftValue,
+            "shortcut",
+          ),
         ),
       );
     $("play").addEventListener("click", () => {
@@ -404,7 +417,8 @@ export function createEventBindings(services) {
     });
     $("guide-page-menu").addEventListener("click", (e) => e.stopPropagation());
     document.addEventListener("click", (e) => {
-      if (!$("guide-page-dropdown")?.contains(e.target)) closeGuidePageDropdown();
+      if (!$("guide-page-dropdown")?.contains(e.target))
+        closeGuidePageDropdown();
     });
     $("guide-next-page").addEventListener("click", () => setGuidePage(1));
     $("reset-defaults-btn").addEventListener("click", resetAllDefaults);
@@ -467,10 +481,15 @@ export function createEventBindings(services) {
     $("sky-pane").setAttribute("tabindex", "0");
     $("sky-pane").setAttribute(
       "aria-label",
-      state.lang === "zh" ? "星图区域，可用方向键平移" : "Sky map, use arrow keys to pan",
+      state.lang === "zh"
+        ? "星图区域，可用方向键平移"
+        : "Sky map, use arrow keys to pan",
     );
     document.addEventListener("keydown", (event) => {
-      if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
+      if (
+        !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)
+      )
+        return;
       if (isTextEditingTarget(event.target)) return;
       if (!getSkyReady() || !window.Celestial) return;
       event.preventDefault();
@@ -482,7 +501,10 @@ export function createEventBindings(services) {
       }
     });
     document.addEventListener("keyup", (event) => {
-      if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
+      if (
+        !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)
+      )
+        return;
       if (skyPanKeys.delete(event.key)) {
         if (!skyPanKeys.size) flushKeyboardPanView();
         queueDebugOverlayUpdate();
@@ -504,11 +526,17 @@ export function createEventBindings(services) {
       }
     });
     window.addEventListener("resize", () => scheduleSkyResize("window.resize"));
-    window.addEventListener("orientationchange", () => scheduleSkyResize("orientationchange"));
+    window.addEventListener("orientationchange", () =>
+      scheduleSkyResize("orientationchange"),
+    );
     window.addEventListener("pageshow", () => scheduleSkyResize("pageshow"));
     if (window.visualViewport) {
-      window.visualViewport.addEventListener("resize", () => scheduleSkyResize("visualViewport.resize"));
-      window.visualViewport.addEventListener("scroll", () => scheduleSkyResize("visualViewport.scroll"));
+      window.visualViewport.addEventListener("resize", () =>
+        scheduleSkyResize("visualViewport.resize"),
+      );
+      window.visualViewport.addEventListener("scroll", () =>
+        scheduleSkyResize("visualViewport.scroll"),
+      );
     }
   }
 

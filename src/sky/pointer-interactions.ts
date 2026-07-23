@@ -148,7 +148,11 @@ export function createPointerInteractionController({
         }
         debug.setDebugPointer(
           true,
-          view.invertSkyCoordinateAtClient(event.clientX, event.clientY, canvas),
+          view.invertSkyCoordinateAtClient(
+            event.clientX,
+            event.clientY,
+            canvas,
+          ),
         );
         debug.queueDebugOverlayUpdate();
       },
@@ -220,8 +224,7 @@ export function createPointerInteractionController({
       delta = Number(event.deltaY || 0) * unit,
       steps = -delta / 240,
       factor = Math.pow(mapScaleButtonFactor(), steps);
-    if (!Number.isFinite(factor) || Math.abs(factor - 1) < 0.0001)
-      return false;
+    if (!Number.isFinite(factor) || Math.abs(factor - 1) < 0.0001) return false;
     event.preventDefault();
     event.stopPropagation();
     if (typeof event.stopImmediatePropagation === "function")
@@ -272,7 +275,10 @@ export function createPointerInteractionController({
       y: event.clientY,
       lastX: event.clientX,
       lastY: event.clientY,
-      anchorCoord: view.invertSkyCoordinateAtClient(event.clientX, event.clientY),
+      anchorCoord: view.invertSkyCoordinateAtClient(
+        event.clientX,
+        event.clientY,
+      ),
       center: center.slice(),
       moved: false,
     });

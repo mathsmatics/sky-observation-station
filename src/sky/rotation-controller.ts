@@ -60,7 +60,10 @@ function finiteCoord(coord: any): [number, number] | null {
   return [((lon % 360) + 360) % 360, Math.max(-90, Math.min(90, lat))];
 }
 
-function centerFromQuaternion(q: Quaternion, fallbackCenter: [number, number, number]): [number, number, number] {
+function centerFromQuaternion(
+  q: Quaternion,
+  fallbackCenter: [number, number, number],
+): [number, number, number] {
   const forward = rotateVectorByQuaternion([1, 0, 0], q);
   const [lon, lat] = vectorToLongitudeLatitude(forward, fallbackCenter[0]);
   const e = quaternionToEuler(q, fallbackCenter[0]);
@@ -98,8 +101,13 @@ export function createRotationController() {
   }): [number, number, number] {
     const dx = Number(options.dx) || 0;
     const dy = Number(options.dy) || 0;
-    const shortSide = Math.max(180, Math.min(Number(options.width) || 0, Number(options.height) || 0));
-    const sensitivity = Number.isFinite(Number(options.sensitivity)) ? Number(options.sensitivity) : 1;
+    const shortSide = Math.max(
+      180,
+      Math.min(Number(options.width) || 0, Number(options.height) || 0),
+    );
+    const sensitivity = Number.isFinite(Number(options.sensitivity))
+      ? Number(options.sensitivity)
+      : 1;
     const radiansPerPixel = (Math.PI / shortSide) * sensitivity;
     const angleX = dx * radiansPerPixel;
     const angleY = -dy * radiansPerPixel;
@@ -108,10 +116,15 @@ export function createRotationController() {
     const right = rotateVectorByQuaternion([0, 1, 0], orientation);
     const qDeltaX = quaternionFromAxisAngle(up, angleX);
     const qDeltaY = quaternionFromAxisAngle(right, angleY);
-    orientation = normalizeQuaternion(multiplyQuaternions(multiplyQuaternions(qDeltaY, qDeltaX), orientation));
+    orientation = normalizeQuaternion(
+      multiplyQuaternions(multiplyQuaternions(qDeltaY, qDeltaX), orientation),
+    );
     center = centerFromQuaternion(orientation, center);
     lastPointerDelta = { dx, dy };
-    lastAngleDelta = { x: (angleX * 180) / Math.PI, y: (angleY * 180) / Math.PI };
+    lastAngleDelta = {
+      x: (angleX * 180) / Math.PI,
+      y: (angleY * 180) / Math.PI,
+    };
     lastSyncReason = "pointer-delta-fallback";
     dragMode = "delta";
     grabAnchor = null;
@@ -137,7 +150,10 @@ export function createRotationController() {
     // “按下时抓住的天球点”。这样高倍缩放时星点不会比鼠标跑得更快。
     orientation = normalizeQuaternion(multiplyQuaternions(qDelta, orientation));
     center = centerFromQuaternion(orientation, center);
-    lastPointerDelta = { dx: Number(options.dx) || 0, dy: Number(options.dy) || 0 };
+    lastPointerDelta = {
+      dx: Number(options.dx) || 0,
+      dy: Number(options.dy) || 0,
+    };
     const angle = angleBetweenVec3(from, to);
     lastAngleDelta = { x: 0, y: (angle * 180) / Math.PI };
     lastSyncReason = "pointer-grab";
@@ -169,8 +185,10 @@ export function createRotationController() {
       lastAngleDelta: { ...lastAngleDelta },
       lastSyncReason,
       dragMode,
-      grabAnchor: grabAnchor ? grabAnchor.slice() as [number, number] : null,
-      grabCurrent: grabCurrent ? grabCurrent.slice() as [number, number] : null,
+      grabAnchor: grabAnchor ? (grabAnchor.slice() as [number, number]) : null,
+      grabCurrent: grabCurrent
+        ? (grabCurrent.slice() as [number, number])
+        : null,
       grabAngleDeg,
     };
   }

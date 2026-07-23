@@ -11,12 +11,32 @@ import { calculateMeeusMoon } from "./meeus-moon";
  */
 
 const BODY_NAMES = {
-  sol: { id: "sol", name: "Sun", en: "Sun", zh: "太阳", desig: "Sol", sym: "☉" },
-  lun: { id: "lun", name: "Moon", en: "Moon", zh: "月球", desig: "Lun", sym: "☾" },
+  sol: {
+    id: "sol",
+    name: "Sun",
+    en: "Sun",
+    zh: "太阳",
+    desig: "Sol",
+    sym: "☉",
+  },
+  lun: {
+    id: "lun",
+    name: "Moon",
+    en: "Moon",
+    zh: "月球",
+    desig: "Lun",
+    sym: "☾",
+  },
 };
 
 function cloneBody(base: any, id: string): any {
-  const fallback = BODY_NAMES[id] || { id, name: id, en: id, zh: id, desig: id };
+  const fallback = BODY_NAMES[id] || {
+    id,
+    name: id,
+    en: id,
+    zh: id,
+    desig: id,
+  };
   return {
     ...fallback,
     ...(base || {}),
@@ -41,12 +61,21 @@ function maybeBaseBody(fn: any, date: Date, observer: any): any {
   }
 }
 
-function calculateMeeusSolarSystemBody(id: string, fn: any, date: Date, observer: any, displayCoordinateForEpochEquatorial: (coord: any) => any): any | null {
+function calculateMeeusSolarSystemBody(
+  id: string,
+  fn: any,
+  date: Date,
+  observer: any,
+  displayCoordinateForEpochEquatorial: (coord: any) => any,
+): any | null {
   const base = cloneBody(maybeBaseBody(fn, date, observer), id);
   if (id === "sol") {
     const sun = calculateMeeusSun(date);
     if (!sun) return null;
-    const epochCoord = [normalizeCelestialLongitude(sun.rightAscensionDeg), sun.declinationDeg];
+    const epochCoord = [
+      normalizeCelestialLongitude(sun.rightAscensionDeg),
+      sun.declinationDeg,
+    ];
     base.ephemeris = {
       ...base.ephemeris,
       pos: epochCoord.slice(),
@@ -67,7 +96,10 @@ function calculateMeeusSolarSystemBody(id: string, fn: any, date: Date, observer
   if (id === "lun") {
     const moon = calculateMeeusMoon(date);
     if (!moon) return null;
-    const epochCoord = [normalizeCelestialLongitude(moon.rightAscensionDeg), moon.declinationDeg];
+    const epochCoord = [
+      normalizeCelestialLongitude(moon.rightAscensionDeg),
+      moon.declinationDeg,
+    ];
     base.ephemeris = {
       ...base.ephemeris,
       pos: epochCoord.slice(),
@@ -114,14 +146,22 @@ export function calculateCurrentPlanetPositions(options: {
     const planets = objects
       .map((fn) => {
         const id = fn.id();
-        const meeusBody = id === "sol" || id === "lun"
-          ? calculateMeeusSolarSystemBody(id, fn, options.date, observer, options.displayCoordinateForEpochEquatorial)
-          : null;
+        const meeusBody =
+          id === "sol" || id === "lun"
+            ? calculateMeeusSolarSystemBody(
+                id,
+                fn,
+                options.date,
+                observer,
+                options.displayCoordinateForEpochEquatorial,
+              )
+            : null;
         if (meeusBody) return meeusBody;
         const body = fn(options.date).equatorial(observer);
         const ep = (body && body.ephemeris) || {};
         const eq = ep.pos;
-        if (!eq || !Number.isFinite(eq[0]) || !Number.isFinite(eq[1])) return null;
+        if (!eq || !Number.isFinite(eq[0]) || !Number.isFinite(eq[1]))
+          return null;
         const epochCoord = options.epochEquatorialFromJ2000(eq);
         return {
           id,
@@ -132,7 +172,10 @@ export function calculateCurrentPlanetPositions(options: {
         };
       })
       .filter(Boolean);
-    options.noteTimeRenderDebug({ planetStatus: "ok", planetCount: planets.length });
+    options.noteTimeRenderDebug({
+      planetStatus: "ok",
+      planetCount: planets.length,
+    });
     return planets;
   } catch (err) {
     console.warn("Planet position calculation failed", err);

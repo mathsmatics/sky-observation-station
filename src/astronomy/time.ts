@@ -58,7 +58,9 @@ export function formatOffsetDetailed(minutes: number): string {
 export function formatCivilDateTime(dt: any, includeSeconds = false): string {
   const y = astronomicalYearToDisplay(dt.year);
   const base = `${y}/${String(dt.month).padStart(2, "0")}/${String(dt.day).padStart(2, "0")} ${String(dt.hour).padStart(2, "0")}:${String(dt.minute).padStart(2, "0")}`;
-  return includeSeconds ? `${base}:${String(dt.second).padStart(2, "0")}` : base;
+  return includeSeconds
+    ? `${base}:${String(dt.second).padStart(2, "0")}`
+    : base;
 }
 
 export function precisionStatusForYear(year: number): string {

@@ -56,14 +56,17 @@ export function normalizeVec3(v: Vec3, fallback: Vec3 = [1, 0, 0]): Vec3 {
   return [v[0] / n, v[1] / n, v[2] / n];
 }
 
-
 export function angleBetweenVec3(a: Vec3, b: Vec3): number {
   const av = normalizeVec3(a, [1, 0, 0]);
   const bv = normalizeVec3(b, [1, 0, 0]);
   return Math.acos(Math.max(-1, Math.min(1, dotVec3(av, bv))));
 }
 
-export function quaternionBetweenVectors(from: Vec3, to: Vec3, fallbackAxis: Vec3 = [0, 0, 1]): Quaternion {
+export function quaternionBetweenVectors(
+  from: Vec3,
+  to: Vec3,
+  fallbackAxis: Vec3 = [0, 0, 1],
+): Quaternion {
   const a = normalizeVec3(from, [1, 0, 0]);
   const b = normalizeVec3(to, [1, 0, 0]);
   const d = Math.max(-1, Math.min(1, dotVec3(a, b)));
@@ -80,7 +83,10 @@ export function quaternionBetweenVectors(from: Vec3, to: Vec3, fallbackAxis: Vec
   return normalizeQuaternion({ w: 1 + d, x: c[0], y: c[1], z: c[2] });
 }
 
-export function quaternionFromAxisAngle(axis: Vec3, angleRad: number): Quaternion {
+export function quaternionFromAxisAngle(
+  axis: Vec3,
+  angleRad: number,
+): Quaternion {
   const a = normalizeVec3(axis, [0, 0, 1]);
   const half = angleRad / 2;
   const s = Math.sin(half);
@@ -99,7 +105,10 @@ export function conjugateQuaternion(q: Quaternion): Quaternion {
 export function rotateVectorByQuaternion(v: Vec3, q: Quaternion): Vec3 {
   const nq = normalizeQuaternion(q);
   const p = { w: 0, x: v[0], y: v[1], z: v[2] };
-  const r = multiplyQuaternions(multiplyQuaternions(nq, p), conjugateQuaternion(nq));
+  const r = multiplyQuaternions(
+    multiplyQuaternions(nq, p),
+    conjugateQuaternion(nq),
+  );
   return [r.x, r.y, r.z];
 }
 
@@ -152,45 +161,65 @@ export function quaternionFromRotationMatrix(m: number[][]): Quaternion {
   return normalizeQuaternion(q);
 }
 
-export function longitudeLatitudeToVector(lonDeg: number, latDeg: number): Vec3 {
+export function longitudeLatitudeToVector(
+  lonDeg: number,
+  latDeg: number,
+): Vec3 {
   const lon = (lonDeg * Math.PI) / 180;
   const lat = (latDeg * Math.PI) / 180;
   const cosLat = Math.cos(lat);
   return [cosLat * Math.cos(lon), cosLat * Math.sin(lon), Math.sin(lat)];
 }
 
-export function vectorToLongitudeLatitude(v: Vec3, fallbackLonDeg = 0): [number, number] {
+export function vectorToLongitudeLatitude(
+  v: Vec3,
+  fallbackLonDeg = 0,
+): [number, number] {
   const n = normalizeVec3(v, [1, 0, 0]);
   const horizontal = Math.hypot(n[0], n[1]);
-  const lon = horizontal < 1e-10 ? fallbackLonDeg : (Math.atan2(n[1], n[0]) * 180) / Math.PI;
+  const lon =
+    horizontal < 1e-10
+      ? fallbackLonDeg
+      : (Math.atan2(n[1], n[0]) * 180) / Math.PI;
   const lat = (Math.asin(Math.max(-1, Math.min(1, n[2]))) * 180) / Math.PI;
   const normalizedLon = ((lon % 360) + 360) % 360;
   return [normalizedLon, lat];
 }
 
-export function localNorthEast(lonDeg: number, latDeg: number): { north: Vec3; east: Vec3 } {
+export function localNorthEast(
+  lonDeg: number,
+  latDeg: number,
+): { north: Vec3; east: Vec3 } {
   const lon = (lonDeg * Math.PI) / 180;
   const lat = (latDeg * Math.PI) / 180;
-  const north = normalizeVec3([
-    -Math.sin(lat) * Math.cos(lon),
-    -Math.sin(lat) * Math.sin(lon),
-    Math.cos(lat),
-  ], [0, 0, 1]);
+  const north = normalizeVec3(
+    [
+      -Math.sin(lat) * Math.cos(lon),
+      -Math.sin(lat) * Math.sin(lon),
+      Math.cos(lat),
+    ],
+    [0, 0, 1],
+  );
   const east = normalizeVec3([-Math.sin(lon), Math.cos(lon), 0], [0, 1, 0]);
   return { north, east };
 }
 
-export function eulerToQuaternion(center: [number, number, number?]): Quaternion {
+export function eulerToQuaternion(
+  center: [number, number, number?],
+): Quaternion {
   const lon = Number(center && center[0]) || 0;
   const lat = Number(center && center[1]) || 0;
   const roll = ((Number(center && center[2]) || 0) * Math.PI) / 180;
   const forward = normalizeVec3(longitudeLatitudeToVector(lon, lat), [1, 0, 0]);
   const { north, east } = localNorthEast(lon, lat);
-  const up = normalizeVec3([
-    north[0] * Math.cos(roll) + east[0] * Math.sin(roll),
-    north[1] * Math.cos(roll) + east[1] * Math.sin(roll),
-    north[2] * Math.cos(roll) + east[2] * Math.sin(roll),
-  ], [0, 0, 1]);
+  const up = normalizeVec3(
+    [
+      north[0] * Math.cos(roll) + east[0] * Math.sin(roll),
+      north[1] * Math.cos(roll) + east[1] * Math.sin(roll),
+      north[2] * Math.cos(roll) + east[2] * Math.sin(roll),
+    ],
+    [0, 0, 1],
+  );
   const right = normalizeVec3(crossVec3(up, forward), [0, 1, 0]);
   const trueUp = normalizeVec3(crossVec3(forward, right), up);
   // 矩阵列分别是 base forward/right/up 经姿态旋转后的方向。
@@ -201,11 +230,15 @@ export function eulerToQuaternion(center: [number, number, number?]): Quaternion
   ]);
 }
 
-export function quaternionToEuler(q: Quaternion, fallbackLonDeg = 0): { yaw: number; pitch: number; roll: number } {
+export function quaternionToEuler(
+  q: Quaternion,
+  fallbackLonDeg = 0,
+): { yaw: number; pitch: number; roll: number } {
   const forward = rotateVectorByQuaternion([1, 0, 0], q);
   const up = rotateVectorByQuaternion([0, 0, 1], q);
   const [lon, lat] = vectorToLongitudeLatitude(forward, fallbackLonDeg);
   const { north, east } = localNorthEast(lon, lat);
-  const roll = (Math.atan2(dotVec3(up, east), dotVec3(up, north)) * 180) / Math.PI;
+  const roll =
+    (Math.atan2(dotVec3(up, east), dotVec3(up, north)) * 180) / Math.PI;
   return { yaw: lon, pitch: lat, roll };
 }

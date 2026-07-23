@@ -57,12 +57,17 @@ export function createAppAnimationController(services) {
     setLastKeyboardPanFrame(now);
     const dt = Math.max(0, Math.min(0.05, (now - last) / 1000));
     if (dt <= 0) return;
-    const speed = Number(cfg("interaction.keyboardPanDegreesPerSecond", 72)) || 72;
+    const speed =
+      Number(cfg("interaction.keyboardPanDegreesPerSecond", 72)) || 72;
     const vector = keyboardPanUnitVector(skyPanKeys);
     if (!vector) return;
     // 方向键长按不再依赖浏览器 keydown 自动重复事件。keydown 只维护按键集合，
     // 这里在动画帧里按当前方向移动一次，避免重复事件堆积大量同步 redraw 后卡死。
-    applyKeyboardPanDelta(vector.lon * speed * dt, vector.lat * speed * dt, "keyboard pan frame");
+    applyKeyboardPanDelta(
+      vector.lon * speed * dt,
+      vector.lat * speed * dt,
+      "keyboard pan frame",
+    );
   }
 
   /**
@@ -73,9 +78,14 @@ export function createAppAnimationController(services) {
     const dt = Math.min(0.25, (now - getLastFrame()) / 1000);
     setLastFrame(now);
     if (getPlaying()) {
-      const current = DateTime.fromISO(String(state.instant || ""), { zone: "utc" });
-      const nextInstant = (current.isValid ? current : DateTime.fromISO(defaults.instant, { zone: "utc" }))
-        .plus({ seconds: dt * Number(state.speed) });
+      const current = DateTime.fromISO(String(state.instant || ""), {
+        zone: "utc",
+      });
+      const nextInstant = (
+        current.isValid
+          ? current
+          : DateTime.fromISO(defaults.instant, { zone: "utc" })
+      ).plus({ seconds: dt * Number(state.speed) });
       const iso = nextInstant.isValid ? nextInstant.toISO() : null;
       const renderDate = renderableDateForDateTime(nextInstant);
       if (iso && renderDate) {
@@ -86,7 +96,9 @@ export function createAppAnimationController(services) {
           jsDateYear: String(renderDate.getUTCFullYear()),
           julianDate: (julianDateFromDate(renderDate) || 0).toFixed(5),
           updateSource: "playback",
-          precision: precisionStatusForYear(nextInstant.setZone(safeZoneForCoordinates()).year),
+          precision: precisionStatusForYear(
+            nextInstant.setZone(safeZoneForCoordinates()).year,
+          ),
           refreshHealth: "healthy",
           currentFatalError: "-",
           recoveredOriginalError: "-",

@@ -167,7 +167,9 @@
     debug: {
       enabled: true,
       defaultOpen: false,
-      refreshMs: 200
+      refreshMs: 200,
+      boundaryDiagnostics: false
+      // 打开后在控制台输出星座边界数据诊断。
     },
     /** 页面布局尺寸，单位通常是 CSS px。 */
     layout: {
@@ -399,7 +401,7 @@
 
   // src/data/culture-notes.ts
   window.RSO_CULTURE_NOTES = {
-    version: "4.8",
+    version: "5.5.3",
     importantMagnitudeLimit: 2.1,
     description: {
       zh: "\u91CD\u8981\u6052\u661F\u7684\u8DE8\u6587\u5316\u7B80\u8FF0\u3002\u6587\u5B57\u4E3A\u4FBF\u4E8E\u5B66\u4E60\u7684\u7B80\u660E\u6982\u62EC\uFF0C\u4E0D\u66FF\u4EE3\u5386\u53F2\u6587\u732E\u539F\u6587\uFF1B\u540C\u4E00\u897F\u65B9\u661F\u5EA7\u53EF\u80FD\u5B58\u5728\u591A\u4E2A\u795E\u8BDD\u7248\u672C\uFF0C\u4E2D\u56FD\u661F\u5B98\u542B\u4E49\u4E5F\u53EF\u80FD\u968F\u65F6\u4EE3\u548C\u6587\u732E\u800C\u53D8\u5316\u3002",
@@ -734,6 +736,876 @@
         zh: "\u5929\u5927\u5C06\u519B\u8868\u73B0\u7EDF\u7387\u5929\u5175\u7684\u9AD8\u7EA7\u5C06\u9886\uFF0C\u662F\u5317\u65B9\u5929\u7A7A\u7684\u91CD\u8981\u519B\u4E8B\u661F\u5B98\u3002",
         en: "Tiandajiangjun, the Great General of Heaven, represents a senior commander leading celestial troops."
       }
+    }
+  };
+  var SOURCE_IAU = ["iau-constellations"];
+  var SOURCE_TRADITION = [
+    "hk-space-museum",
+    "idp-chinese-astronomy",
+    "bu-tian-ge"
+  ];
+  var FENYE_CAUTION = "\u5206\u91CE\u662F\u4F20\u7EDF\u5929\u6587\u2014\u5730\u7406\u5BF9\u5E94\u4F53\u7CFB\uFF0C\u4E0D\u662F\u73B0\u4EE3\u884C\u653F\u533A\uFF0C\u4E5F\u4E0D\u662F\u79D1\u5B66\u5730\u7406\u8FB9\u754C\uFF1B\u4E0D\u540C\u6587\u732E\u5BF9\u5E94\u4F1A\u6709\u5DEE\u5F02\u3002";
+  function monthsForRa(raDeg) {
+    const raHours = (raDeg % 360 + 360) % 360 / 15;
+    const center = Math.round((raHours + 12) % 24 / 2) || 12;
+    return [center - 1 || 12, center, center + 1 > 12 ? 1 : center + 1];
+  }
+  var WESTERN_CONSTELLATION_CULTURE = {
+    Ori: {
+      id: "Ori",
+      zhName: "\u730E\u6237\u5EA7",
+      enName: "Orion",
+      mythologyZh: "\u730E\u6237\u5EA7\u5E38\u89C1\u7248\u672C\u8868\u73B0\u5DE8\u4EBA\u730E\u4EBA\u4FC4\u91CC\u7FC1\u3002\u4ED6\u4E0E\u91D1\u725B\u3001\u5927\u72AC\u3001\u5C0F\u72AC\u3001\u5929\u5154\u548C\u5929\u874E\u6784\u6210\u4E00\u7EC4\u5B8C\u6574\u7684\u51AC\u5B63\u795E\u8BDD\u94FE\uFF1A\u730E\u4EBA\u8FFD\u9010\u730E\u7269\uFF0C\u730E\u72AC\u76F8\u968F\uFF0C\u800C\u5929\u874E\u5728\u53E6\u4E00\u5B63\u8282\u5347\u8D77\uFF0C\u8C61\u5F81\u8FFD\u6740\u4FC4\u91CC\u7FC1\u7684\u5DE8\u874E\u3002",
+      symbolismZh: "\u8C61\u5F81\u72E9\u730E\u3001\u529B\u91CF\u548C\u51AC\u5B63\u591C\u7A7A\u7684\u6807\u5FD7\u6027\u5F62\u8C61\u3002\u8170\u5E26\u4E09\u661F\u4E5F\u662F\u5F88\u591A\u6587\u5316\u4E2D\u7684\u8FA8\u661F\u5165\u53E3\u3002",
+      relatedConstellations: ["Tau", "CMa", "CMi", "Lep", "Sco"],
+      relatedChineseAsterisms: ["\u53C2\u5BBF", "\u4F10(\u9644\u5B98)", "\u5395"],
+      importantStars: ["Betelgeuse", "Rigel", "Bellatrix"],
+      bestViewingMonthsNorth: monthsForRa(83),
+      bestViewingMonthsSouth: monthsForRa(83),
+      sourceTags: SOURCE_IAU
+    },
+    Tau: {
+      id: "Tau",
+      zhName: "\u91D1\u725B\u5EA7",
+      enName: "Taurus",
+      mythologyZh: "\u5E38\u89C1\u5E0C\u814A\u7248\u672C\u4E2D\uFF0C\u91D1\u725B\u4E0E\u5316\u8EAB\u767D\u725B\u7684\u5B99\u65AF\u548C\u6B27\u7F57\u5DF4\u6545\u4E8B\u76F8\u8FDE\uFF1B\u5728\u730E\u6237\u6545\u4E8B\u94FE\u91CC\uFF0C\u5B83\u4E5F\u662F\u4FC4\u91CC\u7FC1\u9762\u524D\u7684\u516C\u725B\u3002\u6634\u661F\u56E2\u548C\u6BD5\u5BBF\u661F\u56E2\u8BA9\u91D1\u725B\u5EA7\u517C\u5177\u795E\u8BDD\u548C\u8089\u773C\u89C2\u6D4B\u4EF7\u503C\u3002",
+      symbolismZh: "\u8C61\u5F81\u516C\u725B\u3001\u6625\u5B63\u519C\u4E8B\u3001\u529B\u91CF\u548C\u9EC4\u9053\u4E0A\u7684\u91CD\u8981\u6807\u5FD7\u3002",
+      relatedConstellations: ["Ori", "Aur", "Ari", "Gem"],
+      relatedChineseAsterisms: ["\u6BD5\u5BBF", "\u6634\u5BBF"],
+      importantStars: ["Aldebaran", "Pleiades"],
+      bestViewingMonthsNorth: monthsForRa(68),
+      bestViewingMonthsSouth: monthsForRa(68),
+      sourceTags: SOURCE_IAU
+    },
+    CMa: {
+      id: "CMa",
+      zhName: "\u5927\u72AC\u5EA7",
+      enName: "Canis Major",
+      mythologyZh: "\u5927\u72AC\u5EA7\u901A\u5E38\u662F\u730E\u6237\u7684\u730E\u72AC\u4E4B\u4E00\uFF0C\u7D27\u968F\u730E\u4EBA\u7A7F\u8FC7\u51AC\u5B63\u5929\u7A7A\u3002\u5929\u72FC\u661F\u662F\u5168\u5929\u6700\u4EAE\u6052\u661F\uFF0C\u4F7F\u8FD9\u4E2A\u661F\u5EA7\u5728\u4E2D\u897F\u4F20\u7EDF\u4E2D\u90FD\u6781\u9192\u76EE\u3002",
+      symbolismZh: "\u8C61\u5F81\u730E\u72AC\u3001\u8FFD\u968F\u548C\u51AC\u5B63\u5357\u65B9\u5929\u7A7A\u7684\u4EAE\u661F\u6807\u8BB0\u3002",
+      relatedConstellations: ["Ori", "CMi", "Lep"],
+      relatedChineseAsterisms: ["\u5929\u72FC", "\u5F27\u77E2"],
+      importantStars: ["Sirius"],
+      bestViewingMonthsNorth: monthsForRa(101),
+      bestViewingMonthsSouth: monthsForRa(101),
+      sourceTags: SOURCE_IAU
+    },
+    CMi: {
+      id: "CMi",
+      zhName: "\u5C0F\u72AC\u5EA7",
+      enName: "Canis Minor",
+      mythologyZh: "\u5C0F\u72AC\u5EA7\u5E38\u88AB\u89E3\u91CA\u4E3A\u730E\u6237\u7684\u53E6\u4E00\u53EA\u730E\u72AC\u3002\u5357\u6CB3\u4E09\u4E0E\u5929\u72FC\u661F\u3001\u53C2\u5BBF\u56DB\u4E00\u8D77\u6784\u6210\u51AC\u5B63\u5927\u4E09\u89D2\uFF0C\u662F\u8FA8\u8BA4\u51AC\u5B63\u661F\u7A7A\u7684\u5B9E\u7528\u6807\u5FD7\u3002",
+      symbolismZh: "\u8C61\u5F81\u5C0F\u730E\u72AC\u3001\u968F\u4ECE\u548C\u51AC\u5B63\u661F\u7A7A\u5BFC\u822A\u3002",
+      relatedConstellations: ["Ori", "CMa", "Gem"],
+      relatedChineseAsterisms: ["\u5357\u6CB3"],
+      importantStars: ["Procyon"],
+      bestViewingMonthsNorth: monthsForRa(113),
+      bestViewingMonthsSouth: monthsForRa(113),
+      sourceTags: SOURCE_IAU
+    },
+    Sco: {
+      id: "Sco",
+      zhName: "\u5929\u874E\u5EA7",
+      enName: "Scorpius",
+      mythologyZh: "\u5929\u874E\u5EA7\u5E38\u89C1\u7248\u672C\u662F\u88AB\u6D3E\u53BB\u60E9\u7F5A\u6216\u8FFD\u6740\u4FC4\u91CC\u7FC1\u7684\u5DE8\u874E\u3002\u5B83\u4E0E\u730E\u6237\u5EA7\u5206\u5904\u76F8\u5BF9\u5B63\u8282\uFF0C\u5F62\u6210\u201C\u730E\u6237\u843D\u4E0B\uFF0C\u5929\u874E\u5347\u8D77\u201D\u7684\u620F\u5267\u6027\u5929\u7A7A\u5173\u7CFB\u3002",
+      symbolismZh: "\u8C61\u5F81\u5371\u9669\u3001\u590D\u4EC7\u3001\u590F\u5B63\u5357\u65B9\u5929\u7A7A\u548C\u94F6\u6CB3\u4E2D\u5FC3\u9644\u8FD1\u7684\u660E\u4EAE\u661F\u7FA4\u3002",
+      relatedConstellations: ["Ori", "Oph", "Sgr", "Lup"],
+      relatedChineseAsterisms: ["\u5FC3\u5BBF", "\u5C3E\u5BBF"],
+      importantStars: ["Antares", "Shaula", "Sargas"],
+      bestViewingMonthsNorth: monthsForRa(247),
+      bestViewingMonthsSouth: monthsForRa(247),
+      sourceTags: SOURCE_IAU
+    },
+    And: {
+      id: "And",
+      zhName: "\u4ED9\u5973\u5EA7",
+      enName: "Andromeda",
+      mythologyZh: "\u4ED9\u5973\u5EA7\u8868\u73B0\u88AB\u9501\u5728\u6D77\u8FB9\u7B49\u5F85\u732E\u796D\u7684\u516C\u4E3B\u5B89\u5FB7\u6D1B\u58A8\u8FBE\u3002\u5979\u7684\u6545\u4E8B\u4E0E\u4ED9\u540E\u3001\u4ED9\u738B\u3001\u82F1\u4ED9\u3001\u9CB8\u9C7C\u548C\u98DE\u9A6C\u76F8\u8FDE\uFF0C\u662F\u79CB\u5B63\u5317\u5929\u6700\u5B8C\u6574\u7684\u5E0C\u814A\u795E\u8BDD\u661F\u5EA7\u7FA4\u4E4B\u4E00\u3002",
+      symbolismZh: "\u8C61\u5F81\u53D7\u96BE\u3001\u6551\u63F4\u3001\u738B\u65CF\u547D\u8FD0\u548C\u79CB\u5B63\u661F\u7A7A\u795E\u8BDD\u94FE\u3002",
+      relatedConstellations: ["Cas", "Cep", "Per", "Cet", "Peg"],
+      importantStars: ["Alpheratz", "Mirach", "Andromeda Galaxy"],
+      bestViewingMonthsNorth: monthsForRa(11),
+      bestViewingMonthsSouth: monthsForRa(11),
+      sourceTags: SOURCE_IAU
+    },
+    Cas: {
+      id: "Cas",
+      zhName: "\u4ED9\u540E\u5EA7",
+      enName: "Cassiopeia",
+      mythologyZh: "\u4ED9\u540E\u5EA7\u8868\u73B0\u738B\u540E\u5361\u897F\u5965\u4F69\u5A05\u3002\u5E38\u89C1\u6545\u4E8B\u4E2D\uFF0C\u5979\u5938\u8000\u81EA\u5DF1\u6216\u5973\u513F\u6BD4\u6D77\u4E2D\u4ED9\u5973\u66F4\u7F8E\uFF0C\u5F15\u53D1\u6D77\u795E\u60E9\u7F5A\uFF0C\u6700\u7EC8\u7275\u8FDE\u5B89\u5FB7\u6D1B\u58A8\u8FBE\u3002",
+      symbolismZh: "\u8C61\u5F81\u738B\u540E\u3001\u5938\u8000\u3001\u60E9\u7F5A\u548C\u5317\u5929 W \u5F62\u8FA8\u661F\u6807\u5FD7\u3002",
+      relatedConstellations: ["And", "Cep", "Per", "Cet"],
+      relatedChineseAsterisms: ["\u9601\u9053", "\u738B\u826F"],
+      importantStars: ["Schedar", "Caph"],
+      bestViewingMonthsNorth: monthsForRa(15),
+      bestViewingMonthsSouth: monthsForRa(15),
+      sourceTags: SOURCE_IAU
+    },
+    Cep: {
+      id: "Cep",
+      zhName: "\u4ED9\u738B\u5EA7",
+      enName: "Cepheus",
+      mythologyZh: "\u4ED9\u738B\u5EA7\u8868\u73B0\u57C3\u585E\u4FC4\u6BD4\u4E9A\u56FD\u738B\u523B\u752B\u65AF\uFF0C\u662F\u4ED9\u540E\u548C\u4ED9\u5973\u5EA7\u6545\u4E8B\u4E2D\u7684\u7236\u4EB2\u89D2\u8272\u3002\u5B83\u9760\u8FD1\u5317\u5929\u6781\uFF0C\u5E38\u5E74\u53EF\u89C1\u4E8E\u5317\u534A\u7403\u9AD8\u7EAC\u5929\u7A7A\u3002",
+      symbolismZh: "\u8C61\u5F81\u738B\u6743\u3001\u7236\u4EB2\u548C\u5317\u5929\u6781\u9644\u8FD1\u7684\u738B\u65CF\u661F\u5EA7\u7FA4\u3002",
+      relatedConstellations: ["Cas", "And", "Per", "Cet"],
+      importantStars: ["Alderamin"],
+      bestViewingMonthsNorth: monthsForRa(330),
+      bestViewingMonthsSouth: monthsForRa(330),
+      sourceTags: SOURCE_IAU
+    },
+    Per: {
+      id: "Per",
+      zhName: "\u82F1\u4ED9\u5EA7",
+      enName: "Perseus",
+      mythologyZh: "\u82F1\u4ED9\u5EA7\u8868\u73B0\u82F1\u96C4\u73C0\u8033\u4FEE\u65AF\u3002\u4ED6\u65A9\u6740\u7F8E\u675C\u838E\uFF0C\u5E76\u5728\u56DE\u7A0B\u4E2D\u6551\u4E0B\u5B89\u5FB7\u6D1B\u58A8\u8FBE\u3002\u5927\u9675\u4E94\u6240\u5728\u7684\u9B54\u5934\u5F62\u8C61\u6765\u81EA\u7F8E\u675C\u838E\u4E4B\u9996\u3002",
+      symbolismZh: "\u8C61\u5F81\u82F1\u96C4\u3001\u9664\u602A\u3001\u6551\u63F4\u548C\u79CB\u51AC\u4EA4\u754C\u7684\u94F6\u6CB3\u661F\u533A\u3002",
+      relatedConstellations: ["And", "Cas", "Cep", "Cet", "Peg"],
+      relatedChineseAsterisms: ["\u5927\u9675", "\u5929\u8239"],
+      importantStars: ["Mirfak", "Algol"],
+      bestViewingMonthsNorth: monthsForRa(50),
+      bestViewingMonthsSouth: monthsForRa(50),
+      sourceTags: SOURCE_IAU
+    },
+    Cet: {
+      id: "Cet",
+      zhName: "\u9CB8\u9C7C\u5EA7",
+      enName: "Cetus",
+      mythologyZh: "\u9CB8\u9C7C\u5EA7\u5728\u53E4\u5178\u8BED\u5883\u4E2D\u66F4\u63A5\u8FD1\u6D77\u602A\u523B\u6258\uFF0C\u5B83\u88AB\u6D3E\u53BB\u5A01\u80C1\u5B89\u5FB7\u6D1B\u58A8\u8FBE\uFF0C\u540E\u6765\u88AB\u73C0\u8033\u4FEE\u65AF\u51FB\u8D25\u3002",
+      symbolismZh: "\u8C61\u5F81\u6D77\u602A\u3001\u6DF7\u6C8C\u6D77\u6D0B\u548C\u79CB\u5B63\u5357\u65B9\u5927\u9762\u79EF\u6697\u6DE1\u5929\u533A\u3002",
+      relatedConstellations: ["And", "Cas", "Cep", "Per", "Psc"],
+      importantStars: ["Mira", "Diphda"],
+      bestViewingMonthsNorth: monthsForRa(25),
+      bestViewingMonthsSouth: monthsForRa(25),
+      sourceTags: SOURCE_IAU
+    },
+    Peg: {
+      id: "Peg",
+      zhName: "\u98DE\u9A6C\u5EA7",
+      enName: "Pegasus",
+      mythologyZh: "\u98DE\u9A6C\u5EA7\u8868\u73B0\u6709\u7FFC\u795E\u9A6C\u73C0\u4F3D\u7D22\u65AF\uFF0C\u5E38\u4E0E\u73C0\u8033\u4FEE\u65AF\u3001\u7F8E\u675C\u838E\u548C\u82F1\u96C4\u65C5\u884C\u6545\u4E8B\u76F8\u8FDE\u3002\u79CB\u5B63\u5927\u56DB\u8FB9\u5F62\u662F\u8FA8\u8BA4\u5B83\u7684\u5173\u952E\u3002",
+      symbolismZh: "\u8C61\u5F81\u98DE\u9A6C\u3001\u7075\u611F\u3001\u8FDC\u884C\u548C\u79CB\u5B63\u5929\u7A7A\u6846\u67B6\u3002",
+      relatedConstellations: ["And", "Per", "Equ", "Psc"],
+      relatedChineseAsterisms: ["\u5BA4\u5BBF", "\u58C1\u5BBF"],
+      importantStars: ["Markab", "Scheat", "Algenib"],
+      bestViewingMonthsNorth: monthsForRa(340),
+      bestViewingMonthsSouth: monthsForRa(340),
+      sourceTags: SOURCE_IAU
+    },
+    UMa: {
+      id: "UMa",
+      zhName: "\u5927\u718A\u5EA7",
+      enName: "Ursa Major",
+      mythologyZh: "\u5927\u718A\u5EA7\u5E38\u89C1\u7248\u672C\u4E0E\u5361\u5229\u65AF\u6258\u53D8\u718A\u7684\u6545\u4E8B\u6709\u5173\u3002\u5317\u6597\u4E03\u661F\u662F\u8FD9\u4E2A\u661F\u5EA7\u4E2D\u6700\u9192\u76EE\u7684\u90E8\u5206\uFF0C\u5728\u897F\u65B9\u5E38\u79F0 Big Dipper \u6216 Plough\uFF0C\u5728\u4E2D\u56FD\u5219\u662F\u72EC\u7ACB\u4E14\u6781\u91CD\u8981\u7684\u5317\u6597\u661F\u5B98\u3002",
+      symbolismZh: "\u8C61\u5F81\u5927\u718A\u3001\u5317\u65B9\u3001\u5BFC\u822A\u3001\u5B63\u8282\u548C\u5317\u5929\u79E9\u5E8F\u3002",
+      relatedConstellations: ["UMi", "Boo", "CVn", "Dra"],
+      relatedChineseAsterisms: ["\u5317\u6597"],
+      importantStars: ["Dubhe", "Merak", "Alioth"],
+      bestViewingMonthsNorth: monthsForRa(170),
+      bestViewingMonthsSouth: monthsForRa(170),
+      sourceTags: SOURCE_IAU
+    },
+    UMi: {
+      id: "UMi",
+      zhName: "\u5C0F\u718A\u5EA7",
+      enName: "Ursa Minor",
+      mythologyZh: "\u5C0F\u718A\u5EA7\u5305\u542B\u5317\u6781\u661F\u3002\u5B83\u5E38\u4E0E\u5927\u718A\u5EA7\u6545\u4E8B\u76F8\u8FDE\uFF0C\u4E5F\u56E0\u9760\u8FD1\u5317\u5929\u6781\u800C\u5728\u822A\u6D77\u3001\u8FA8\u5411\u548C\u5929\u7403\u5B66\u4E60\u4E2D\u5177\u6709\u7279\u6B8A\u610F\u4E49\u3002",
+      symbolismZh: "\u8C61\u5F81\u5C0F\u718A\u3001\u5317\u6781\u3001\u65B9\u5411\u548C\u5929\u7403\u65CB\u8F6C\u8F74\u9644\u8FD1\u7684\u7A33\u5B9A\u53C2\u7167\u3002",
+      relatedConstellations: ["UMa", "Dra", "Cep"],
+      relatedChineseAsterisms: ["\u52FE\u9648", "\u5317\u6781"],
+      importantStars: ["Polaris", "Kochab"],
+      bestViewingMonthsNorth: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+      bestViewingMonthsSouth: [],
+      sourceTags: SOURCE_IAU
+    },
+    Boo: {
+      id: "Boo",
+      zhName: "\u7267\u592B\u5EA7",
+      enName: "Bo\xF6tes",
+      mythologyZh: "\u7267\u592B\u5EA7\u5E38\u88AB\u63CF\u7ED8\u4E3A\u7267\u4EBA\u3001\u9A71\u718A\u8005\u6216\u5B88\u62A4\u8005\uFF0C\u548C\u5927\u718A\u5EA7\u7684\u5173\u7CFB\u5BC6\u5207\u3002\u4E0D\u540C\u53E4\u5178\u4F20\u7EDF\u5BF9\u5176\u8EAB\u4EFD\u89E3\u91CA\u4E0D\u5B8C\u5168\u4E00\u81F4\u3002",
+      symbolismZh: "\u8C61\u5F81\u7267\u4EBA\u3001\u5B88\u62A4\u3001\u6625\u5B63\u5317\u5929\u548C\u5927\u89D2\u661F\u7684\u660E\u4EAE\u6807\u8BB0\u3002",
+      relatedConstellations: ["UMa", "CVn", "CrB", "Vir"],
+      relatedChineseAsterisms: ["\u5927\u89D2"],
+      importantStars: ["Arcturus"],
+      bestViewingMonthsNorth: monthsForRa(220),
+      bestViewingMonthsSouth: monthsForRa(220),
+      sourceTags: SOURCE_IAU
+    },
+    CVn: {
+      id: "CVn",
+      zhName: "\u730E\u72AC\u5EA7",
+      enName: "Canes Venatici",
+      mythologyZh: "\u730E\u72AC\u5EA7\u662F\u8FD1\u4EE3\u661F\u5EA7\uFF0C\u8868\u73B0\u7267\u592B\u7275\u7740\u8FFD\u9010\u5927\u718A\u7684\u4E24\u53EA\u730E\u72AC\u3002\u5B83\u4E0D\u50CF\u53E4\u5178\u9EC4\u9053\u661F\u5EA7\u90A3\u6837\u6709\u7EDF\u4E00\u53E4\u5E0C\u814A\u795E\u8BDD\uFF0C\u5374\u5728\u6625\u5B63\u6DF1\u7A7A\u5929\u4F53\u4E2D\u5F88\u91CD\u8981\u3002",
+      symbolismZh: "\u8C61\u5F81\u730E\u72AC\u3001\u8FFD\u9010\u548C\u6625\u5B63\u5317\u5929\u6DF1\u7A7A\u76EE\u6807\u533A\u57DF\u3002",
+      relatedConstellations: ["Boo", "UMa"],
+      importantStars: ["Cor Caroli"],
+      bestViewingMonthsNorth: monthsForRa(195),
+      bestViewingMonthsSouth: monthsForRa(195),
+      sourceTags: SOURCE_IAU
+    },
+    Lyr: {
+      id: "Lyr",
+      zhName: "\u5929\u7434\u5EA7",
+      enName: "Lyra",
+      mythologyZh: "\u5929\u7434\u5EA7\u901A\u5E38\u4EE3\u8868\u4FC4\u8033\u752B\u65AF\u7684\u7434\u3002\u5E38\u89C1\u6545\u4E8B\u4E2D\uFF0C\u4FC4\u8033\u752B\u65AF\u7684\u97F3\u4E50\u80FD\u611F\u52A8\u4EBA\u3001\u52A8\u7269\u751A\u81F3\u51A5\u5E9C\u3002",
+      symbolismZh: "\u8C61\u5F81\u97F3\u4E50\u3001\u8BD7\u6B4C\u3001\u611F\u5316\u529B\u91CF\u548C\u590F\u5B63\u5927\u4E09\u89D2\u3002",
+      relatedConstellations: ["Cyg", "Aql", "Her"],
+      relatedChineseAsterisms: ["\u7EC7\u5973"],
+      importantStars: ["Vega"],
+      bestViewingMonthsNorth: monthsForRa(280),
+      bestViewingMonthsSouth: monthsForRa(280),
+      sourceTags: SOURCE_IAU
+    },
+    Cyg: {
+      id: "Cyg",
+      zhName: "\u5929\u9E45\u5EA7",
+      enName: "Cygnus",
+      mythologyZh: "\u5929\u9E45\u5EA7\u548C\u591A\u4E2A\u5929\u9E45\u6545\u4E8B\u6709\u5173\uFF0C\u5305\u62EC\u5B99\u65AF\u5316\u8EAB\u5929\u9E45\u3001\u6216\u540D\u4E3A Cycnus \u7684\u4EBA\u7269\u4F20\u8BF4\u3002\u5B83\u6A2A\u5367\u94F6\u6CB3\uFF0C\u662F\u590F\u79CB\u5B63\u6700\u9192\u76EE\u7684\u661F\u5EA7\u4E4B\u4E00\u3002",
+      symbolismZh: "\u8C61\u5F81\u5929\u9E45\u3001\u98DE\u7FD4\u3001\u94F6\u6CB3\u548C\u590F\u5B63\u5927\u4E09\u89D2\u3002",
+      relatedConstellations: ["Lyr", "Aql", "Cep", "Vul"],
+      relatedChineseAsterisms: ["\u5929\u6D25"],
+      importantStars: ["Deneb", "Albireo"],
+      bestViewingMonthsNorth: monthsForRa(305),
+      bestViewingMonthsSouth: monthsForRa(305),
+      sourceTags: SOURCE_IAU
+    },
+    Aql: {
+      id: "Aql",
+      zhName: "\u5929\u9E70\u5EA7",
+      enName: "Aquila",
+      mythologyZh: "\u5929\u9E70\u5EA7\u4EE3\u8868\u5B99\u65AF\u7684\u9E70\u3002\u5E38\u89C1\u7248\u672C\u4E2D\uFF0C\u5B83\u4E3A\u5B99\u65AF\u643A\u5E26\u96F7\u9706\uFF0C\u6216\u628A\u4F3D\u502A\u58A8\u5F97\u65AF\u5E26\u5230\u5965\u6797\u5339\u65AF\u3002",
+      symbolismZh: "\u8C61\u5F81\u9E70\u3001\u96F7\u9706\u3001\u795E\u4F7F\u548C\u94F6\u6CB3\u4E24\u5CB8\u7684\u725B\u90CE\u7EC7\u5973\u6545\u4E8B\u5BF9\u5E94\u533A\u3002",
+      relatedConstellations: ["Lyr", "Cyg", "Sge", "Del"],
+      relatedChineseAsterisms: ["\u6CB3\u9F13"],
+      importantStars: ["Altair"],
+      bestViewingMonthsNorth: monthsForRa(297),
+      bestViewingMonthsSouth: monthsForRa(297),
+      sourceTags: SOURCE_IAU
+    },
+    Her: {
+      id: "Her",
+      zhName: "\u6B66\u4ED9\u5EA7",
+      enName: "Hercules",
+      mythologyZh: "\u6B66\u4ED9\u5EA7\u8868\u73B0\u82F1\u96C4\u8D6B\u62C9\u514B\u52D2\u65AF\u3002\u5B83\u4E0E\u5317\u5195\u3001\u5929\u9F99\u3001\u86C7\u592B\u7B49\u90BB\u8FD1\u661F\u5EA7\u6709\u795E\u8BDD\u4E0E\u5929\u7A7A\u4F4D\u7F6E\u5173\u7CFB\uFF0C\u662F\u590F\u5B63\u5317\u5929\u7684\u5927\u578B\u6697\u6DE1\u661F\u5EA7\u3002",
+      symbolismZh: "\u8C61\u5F81\u82F1\u96C4\u3001\u8BD5\u70BC\u3001\u529B\u91CF\u548C\u5341\u4E8C\u529F\u4E1A\u4F20\u7EDF\u3002",
+      relatedConstellations: ["CrB", "Dra", "Oph", "Lyr"],
+      importantStars: ["Rasalgethi"],
+      bestViewingMonthsNorth: monthsForRa(258),
+      bestViewingMonthsSouth: monthsForRa(258),
+      sourceTags: SOURCE_IAU
+    },
+    Oph: {
+      id: "Oph",
+      zhName: "\u86C7\u592B\u5EA7",
+      enName: "Ophiuchus",
+      mythologyZh: "\u86C7\u592B\u5EA7\u901A\u5E38\u4E0E\u533B\u795E\u963F\u65AF\u514B\u52D2\u5E87\u4FC4\u65AF\u76F8\u8FDE\uFF0C\u624B\u6301\u5DE8\u86C7\u3002\u5B83\u4F4D\u4E8E\u9EC4\u9053\u7ECF\u8FC7\u7684\u5929\u7A7A\u533A\u57DF\uFF0C\u4F46\u4E0D\u662F\u4F20\u7EDF\u9EC4\u9053\u5341\u4E8C\u5BAB\u4E4B\u4E00\u3002",
+      symbolismZh: "\u8C61\u5F81\u533B\u672F\u3001\u590D\u751F\u77E5\u8BC6\u3001\u86C7\u548C\u9EC4\u9053\u9644\u8FD1\u7684\u5927\u578B\u590F\u5B63\u661F\u5EA7\u3002",
+      relatedConstellations: ["Ser", "Sco", "Sgr", "Her"],
+      relatedChineseAsterisms: ["\u5929\u5E02\u57A3", "\u5019"],
+      importantStars: ["Rasalhague"],
+      bestViewingMonthsNorth: monthsForRa(258),
+      bestViewingMonthsSouth: monthsForRa(258),
+      sourceTags: SOURCE_IAU
+    },
+    Sgr: {
+      id: "Sgr",
+      zhName: "\u4EBA\u9A6C\u5EA7",
+      enName: "Sagittarius",
+      mythologyZh: "\u4EBA\u9A6C\u5EA7\u8868\u73B0\u6301\u5F13\u5C04\u624B\uFF0C\u5E38\u753B\u6210\u534A\u4EBA\u9A6C\u5F62\u8C61\u3002\u5B83\u4F4D\u4E8E\u94F6\u6CB3\u4E2D\u5FC3\u65B9\u5411\uFF0C\u795E\u8BDD\u5F62\u8C61\u548C\u89C2\u6D4B\u4EF7\u503C\u90FD\u5F88\u5F3A\u3002",
+      symbolismZh: "\u8C61\u5F81\u5C04\u624B\u3001\u8FDC\u65B9\u76EE\u6807\u3001\u94F6\u6CB3\u4E2D\u5FC3\u548C\u590F\u5B63\u5357\u65B9\u5929\u7A7A\u3002",
+      relatedConstellations: ["Sco", "Cap", "Oph", "CrA"],
+      relatedChineseAsterisms: ["\u6597\u5BBF", "\u7B95\u5BBF"],
+      importantStars: ["Kaus Australis", "Nunki"],
+      bestViewingMonthsNorth: monthsForRa(285),
+      bestViewingMonthsSouth: monthsForRa(285),
+      sourceTags: SOURCE_IAU
+    },
+    Ari: {
+      id: "Ari",
+      zhName: "\u767D\u7F8A\u5EA7",
+      enName: "Aries",
+      mythologyZh: "\u767D\u7F8A\u5EA7\u901A\u5E38\u4EE3\u8868\u8F7D\u7740\u4F5B\u91CC\u514B\u7D22\u65AF\u9003\u79BB\u5371\u9669\u7684\u795E\u7F8A\uFF0C\u540E\u6765\u7559\u4E0B\u91D1\u7F8A\u6BDB\uFF0C\u5F15\u51FA\u4F0A\u963F\u5B8B\u548C\u963F\u5C14\u6208\u82F1\u96C4\u7684\u8FDC\u5F81\u6545\u4E8B\u3002",
+      symbolismZh: "\u8C61\u5F81\u516C\u7F8A\u3001\u9EC4\u9053\u8D77\u70B9\u4F20\u7EDF\u3001\u6625\u5B63\u548C\u91D1\u7F8A\u6BDB\u795E\u8BDD\u3002",
+      relatedConstellations: ["Tau", "Psc", "Cet", "And"],
+      relatedChineseAsterisms: ["\u5A04\u5BBF", "\u80C3\u5BBF"],
+      importantStars: ["Hamal"],
+      bestViewingMonthsNorth: monthsForRa(35),
+      bestViewingMonthsSouth: monthsForRa(35),
+      sourceTags: SOURCE_IAU
+    },
+    Gem: {
+      id: "Gem",
+      zhName: "\u53CC\u5B50\u5EA7",
+      enName: "Gemini",
+      mythologyZh: "\u53CC\u5B50\u5EA7\u4EE3\u8868\u5361\u65AF\u6258\u8033\u548C\u6CE2\u5415\u4E22\u523B\u65AF\uFF0C\u4E24\u5144\u5F1F\u4E00\u4E2A\u51E1\u4EBA\u3001\u4E00\u4E2A\u4E0D\u673D\uFF0C\u5E38\u88AB\u89C6\u4E3A\u5144\u5F1F\u60C5\u8C0A\u548C\u5B88\u62A4\u822A\u6D77\u8005\u7684\u8C61\u5F81\u3002",
+      symbolismZh: "\u8C61\u5F81\u53CC\u751F\u3001\u5144\u5F1F\u3001\u5B88\u62A4\u548C\u51AC\u6625\u4EA4\u754C\u7684\u9EC4\u9053\u661F\u5EA7\u3002",
+      relatedConstellations: ["Ori", "CMi", "Cnc", "Tau"],
+      relatedChineseAsterisms: ["\u4E95\u5BBF", "\u5317\u6CB3"],
+      importantStars: ["Castor", "Pollux"],
+      bestViewingMonthsNorth: monthsForRa(105),
+      bestViewingMonthsSouth: monthsForRa(105),
+      sourceTags: SOURCE_IAU
+    },
+    Cnc: {
+      id: "Cnc",
+      zhName: "\u5DE8\u87F9\u5EA7",
+      enName: "Cancer",
+      mythologyZh: "\u5DE8\u87F9\u5EA7\u5E38\u4E0E\u8D6B\u62C9\u514B\u52D2\u65AF\u5927\u6218\u4E5D\u5934\u86C7\u65F6\u88AB\u8D6B\u62C9\u6D3E\u53BB\u5E72\u6270\u4ED6\u7684\u8783\u87F9\u76F8\u8FDE\u3002\u5B83\u672C\u8EAB\u8F83\u6697\uFF0C\u4F46\u9B3C\u661F\u56E2\u8BA9\u5B83\u5F88\u9002\u5408\u89C2\u6D4B\u6559\u5B66\u3002",
+      symbolismZh: "\u8C61\u5F81\u8783\u87F9\u3001\u9EC4\u9053\u3001\u6697\u6DE1\u661F\u5EA7\u4E2D\u7684\u663E\u8457\u661F\u56E2\u3002",
+      relatedConstellations: ["Gem", "Leo", "Hya"],
+      relatedChineseAsterisms: ["\u9B3C\u5BBF"],
+      importantStars: ["Praesepe"],
+      bestViewingMonthsNorth: monthsForRa(130),
+      bestViewingMonthsSouth: monthsForRa(130),
+      sourceTags: SOURCE_IAU
+    },
+    Leo: {
+      id: "Leo",
+      zhName: "\u72EE\u5B50\u5EA7",
+      enName: "Leo",
+      mythologyZh: "\u72EE\u5B50\u5EA7\u901A\u5E38\u88AB\u89E3\u91CA\u4E3A\u8D6B\u62C9\u514B\u52D2\u65AF\u5341\u4E8C\u529F\u4E1A\u4E2D\u7684\u5C3C\u7C73\u4E9A\u72EE\u3002\u8F69\u8F95\u5341\u56DB\u4F4D\u4E8E\u72EE\u5FC3\u9644\u8FD1\uFF0C\u662F\u6625\u5B63\u591C\u7A7A\u7684\u91CD\u8981\u4EAE\u661F\u3002",
+      symbolismZh: "\u8C61\u5F81\u72EE\u5B50\u3001\u738B\u6743\u3001\u52C7\u529B\u548C\u6625\u5B63\u9EC4\u9053\u661F\u5EA7\u3002",
+      relatedConstellations: ["Cnc", "Vir", "LMi", "Hya"],
+      relatedChineseAsterisms: ["\u8F69\u8F95"],
+      importantStars: ["Regulus", "Denebola"],
+      bestViewingMonthsNorth: monthsForRa(155),
+      bestViewingMonthsSouth: monthsForRa(155),
+      sourceTags: SOURCE_IAU
+    },
+    Vir: {
+      id: "Vir",
+      zhName: "\u5BA4\u5973\u5EA7",
+      enName: "Virgo",
+      mythologyZh: "\u5BA4\u5973\u5EA7\u5E38\u88AB\u89E3\u91CA\u4E3A\u6B63\u4E49\u5973\u795E\u963F\u65AF\u7279\u8D56\u4E9A\uFF0C\u6216\u4E0E\u519C\u4E1A\u548C\u4E30\u6536\u5973\u795E\u76F8\u8FDE\u3002\u5B83\u4E5F\u662F\u6625\u5B63\u661F\u7CFB\u56E2\u6240\u5728\u7684\u5927\u578B\u9EC4\u9053\u661F\u5EA7\u3002",
+      symbolismZh: "\u8C61\u5F81\u5C11\u5973\u3001\u6B63\u4E49\u3001\u8C37\u7269\u3001\u4E30\u6536\u548C\u6625\u5B63\u661F\u7CFB\u5929\u533A\u3002",
+      relatedConstellations: ["Leo", "Lib", "Boo", "Crv"],
+      relatedChineseAsterisms: ["\u89D2\u5BBF", "\u4EA2\u5BBF"],
+      importantStars: ["Spica"],
+      bestViewingMonthsNorth: monthsForRa(195),
+      bestViewingMonthsSouth: monthsForRa(195),
+      sourceTags: SOURCE_IAU
+    },
+    Lib: {
+      id: "Lib",
+      zhName: "\u5929\u79E4\u5EA7",
+      enName: "Libra",
+      mythologyZh: "\u5929\u79E4\u5EA7\u8868\u73B0\u5929\u5E73\uFF0C\u5E38\u4E0E\u6B63\u4E49\u3001\u8861\u91CF\u548C\u79CB\u5206\u9644\u8FD1\u592A\u9633\u6240\u5728\u7684\u4F20\u7EDF\u8054\u60F3\u76F8\u8FDE\u3002\u53E4\u4EE3\u4E5F\u66FE\u548C\u5929\u874E\u5EA7\u7684\u722A\u90E8\u6709\u5173\u3002",
+      symbolismZh: "\u8C61\u5F81\u8861\u91CF\u3001\u516C\u5E73\u3001\u5E73\u8861\u548C\u9EC4\u9053\u4E0A\u7684\u5C3A\u5EA6\u610F\u8C61\u3002",
+      relatedConstellations: ["Vir", "Sco", "Ser"],
+      relatedChineseAsterisms: ["\u6C10\u5BBF"],
+      importantStars: ["Zubenelgenubi", "Zubeneschamali"],
+      bestViewingMonthsNorth: monthsForRa(225),
+      bestViewingMonthsSouth: monthsForRa(225),
+      sourceTags: SOURCE_IAU
+    },
+    Cap: {
+      id: "Cap",
+      zhName: "\u6469\u7FAF\u5EA7",
+      enName: "Capricornus",
+      mythologyZh: "\u6469\u7FAF\u5EA7\u8868\u73B0\u534A\u7F8A\u534A\u9C7C\u7684\u6D77\u5C71\u7F8A\uFF0C\u5E38\u4E0E\u6F58\u795E\u9003\u907F\u602A\u7269\u65F6\u5316\u8EAB\u5165\u6C34\u7684\u6545\u4E8B\u76F8\u8FDE\u3002",
+      symbolismZh: "\u8C61\u5F81\u5C71\u7F8A\u9C7C\u3001\u51AC\u81F3\u70B9\u4F20\u7EDF\u548C\u9EC4\u9053\u5357\u90E8\u6697\u6DE1\u661F\u5EA7\u3002",
+      relatedConstellations: ["Sgr", "Aqr", "PsA"],
+      relatedChineseAsterisms: ["\u725B\u5BBF"],
+      importantStars: ["Deneb Algedi"],
+      bestViewingMonthsNorth: monthsForRa(315),
+      bestViewingMonthsSouth: monthsForRa(315),
+      sourceTags: SOURCE_IAU
+    },
+    Aqr: {
+      id: "Aqr",
+      zhName: "\u5B9D\u74F6\u5EA7",
+      enName: "Aquarius",
+      mythologyZh: "\u5B9D\u74F6\u5EA7\u8868\u73B0\u5012\u6C34\u8005\uFF0C\u5E38\u4E0E\u4F3D\u502A\u58A8\u5F97\u65AF\u6216\u5929\u4E0A\u53F8\u6C34\u4EBA\u7269\u76F8\u8FDE\u3002\u6C34\u6D41\u5E38\u88AB\u753B\u5411\u5357\u9C7C\u5EA7\u3002",
+      symbolismZh: "\u8C61\u5F81\u6C34\u3001\u503E\u6CE8\u3001\u96E8\u5B63\u548C\u79CB\u5B63\u9EC4\u9053\u533A\u57DF\u3002",
+      relatedConstellations: ["Cap", "Psc", "PsA", "Peg"],
+      relatedChineseAsterisms: ["\u5973\u5BBF", "\u865A\u5BBF", "\u5371\u5BBF"],
+      importantStars: ["Sadalsuud", "Sadalmelik"],
+      bestViewingMonthsNorth: monthsForRa(335),
+      bestViewingMonthsSouth: monthsForRa(335),
+      sourceTags: SOURCE_IAU
+    },
+    Psc: {
+      id: "Psc",
+      zhName: "\u53CC\u9C7C\u5EA7",
+      enName: "Pisces",
+      mythologyZh: "\u53CC\u9C7C\u5EA7\u8868\u73B0\u4E24\u6761\u9C7C\uFF0C\u5E38\u89C1\u7248\u672C\u4E0E\u963F\u4F5B\u6D1B\u72C4\u5FD2\u548C\u5384\u6D1B\u65AF\u4E3A\u8EB2\u907F\u602A\u7269\u5316\u4E3A\u9C7C\u6709\u5173\u3002\u5B83\u8DE8\u8D8A\u6625\u5206\u70B9\u9644\u8FD1\uFF0C\u662F\u9EC4\u9053\u5341\u4E8C\u5BAB\u4E4B\u4E00\u3002",
+      symbolismZh: "\u8C61\u5F81\u53CC\u9C7C\u3001\u9003\u907F\u3001\u8FDE\u63A5\u548C\u79CB\u5B63\u6697\u6DE1\u9EC4\u9053\u5929\u533A\u3002",
+      relatedConstellations: ["Aqr", "Ari", "Peg", "Cet"],
+      relatedChineseAsterisms: ["\u5BA4\u5BBF", "\u58C1\u5BBF"],
+      importantStars: ["Alrescha"],
+      bestViewingMonthsNorth: monthsForRa(10),
+      bestViewingMonthsSouth: monthsForRa(10),
+      sourceTags: SOURCE_IAU
+    },
+    Cru: {
+      id: "Cru",
+      zhName: "\u5357\u5341\u5B57\u5EA7",
+      enName: "Crux",
+      mythologyZh: "\u5357\u5341\u5B57\u5EA7\u662F\u8FD1\u4EE3\u897F\u65B9\u661F\u5EA7\uFF0C\u4EE5\u9192\u76EE\u7684\u5341\u5B57\u5F62\u547D\u540D\u3002\u5B83\u6CA1\u6709\u7EDF\u4E00\u53E4\u5E0C\u814A\u795E\u8BDD\u4E3B\u4F53\uFF0C\u5374\u5728\u5357\u534A\u7403\u822A\u6D77\u548C\u8FA8\u5411\u4E2D\u6781\u91CD\u8981\u3002",
+      symbolismZh: "\u8C61\u5F81\u5357\u65B9\u3001\u5341\u5B57\u5F62\u3001\u822A\u6D77\u65B9\u5411\u548C\u5357\u5929\u6807\u5FD7\u3002",
+      relatedConstellations: ["Cen", "Mus", "Car"],
+      relatedChineseAsterisms: ["\u5341\u5B57\u67B6"],
+      importantStars: ["Acrux", "Mimosa", "Gacrux"],
+      bestViewingMonthsNorth: monthsForRa(187),
+      bestViewingMonthsSouth: monthsForRa(187),
+      sourceTags: SOURCE_IAU
+    },
+    Cen: {
+      id: "Cen",
+      zhName: "\u534A\u4EBA\u9A6C\u5EA7",
+      enName: "Centaurus",
+      mythologyZh: "\u534A\u4EBA\u9A6C\u5EA7\u8868\u73B0\u534A\u4EBA\u534A\u9A6C\u7684\u751F\u7269\uFF0C\u5E38\u4E0E\u8D24\u8005\u5580\u620E\u8054\u7CFB\u3002\u5B83\u5305\u542B\u5357\u95E8\u4E8C\u6240\u5728\u7684\u8FD1\u90BB\u6052\u661F\u7CFB\u7EDF\uFF0C\u4E5F\u662F\u5357\u5929\u6700\u91CD\u8981\u661F\u5EA7\u4E4B\u4E00\u3002",
+      symbolismZh: "\u8C61\u5F81\u534A\u4EBA\u9A6C\u3001\u667A\u6167\u3001\u5357\u5929\u4EAE\u661F\u548C\u5357\u5341\u5B57\u9644\u8FD1\u7684\u5BFC\u822A\u533A\u57DF\u3002",
+      relatedConstellations: ["Cru", "Lup", "Car"],
+      relatedChineseAsterisms: ["\u5357\u95E8", "\u9A6C\u8179"],
+      importantStars: ["Alpha Centauri", "Hadar"],
+      bestViewingMonthsNorth: monthsForRa(200),
+      bestViewingMonthsSouth: monthsForRa(200),
+      sourceTags: SOURCE_IAU
+    },
+    Car: {
+      id: "Car",
+      zhName: "\u8239\u5E95\u5EA7",
+      enName: "Carina",
+      mythologyZh: "\u8239\u5E95\u5EA7\u6765\u81EA\u53E4\u4EE3\u5DE8\u8239\u963F\u5C14\u6208\u53F7\u7684\u8239\u5E95\u90E8\u5206\u3002\u963F\u5C14\u6208\u53F7\u627F\u8F7D\u4F0A\u963F\u5B8B\u548C\u963F\u5C14\u6208\u82F1\u96C4\u5BFB\u627E\u91D1\u7F8A\u6BDB\u3002",
+      symbolismZh: "\u8C61\u5F81\u822A\u8239\u3001\u8FDC\u5F81\u3001\u5357\u5929\u94F6\u6CB3\u548C\u8001\u4EBA\u661F\u6240\u5728\u7684\u660E\u4EAE\u533A\u57DF\u3002",
+      relatedConstellations: ["Vel", "Pup", "Pyx", "Cen", "Cru"],
+      relatedChineseAsterisms: ["\u8001\u4EBA", "\u5357\u8239"],
+      importantStars: ["Canopus", "Miaplacidus", "Eta Carinae"],
+      bestViewingMonthsNorth: monthsForRa(130),
+      bestViewingMonthsSouth: monthsForRa(130),
+      sourceTags: SOURCE_IAU
+    },
+    Vel: {
+      id: "Vel",
+      zhName: "\u8239\u5E06\u5EA7",
+      enName: "Vela",
+      mythologyZh: "\u8239\u5E06\u5EA7\u662F\u539F\u963F\u5C14\u6208\u8239\u5EA7\u62C6\u5206\u540E\u7684\u8239\u5E06\u90E8\u5206\uFF0C\u4E0E\u8239\u5E95\u3001\u8239\u5C3E\u548C\u7F57\u76D8\u5171\u540C\u4FDD\u7559\u53E4\u4EE3\u5DE8\u8239\u610F\u8C61\u3002",
+      symbolismZh: "\u8C61\u5F81\u822A\u884C\u3001\u98CE\u5E06\u548C\u5357\u5929\u94F6\u6CB3\u3002",
+      relatedConstellations: ["Car", "Pup", "Pyx"],
+      relatedChineseAsterisms: ["\u5357\u8239"],
+      importantStars: ["Suhail", "Regor"],
+      bestViewingMonthsNorth: monthsForRa(145),
+      bestViewingMonthsSouth: monthsForRa(145),
+      sourceTags: SOURCE_IAU
+    },
+    Pup: {
+      id: "Pup",
+      zhName: "\u8239\u5C3E\u5EA7",
+      enName: "Puppis",
+      mythologyZh: "\u8239\u5C3E\u5EA7\u662F\u963F\u5C14\u6208\u53F7\u7684\u8239\u5C3E\u90E8\u5206\uFF0C\u548C\u8239\u5E95\u5EA7\u3001\u8239\u5E06\u5EA7\u4E00\u8D77\u6784\u6210\u88AB\u62C6\u5206\u540E\u7684\u963F\u5C14\u6208\u8239\u4F20\u7EDF\u3002",
+      symbolismZh: "\u8C61\u5F81\u8239\u5C3E\u3001\u822A\u7A0B\u548C\u51AC\u6625\u5357\u5929\u94F6\u6CB3\u3002",
+      relatedConstellations: ["Car", "Vel", "Pyx"],
+      relatedChineseAsterisms: ["\u5929\u793E", "\u5357\u8239"],
+      importantStars: ["Naos"],
+      bestViewingMonthsNorth: monthsForRa(120),
+      bestViewingMonthsSouth: monthsForRa(120),
+      sourceTags: SOURCE_IAU
+    },
+    Phe: {
+      id: "Phe",
+      zhName: "\u51E4\u51F0\u5EA7",
+      enName: "Phoenix",
+      mythologyZh: "\u51E4\u51F0\u5EA7\u662F\u8FD1\u4EE3\u5357\u5929\u661F\u5EA7\uFF0C\u6765\u81EA\u6B27\u6D32\u822A\u6D77\u65F6\u4EE3\u5BF9\u5357\u5929\u661F\u7A7A\u7684\u547D\u540D\u4F20\u7EDF\uFF0C\u4E0D\u5C5E\u4E8E\u53E4\u5178\u5E0C\u814A 48 \u661F\u5EA7\u3002",
+      symbolismZh: "\u8C61\u5F81\u51E4\u51F0\u3001\u91CD\u751F\u548C\u5357\u5929\u65B0\u661F\u5EA7\u4F53\u7CFB\u3002",
+      relatedConstellations: ["Gru", "Tuc", "Eri"],
+      bestViewingMonthsNorth: monthsForRa(20),
+      bestViewingMonthsSouth: monthsForRa(20),
+      sourceTags: SOURCE_IAU
+    },
+    Pav: {
+      id: "Pav",
+      zhName: "\u5B54\u96C0\u5EA7",
+      enName: "Pavo",
+      mythologyZh: "\u5B54\u96C0\u5EA7\u662F\u8FD1\u4EE3\u5357\u5929\u661F\u5EA7\uFF0C\u8868\u73B0\u5B54\u96C0\u3002\u5B83\u4E3B\u8981\u5F62\u6210\u4E8E\u6B27\u6D32\u822A\u6D77\u5BB6\u7ED8\u5236\u5357\u5929\u661F\u7A7A\u7684\u65F6\u671F\u3002",
+      symbolismZh: "\u8C61\u5F81\u5B54\u96C0\u3001\u5357\u5929\u5F02\u57DF\u52A8\u7269\u548C\u8FD1\u4EE3\u661F\u56FE\u4F20\u7EDF\u3002",
+      relatedConstellations: ["Ind", "Tel", "Aps"],
+      relatedChineseAsterisms: ["\u5B54\u96C0"],
+      bestViewingMonthsNorth: monthsForRa(305),
+      bestViewingMonthsSouth: monthsForRa(305),
+      sourceTags: SOURCE_IAU
+    }
+  };
+  var TWENTY_EIGHT_MANSION_CULTURE = {
+    \u89D2\u5BBF: {
+      id: "\u89D2\u5BBF",
+      name: "\u89D2\u5BBF",
+      pinyin: "Jiao Xiu",
+      meaningZh: "\u4E1C\u65B9\u82CD\u9F99\u4E03\u5BBF\u4E4B\u9996\uFF0C\u8C61\u5F81\u9F99\u89D2\uFF0C\u4E5F\u662F\u4E8C\u5341\u516B\u5BBF\u5E8F\u5217\u7684\u91CD\u8981\u8D77\u70B9\u3002",
+      system: "twenty-eight-mansions",
+      mansion: "\u89D2\u5BBF",
+      fourSymbol: "\u4E1C\u65B9\u82CD\u9F99",
+      buTianGeNote: "\u300A\u6B65\u5929\u6B4C\u300B\u6309\u5BBF\u6B21\u63CF\u8FF0\u89D2\u5BBF\u53CA\u5176\u7EDF\u9886\u661F\u5B98\uFF0C\u53EF\u4F5C\u4E3A\u4E1C\u65B9\u4E03\u5BBF\u5F00\u7BC7\u7406\u89E3\u3002",
+      fenye: {
+        mansion: "\u89D2\u5BBF",
+        ancientRegion: "\u5156\u5DDE / \u90D1\u7B49\u8BF4\u6CD5",
+        modernApproximation: "\u5E38\u89C1\u8BF4\u6CD5\u5927\u81F4\u7275\u6D89\u4ECA\u6CB3\u5357\u3001\u5C71\u4E1C\u4E00\u5E26\uFF0C\u5177\u4F53\u968F\u6587\u732E\u800C\u53D8\u3002",
+        caution: FENYE_CAUTION
+      },
+      relatedAsterisms: ["\u4EA2\u5BBF", "\u5927\u89D2", "\u5357\u95E8"],
+      relatedWesternConstellations: ["Vir", "Boo"],
+      sourceTags: SOURCE_TRADITION
+    },
+    \u4EA2\u5BBF: {
+      id: "\u4EA2\u5BBF",
+      name: "\u4EA2\u5BBF",
+      pinyin: "Kang Xiu",
+      meaningZh: "\u8C61\u5F81\u4E1C\u65B9\u82CD\u9F99\u7684\u9888\u90E8\u6216\u54BD\u5589\uFF0C\u627F\u63A5\u89D2\u5BBF\u4E4B\u540E\u7684\u9F99\u8EAB\u7ED3\u6784\u3002",
+      system: "twenty-eight-mansions",
+      mansion: "\u4EA2\u5BBF",
+      fourSymbol: "\u4E1C\u65B9\u82CD\u9F99",
+      buTianGeNote: "\u300A\u6B65\u5929\u6B4C\u300B\u7528\u5BBF\u661F\u548C\u9644\u5C5E\u661F\u5B98\u63CF\u8FF0\u5176\u5728\u4E1C\u65B9\u9F99\u8C61\u4E2D\u7684\u4F4D\u7F6E\u3002",
+      fenye: {
+        mansion: "\u4EA2\u5BBF",
+        ancientRegion: "\u5156\u5DDE / \u90D1\u7B49\u8BF4\u6CD5",
+        modernApproximation: "\u5E38\u89C1\u8BF4\u6CD5\u5927\u81F4\u7275\u6D89\u4ECA\u6CB3\u5357\u3001\u5C71\u4E1C\u4E00\u5E26\u3002",
+        caution: FENYE_CAUTION
+      },
+      relatedAsterisms: ["\u89D2\u5BBF", "\u6C10\u5BBF"],
+      sourceTags: SOURCE_TRADITION
+    },
+    \u6C10\u5BBF: {
+      id: "\u6C10\u5BBF",
+      name: "\u6C10\u5BBF",
+      pinyin: "Di Xiu",
+      meaningZh: "\u4E1C\u65B9\u82CD\u9F99\u7684\u6839\u90E8\u6216\u80F8\u8179\u9644\u8FD1\u661F\u5BBF\uFF0C\u540D\u79F0\u5E38\u89E3\u91CA\u4E3A\u6839\u57FA\u3002",
+      system: "twenty-eight-mansions",
+      mansion: "\u6C10\u5BBF",
+      fourSymbol: "\u4E1C\u65B9\u82CD\u9F99",
+      buTianGeNote: "\u4F20\u7EDF\u5BBF\u6B21\u4E2D\u4F4D\u4E8E\u4EA2\u5BBF\u4E4B\u540E\u3001\u623F\u5BBF\u4E4B\u524D\u3002",
+      fenye: {
+        mansion: "\u6C10\u5BBF",
+        ancientRegion: "\u5156\u5DDE / \u5B8B\u7B49\u8BF4\u6CD5",
+        modernApproximation: "\u5E38\u89C1\u8BF4\u6CD5\u5927\u81F4\u7275\u6D89\u4ECA\u6CB3\u5357\u4E1C\u90E8\u3001\u5C71\u4E1C\u897F\u5357\u4E00\u5E26\u3002",
+        caution: FENYE_CAUTION
+      },
+      relatedAsterisms: ["\u4EA2\u5BBF", "\u623F\u5BBF"],
+      sourceTags: SOURCE_TRADITION
+    },
+    \u623F\u5BBF: {
+      id: "\u623F\u5BBF",
+      name: "\u623F\u5BBF",
+      pinyin: "Fang Xiu",
+      meaningZh: "\u4E1C\u65B9\u82CD\u9F99\u8179\u90E8\u9644\u8FD1\u7684\u661F\u5BBF\uFF0C\u4F20\u7EDF\u4E0A\u4E5F\u6709\u5929\u9A77\u3001\u623F\u5BA4\u7B49\u8C61\u5F81\u3002",
+      system: "twenty-eight-mansions",
+      mansion: "\u623F\u5BBF",
+      fourSymbol: "\u4E1C\u65B9\u82CD\u9F99",
+      buTianGeNote: "\u300A\u6B65\u5929\u6B4C\u300B\u5C06\u623F\u5BBF\u4E0E\u5468\u8FB9\u4ECE\u5B98\u3001\u94A9\u94A4\u7B49\u661F\u5B98\u540C\u533A\u63CF\u8FF0\u3002",
+      fenye: {
+        mansion: "\u623F\u5BBF",
+        ancientRegion: "\u8C6B\u5DDE / \u5B8B\u7B49\u8BF4\u6CD5",
+        modernApproximation: "\u5E38\u89C1\u8BF4\u6CD5\u5927\u81F4\u7275\u6D89\u4ECA\u6CB3\u5357\u3001\u5B89\u5FBD\u5317\u90E8\u4E00\u5E26\u3002",
+        caution: FENYE_CAUTION
+      },
+      relatedAsterisms: ["\u6C10\u5BBF", "\u5FC3\u5BBF"],
+      sourceTags: SOURCE_TRADITION
+    },
+    \u5FC3\u5BBF: {
+      id: "\u5FC3\u5BBF",
+      name: "\u5FC3\u5BBF",
+      pinyin: "Xin Xiu",
+      meaningZh: "\u4E1C\u65B9\u82CD\u9F99\u7684\u5FC3\u810F\u3002\u5FC3\u5BBF\u4E8C\u5373\u201C\u5927\u706B\u201D\uFF0C\u5728\u53E4\u4EE3\u65F6\u4EE4\u89C2\u6D4B\u4E2D\u5341\u5206\u91CD\u8981\u3002",
+      system: "twenty-eight-mansions",
+      mansion: "\u5FC3\u5BBF",
+      fourSymbol: "\u4E1C\u65B9\u82CD\u9F99",
+      buTianGeNote: "\u5FC3\u5BBF\u5728\u4F20\u7EDF\u6587\u732E\u4E2D\u5E38\u4F5C\u4E3A\u663E\u8457\u65F6\u4EE4\u661F\u5BBF\u7406\u89E3\u3002",
+      fenye: {
+        mansion: "\u5FC3\u5BBF",
+        ancientRegion: "\u8C6B\u5DDE / \u5B8B\u7B49\u8BF4\u6CD5",
+        modernApproximation: "\u5E38\u89C1\u8BF4\u6CD5\u5927\u81F4\u7275\u6D89\u4ECA\u6CB3\u5357\u4E1C\u90E8\u3001\u5B89\u5FBD\u5317\u90E8\u4E00\u5E26\u3002",
+        caution: FENYE_CAUTION
+      },
+      relatedAsterisms: ["\u623F\u5BBF", "\u5C3E\u5BBF"],
+      relatedWesternConstellations: ["Sco"],
+      sourceTags: SOURCE_TRADITION
+    },
+    \u5C3E\u5BBF: {
+      id: "\u5C3E\u5BBF",
+      name: "\u5C3E\u5BBF",
+      pinyin: "Wei Xiu",
+      meaningZh: "\u4E1C\u65B9\u82CD\u9F99\u7684\u5C3E\u90E8\uFF0C\u63A5\u7EED\u5FC3\u5BBF\u4E4B\u540E\u3002",
+      system: "twenty-eight-mansions",
+      mansion: "\u5C3E\u5BBF",
+      fourSymbol: "\u4E1C\u65B9\u82CD\u9F99",
+      buTianGeNote: "\u300A\u6B65\u5929\u6B4C\u300B\u5C06\u5C3E\u5BBF\u4E0E\u7B95\u5BBF\u76F8\u90BB\u63CF\u8FF0\uFF0C\u5F62\u6210\u9752\u9F99\u5C3E\u90E8\u7ED3\u6784\u3002",
+      fenye: {
+        mansion: "\u5C3E\u5BBF",
+        ancientRegion: "\u5E7D\u5DDE / \u71D5\u7B49\u8BF4\u6CD5",
+        modernApproximation: "\u5E38\u89C1\u8BF4\u6CD5\u5927\u81F4\u7275\u6D89\u4ECA\u6CB3\u5317\u5317\u90E8\u3001\u5317\u4EAC\u3001\u8FBD\u5B81\u4E00\u5E26\u3002",
+        caution: FENYE_CAUTION
+      },
+      relatedAsterisms: ["\u5FC3\u5BBF", "\u7B95\u5BBF"],
+      sourceTags: SOURCE_TRADITION
+    },
+    \u7B95\u5BBF: {
+      id: "\u7B95\u5BBF",
+      name: "\u7B95\u5BBF",
+      pinyin: "Ji Xiu",
+      meaningZh: "\u5F62\u4F3C\u7C38\u7B95\uFF0C\u8C61\u5F81\u626C\u8C37\u7528\u5177\uFF0C\u662F\u4E1C\u65B9\u82CD\u9F99\u4E03\u5BBF\u6700\u540E\u4E00\u5BBF\u3002",
+      system: "twenty-eight-mansions",
+      mansion: "\u7B95\u5BBF",
+      fourSymbol: "\u4E1C\u65B9\u82CD\u9F99",
+      buTianGeNote: "\u4F5C\u4E3A\u4E1C\u65B9\u4E03\u5BBF\u6536\u675F\uFF0C\u5E38\u4E0E\u6597\u5BBF\u8FDB\u5165\u5317\u65B9\u7384\u6B66\u5E8F\u5217\u76F8\u63A5\u3002",
+      fenye: {
+        mansion: "\u7B95\u5BBF",
+        ancientRegion: "\u5E7D\u5DDE / \u71D5\u7B49\u8BF4\u6CD5",
+        modernApproximation: "\u5E38\u89C1\u8BF4\u6CD5\u5927\u81F4\u7275\u6D89\u4ECA\u6CB3\u5317\u5317\u90E8\u3001\u5317\u4EAC\u3001\u8FBD\u5B81\u4E00\u5E26\u3002",
+        caution: FENYE_CAUTION
+      },
+      relatedAsterisms: ["\u5C3E\u5BBF", "\u6597\u5BBF"],
+      sourceTags: SOURCE_TRADITION
+    },
+    \u6597\u5BBF: {
+      id: "\u6597\u5BBF",
+      name: "\u6597\u5BBF",
+      pinyin: "Dou Xiu",
+      meaningZh: "\u5317\u65B9\u7384\u6B66\u4E03\u5BBF\u4E4B\u9996\uFF0C\u5F62\u4F3C\u6597\uFF0C\u5305\u542B\u5357\u6597\u516D\u661F\u7684\u4F20\u7EDF\u610F\u8C61\u3002",
+      system: "twenty-eight-mansions",
+      mansion: "\u6597\u5BBF",
+      fourSymbol: "\u5317\u65B9\u7384\u6B66",
+      buTianGeNote: "\u300A\u6B65\u5929\u6B4C\u300B\u4EE5\u6597\u5BBF\u5F00\u542F\u5317\u65B9\u7384\u6B66\u4E03\u5BBF\u3002",
+      fenye: {
+        mansion: "\u6597\u5BBF",
+        ancientRegion: "\u5434\u8D8A\u7B49\u8BF4\u6CD5",
+        modernApproximation: "\u5E38\u89C1\u8BF4\u6CD5\u5927\u81F4\u7275\u6D89\u4ECA\u6C5F\u82CF\u5357\u90E8\u3001\u6D59\u6C5F\u3001\u4E0A\u6D77\u4E00\u5E26\u3002",
+        caution: FENYE_CAUTION
+      },
+      relatedAsterisms: ["\u7B95\u5BBF", "\u725B\u5BBF"],
+      sourceTags: SOURCE_TRADITION
+    },
+    \u725B\u5BBF: {
+      id: "\u725B\u5BBF",
+      name: "\u725B\u5BBF",
+      pinyin: "Niu Xiu",
+      meaningZh: "\u5317\u65B9\u7384\u6B66\u4E03\u5BBF\u4E4B\u4E00\uFF0C\u4E0E\u725B\u3001\u7275\u725B\u7B49\u519C\u8015\u548C\u94F6\u6CB3\u610F\u8C61\u76F8\u8FDE\u3002",
+      system: "twenty-eight-mansions",
+      mansion: "\u725B\u5BBF",
+      fourSymbol: "\u5317\u65B9\u7384\u6B66",
+      buTianGeNote: "\u725B\u5BBF\u5728\u94F6\u6CB3\u9644\u8FD1\uFF0C\u4E0E\u5973\u5BBF\u3001\u865A\u5BBF\u7EC4\u6210\u5317\u65B9\u5BBF\u6B21\u3002",
+      fenye: {
+        mansion: "\u725B\u5BBF",
+        ancientRegion: "\u5434\u8D8A\u7B49\u8BF4\u6CD5",
+        modernApproximation: "\u5E38\u89C1\u8BF4\u6CD5\u5927\u81F4\u7275\u6D89\u4ECA\u6C5F\u6D59\u4E00\u5E26\u3002",
+        caution: FENYE_CAUTION
+      },
+      relatedAsterisms: ["\u6597\u5BBF", "\u5973\u5BBF", "\u6CB3\u9F13"],
+      sourceTags: SOURCE_TRADITION
+    },
+    \u5973\u5BBF: {
+      id: "\u5973\u5BBF",
+      name: "\u5973\u5BBF",
+      pinyin: "N\xFC Xiu",
+      meaningZh: "\u5317\u65B9\u7384\u6B66\u4E03\u5BBF\u4E4B\u4E00\uFF0C\u540D\u79F0\u4E0E\u5973\u5B50\u3001\u5973\u5DE5\u6216\u7EC7\u4F5C\u610F\u8C61\u6709\u5173\u3002",
+      system: "twenty-eight-mansions",
+      mansion: "\u5973\u5BBF",
+      fourSymbol: "\u5317\u65B9\u7384\u6B66",
+      buTianGeNote: "\u5973\u5BBF\u4E0E\u725B\u5BBF\u3001\u865A\u5BBF\u76F8\u90BB\uFF0C\u5728\u94F6\u6CB3\u9644\u8FD1\u7684\u4F20\u7EDF\u7ED3\u6784\u4E2D\u7406\u89E3\u3002",
+      fenye: {
+        mansion: "\u5973\u5BBF",
+        ancientRegion: "\u5434\u8D8A\u7B49\u8BF4\u6CD5",
+        modernApproximation: "\u5E38\u89C1\u8BF4\u6CD5\u5927\u81F4\u7275\u6D89\u4ECA\u6C5F\u6D59\u4E00\u5E26\u3002",
+        caution: FENYE_CAUTION
+      },
+      relatedAsterisms: ["\u725B\u5BBF", "\u865A\u5BBF"],
+      sourceTags: SOURCE_TRADITION
+    },
+    \u865A\u5BBF: {
+      id: "\u865A\u5BBF",
+      name: "\u865A\u5BBF",
+      pinyin: "Xu Xiu",
+      meaningZh: "\u5317\u65B9\u7384\u6B66\u4E03\u5BBF\u4E4B\u4E00\uFF0C\u540D\u79F0\u6709\u7A7A\u865A\u3001\u4E18\u589F\u7B49\u8C61\u5F81\u89E3\u91CA\u3002",
+      system: "twenty-eight-mansions",
+      mansion: "\u865A\u5BBF",
+      fourSymbol: "\u5317\u65B9\u7384\u6B66",
+      buTianGeNote: "\u865A\u5BBF\u627F\u63A5\u5973\u5BBF\uFF0C\u8FDE\u63A5\u5371\u5BBF\u3002",
+      fenye: {
+        mansion: "\u865A\u5BBF",
+        ancientRegion: "\u9752\u5DDE / \u9F50\u7B49\u8BF4\u6CD5",
+        modernApproximation: "\u5E38\u89C1\u8BF4\u6CD5\u5927\u81F4\u7275\u6D89\u4ECA\u5C71\u4E1C\u534A\u5C9B\u53CA\u5468\u8FB9\u3002",
+        caution: FENYE_CAUTION
+      },
+      relatedAsterisms: ["\u5973\u5BBF", "\u5371\u5BBF"],
+      sourceTags: SOURCE_TRADITION
+    },
+    \u5371\u5BBF: {
+      id: "\u5371\u5BBF",
+      name: "\u5371\u5BBF",
+      pinyin: "Wei Xiu",
+      meaningZh: "\u5317\u65B9\u7384\u6B66\u4E03\u5BBF\u4E4B\u4E00\uFF0C\u5E38\u89E3\u91CA\u4E3A\u9AD8\u5904\u3001\u5C4B\u810A\u6216\u5371\u9669\u5904\u7684\u610F\u8C61\u3002",
+      system: "twenty-eight-mansions",
+      mansion: "\u5371\u5BBF",
+      fourSymbol: "\u5317\u65B9\u7384\u6B66",
+      buTianGeNote: "\u5371\u5BBF\u4E0E\u5BA4\u5BBF\u3001\u58C1\u5BBF\u6784\u6210\u7384\u6B66\u540E\u6BB5\u3002",
+      fenye: {
+        mansion: "\u5371\u5BBF",
+        ancientRegion: "\u9752\u5DDE / \u9F50\u7B49\u8BF4\u6CD5",
+        modernApproximation: "\u5E38\u89C1\u8BF4\u6CD5\u5927\u81F4\u7275\u6D89\u4ECA\u5C71\u4E1C\u4E00\u5E26\u3002",
+        caution: FENYE_CAUTION
+      },
+      relatedAsterisms: ["\u865A\u5BBF", "\u5BA4\u5BBF"],
+      sourceTags: SOURCE_TRADITION
+    },
+    \u5BA4\u5BBF: {
+      id: "\u5BA4\u5BBF",
+      name: "\u5BA4\u5BBF",
+      pinyin: "Shi Xiu",
+      meaningZh: "\u5317\u65B9\u7384\u6B66\u4E03\u5BBF\u4E4B\u4E00\uFF0C\u8C61\u5F81\u5BAB\u5BA4\u3001\u8425\u5BA4\u6216\u5C45\u5904\u3002",
+      system: "twenty-eight-mansions",
+      mansion: "\u5BA4\u5BBF",
+      fourSymbol: "\u5317\u65B9\u7384\u6B66",
+      buTianGeNote: "\u5BA4\u5BBF\u5E38\u4E0E\u58C1\u5BBF\u5408\u770B\uFF0C\u6784\u6210\u623F\u5C4B\u548C\u5899\u58C1\u610F\u8C61\u3002",
+      fenye: {
+        mansion: "\u5BA4\u5BBF",
+        ancientRegion: "\u5E76\u5DDE / \u536B\u7B49\u8BF4\u6CD5",
+        modernApproximation: "\u5E38\u89C1\u8BF4\u6CD5\u5927\u81F4\u7275\u6D89\u4ECA\u5C71\u897F\u3001\u6CB3\u5317\u5357\u90E8\u4E00\u5E26\u3002",
+        caution: FENYE_CAUTION
+      },
+      relatedAsterisms: ["\u5371\u5BBF", "\u58C1\u5BBF"],
+      sourceTags: SOURCE_TRADITION
+    },
+    \u58C1\u5BBF: {
+      id: "\u58C1\u5BBF",
+      name: "\u58C1\u5BBF",
+      pinyin: "Bi Xiu",
+      meaningZh: "\u5317\u65B9\u7384\u6B66\u4E03\u5BBF\u4E4B\u4E00\uFF0C\u8C61\u5F81\u5BAB\u5BA4\u6216\u8425\u5792\u7684\u5899\u58C1\u3002",
+      system: "twenty-eight-mansions",
+      mansion: "\u58C1\u5BBF",
+      fourSymbol: "\u5317\u65B9\u7384\u6B66",
+      buTianGeNote: "\u58C1\u5BBF\u6536\u675F\u5317\u65B9\u7384\u6B66\u4E03\u5BBF\uFF0C\u5E76\u4E0E\u897F\u65B9\u767D\u864E\u7684\u594E\u5BBF\u76F8\u63A5\u3002",
+      fenye: {
+        mansion: "\u58C1\u5BBF",
+        ancientRegion: "\u5E76\u5DDE / \u536B\u7B49\u8BF4\u6CD5",
+        modernApproximation: "\u5E38\u89C1\u8BF4\u6CD5\u5927\u81F4\u7275\u6D89\u4ECA\u5C71\u897F\u3001\u6CB3\u5317\u4E00\u5E26\u3002",
+        caution: FENYE_CAUTION
+      },
+      relatedAsterisms: ["\u5BA4\u5BBF", "\u594E\u5BBF"],
+      sourceTags: SOURCE_TRADITION
+    }
+  };
+  var whiteTiger = ["\u594E\u5BBF", "\u5A04\u5BBF", "\u80C3\u5BBF", "\u6634\u5BBF", "\u6BD5\u5BBF", "\u89DC\u5BBF", "\u53C2\u5BBF"];
+  var vermilionBird = ["\u4E95\u5BBF", "\u9B3C\u5BBF", "\u67F3\u5BBF", "\u661F\u5BBF", "\u5F20\u5BBF", "\u7FFC\u5BBF", "\u8F78\u5BBF"];
+  whiteTiger.forEach((name) => {
+    TWENTY_EIGHT_MANSION_CULTURE[name] || (TWENTY_EIGHT_MANSION_CULTURE[name] = {
+      id: name,
+      name,
+      meaningZh: `${name}\u5C5E\u4E8E\u897F\u65B9\u767D\u864E\u4E03\u5BBF\u3002\u5177\u4F53\u661F\u5B98\u542B\u4E49\u5728\u4E0D\u540C\u6587\u732E\u4E2D\u89E3\u91CA\u7565\u6709\u5DEE\u5F02\uFF0C\u5E94\u7ED3\u5408\u300A\u6B65\u5929\u6B4C\u300B\u548C\u4F20\u7EDF\u661F\u5B98\u56FE\u9605\u8BFB\u3002`,
+      system: "twenty-eight-mansions",
+      mansion: name,
+      fourSymbol: "\u897F\u65B9\u767D\u864E",
+      buTianGeNote: "\u300A\u6B65\u5929\u6B4C\u300B\u6309\u5BBF\u6B21\u63CF\u8FF0\u672C\u5BBF\u53CA\u5176\u9644\u5C5E\u661F\u5B98\uFF0C\u662F\u7406\u89E3\u4E8C\u5341\u516B\u5BBF\u987A\u5E8F\u7684\u91CD\u8981\u6587\u672C\u3002",
+      fenye: {
+        mansion: name,
+        ancientRegion: "\u9C81 / \u8D75 / \u9B4F\u7B49\u5206\u91CE\u8BF4\u6CD5",
+        modernApproximation: "\u5E38\u89C1\u8BF4\u6CD5\u5927\u81F4\u7275\u6D89\u4ECA\u5C71\u4E1C\u3001\u6CB3\u5317\u3001\u6CB3\u5357\u5317\u90E8\u4E00\u5E26\uFF0C\u5177\u4F53\u968F\u6587\u732E\u4E0D\u540C\u3002",
+        caution: FENYE_CAUTION
+      },
+      sourceTags: SOURCE_TRADITION
+    });
+  });
+  vermilionBird.forEach((name) => {
+    TWENTY_EIGHT_MANSION_CULTURE[name] || (TWENTY_EIGHT_MANSION_CULTURE[name] = {
+      id: name,
+      name,
+      meaningZh: `${name}\u5C5E\u4E8E\u5357\u65B9\u6731\u96C0\u4E03\u5BBF\uFF0C\u662F\u5357\u65B9\u5929\u533A\u5BBF\u6B21\u7684\u4E00\u90E8\u5206\u3002`,
+      system: "twenty-eight-mansions",
+      mansion: name,
+      fourSymbol: "\u5357\u65B9\u6731\u96C0",
+      buTianGeNote: "\u300A\u6B65\u5929\u6B4C\u300B\u6309\u6731\u96C0\u4E03\u5BBF\u987A\u5E8F\u63CF\u8FF0\u5357\u65B9\u661F\u5B98\u7ED3\u6784\u3002",
+      fenye: {
+        mansion: name,
+        ancientRegion: "\u79E6 / \u5468 / \u695A\u7B49\u5206\u91CE\u8BF4\u6CD5",
+        modernApproximation: "\u5E38\u89C1\u8BF4\u6CD5\u5927\u81F4\u7275\u6D89\u4ECA\u9655\u897F\u3001\u6CB3\u5357\u3001\u6E56\u5317\u3001\u6E56\u5357\u4E00\u5E26\uFF0C\u5177\u4F53\u968F\u6587\u732E\u4E0D\u540C\u3002",
+        caution: FENYE_CAUTION
+      },
+      sourceTags: SOURCE_TRADITION
+    });
+  });
+  var CHINESE_ASTERISM_CULTURE = {
+    ...TWENTY_EIGHT_MANSION_CULTURE,
+    \u7D2B\u5FAE\u57A3: {
+      id: "\u7D2B\u5FAE\u57A3",
+      name: "\u7D2B\u5FAE\u57A3",
+      meaningZh: "\u7D2B\u5FAE\u57A3\u8C61\u5F81\u5929\u5E1D\u5C45\u6240\u548C\u6838\u5FC3\u5BAB\u5EF7\uFF0C\u662F\u4E09\u57A3\u4E2D\u6700\u63A5\u8FD1\u5317\u5929\u6781\u7684\u533A\u57DF\u3002\u5DE6\u53F3\u57A3\u53EF\u7406\u89E3\u4E3A\u73AF\u536B\u5E1D\u5EA7\u7684\u5BAB\u5899\u3002",
+      system: "three-enclosures",
+      enclosure: "\u7D2B\u5FAE\u57A3",
+      buTianGeNote: "\u300A\u6B65\u5929\u6B4C\u300B\u628A\u4E09\u57A3\u4F5C\u4E3A\u72EC\u7ACB\u5927\u533A\u63CF\u8FF0\uFF0C\u7D2B\u5FAE\u57A3\u4EE3\u8868\u5317\u6781\u9644\u8FD1\u7684\u5929\u5EF7\u6838\u5FC3\u3002",
+      relatedAsterisms: ["\u5317\u6781", "\u52FE\u9648", "\u7D2B\u5FAE\u5DE6\u57A3", "\u7D2B\u5FAE\u53F3\u57A3"],
+      sourceTags: SOURCE_TRADITION
+    },
+    \u592A\u5FAE\u57A3: {
+      id: "\u592A\u5FAE\u57A3",
+      name: "\u592A\u5FAE\u57A3",
+      meaningZh: "\u592A\u5FAE\u57A3\u5E38\u8C61\u5F81\u671D\u5EF7\u3001\u653F\u52A1\u548C\u767E\u5B98\u8BAE\u653F\u7A7A\u95F4\u3002\u5DE6\u53F3\u57A3\u50CF\u5BAB\u5899\uFF0C\u4E24\u4FA7\u661F\u5B98\u5171\u540C\u6784\u6210\u5929\u4E0A\u671D\u4F1A\u573A\u6240\u3002",
+      system: "three-enclosures",
+      enclosure: "\u592A\u5FAE\u57A3",
+      buTianGeNote: "\u300A\u6B65\u5929\u6B4C\u300B\u5C06\u592A\u5FAE\u57A3\u4F5C\u4E3A\u4E09\u57A3\u4E4B\u4E00\uFF0C\u548C\u7D2B\u5FAE\u3001\u5929\u5E02\u5171\u540C\u6784\u6210\u5317\u5929\u5236\u5EA6\u7A7A\u95F4\u3002",
+      relatedAsterisms: ["\u592A\u5FAE\u5DE6\u57A3", "\u592A\u5FAE\u53F3\u57A3", "\u4E94\u5E1D\u5EA7"],
+      sourceTags: SOURCE_TRADITION
+    },
+    \u5929\u5E02\u57A3: {
+      id: "\u5929\u5E02\u57A3",
+      name: "\u5929\u5E02\u57A3",
+      meaningZh: "\u5929\u5E02\u57A3\u8C61\u5F81\u5E02\u573A\u3001\u4EA4\u6613\u3001\u5EA6\u91CF\u8861\u548C\u57CE\u5E02\u7A7A\u95F4\uFF0C\u662F\u4E09\u57A3\u4E2D\u5546\u4E1A\u548C\u7269\u8D44\u6D41\u901A\u610F\u8C61\u6700\u5F3A\u7684\u4E00\u57A3\u3002",
+      system: "three-enclosures",
+      enclosure: "\u5929\u5E02\u57A3",
+      buTianGeNote: "\u300A\u6B65\u5929\u6B4C\u300B\u5929\u5E02\u57A3\u7BC7\u660E\u786E\u4EE5\u5E02\u573A\u3001\u8F66\u8086\u3001\u5217\u8086\u3001\u6597\u659B\u7B49\u661F\u5B98\u7EC4\u7EC7\u5176\u610F\u4E49\u3002",
+      relatedAsterisms: ["\u5929\u5E02\u5DE6\u57A3", "\u5929\u5E02\u53F3\u57A3", "\u5E1D\u5EA7", "\u6597", "\u659B"],
+      sourceTags: SOURCE_TRADITION
+    },
+    \u4E1C\u65B9\u9752\u9F99: {
+      id: "\u4E1C\u65B9\u9752\u9F99",
+      name: "\u4E1C\u65B9\u9752\u9F99",
+      meaningZh: "\u4E1C\u65B9\u9752\u9F99\u7531\u89D2\u3001\u4EA2\u3001\u6C10\u3001\u623F\u3001\u5FC3\u3001\u5C3E\u3001\u7B95\u4E03\u5BBF\u7EC4\u6210\uFF0C\u8C61\u5F81\u4E1C\u65B9\u3001\u6625\u5B63\u548C\u9F99\u5F62\u5929\u533A\u3002",
+      system: "four-symbols",
+      fourSymbol: "\u4E1C\u65B9\u9752\u9F99",
+      sourceTags: SOURCE_TRADITION
+    },
+    \u5317\u65B9\u7384\u6B66: {
+      id: "\u5317\u65B9\u7384\u6B66",
+      name: "\u5317\u65B9\u7384\u6B66",
+      meaningZh: "\u5317\u65B9\u7384\u6B66\u7531\u6597\u3001\u725B\u3001\u5973\u3001\u865A\u3001\u5371\u3001\u5BA4\u3001\u58C1\u4E03\u5BBF\u7EC4\u6210\uFF0C\u8C61\u5F81\u5317\u65B9\u3001\u51AC\u5B63\u548C\u9F9F\u86C7\u5408\u4F53\u5F62\u8C61\u3002",
+      system: "four-symbols",
+      fourSymbol: "\u5317\u65B9\u7384\u6B66",
+      sourceTags: SOURCE_TRADITION
+    },
+    \u897F\u65B9\u767D\u864E: {
+      id: "\u897F\u65B9\u767D\u864E",
+      name: "\u897F\u65B9\u767D\u864E",
+      meaningZh: "\u897F\u65B9\u767D\u864E\u7531\u594E\u3001\u5A04\u3001\u80C3\u3001\u6634\u3001\u6BD5\u3001\u89DC\u3001\u53C2\u4E03\u5BBF\u7EC4\u6210\uFF0C\u8C61\u5F81\u897F\u65B9\u3001\u79CB\u5B63\u548C\u864E\u5F62\u5929\u533A\u3002",
+      system: "four-symbols",
+      fourSymbol: "\u897F\u65B9\u767D\u864E",
+      sourceTags: SOURCE_TRADITION
+    },
+    \u5357\u65B9\u6731\u96C0: {
+      id: "\u5357\u65B9\u6731\u96C0",
+      name: "\u5357\u65B9\u6731\u96C0",
+      meaningZh: "\u5357\u65B9\u6731\u96C0\u7531\u4E95\u3001\u9B3C\u3001\u67F3\u3001\u661F\u3001\u5F20\u3001\u7FFC\u3001\u8F78\u4E03\u5BBF\u7EC4\u6210\uFF0C\u8C61\u5F81\u5357\u65B9\u3001\u590F\u5B63\u548C\u9E1F\u5F62\u5929\u533A\u3002",
+      system: "four-symbols",
+      fourSymbol: "\u5357\u65B9\u6731\u96C0",
+      sourceTags: SOURCE_TRADITION
+    },
+    \u5317\u65B9\u6218\u573A: {
+      id: "\u5317\u65B9\u6218\u573A",
+      name: "\u5317\u65B9\u6218\u573A",
+      meaningZh: "\u5F53\u524D\u9879\u76EE\u4E2D\u7684\u5317\u65B9\u6218\u573A\u662F\u57FA\u4E8E\u5792\u58C1\u9635\u3001\u7FBD\u6797\u519B\u3001\u5317\u843D\u5E08\u95E8\u7B49\u519B\u4E8B\u661F\u5B98\u751F\u6210\u7684\u6587\u5316\u4E3B\u9898\u793A\u610F\u533A\uFF0C\u8868\u73B0\u9632\u5FA1\u3001\u519B\u8425\u548C\u8FB9\u585E\u610F\u8C61\u3002",
+      system: "battlefields",
+      relatedAsterisms: ["\u5792\u58C1\u9635", "\u7FBD\u6797\u519B", "\u5317\u843D\u5E08\u95E8", "\u5929\u5792\u57CE"],
+      sourceTags: ["project-derived"]
+    },
+    \u897F\u5317\u6218\u573A: {
+      id: "\u897F\u5317\u6218\u573A",
+      name: "\u897F\u5317\u6218\u573A",
+      meaningZh: "\u5F53\u524D\u9879\u76EE\u4E2D\u7684\u897F\u5317\u6218\u573A\u56F4\u7ED5\u6634\u5BBF\u3001\u6BD5\u5BBF\u3001\u5929\u5927\u5C06\u519B\u3001\u4E94\u8F66\u7B49\u661F\u5B98\u751F\u6210\uFF0C\u8868\u73B0\u519B\u9635\u3001\u8F66\u9A6C\u3001\u4ED3\u50A8\u548C\u897F\u5317\u65B9\u4F4D\u4E3B\u9898\u3002\u4F20\u7EDF\u89E3\u91CA\u5B58\u5728\u5DEE\u5F02\u3002",
+      system: "battlefields",
+      relatedAsterisms: ["\u6634\u5BBF", "\u6BD5\u5BBF", "\u5929\u5927\u5C06\u519B", "\u4E94\u8F66"],
+      sourceTags: ["project-derived"]
+    },
+    \u5357\u65B9\u6218\u573A: {
+      id: "\u5357\u65B9\u6218\u573A",
+      name: "\u5357\u65B9\u6218\u573A",
+      meaningZh: "\u5F53\u524D\u9879\u76EE\u4E2D\u7684\u5357\u65B9\u6218\u573A\u56F4\u7ED5\u7FFC\u5BBF\u3001\u8F78\u5BBF\u3001\u89D2\u5BBF\u3001\u4EA2\u5BBF\u3001\u5E93\u697C\u3001\u9A91\u5B98\u7B49\u661F\u5B98\u751F\u6210\uFF0C\u8868\u73B0\u5357\u65B9\u519B\u4E8B\u8BBE\u65BD\u548C\u8F66\u9A91\u9635\u5217\u4E3B\u9898\u3002\u4F20\u7EDF\u89E3\u91CA\u5B58\u5728\u5DEE\u5F02\u3002",
+      system: "battlefields",
+      relatedAsterisms: ["\u7FFC\u5BBF", "\u8F78\u5BBF", "\u89D2\u5BBF", "\u4EA2\u5BBF", "\u5E93\u697C", "\u9A91\u5B98"],
+      sourceTags: ["project-derived"]
     }
   };
 
@@ -1380,8 +2252,95 @@
   function westernConstellationLinePath() {
     return datasetPath("westernConstellationLines");
   }
+  function westernConstellationBoundaryFeatures() {
+    return catalogFeatures("westernConstellationBounds");
+  }
   function westernConstellationCoordinateMap() {
     return pointFeatureCoordinateMap("westernConstellationNames");
+  }
+
+  // src/data/boundary-diagnostics.ts
+  function lineStrings(geometry) {
+    if (!geometry) return [];
+    if (geometry.type === "LineString") return [geometry.coordinates || []];
+    if (geometry.type === "MultiLineString") return geometry.coordinates || [];
+    return [];
+  }
+  function endpointKey(point, precision = 3) {
+    return `${Number(point[0]).toFixed(precision)},${Number(point[1]).toFixed(precision)}`;
+  }
+  function pairKey(ids) {
+    return ids.split(",").map((id) => id.trim()).filter(Boolean).sort().join(",");
+  }
+  function diagnoseConstellationBoundaries(options) {
+    const pairCounts = /* @__PURE__ */ new Map();
+    const constellationSet = /* @__PURE__ */ new Set();
+    const endpointCounts = /* @__PURE__ */ new Map();
+    let datelineCrossingSegmentCount = 0;
+    let polarSegmentCount = 0;
+    options.boundaryFeatures.forEach((feature) => {
+      const key = pairKey(feature.ids || "");
+      if (key) {
+        pairCounts.set(key, (pairCounts.get(key) || 0) + 1);
+        key.split(",").forEach((id) => constellationSet.add(id));
+      }
+      lineStrings(feature.geometry).forEach((line) => {
+        if (line.length) {
+          const first = endpointKey(line[0]);
+          const last = endpointKey(line[line.length - 1]);
+          endpointCounts.set(first, (endpointCounts.get(first) || 0) + 1);
+          endpointCounts.set(last, (endpointCounts.get(last) || 0) + 1);
+        }
+        for (let index = 1; index < line.length; index += 1) {
+          const prev = line[index - 1];
+          const next = line[index];
+          const deltaLon = Math.abs(Number(next[0]) - Number(prev[0]));
+          if (deltaLon > 180) datelineCrossingSegmentCount += 1;
+          if (Math.max(Math.abs(Number(prev[1])), Math.abs(Number(next[1]))) > 80)
+            polarSegmentCount += 1;
+        }
+      });
+    });
+    const constellationsInLabels = Array.from(
+      new Set(
+        options.constellationFeatures.map(
+          (feature) => String(feature.id || feature.properties?.desig || "")
+        ).filter(Boolean)
+      )
+    ).sort();
+    const constellationsInBoundaries = Array.from(constellationSet).sort();
+    const dangling = Array.from(endpointCounts.entries()).filter(([, count]) => count === 1).map(([key]) => key).sort();
+    return {
+      boundaryFeatureCount: options.boundaryFeatures.length,
+      uniqueAdjacencyPairCount: pairCounts.size,
+      constellationsInLabels,
+      constellationsInBoundaries,
+      constellationsWithoutBoundary: constellationsInLabels.filter(
+        (id) => !constellationSet.has(id)
+      ),
+      duplicatedAdjacencyPairs: Array.from(pairCounts.entries()).filter(([, count]) => count > 1).map(([key, count]) => `${key} x${count}`).sort(),
+      danglingEndpointCount: dangling.length,
+      sampleDanglingEndpoints: dangling.slice(0, 12),
+      datelineCrossingSegmentCount,
+      polarSegmentCount
+    };
+  }
+  function logConstellationBoundaryDiagnostics(report) {
+    console.info("RSO constellation boundary diagnostics", report);
+  }
+
+  // src/data/bright-star-ranking.ts
+  function buildBrightStarRankMap(stars, limit = 100) {
+    const sorted = stars.map((star) => ({
+      hip: String(star.id || ""),
+      mag: Number(star.properties?.mag)
+    })).filter((item) => item.hip && Number.isFinite(item.mag)).sort((a, b) => a.mag - b.mag).slice(0, limit);
+    return new Map(
+      sorted.map((item, index) => [
+        item.hip,
+        { rank: index + 1, hip: item.hip, mag: item.mag }
+      ])
+    );
   }
 
   // src/data/deep-sky/index.ts
@@ -1422,275 +2381,690 @@
         id: "quick-start",
         title: "1. \u5FEB\u901F\u4F7F\u7528\u6D41\u7A0B",
         blocks: [
-          { type: "paragraph", html: "\u8FD9\u4EFD\u8BF4\u660E\u4E66\u628A\u8F6F\u4EF6\u4F7F\u7528\u3001\u5929\u6587\u5B66\u80CC\u666F\u3001\u6D4F\u89C8\u5668\u8FD0\u884C\u903B\u8F91\u548C\u5F00\u53D1\u8005\u6392\u67E5\u65B9\u6CD5\u653E\u5728\u540C\u4E00\u9875\u3002\u7B2C\u4E00\u6B21\u4F7F\u7528\u65F6\uFF0C\u53EF\u4EE5\u5148\u7167\u7740\u672C\u7AE0\u5B8C\u6210\u4E00\u8F6E\u64CD\u4F5C\uFF0C\u518D\u6309\u4E0B\u62C9\u76EE\u5F55\u8DF3\u5230\u540E\u9762\u7684\u539F\u7406\u7AE0\u8282\u3002" },
-          { type: "list", items: [
-            "\u89E3\u538B\u5B8C\u6574\u9879\u76EE\u6587\u4EF6\u5939\uFF0C\u76F4\u63A5\u6253\u5F00\u6839\u76EE\u5F55\u7684 <code>index.html</code>\u3002\u5982\u679C\u6D4F\u89C8\u5668\u5B9A\u4F4D\u53D7\u9650\uFF0C\u53EF\u5728\u9879\u76EE\u76EE\u5F55\u8FD0\u884C <code>python -m http.server 8000</code> \u540E\u4ECE localhost \u6253\u5F00\u3002",
-            "\u5728\u201C\u89C2\u6D4B\u5730\u70B9\u201D\u4E2D\u641C\u7D22\u57CE\u5E02\uFF0C\u6216\u624B\u52A8\u8F93\u5165\u7ECF\u7EAC\u5EA6\uFF1B\u65F6\u533A\u4F1A\u6839\u636E\u7ECF\u7EAC\u5EA6\u81EA\u52A8\u5339\u914D\u4E3A IANA \u65F6\u533A\u3002",
-            "\u5728\u201C\u89C2\u6D4B\u65F6\u95F4\u201D\u4E2D\u8F93\u5165\u5E74\u6708\u65E5\u65F6\u5206\u3002\u5E74\u4EFD\u53EF\u4EE5\u8F93\u5165\u8D1F\u6570\uFF0C\u4F8B\u5982 <code>-500</code> \u8868\u793A\u516C\u5143\u524D 500 \u5E74\uFF1B\u663E\u793A\u533A\u4F1A\u5199\u4F5C <code>BC 500</code>\u3002",
-            "\u5728\u201C\u8BED\u8A00\u4E0E\u661F\u7A7A\u4F53\u7CFB\u201D\u4E2D\u9009\u62E9\u4E2D\u6587/\u82F1\u6587\u754C\u9762\uFF0C\u4EE5\u53CA\u897F\u65B9\u661F\u5EA7\u3001\u4E2D\u56FD\u661F\u5B98\u6216\u4E24\u8005\u540C\u65F6\u663E\u793A\u3002",
-            "\u5728\u201C\u89C6\u56FE\u4E0E\u6295\u5F71\u201D\u4E2D\u9009\u62E9\u5730\u5E73\u3001\u8D64\u9053\u3001\u9EC4\u9053\u6216\u94F6\u6CB3\u5750\u6807\u89C6\u89D2\uFF0C\u518D\u9009\u62E9\u9002\u5408\u7684\u6295\u5F71\u3002",
-            "\u7528\u9F20\u6807\u6EDA\u8F6E\u6216\u53CC\u6307\u7F29\u653E\u661F\u56FE\uFF0C\u62D6\u52A8\u661F\u56FE\u79FB\u52A8\u89C6\u91CE\uFF1B\u641C\u7D22\u6846\u53EF\u5B9A\u4F4D\u6052\u661F\u3001\u661F\u5EA7\u3001\u661F\u5B98\u3001\u884C\u661F\u548C\u6DF1\u7A7A\u5929\u4F53\u3002",
-            "\u5355\u51FB\u5929\u4F53\u67E5\u770B\u4FE1\u606F\u6D6E\u7A97\uFF1B\u9047\u5230\u663E\u793A\u5F02\u5E38\u65F6\u6253\u5F00 DBG \u8C03\u8BD5\u9762\u677F\uFF0C\u590D\u5236\u6574\u6BB5\u4FE1\u606F\u7ED9\u7EF4\u62A4\u8005\u3002"
-          ] },
-          { type: "note", html: "\u5C0F\u63D0\u793A\uFF1A\u661F\u56FE\u4E0D\u662F\u968F\u673A\u80CC\u666F\uFF0C\u800C\u662F\u7528\u771F\u5B9E\u6052\u661F\u76EE\u5F55\u3001\u661F\u5EA7\u8FB9\u754C\u3001\u4E2D\u56FD\u661F\u5B98\u548C\u672C\u5730\u65F6\u95F4\u5730\u70B9\u8BA1\u7B97\u5F97\u5230\u7684\u53EF\u89C6\u5316\u7ED3\u679C\u3002\u5B83\u9002\u5408\u5B66\u4E60\u548C\u89C2\u661F\u53C2\u8003\uFF0C\u4F46\u4E0D\u7B49\u540C\u4E8E\u4E13\u4E1A\u661F\u5386\u8F6F\u4EF6\u3002" }
+          {
+            type: "paragraph",
+            html: "\u8FD9\u4EFD\u8BF4\u660E\u4E66\u628A\u8F6F\u4EF6\u4F7F\u7528\u3001\u5929\u6587\u5B66\u80CC\u666F\u3001\u6D4F\u89C8\u5668\u8FD0\u884C\u903B\u8F91\u548C\u5F00\u53D1\u8005\u6392\u67E5\u65B9\u6CD5\u653E\u5728\u540C\u4E00\u9875\u3002\u7B2C\u4E00\u6B21\u4F7F\u7528\u65F6\uFF0C\u53EF\u4EE5\u5148\u7167\u7740\u672C\u7AE0\u5B8C\u6210\u4E00\u8F6E\u64CD\u4F5C\uFF0C\u518D\u6309\u4E0B\u62C9\u76EE\u5F55\u8DF3\u5230\u540E\u9762\u7684\u539F\u7406\u7AE0\u8282\u3002"
+          },
+          {
+            type: "list",
+            items: [
+              "\u89E3\u538B\u5B8C\u6574\u9879\u76EE\u6587\u4EF6\u5939\uFF0C\u76F4\u63A5\u6253\u5F00\u6839\u76EE\u5F55\u7684 <code>index.html</code>\u3002\u5982\u679C\u6D4F\u89C8\u5668\u5B9A\u4F4D\u53D7\u9650\uFF0C\u53EF\u5728\u9879\u76EE\u76EE\u5F55\u8FD0\u884C <code>python -m http.server 8000</code> \u540E\u4ECE localhost \u6253\u5F00\u3002",
+              "\u5728\u201C\u89C2\u6D4B\u5730\u70B9\u201D\u4E2D\u641C\u7D22\u57CE\u5E02\uFF0C\u6216\u624B\u52A8\u8F93\u5165\u7ECF\u7EAC\u5EA6\uFF1B\u65F6\u533A\u4F1A\u6839\u636E\u7ECF\u7EAC\u5EA6\u81EA\u52A8\u5339\u914D\u4E3A IANA \u65F6\u533A\u3002",
+              "\u5728\u201C\u89C2\u6D4B\u65F6\u95F4\u201D\u4E2D\u8F93\u5165\u5E74\u6708\u65E5\u65F6\u5206\u3002\u5E74\u4EFD\u53EF\u4EE5\u8F93\u5165\u8D1F\u6570\uFF0C\u4F8B\u5982 <code>-500</code> \u8868\u793A\u516C\u5143\u524D 500 \u5E74\uFF1B\u663E\u793A\u533A\u4F1A\u5199\u4F5C <code>BC 500</code>\u3002",
+              "\u5728\u201C\u8BED\u8A00\u4E0E\u661F\u7A7A\u4F53\u7CFB\u201D\u4E2D\u9009\u62E9\u4E2D\u6587/\u82F1\u6587\u754C\u9762\uFF0C\u4EE5\u53CA\u897F\u65B9\u661F\u5EA7\u3001\u4E2D\u56FD\u661F\u5B98\u6216\u4E24\u8005\u540C\u65F6\u663E\u793A\u3002",
+              "\u5728\u201C\u89C6\u56FE\u4E0E\u6295\u5F71\u201D\u4E2D\u9009\u62E9\u5730\u5E73\u3001\u8D64\u9053\u3001\u9EC4\u9053\u6216\u94F6\u6CB3\u5750\u6807\u89C6\u89D2\uFF0C\u518D\u9009\u62E9\u9002\u5408\u7684\u6295\u5F71\u3002",
+              "\u7528\u9F20\u6807\u6EDA\u8F6E\u6216\u53CC\u6307\u7F29\u653E\u661F\u56FE\uFF0C\u62D6\u52A8\u661F\u56FE\u79FB\u52A8\u89C6\u91CE\uFF1B\u641C\u7D22\u6846\u53EF\u5B9A\u4F4D\u6052\u661F\u3001\u661F\u5EA7\u3001\u661F\u5B98\u3001\u884C\u661F\u548C\u6DF1\u7A7A\u5929\u4F53\u3002",
+              "\u5355\u51FB\u5929\u4F53\u67E5\u770B\u4FE1\u606F\u6D6E\u7A97\uFF1B\u9047\u5230\u663E\u793A\u5F02\u5E38\u65F6\u6253\u5F00 DBG \u8C03\u8BD5\u9762\u677F\uFF0C\u590D\u5236\u6574\u6BB5\u4FE1\u606F\u7ED9\u7EF4\u62A4\u8005\u3002"
+            ]
+          },
+          {
+            type: "note",
+            html: "\u5C0F\u63D0\u793A\uFF1A\u661F\u56FE\u4E0D\u662F\u968F\u673A\u80CC\u666F\uFF0C\u800C\u662F\u7528\u771F\u5B9E\u6052\u661F\u76EE\u5F55\u3001\u661F\u5EA7\u8FB9\u754C\u3001\u4E2D\u56FD\u661F\u5B98\u548C\u672C\u5730\u65F6\u95F4\u5730\u70B9\u8BA1\u7B97\u5F97\u5230\u7684\u53EF\u89C6\u5316\u7ED3\u679C\u3002\u5B83\u9002\u5408\u5B66\u4E60\u548C\u89C2\u661F\u53C2\u8003\uFF0C\u4F46\u4E0D\u7B49\u540C\u4E8E\u4E13\u4E1A\u661F\u5386\u8F6F\u4EF6\u3002"
+          }
         ]
       },
       {
         id: "interface-controls",
         title: "2. \u754C\u9762\u533A\u57DF\u4E0E\u6309\u94AE\u8BF4\u660E",
         blocks: [
-          { type: "paragraph", html: "\u5DE6\u4FA7\u83DC\u5355\u662F\u4E3B\u8981\u63A7\u5236\u533A\u3002\u9876\u90E8\u4FE1\u606F\u663E\u793A\u5F53\u524D\u9879\u76EE\u540D\u3001\u5730\u70B9\u4E0E\u65F6\u95F4\uFF1BPanel \u6309\u94AE\u7528\u4E8E\u6536\u8D77\u6216\u5C55\u5F00\u83DC\u5355\u3002\u83DC\u5355\u672C\u8EAB\u53EF\u4EE5\u6EDA\u52A8\uFF0C\u6BCF\u4E2A\u5927\u533A\u90FD\u53EF\u4EE5\u6298\u53E0\uFF0C\u9ED8\u8BA4\u5C55\u5F00\u6216\u9ED8\u8BA4\u6536\u8D77\u53EA\u662F\u4E00\u79CD\u521D\u59CB\u72B6\u6001\u3002" },
-          { type: "table", headers: ["\u533A\u57DF", "\u4E3B\u8981\u7528\u9014", "\u600E\u4E48\u7528"], rows: [
-            ["\u9876\u90E8\u4FE1\u606F", "\u663E\u793A\u9879\u76EE\u540D\u3001\u5F53\u524D\u5730\u70B9\u548C\u5F53\u524D\u65F6\u95F4", "\u968F\u83DC\u5355\u4E00\u8D77\u6EDA\u52A8\uFF0C\u4E0D\u518D\u56FA\u5B9A\u5360\u4F4F\u5C4F\u5E55\u9876\u90E8\u3002"],
-            ["\u89C6\u56FE\u63A7\u5236", "\u7F29\u653E\u3001\u91CD\u7F6E\u89C6\u56FE\u3001\u5168\u5C4F\u3001\u5B57\u4F53\u7F29\u653E", "A+/A\u2212 \u4F1A\u6539\u53D8\u5168\u5C40\u5B57\u4F53\u7F29\u653E\uFF0C\u6309\u94AE\u89E6\u63A7\u533A\u57DF\u4E5F\u4F1A\u8DDF\u968F\u53D8\u5927\u6216\u53D8\u5C0F\u3002"],
-            ["\u5929\u4F53\u641C\u7D22", "\u641C\u7D22\u6052\u661F\u3001\u884C\u661F\u3001\u661F\u5EA7\u3001\u661F\u5B98\u3001\u6DF1\u7A7A\u5929\u4F53", "\u8F93\u5165\u4E2D\u6587\u540D\u3001\u82F1\u6587\u540D\u3001\u7F29\u5199\u6216\u76EE\u5F55\u7F16\u53F7\uFF0C\u9009\u62E9\u5019\u9009\u9879\u540E\u661F\u56FE\u4F1A\u5B9A\u4F4D\u5230\u76EE\u6807\u3002"],
-            ["\u8BED\u8A00\u4E0E\u661F\u7A7A\u4F53\u7CFB", "\u5207\u6362\u754C\u9762\u8BED\u8A00\u548C\u4E2D\u897F\u661F\u7A7A\u6587\u5316\u56FE\u5C42", "\u8BED\u8A00\u53EA\u5F71\u54CD\u6587\u6848\u548C\u540D\u79F0\u5B57\u6BB5\uFF1B\u661F\u7A7A\u4F53\u7CFB\u51B3\u5B9A\u663E\u793A\u897F\u65B9\u661F\u5EA7\u3001\u4E2D\u56FD\u661F\u5B98\u6216\u4E24\u8005\u3002"],
-            ["\u89C2\u6D4B\u5730\u70B9", "\u8BBE\u7F6E\u7EAC\u5EA6\u3001\u7ECF\u5EA6\u548C\u65F6\u533A", "\u57CE\u5E02\u641C\u7D22\u4F1A\u81EA\u52A8\u586B\u5145\u7ECF\u7EAC\u5EA6\u548C IANA \u65F6\u533A\uFF1B\u624B\u52A8\u7ECF\u7EAC\u5EA6\u4E5F\u4F1A\u5C1D\u8BD5\u91CD\u65B0\u5339\u914D\u65F6\u533A\u3002"],
-            ["\u89C2\u6D4B\u65F6\u95F4", "\u8BBE\u7F6E\u5F53\u524D\u6A21\u62DF\u5929\u7A7A\u7684\u65F6\u95F4", "\u5206\u6BB5\u8F93\u5165\u5E74\u3001\u6708\u3001\u65E5\u3001\u65F6\u3001\u5206\uFF1B\u65B9\u5411\u952E\u53EF\u4EE5\u5207\u6362\u5B57\u6BB5\u6216\u5FEB\u901F\u52A0\u51CF\u3002"],
-            ["\u89C6\u56FE\u4E0E\u6295\u5F71", "\u9009\u62E9\u5750\u6807\u89C6\u89D2\u548C\u6295\u5F71\u65B9\u5F0F", "\u5730\u5E73\u5750\u6807\u9002\u5408\u6A21\u62DF\u5F53\u5730\u5929\u7A7A\uFF1B\u8D64\u9053/\u9EC4\u9053/\u94F6\u6CB3\u89C6\u89D2\u9002\u5408\u5B66\u4E60\u5750\u6807\u7CFB\u7EDF\u3002"],
-            ["\u663E\u793A\u8BBE\u7F6E", "\u5F00\u5173\u661F\u540D\u3001\u661F\u5EA7\u7EBF\u3001\u661F\u5B98\u7EBF\u3001\u9EC4\u9053\u3001\u8D64\u9053\u3001\u5730\u5E73\u7EBF\u7B49", "\u6052\u661F\u5927\u5C0F\u63A7\u5236\u661F\u70B9\u5C3A\u5BF8\uFF1B\u661F\u540D\u663E\u793A\u5BC6\u5EA6\u53EA\u63A7\u5236\u6052\u661F\u540D\u5B57\u6570\u91CF\uFF0C\u4E0D\u5F71\u54CD\u661F\u70B9\u6570\u91CF\u3002"],
-            ["\u5929\u4F53\u4FE1\u606F", "\u663E\u793A\u88AB\u70B9\u51FB\u5BF9\u8C61\u7684\u540D\u79F0\u3001\u5750\u6807\u548C\u76EE\u5F55\u4FE1\u606F", "\u53EF\u590D\u5236\u5F53\u524D\u5BF9\u8C61\u4FE1\u606F\u3002"],
-            ["\u72B6\u6001", "\u663E\u793A\u5730\u70B9\u3001\u65F6\u95F4\u3001\u6295\u5F71\u3001\u5750\u6807\u548C\u8FD0\u884C\u72B6\u6001", "\u7528\u4E8E\u5FEB\u901F\u6838\u5BF9\u5F53\u524D\u661F\u56FE\u5230\u5E95\u6309\u4EC0\u4E48\u6761\u4EF6\u7ED8\u5236\u3002"]
-          ] }
+          {
+            type: "paragraph",
+            html: "\u5DE6\u4FA7\u83DC\u5355\u662F\u4E3B\u8981\u63A7\u5236\u533A\u3002\u9876\u90E8\u4FE1\u606F\u663E\u793A\u5F53\u524D\u9879\u76EE\u540D\u3001\u5730\u70B9\u4E0E\u65F6\u95F4\uFF1BPanel \u6309\u94AE\u7528\u4E8E\u6536\u8D77\u6216\u5C55\u5F00\u83DC\u5355\u3002\u83DC\u5355\u672C\u8EAB\u53EF\u4EE5\u6EDA\u52A8\uFF0C\u6BCF\u4E2A\u5927\u533A\u90FD\u53EF\u4EE5\u6298\u53E0\uFF0C\u9ED8\u8BA4\u5C55\u5F00\u6216\u9ED8\u8BA4\u6536\u8D77\u53EA\u662F\u4E00\u79CD\u521D\u59CB\u72B6\u6001\u3002"
+          },
+          {
+            type: "table",
+            headers: ["\u533A\u57DF", "\u4E3B\u8981\u7528\u9014", "\u600E\u4E48\u7528"],
+            rows: [
+              [
+                "\u9876\u90E8\u4FE1\u606F",
+                "\u663E\u793A\u9879\u76EE\u540D\u3001\u5F53\u524D\u5730\u70B9\u548C\u5F53\u524D\u65F6\u95F4",
+                "\u968F\u83DC\u5355\u4E00\u8D77\u6EDA\u52A8\uFF0C\u4E0D\u518D\u56FA\u5B9A\u5360\u4F4F\u5C4F\u5E55\u9876\u90E8\u3002"
+              ],
+              [
+                "\u89C6\u56FE\u63A7\u5236",
+                "\u7F29\u653E\u3001\u91CD\u7F6E\u89C6\u56FE\u3001\u5168\u5C4F\u3001\u5B57\u4F53\u7F29\u653E",
+                "A+/A\u2212 \u4F1A\u6539\u53D8\u5168\u5C40\u5B57\u4F53\u7F29\u653E\uFF0C\u6309\u94AE\u89E6\u63A7\u533A\u57DF\u4E5F\u4F1A\u8DDF\u968F\u53D8\u5927\u6216\u53D8\u5C0F\u3002"
+              ],
+              [
+                "\u5929\u4F53\u641C\u7D22",
+                "\u641C\u7D22\u6052\u661F\u3001\u884C\u661F\u3001\u661F\u5EA7\u3001\u661F\u5B98\u3001\u6DF1\u7A7A\u5929\u4F53",
+                "\u8F93\u5165\u4E2D\u6587\u540D\u3001\u82F1\u6587\u540D\u3001\u7F29\u5199\u6216\u76EE\u5F55\u7F16\u53F7\uFF0C\u9009\u62E9\u5019\u9009\u9879\u540E\u661F\u56FE\u4F1A\u5B9A\u4F4D\u5230\u76EE\u6807\u3002"
+              ],
+              [
+                "\u8BED\u8A00\u4E0E\u661F\u7A7A\u4F53\u7CFB",
+                "\u5207\u6362\u754C\u9762\u8BED\u8A00\u548C\u4E2D\u897F\u661F\u7A7A\u6587\u5316\u56FE\u5C42",
+                "\u8BED\u8A00\u53EA\u5F71\u54CD\u6587\u6848\u548C\u540D\u79F0\u5B57\u6BB5\uFF1B\u661F\u7A7A\u4F53\u7CFB\u51B3\u5B9A\u663E\u793A\u897F\u65B9\u661F\u5EA7\u3001\u4E2D\u56FD\u661F\u5B98\u6216\u4E24\u8005\u3002"
+              ],
+              [
+                "\u89C2\u6D4B\u5730\u70B9",
+                "\u8BBE\u7F6E\u7EAC\u5EA6\u3001\u7ECF\u5EA6\u548C\u65F6\u533A",
+                "\u57CE\u5E02\u641C\u7D22\u4F1A\u81EA\u52A8\u586B\u5145\u7ECF\u7EAC\u5EA6\u548C IANA \u65F6\u533A\uFF1B\u624B\u52A8\u7ECF\u7EAC\u5EA6\u4E5F\u4F1A\u5C1D\u8BD5\u91CD\u65B0\u5339\u914D\u65F6\u533A\u3002"
+              ],
+              [
+                "\u89C2\u6D4B\u65F6\u95F4",
+                "\u8BBE\u7F6E\u5F53\u524D\u6A21\u62DF\u5929\u7A7A\u7684\u65F6\u95F4",
+                "\u5206\u6BB5\u8F93\u5165\u5E74\u3001\u6708\u3001\u65E5\u3001\u65F6\u3001\u5206\uFF1B\u65B9\u5411\u952E\u53EF\u4EE5\u5207\u6362\u5B57\u6BB5\u6216\u5FEB\u901F\u52A0\u51CF\u3002"
+              ],
+              [
+                "\u89C6\u56FE\u4E0E\u6295\u5F71",
+                "\u9009\u62E9\u5750\u6807\u89C6\u89D2\u548C\u6295\u5F71\u65B9\u5F0F",
+                "\u5730\u5E73\u5750\u6807\u9002\u5408\u6A21\u62DF\u5F53\u5730\u5929\u7A7A\uFF1B\u8D64\u9053/\u9EC4\u9053/\u94F6\u6CB3\u89C6\u89D2\u9002\u5408\u5B66\u4E60\u5750\u6807\u7CFB\u7EDF\u3002"
+              ],
+              [
+                "\u663E\u793A\u8BBE\u7F6E",
+                "\u5F00\u5173\u661F\u540D\u3001\u661F\u5EA7\u7EBF\u3001\u661F\u5B98\u7EBF\u3001\u9EC4\u9053\u3001\u8D64\u9053\u3001\u5730\u5E73\u7EBF\u7B49",
+                "\u6052\u661F\u5927\u5C0F\u63A7\u5236\u661F\u70B9\u5C3A\u5BF8\uFF1B\u661F\u540D\u663E\u793A\u5BC6\u5EA6\u53EA\u63A7\u5236\u6052\u661F\u540D\u5B57\u6570\u91CF\uFF0C\u4E0D\u5F71\u54CD\u661F\u70B9\u6570\u91CF\u3002"
+              ],
+              [
+                "\u5929\u4F53\u4FE1\u606F",
+                "\u663E\u793A\u88AB\u70B9\u51FB\u5BF9\u8C61\u7684\u540D\u79F0\u3001\u5750\u6807\u548C\u76EE\u5F55\u4FE1\u606F",
+                "\u53EF\u590D\u5236\u5F53\u524D\u5BF9\u8C61\u4FE1\u606F\u3002"
+              ],
+              [
+                "\u72B6\u6001",
+                "\u663E\u793A\u5730\u70B9\u3001\u65F6\u95F4\u3001\u6295\u5F71\u3001\u5750\u6807\u548C\u8FD0\u884C\u72B6\u6001",
+                "\u7528\u4E8E\u5FEB\u901F\u6838\u5BF9\u5F53\u524D\u661F\u56FE\u5230\u5E95\u6309\u4EC0\u4E48\u6761\u4EF6\u7ED8\u5236\u3002"
+              ]
+            ]
+          }
         ]
       },
       {
         id: "observer-storage",
         title: "3. \u89C2\u6D4B\u5730\u70B9\u3001\u65F6\u533A\u4E0E\u6D4F\u89C8\u5668\u4FDD\u5B58",
         blocks: [
-          { type: "paragraph", html: "\u661F\u56FE\u8BA1\u7B97\u9700\u8981\u89C2\u6D4B\u8005\u7684\u4F4D\u7F6E\u548C\u5F53\u5730\u65F6\u95F4\u3002\u7ECF\u7EAC\u5EA6\u51B3\u5B9A\u5730\u5E73\u7EBF\u548C\u65B9\u4F4D\uFF1B\u65F6\u533A\u8D1F\u8D23\u628A\u7528\u6237\u8F93\u5165\u7684\u5F53\u5730\u65F6\u95F4\u8F6C\u6362\u6210\u5185\u90E8\u7EDF\u4E00\u4F7F\u7528\u7684 UTC\u3002\u9879\u76EE\u4F7F\u7528 IANA \u65F6\u533A\u540D\uFF0C\u4F8B\u5982 <code>Asia/Shanghai</code>\u3001<code>Europe/London</code>\u3002" },
-          { type: "paragraph", html: "\u5386\u53F2\u5E74\u4EFD\u7684\u65F6\u533A\u504F\u79FB\u53EF\u80FD\u4E0D\u662F\u73B0\u4EE3\u56FA\u5B9A\u504F\u79FB\u3002\u4F8B\u5982\u5F88\u65E9\u7684 <code>Asia/Shanghai</code> \u53EF\u80FD\u663E\u793A\u7C7B\u4F3C <code>+08:05:43</code> \u7684\u5386\u53F2\u5730\u65B9\u65F6\u504F\u79FB\uFF0C\u6240\u4EE5\u672C\u5730\u65F6\u95F4\u8F6C UTC \u540E\u4E0D\u4E00\u5B9A\u843D\u5728\u6574\u70B9\u3002\u8FD9\u4E0D\u662F\u8F93\u5165\u9519\u8BEF\uFF0C\u800C\u662F\u6D4F\u89C8\u5668\u65F6\u533A\u6570\u636E\u5E93\u7684\u5386\u53F2\u89C4\u5219\u5728\u8D77\u4F5C\u7528\u3002" },
-          { type: "table", headers: ["\u4F1A\u4FDD\u5B58\u5230\u6D4F\u89C8\u5668", "\u5237\u65B0\u540E\u662F\u5426\u4FDD\u7559", "\u8BF4\u660E"], rows: [
-            ["\u8BED\u8A00\u3001\u661F\u7A7A\u4F53\u7CFB", "\u4FDD\u7559", "\u907F\u514D\u6BCF\u6B21\u6253\u5F00\u90FD\u91CD\u65B0\u9009\u62E9\u3002"],
-            ["\u57CE\u5E02\u3001\u7ECF\u7EAC\u5EA6\u3001\u65F6\u533A", "\u4FDD\u7559", "\u4E0B\u4E00\u6B21\u6253\u5F00\u7EE7\u7EED\u4F7F\u7528\u4E0A\u6B21\u89C2\u6D4B\u5730\u70B9\u3002"],
-            ["\u89C2\u6D4B\u65F6\u95F4", "\u4FDD\u7559", "\u7528\u4E8E\u7EE7\u7EED\u67E5\u770B\u540C\u4E00\u5386\u53F2\u6216\u672A\u6765\u5929\u7A7A\u3002"],
-            ["\u6295\u5F71\u3001\u5750\u6807\u89C6\u89D2\u3001\u7F29\u653E\u3001\u90E8\u5206\u89C6\u56FE\u4E2D\u5FC3", "\u4FDD\u7559", "\u65B9\u4FBF\u4E0D\u540C\u6295\u5F71\u4E4B\u95F4\u72EC\u7ACB\u4FDD\u5B58\u89C6\u89D2\u3002"],
-            ["\u56FE\u5C42\u5F00\u5173\u3001\u661F\u7B49\u9608\u503C\u3001\u5B57\u4F53\u7F29\u653E\u3001\u83DC\u5355\u6298\u53E0\u72B6\u6001", "\u4FDD\u7559", "\u5C5E\u4E8E\u7528\u6237\u754C\u9762\u504F\u597D\u3002"],
-            ["\u9F20\u6807\u60AC\u505C\u3001\u62D6\u52A8\u4E2D\u72B6\u6001\u3001\u5019\u9009\u8F93\u5165\u3001\u4E34\u65F6\u9519\u8BEF\u5806\u6808", "\u4E0D\u4FDD\u7559", "\u5237\u65B0\u540E\u91CD\u65B0\u521D\u59CB\u5316\u3002"]
-          ] },
-          { type: "note", html: "\u91CD\u7F6E\u6309\u94AE\u7528\u4E8E\u5F00\u53D1\u8005\u8C03\u8BD5\uFF1A\u5B83\u53EA\u6E05\u7A7A\u672C\u9879\u76EE\u5199\u5165\u7684 localStorage \u914D\u7F6E\uFF0C\u4E0D\u4F1A\u6E05\u7406\u6D4F\u89C8\u5668\u91CC\u5176\u4ED6\u7F51\u7AD9\u7684\u6570\u636E\u3002" }
+          {
+            type: "paragraph",
+            html: "\u661F\u56FE\u8BA1\u7B97\u9700\u8981\u89C2\u6D4B\u8005\u7684\u4F4D\u7F6E\u548C\u5F53\u5730\u65F6\u95F4\u3002\u7ECF\u7EAC\u5EA6\u51B3\u5B9A\u5730\u5E73\u7EBF\u548C\u65B9\u4F4D\uFF1B\u65F6\u533A\u8D1F\u8D23\u628A\u7528\u6237\u8F93\u5165\u7684\u5F53\u5730\u65F6\u95F4\u8F6C\u6362\u6210\u5185\u90E8\u7EDF\u4E00\u4F7F\u7528\u7684 UTC\u3002\u9879\u76EE\u4F7F\u7528 IANA \u65F6\u533A\u540D\uFF0C\u4F8B\u5982 <code>Asia/Shanghai</code>\u3001<code>Europe/London</code>\u3002"
+          },
+          {
+            type: "paragraph",
+            html: "\u5386\u53F2\u5E74\u4EFD\u7684\u65F6\u533A\u504F\u79FB\u53EF\u80FD\u4E0D\u662F\u73B0\u4EE3\u56FA\u5B9A\u504F\u79FB\u3002\u4F8B\u5982\u5F88\u65E9\u7684 <code>Asia/Shanghai</code> \u53EF\u80FD\u663E\u793A\u7C7B\u4F3C <code>+08:05:43</code> \u7684\u5386\u53F2\u5730\u65B9\u65F6\u504F\u79FB\uFF0C\u6240\u4EE5\u672C\u5730\u65F6\u95F4\u8F6C UTC \u540E\u4E0D\u4E00\u5B9A\u843D\u5728\u6574\u70B9\u3002\u8FD9\u4E0D\u662F\u8F93\u5165\u9519\u8BEF\uFF0C\u800C\u662F\u6D4F\u89C8\u5668\u65F6\u533A\u6570\u636E\u5E93\u7684\u5386\u53F2\u89C4\u5219\u5728\u8D77\u4F5C\u7528\u3002"
+          },
+          {
+            type: "table",
+            headers: ["\u4F1A\u4FDD\u5B58\u5230\u6D4F\u89C8\u5668", "\u5237\u65B0\u540E\u662F\u5426\u4FDD\u7559", "\u8BF4\u660E"],
+            rows: [
+              ["\u8BED\u8A00\u3001\u661F\u7A7A\u4F53\u7CFB", "\u4FDD\u7559", "\u907F\u514D\u6BCF\u6B21\u6253\u5F00\u90FD\u91CD\u65B0\u9009\u62E9\u3002"],
+              ["\u57CE\u5E02\u3001\u7ECF\u7EAC\u5EA6\u3001\u65F6\u533A", "\u4FDD\u7559", "\u4E0B\u4E00\u6B21\u6253\u5F00\u7EE7\u7EED\u4F7F\u7528\u4E0A\u6B21\u89C2\u6D4B\u5730\u70B9\u3002"],
+              ["\u89C2\u6D4B\u65F6\u95F4", "\u4FDD\u7559", "\u7528\u4E8E\u7EE7\u7EED\u67E5\u770B\u540C\u4E00\u5386\u53F2\u6216\u672A\u6765\u5929\u7A7A\u3002"],
+              [
+                "\u6295\u5F71\u3001\u5750\u6807\u89C6\u89D2\u3001\u7F29\u653E\u3001\u90E8\u5206\u89C6\u56FE\u4E2D\u5FC3",
+                "\u4FDD\u7559",
+                "\u65B9\u4FBF\u4E0D\u540C\u6295\u5F71\u4E4B\u95F4\u72EC\u7ACB\u4FDD\u5B58\u89C6\u89D2\u3002"
+              ],
+              [
+                "\u56FE\u5C42\u5F00\u5173\u3001\u661F\u7B49\u9608\u503C\u3001\u5B57\u4F53\u7F29\u653E\u3001\u83DC\u5355\u6298\u53E0\u72B6\u6001",
+                "\u4FDD\u7559",
+                "\u5C5E\u4E8E\u7528\u6237\u754C\u9762\u504F\u597D\u3002"
+              ],
+              [
+                "\u9F20\u6807\u60AC\u505C\u3001\u62D6\u52A8\u4E2D\u72B6\u6001\u3001\u5019\u9009\u8F93\u5165\u3001\u4E34\u65F6\u9519\u8BEF\u5806\u6808",
+                "\u4E0D\u4FDD\u7559",
+                "\u5237\u65B0\u540E\u91CD\u65B0\u521D\u59CB\u5316\u3002"
+              ]
+            ]
+          },
+          {
+            type: "note",
+            html: "\u91CD\u7F6E\u6309\u94AE\u7528\u4E8E\u5F00\u53D1\u8005\u8C03\u8BD5\uFF1A\u5B83\u53EA\u6E05\u7A7A\u672C\u9879\u76EE\u5199\u5165\u7684 localStorage \u914D\u7F6E\uFF0C\u4E0D\u4F1A\u6E05\u7406\u6D4F\u89C8\u5668\u91CC\u5176\u4ED6\u7F51\u7AD9\u7684\u6570\u636E\u3002"
+          }
         ]
       },
       {
         id: "time-playback",
         title: "4. \u65F6\u95F4\u63A7\u5236\u4E0E\u64AD\u653E",
         blocks: [
-          { type: "paragraph", html: "\u89C2\u6D4B\u65F6\u95F4\u63A7\u4EF6\u662F\u5355\u6846\u89C6\u89C9\u7684\u5206\u6BB5\u7F16\u8F91\u5668\uFF0C\u4E0D\u662F\u666E\u901A\u6587\u672C\u6846\u3002\u70B9\u51FB\u5E74\u3001\u6708\u3001\u65E5\u3001\u65F6\u3001\u5206\u4EFB\u4E00\u5B57\u6BB5\u65F6\uFF0C\u8BE5\u5B57\u6BB5\u6574\u4F53\u9009\u4E2D\uFF1B\u7B2C\u4E00\u6B21\u8F93\u5165\u4F1A\u66FF\u6362\u6574\u4E2A\u5B57\u6BB5\uFF0C\u540E\u7EED\u8FDE\u7EED\u8F93\u5165\u624D\u8FFD\u52A0\u3002\u5DE6\u53F3\u65B9\u5411\u952E\u5728\u5B57\u6BB5\u4E4B\u95F4\u5207\u6362\uFF0C\u4E0A\u4E0B\u65B9\u5411\u952E\u76F4\u63A5\u6309\u771F\u5B9E\u65E5\u5386\u8FDB\u4F4D\u6216\u9000\u4F4D\u3002" },
-          { type: "code", text: "\u7528\u6237\u8F93\u5165\u5019\u9009\u65F6\u95F4\n\u2192 \u68C0\u67E5\u5E74\u6708\u65E5\u65F6\u5206\u662F\u5426\u5408\u6CD5\n\u2192 \u7528\u5019\u9009\u65F6\u95F4\u5C1D\u8BD5\u5237\u65B0\u661F\u56FE\n\u2192 \u5237\u65B0\u6210\u529F\uFF1A\u5199\u5165\u5F53\u524D\u6709\u6548\u65F6\u95F4\u5E76\u4FDD\u5B58\n\u2192 \u5237\u65B0\u5931\u8D25\uFF1A\u6062\u590D\u4E0A\u4E00\u4E2A\u6709\u6548\u65F6\u95F4\uFF0Cdebug \u8BB0\u5F55\u5931\u8D25\u539F\u56E0" },
-          { type: "paragraph", html: "\u64AD\u653E\u6309\u94AE\u4F1A\u8BA9\u65F6\u95F4\u6309\u6307\u5B9A\u500D\u901F\u5411\u524D\u63A8\u8FDB\u3002\u5FEB\u6377\u6309\u94AE <code>\u22121\u6708/\u22121\u5929/\u22121\u65F6/+1\u65F6/+1\u5929/+1\u6708</code> \u7528\u4E8E\u5FEB\u901F\u8DF3\u8F6C\uFF1B\u4EFB\u610F\u6B65\u957F\u63A7\u4EF6\u9002\u5408\u6309\u51E0\u5E74\u3001\u51E0\u5929\u6216\u51E0\u5C0F\u65F6\u89C2\u5BDF\u5929\u7A7A\u53D8\u5316\u3002" },
-          { type: "warning", html: "\u8FDC\u53E4\u6216\u8FDC\u672A\u6765\u65E5\u671F\u53EF\u4EE5\u8F93\u5165\uFF0C\u4F46\u592A\u9633\u7CFB\u5929\u4F53\u548C\u90E8\u5206\u53C2\u8003\u7EBF\u662F\u8FD1\u4F3C\u663E\u793A\u3002\u4E0D\u8981\u628A\u5B83\u7528\u4E8E\u4E25\u8083\u5386\u6CD5\u590D\u539F\u3001\u65E5\u6708\u98DF\u5224\u5B9A\u6216\u4E13\u4E1A\u661F\u5386\u6BD4\u5BF9\u3002" }
+          {
+            type: "paragraph",
+            html: "\u89C2\u6D4B\u65F6\u95F4\u63A7\u4EF6\u662F\u5355\u6846\u89C6\u89C9\u7684\u5206\u6BB5\u7F16\u8F91\u5668\uFF0C\u4E0D\u662F\u666E\u901A\u6587\u672C\u6846\u3002\u70B9\u51FB\u5E74\u3001\u6708\u3001\u65E5\u3001\u65F6\u3001\u5206\u4EFB\u4E00\u5B57\u6BB5\u65F6\uFF0C\u8BE5\u5B57\u6BB5\u6574\u4F53\u9009\u4E2D\uFF1B\u7B2C\u4E00\u6B21\u8F93\u5165\u4F1A\u66FF\u6362\u6574\u4E2A\u5B57\u6BB5\uFF0C\u540E\u7EED\u8FDE\u7EED\u8F93\u5165\u624D\u8FFD\u52A0\u3002\u5DE6\u53F3\u65B9\u5411\u952E\u5728\u5B57\u6BB5\u4E4B\u95F4\u5207\u6362\uFF0C\u4E0A\u4E0B\u65B9\u5411\u952E\u76F4\u63A5\u6309\u771F\u5B9E\u65E5\u5386\u8FDB\u4F4D\u6216\u9000\u4F4D\u3002"
+          },
+          {
+            type: "code",
+            text: "\u7528\u6237\u8F93\u5165\u5019\u9009\u65F6\u95F4\n\u2192 \u68C0\u67E5\u5E74\u6708\u65E5\u65F6\u5206\u662F\u5426\u5408\u6CD5\n\u2192 \u7528\u5019\u9009\u65F6\u95F4\u5C1D\u8BD5\u5237\u65B0\u661F\u56FE\n\u2192 \u5237\u65B0\u6210\u529F\uFF1A\u5199\u5165\u5F53\u524D\u6709\u6548\u65F6\u95F4\u5E76\u4FDD\u5B58\n\u2192 \u5237\u65B0\u5931\u8D25\uFF1A\u6062\u590D\u4E0A\u4E00\u4E2A\u6709\u6548\u65F6\u95F4\uFF0Cdebug \u8BB0\u5F55\u5931\u8D25\u539F\u56E0"
+          },
+          {
+            type: "paragraph",
+            html: "\u64AD\u653E\u6309\u94AE\u4F1A\u8BA9\u65F6\u95F4\u6309\u6307\u5B9A\u500D\u901F\u5411\u524D\u63A8\u8FDB\u3002\u5FEB\u6377\u6309\u94AE <code>\u22121\u6708/\u22121\u5929/\u22121\u65F6/+1\u65F6/+1\u5929/+1\u6708</code> \u7528\u4E8E\u5FEB\u901F\u8DF3\u8F6C\uFF1B\u4EFB\u610F\u6B65\u957F\u63A7\u4EF6\u9002\u5408\u6309\u51E0\u5E74\u3001\u51E0\u5929\u6216\u51E0\u5C0F\u65F6\u89C2\u5BDF\u5929\u7A7A\u53D8\u5316\u3002"
+          },
+          {
+            type: "warning",
+            html: "\u8FDC\u53E4\u6216\u8FDC\u672A\u6765\u65E5\u671F\u53EF\u4EE5\u8F93\u5165\uFF0C\u4F46\u592A\u9633\u7CFB\u5929\u4F53\u548C\u90E8\u5206\u53C2\u8003\u7EBF\u662F\u8FD1\u4F3C\u663E\u793A\u3002\u4E0D\u8981\u628A\u5B83\u7528\u4E8E\u4E25\u8083\u5386\u6CD5\u590D\u539F\u3001\u65E5\u6708\u98DF\u5224\u5B9A\u6216\u4E13\u4E1A\u661F\u5386\u6BD4\u5BF9\u3002"
+          }
         ]
       },
       {
         id: "search-picking",
         title: "5. \u641C\u7D22\u3001\u70B9\u51FB\u4E0E\u4FE1\u606F\u6D6E\u7A97",
         blocks: [
-          { type: "paragraph", html: "\u641C\u7D22\u548C\u70B9\u51FB\u90FD\u4F9D\u8D56\u540C\u4E00\u5957\u5C4F\u5E55\u5750\u6807\uFF1A\u753B\u5728\u5C4F\u5E55\u4E0A\u7684\u70B9\u5728\u54EA\u91CC\uFF0C\u547D\u4E2D\u68C0\u6D4B\u5C31\u5E94\u5728\u54EA\u91CC\u627E\u5B83\u3002\u52A0\u5165\u5C81\u5DEE\u540E\uFF0C\u6E90\u6570\u636E\u4ECD\u662F J2000\uFF0C\u4F46\u6E32\u67D3\u3001\u641C\u7D22\u5B9A\u4F4D\u548C\u6D6E\u7A97\u663E\u793A\u4F7F\u7528\u5F53\u524D\u663E\u793A\u5386\u5143\uFF0C\u907F\u514D\u201C\u770B\u89C1\u7684\u4F4D\u7F6E\u201D\u548C\u201C\u70B9\u51FB\u7684\u4F4D\u7F6E\u201D\u4E0D\u4E00\u81F4\u3002" },
-          { type: "table", headers: ["\u5B57\u6BB5", "\u542B\u4E49"], rows: [
-            ["RA / Dec", "\u8D64\u7ECF\u548C\u8D64\u7EAC\uFF0C\u7C7B\u4F3C\u5929\u7403\u4E0A\u7684\u7ECF\u7EAC\u5EA6\u3002RA \u901A\u5E38\u7528\u5C0F\u65F6\u8868\u793A\uFF0CDec \u7528\u89D2\u5EA6\u8868\u793A\u3002"],
-            ["Alt / Az", "\u9AD8\u5EA6\u89D2\u548C\u65B9\u4F4D\u89D2\uFF0C\u662F\u5BF9\u5F53\u524D\u5730\u70B9\u548C\u5F53\u524D\u65F6\u523B\u800C\u8A00\u7684\u672C\u5730\u5929\u7A7A\u5750\u6807\u3002"],
-            ["\u89C6\u661F\u7B49", "\u4ECE\u5730\u7403\u770B\u4E0A\u53BB\u6709\u591A\u4EAE\uFF1B\u6570\u5B57\u8D8A\u5C0F\u8D8A\u4EAE\uFF0C\u8D1F\u6570\u6BD4 0 \u7B49\u8FD8\u4EAE\u3002"],
-            ["HIP / HD / HR / Gaia", "\u4E0D\u540C\u6052\u661F\u661F\u8868\u7684\u76EE\u5F55\u7F16\u53F7\uFF0C\u7528\u6765\u786E\u5B9A\u5177\u4F53\u662F\u54EA\u9897\u661F\u3002"],
-            ["Bayer / Flamsteed", "\u897F\u65B9\u4F20\u7EDF\u6052\u661F\u547D\u540D\u4F53\u7CFB\uFF0C\u4F8B\u5982 \u03B1 Lyrae \u6216 3 Lyrae\u3002"],
-            ["\u4E2D\u6587\u661F\u540D", "\u4F20\u7EDF\u4E2D\u6587\u661F\u540D\u6216\u73B0\u4EE3\u4E2D\u6587\u8BD1\u540D\uFF1B\u540C\u4E00\u9897\u661F\u53EF\u80FD\u6709\u591A\u4E2A\u6587\u5316\u540D\u79F0\u3002"],
-            ["\u661F\u540D\u663E\u793A\u5BC6\u5EA6", "\u6052\u661F\u540D\u5B57\u4F7F\u7528\u57FA\u7840\u661F\u7B49\u9608\u503C\u63A7\u5236\uFF1B\u6ED1\u6761\u8D8A\u5927\uFF0C\u5141\u8BB8\u663E\u793A\u540D\u5B57\u7684\u6052\u661F\u8D8A\u6697\uFF0C\u540D\u5B57\u8D8A\u591A\u3002\u5B9E\u9645\u663E\u793A\u9608\u503C\u8FD8\u4F1A\u4E58\u4EE5 D3-Celestial \u7684\u5185\u90E8 zoom\uFF0C\u6240\u4EE5\u653E\u5927\u540E\u661F\u540D\u4F1A\u7EE7\u7EED\u589E\u52A0\u3002"]
-          ] }
+          {
+            type: "paragraph",
+            html: "\u641C\u7D22\u548C\u70B9\u51FB\u90FD\u4F9D\u8D56\u540C\u4E00\u5957\u5C4F\u5E55\u5750\u6807\uFF1A\u753B\u5728\u5C4F\u5E55\u4E0A\u7684\u70B9\u5728\u54EA\u91CC\uFF0C\u547D\u4E2D\u68C0\u6D4B\u5C31\u5E94\u5728\u54EA\u91CC\u627E\u5B83\u3002\u52A0\u5165\u5C81\u5DEE\u540E\uFF0C\u6E90\u6570\u636E\u4ECD\u662F J2000\uFF0C\u4F46\u6E32\u67D3\u3001\u641C\u7D22\u5B9A\u4F4D\u548C\u6D6E\u7A97\u663E\u793A\u4F7F\u7528\u5F53\u524D\u663E\u793A\u5386\u5143\uFF0C\u907F\u514D\u201C\u770B\u89C1\u7684\u4F4D\u7F6E\u201D\u548C\u201C\u70B9\u51FB\u7684\u4F4D\u7F6E\u201D\u4E0D\u4E00\u81F4\u3002"
+          },
+          {
+            type: "table",
+            headers: ["\u5B57\u6BB5", "\u542B\u4E49"],
+            rows: [
+              [
+                "RA / Dec",
+                "\u8D64\u7ECF\u548C\u8D64\u7EAC\uFF0C\u7C7B\u4F3C\u5929\u7403\u4E0A\u7684\u7ECF\u7EAC\u5EA6\u3002RA \u901A\u5E38\u7528\u5C0F\u65F6\u8868\u793A\uFF0CDec \u7528\u89D2\u5EA6\u8868\u793A\u3002"
+              ],
+              [
+                "Alt / Az",
+                "\u9AD8\u5EA6\u89D2\u548C\u65B9\u4F4D\u89D2\uFF0C\u662F\u5BF9\u5F53\u524D\u5730\u70B9\u548C\u5F53\u524D\u65F6\u523B\u800C\u8A00\u7684\u672C\u5730\u5929\u7A7A\u5750\u6807\u3002"
+              ],
+              ["\u89C6\u661F\u7B49", "\u4ECE\u5730\u7403\u770B\u4E0A\u53BB\u6709\u591A\u4EAE\uFF1B\u6570\u5B57\u8D8A\u5C0F\u8D8A\u4EAE\uFF0C\u8D1F\u6570\u6BD4 0 \u7B49\u8FD8\u4EAE\u3002"],
+              [
+                "HIP / HD / HR / Gaia",
+                "\u4E0D\u540C\u6052\u661F\u661F\u8868\u7684\u76EE\u5F55\u7F16\u53F7\uFF0C\u7528\u6765\u786E\u5B9A\u5177\u4F53\u662F\u54EA\u9897\u661F\u3002"
+              ],
+              [
+                "Bayer / Flamsteed",
+                "\u897F\u65B9\u4F20\u7EDF\u6052\u661F\u547D\u540D\u4F53\u7CFB\uFF0C\u4F8B\u5982 \u03B1 Lyrae \u6216 3 Lyrae\u3002"
+              ],
+              [
+                "\u4E2D\u6587\u661F\u540D",
+                "\u4F20\u7EDF\u4E2D\u6587\u661F\u540D\u6216\u73B0\u4EE3\u4E2D\u6587\u8BD1\u540D\uFF1B\u540C\u4E00\u9897\u661F\u53EF\u80FD\u6709\u591A\u4E2A\u6587\u5316\u540D\u79F0\u3002"
+              ],
+              [
+                "\u661F\u540D\u663E\u793A\u5BC6\u5EA6",
+                "\u6052\u661F\u540D\u5B57\u4F7F\u7528\u57FA\u7840\u661F\u7B49\u9608\u503C\u63A7\u5236\uFF1B\u6ED1\u6761\u8D8A\u5927\uFF0C\u5141\u8BB8\u663E\u793A\u540D\u5B57\u7684\u6052\u661F\u8D8A\u6697\uFF0C\u540D\u5B57\u8D8A\u591A\u3002\u5B9E\u9645\u663E\u793A\u9608\u503C\u8FD8\u4F1A\u4E58\u4EE5 D3-Celestial \u7684\u5185\u90E8 zoom\uFF0C\u6240\u4EE5\u653E\u5927\u540E\u661F\u540D\u4F1A\u7EE7\u7EED\u589E\u52A0\u3002"
+              ]
+            ]
+          }
         ]
       },
       {
         id: "coordinate-systems",
         title: "6. \u5929\u7403\u6A21\u578B\u4E0E\u5750\u6807\u7CFB\u7EDF",
         blocks: [
-          { type: "paragraph", html: "\u5929\u7403\u6A21\u578B\u628A\u9065\u8FDC\u5929\u4F53\u8FD1\u4F3C\u6295\u5F71\u5230\u4E00\u4E2A\u5DE8\u5927\u7403\u9762\u4E0A\u3002\u5BF9\u661F\u56FE\u6765\u8BF4\uFF0C\u91CD\u8981\u7684\u4E0D\u662F\u5929\u4F53\u771F\u5B9E\u8DDD\u79BB\uFF0C\u800C\u662F\u5B83\u5728\u5929\u7A7A\u65B9\u5411\u4E0A\u7684\u89D2\u4F4D\u7F6E\u3002" },
+          {
+            type: "paragraph",
+            html: "\u5929\u7403\u6A21\u578B\u628A\u9065\u8FDC\u5929\u4F53\u8FD1\u4F3C\u6295\u5F71\u5230\u4E00\u4E2A\u5DE8\u5927\u7403\u9762\u4E0A\u3002\u5BF9\u661F\u56FE\u6765\u8BF4\uFF0C\u91CD\u8981\u7684\u4E0D\u662F\u5929\u4F53\u771F\u5B9E\u8DDD\u79BB\uFF0C\u800C\u662F\u5B83\u5728\u5929\u7A7A\u65B9\u5411\u4E0A\u7684\u89D2\u4F4D\u7F6E\u3002"
+          },
           { type: "formula", html: "H = LST - \u03B1" },
-          { type: "paragraph", html: "\u8FD9\u91CC <code>H</code> \u662F\u5C0F\u65F6\u89D2\uFF0C<code>LST</code> \u662F\u5730\u65B9\u6052\u661F\u65F6\uFF0C<code>\u03B1</code> \u662F\u8D64\u7ECF\u3002\u5C0F\u65F6\u89D2\u544A\u8BC9\u6211\u4EEC\u67D0\u4E2A\u5929\u4F53\u76F8\u5BF9\u672C\u5730\u5B50\u5348\u7EBF\u504F\u4E1C\u8FD8\u662F\u504F\u897F\u3002" },
-          { type: "formula", html: "sin h = sin \u03C6,sin \u03B4 + cos \u03C6,cos \u03B4,cos H" },
-          { type: "paragraph", html: "\u8FD9\u4E2A\u516C\u5F0F\u628A\u8D64\u9053\u5750\u6807\u8F6C\u6362\u4E3A\u672C\u5730\u9AD8\u5EA6\u89D2\u3002<code>\u03C6</code> \u662F\u89C2\u6D4B\u7EAC\u5EA6\uFF0C<code>\u03B4</code> \u662F\u8D64\u7EAC\uFF0C<code>h</code> \u662F\u9AD8\u5EA6\u89D2\u3002\u9AD8\u5EA6\u89D2\u5927\u4E8E 0\xB0 \u901A\u5E38\u8868\u793A\u5929\u4F53\u5728\u51E0\u4F55\u5730\u5E73\u7EBF\u4E0A\u65B9\u3002" },
-          { type: "table", headers: ["\u5750\u6807\u7CFB\u7EDF", "\u6838\u5FC3\u53C2\u8003\u9762", "\u9002\u5408\u7528\u9014"], rows: [
-            ["\u5730\u5E73\u5750\u6807", "\u89C2\u6D4B\u8005\u6240\u5728\u5730\u5E73\u9762", "\u6700\u63A5\u8FD1\u65E5\u5E38\u89C2\u661F\uFF1A\u4E1C\u5357\u897F\u5317\u548C\u9AD8\u5EA6\u89D2\u3002"],
-            ["\u8D64\u9053\u5750\u6807", "\u5730\u7403\u8D64\u9053\u6295\u5F71\u5230\u5929\u7403", "\u661F\u8868\u3001\u671B\u8FDC\u955C\u3001\u8D64\u7ECF\u8D64\u7EAC\u5B66\u4E60\u3002"],
-            ["\u9EC4\u9053\u5750\u6807", "\u5730\u7403\u516C\u8F6C\u8F68\u9053\u5E73\u9762", "\u592A\u9633\u3001\u6708\u4EAE\u3001\u884C\u661F\u548C\u9EC4\u9053\u9644\u8FD1\u73B0\u8C61\u3002"],
-            ["\u94F6\u6CB3\u5750\u6807", "\u94F6\u6CB3\u7CFB\u76D8\u9762", "\u7406\u89E3\u94F6\u6CB3\u5E26\u3001\u94F6\u5FC3\u65B9\u5411\u548C\u94F6\u6CB3\u7ED3\u6784\u3002"]
-          ] }
+          {
+            type: "paragraph",
+            html: "\u8FD9\u91CC <code>H</code> \u662F\u5C0F\u65F6\u89D2\uFF0C<code>LST</code> \u662F\u5730\u65B9\u6052\u661F\u65F6\uFF0C<code>\u03B1</code> \u662F\u8D64\u7ECF\u3002\u5C0F\u65F6\u89D2\u544A\u8BC9\u6211\u4EEC\u67D0\u4E2A\u5929\u4F53\u76F8\u5BF9\u672C\u5730\u5B50\u5348\u7EBF\u504F\u4E1C\u8FD8\u662F\u504F\u897F\u3002"
+          },
+          {
+            type: "formula",
+            html: "sin h = sin \u03C6,sin \u03B4 + cos \u03C6,cos \u03B4,cos H"
+          },
+          {
+            type: "paragraph",
+            html: "\u8FD9\u4E2A\u516C\u5F0F\u628A\u8D64\u9053\u5750\u6807\u8F6C\u6362\u4E3A\u672C\u5730\u9AD8\u5EA6\u89D2\u3002<code>\u03C6</code> \u662F\u89C2\u6D4B\u7EAC\u5EA6\uFF0C<code>\u03B4</code> \u662F\u8D64\u7EAC\uFF0C<code>h</code> \u662F\u9AD8\u5EA6\u89D2\u3002\u9AD8\u5EA6\u89D2\u5927\u4E8E 0\xB0 \u901A\u5E38\u8868\u793A\u5929\u4F53\u5728\u51E0\u4F55\u5730\u5E73\u7EBF\u4E0A\u65B9\u3002"
+          },
+          {
+            type: "table",
+            headers: ["\u5750\u6807\u7CFB\u7EDF", "\u6838\u5FC3\u53C2\u8003\u9762", "\u9002\u5408\u7528\u9014"],
+            rows: [
+              [
+                "\u5730\u5E73\u5750\u6807",
+                "\u89C2\u6D4B\u8005\u6240\u5728\u5730\u5E73\u9762",
+                "\u6700\u63A5\u8FD1\u65E5\u5E38\u89C2\u661F\uFF1A\u4E1C\u5357\u897F\u5317\u548C\u9AD8\u5EA6\u89D2\u3002"
+              ],
+              ["\u8D64\u9053\u5750\u6807", "\u5730\u7403\u8D64\u9053\u6295\u5F71\u5230\u5929\u7403", "\u661F\u8868\u3001\u671B\u8FDC\u955C\u3001\u8D64\u7ECF\u8D64\u7EAC\u5B66\u4E60\u3002"],
+              [
+                "\u9EC4\u9053\u5750\u6807",
+                "\u5730\u7403\u516C\u8F6C\u8F68\u9053\u5E73\u9762",
+                "\u592A\u9633\u3001\u6708\u4EAE\u3001\u884C\u661F\u548C\u9EC4\u9053\u9644\u8FD1\u73B0\u8C61\u3002"
+              ],
+              ["\u94F6\u6CB3\u5750\u6807", "\u94F6\u6CB3\u7CFB\u76D8\u9762", "\u7406\u89E3\u94F6\u6CB3\u5E26\u3001\u94F6\u5FC3\u65B9\u5411\u548C\u94F6\u6CB3\u7ED3\u6784\u3002"]
+            ]
+          }
         ]
       },
       {
         id: "projection-math",
         title: "7. \u6295\u5F71\u65B9\u5F0F\u7684\u6570\u5B66\u539F\u7406",
         blocks: [
-          { type: "paragraph", html: "\u6295\u5F71\u628A\u7403\u9762\u65B9\u5411 <code>(\u03BB, \u03C6)</code> \u6620\u5C04\u5230\u5C4F\u5E55\u5E73\u9762 <code>(x, y)</code>\u3002\u7403\u9762\u4E0D\u80FD\u65E0\u53D8\u5F62\u5730\u94FA\u5E73\u6210\u5E73\u9762\uFF0C\u6240\u4EE5\u6BCF\u79CD\u6295\u5F71\u90FD\u5728\u89D2\u5EA6\u3001\u9762\u79EF\u3001\u8DDD\u79BB\u548C\u6574\u4F53\u5F62\u72B6\u4E4B\u95F4\u53D6\u820D\u3002" },
-          { type: "formula", html: "r = f(\u03C6,\u03BB),\xA0\xA0x = rsin\u03BB,\xA0\xA0y = rcos\u03BB" },
-          { type: "table", headers: ["\u6295\u5F71", "\u6570\u5B66\u6027\u8D28", "\u63A8\u8350\u573A\u666F"], rows: [
-            ["Orthographic \u6B63\u5C04", "\u50CF\u4ECE\u65E0\u9650\u8FDC\u770B\u4E00\u4E2A\u7403\u9762\u534A\u7403\uFF1B\u8FB9\u7F18\u538B\u7F29\u660E\u663E\u3002", "\u5C55\u793A\u201C\u773C\u524D\u8FD9\u534A\u4E2A\u5929\u7A7A\u201D\u7684\u7403\u4F53\u611F\u3002"],
-            ["Stereographic \u7403\u6781", "\u4FDD\u89D2\u6295\u5F71\uFF0C\u5C40\u90E8\u5F62\u72B6\u597D\uFF0C\u4F46\u8FB9\u7F18\u9762\u79EF\u6025\u5267\u653E\u5927\u3002", "\u89C2\u5BDF\u5C40\u90E8\u661F\u5EA7\u5F62\u72B6\u6216\u4FDD\u89D2\u5173\u7CFB\u3002"],
-            ["Azimuthal Equidistant \u65B9\u4F4D\u7B49\u8DDD", "\u4ECE\u4E2D\u5FC3\u51FA\u53D1\u7684\u89D2\u8DDD\u79BB\u6309\u6BD4\u4F8B\u4FDD\u5B58\u3002", "\u4ECE\u4E2D\u5FC3\u5411\u5916\u770B\u8DDD\u79BB\u5173\u7CFB\u3002"],
-            ["Azimuthal Equal Area \u65B9\u4F4D\u7B49\u9762\u79EF", "\u9762\u79EF\u6BD4\u4F8B\u66F4\u53EF\u9760\uFF0C\u5F62\u72B6\u4F1A\u53D8\u3002", "\u6BD4\u8F83\u5927\u8303\u56F4\u5929\u533A\u9762\u79EF\u3002"],
-            ["Aitoff / Hammer / Mollweide", "\u5168\u5929\u56FE\u6298\u4E2D\u6295\u5F71\uFF0C\u9002\u5408\u628A\u6574\u4E2A\u5929\u7403\u644A\u5F00\u3002", "\u5168\u5929\u5929\u56FE\u3001\u661F\u5EA7\u5206\u5E03\u3001\u94F6\u6CB3\u8F6E\u5ED3\u3002"],
-            ["Winkel Tripel", "\u6298\u4E2D\u89D2\u5EA6\u3001\u9762\u79EF\u548C\u8DDD\u79BB\u4E09\u7C7B\u8BEF\u5DEE\u3002", "\u8F83\u5747\u8861\u7684\u5168\u5929\u5C55\u793A\u3002"],
-            ["Equirectangular \u7B49\u8DDD\u5706\u67F1", "\u7ECF\u7EAC\u7EBF\u662F\u89C4\u5219\u7F51\u683C\uFF0C\u6570\u5B66\u76F4\u89C2\u4F46\u9AD8\u7EAC\u62C9\u4F38\u4E25\u91CD\u3002", "\u5B66\u4E60\u5750\u6807\u6216\u8C03\u8BD5\u6570\u636E\u3002"]
-          ] },
-          { type: "note", html: "\u6CA1\u6709\u201C\u5B8C\u7F8E\u6295\u5F71\u201D\u3002\u661F\u56FE\u8F6F\u4EF6\u91CC\u7684\u6295\u5F71\u9009\u62E9\uFF0C\u672C\u8D28\u4E0A\u662F\u5728\u9009\u62E9\u4F60\u613F\u610F\u63A5\u53D7\u54EA\u79CD\u53D8\u5F62\u3002" }
+          {
+            type: "paragraph",
+            html: "\u6295\u5F71\u628A\u7403\u9762\u65B9\u5411 <code>(\u03BB, \u03C6)</code> \u6620\u5C04\u5230\u5C4F\u5E55\u5E73\u9762 <code>(x, y)</code>\u3002\u7403\u9762\u4E0D\u80FD\u65E0\u53D8\u5F62\u5730\u94FA\u5E73\u6210\u5E73\u9762\uFF0C\u6240\u4EE5\u6BCF\u79CD\u6295\u5F71\u90FD\u5728\u89D2\u5EA6\u3001\u9762\u79EF\u3001\u8DDD\u79BB\u548C\u6574\u4F53\u5F62\u72B6\u4E4B\u95F4\u53D6\u820D\u3002"
+          },
+          {
+            type: "formula",
+            html: "r = f(\u03C6,\u03BB),\xA0\xA0x = rsin\u03BB,\xA0\xA0y = rcos\u03BB"
+          },
+          {
+            type: "table",
+            headers: ["\u6295\u5F71", "\u6570\u5B66\u6027\u8D28", "\u63A8\u8350\u573A\u666F"],
+            rows: [
+              [
+                "Orthographic \u6B63\u5C04",
+                "\u50CF\u4ECE\u65E0\u9650\u8FDC\u770B\u4E00\u4E2A\u7403\u9762\u534A\u7403\uFF1B\u8FB9\u7F18\u538B\u7F29\u660E\u663E\u3002",
+                "\u5C55\u793A\u201C\u773C\u524D\u8FD9\u534A\u4E2A\u5929\u7A7A\u201D\u7684\u7403\u4F53\u611F\u3002"
+              ],
+              [
+                "Stereographic \u7403\u6781",
+                "\u4FDD\u89D2\u6295\u5F71\uFF0C\u5C40\u90E8\u5F62\u72B6\u597D\uFF0C\u4F46\u8FB9\u7F18\u9762\u79EF\u6025\u5267\u653E\u5927\u3002",
+                "\u89C2\u5BDF\u5C40\u90E8\u661F\u5EA7\u5F62\u72B6\u6216\u4FDD\u89D2\u5173\u7CFB\u3002"
+              ],
+              [
+                "Azimuthal Equidistant \u65B9\u4F4D\u7B49\u8DDD",
+                "\u4ECE\u4E2D\u5FC3\u51FA\u53D1\u7684\u89D2\u8DDD\u79BB\u6309\u6BD4\u4F8B\u4FDD\u5B58\u3002",
+                "\u4ECE\u4E2D\u5FC3\u5411\u5916\u770B\u8DDD\u79BB\u5173\u7CFB\u3002"
+              ],
+              [
+                "Azimuthal Equal Area \u65B9\u4F4D\u7B49\u9762\u79EF",
+                "\u9762\u79EF\u6BD4\u4F8B\u66F4\u53EF\u9760\uFF0C\u5F62\u72B6\u4F1A\u53D8\u3002",
+                "\u6BD4\u8F83\u5927\u8303\u56F4\u5929\u533A\u9762\u79EF\u3002"
+              ],
+              [
+                "Aitoff / Hammer / Mollweide",
+                "\u5168\u5929\u56FE\u6298\u4E2D\u6295\u5F71\uFF0C\u9002\u5408\u628A\u6574\u4E2A\u5929\u7403\u644A\u5F00\u3002",
+                "\u5168\u5929\u5929\u56FE\u3001\u661F\u5EA7\u5206\u5E03\u3001\u94F6\u6CB3\u8F6E\u5ED3\u3002"
+              ],
+              [
+                "Winkel Tripel",
+                "\u6298\u4E2D\u89D2\u5EA6\u3001\u9762\u79EF\u548C\u8DDD\u79BB\u4E09\u7C7B\u8BEF\u5DEE\u3002",
+                "\u8F83\u5747\u8861\u7684\u5168\u5929\u5C55\u793A\u3002"
+              ],
+              [
+                "Equirectangular \u7B49\u8DDD\u5706\u67F1",
+                "\u7ECF\u7EAC\u7EBF\u662F\u89C4\u5219\u7F51\u683C\uFF0C\u6570\u5B66\u76F4\u89C2\u4F46\u9AD8\u7EAC\u62C9\u4F38\u4E25\u91CD\u3002",
+                "\u5B66\u4E60\u5750\u6807\u6216\u8C03\u8BD5\u6570\u636E\u3002"
+              ]
+            ]
+          },
+          {
+            type: "note",
+            html: "\u6CA1\u6709\u201C\u5B8C\u7F8E\u6295\u5F71\u201D\u3002\u661F\u56FE\u8F6F\u4EF6\u91CC\u7684\u6295\u5F71\u9009\u62E9\uFF0C\u672C\u8D28\u4E0A\u662F\u5728\u9009\u62E9\u4F60\u613F\u610F\u63A5\u53D7\u54EA\u79CD\u53D8\u5F62\u3002"
+          }
         ]
       },
       {
         id: "cultures-data",
         title: "8. \u897F\u65B9\u661F\u5EA7\u3001\u4E2D\u56FD\u661F\u5B98\u4E0E\u4F20\u7EDF\u5929\u533A",
         blocks: [
-          { type: "paragraph", html: "\u897F\u65B9\u661F\u5EA7\u548C\u4E2D\u56FD\u661F\u5B98\u662F\u4E24\u5957\u4E0D\u540C\u6587\u5316\u7CFB\u7EDF\u3002\u73B0\u4EE3\u897F\u65B9\u661F\u5EA7\u4F7F\u7528 IAU 88 \u661F\u5EA7\u548C\u8FB9\u754C\u4F53\u7CFB\uFF1B\u4E2D\u56FD\u661F\u5B98\u6765\u81EA\u4F20\u7EDF\u5929\u6587\u6587\u5316\uFF0C\u5E38\u4EE5\u82E5\u5E72\u6052\u661F\u8FDE\u7EBF\u548C\u540D\u79F0\u7EC4\u7EC7\uFF0C\u5E76\u4E0D\u80FD\u7B80\u5355\u89C6\u4E3A\u897F\u65B9\u661F\u5EA7\u7684\u7FFB\u8BD1\u3002" },
-          { type: "table", headers: ["\u6570\u636E\u7C7B\u578B", "\u5B58\u50A8\u65B9\u5F0F", "\u7528\u9014"], rows: [
-            ["\u6052\u661F", "\u76EE\u5F55\u7F16\u53F7\u3001RA/Dec\u3001\u661F\u7B49\u3001\u989C\u8272\u6307\u6570\u3001\u540D\u79F0\u6620\u5C04", "\u7ED8\u5236\u661F\u70B9\u3001\u641C\u7D22\u3001\u70B9\u51FB\u548C\u6807\u7B7E\u3002"],
-            ["\u6DF1\u7A7A\u5929\u4F53", "\u4EAE\u76EE\u6807\u70B9\u4F4D\u3001Messier \u5168\u8868\u3001Caldwell \u5168\u8868\u548C\u540D\u79F0\u522B\u540D", "\u663E\u793A\u661F\u7CFB\u3001\u661F\u4E91\u3001\u661F\u56E2\u7B49\u6DF1\u7A7A\u76EE\u6807\uFF1B\u53EF\u641C\u7D22 M\u3001C\u3001NGC\u3001IC \u548C\u5E38\u7528\u540D\u79F0\u3002"],
-            ["\u897F\u65B9\u661F\u5EA7\u7EBF", "\u6309\u661F\u5EA7\u5206\u7EC4\u7684\u6052\u661F\u8FDE\u7EBF", "\u663E\u793A\u73B0\u4EE3\u5E38\u89C1\u661F\u5EA7\u56FE\u6848\u3002"],
-            ["IAU \u661F\u5EA7\u8FB9\u754C", "\u5929\u533A\u8FB9\u754C\u70B9\u5217", "\u663E\u793A\u73B0\u4EE3\u5929\u6587\u5B66\u7684\u661F\u5EA7\u5206\u533A\u3002"],
-            ["\u4E2D\u56FD\u661F\u5B98", "\u661F\u5B98\u540D\u79F0\u3001\u5173\u8054\u6052\u661F\u3001\u8FDE\u7EBF\u3001\u6807\u7B7E\u4F4D\u7F6E", "\u663E\u793A\u4F20\u7EDF\u4E2D\u56FD\u661F\u7A7A\u4F53\u7CFB\u3002"],
-            ["\u4F20\u7EDF\u5929\u533A", "\u4E09\u57A3\u3001\u56DB\u8C61\u3001\u4E8C\u5341\u516B\u5BBF\u7B49\u533A\u57DF\u7684\u53EF\u89C6\u5316\u8FB9\u754C\u6216\u6807\u7B7E", "\u63D0\u4F9B\u6587\u5316\u5C42\u7EA7\u53C2\u8003\uFF0C\u4E0D\u7B49\u540C\u4E8E IAU \u6CD5\u5B9A\u8FB9\u754C\u3002"]
-          ] },
-          { type: "note", html: "\u5F53\u524D\u6DF1\u7A7A\u6570\u636E\u5E93\u5305\u542B\u5B8C\u6574 Messier 110 \u4E2A\u76EE\u6807\u3001\u5B8C\u6574 Caldwell 109 \u4E2A\u76EE\u6807\uFF0C\u5E76\u4FDD\u7559\u5C11\u91CF\u539F\u6709\u4EAE\u76EE\u6807\u3002\u661F\u56FE\u662F\u5426\u76F4\u63A5\u663E\u793A\u67D0\u4E2A\u6DF1\u7A7A\u76EE\u6807\u4ECD\u53D7\u201C\u4EAE\u6DF1\u7A7A\u5929\u4F53\u201D\u5F00\u5173\u548C\u5F53\u524D\u661F\u7B49\u9608\u503C\u5F71\u54CD\uFF1B\u641C\u7D22\u7D22\u5F15\u4F1A\u8986\u76D6\u8FD9\u4E9B\u76EE\u6807\u7684\u4E3B\u8981\u7F16\u53F7\u548C\u522B\u540D\u3002" },
-          { type: "paragraph", html: "\u4E09\u57A3\u3001\u4E8C\u5341\u516B\u5BBF\u3001\u56DB\u8C61\u662F\u4F20\u7EDF\u4E2D\u56FD\u5929\u6587\u5B66\u4E2D\u7EC4\u7EC7\u5929\u7A7A\u7684\u65B9\u5F0F\u3002\u661F\u5B98\u66F4\u50CF\u4E00\u4E2A\u4E2A\u5C0F\u7684\u661F\u7EC4\u6216\u5B98\u7F72\u540D\u79F0\uFF1B\u661F\u5EA7\u5219\u662F\u73B0\u4EE3\u5929\u6587\u5B66\u628A\u5168\u5929\u5212\u5206\u6210 88 \u4E2A\u4E92\u4E0D\u91CD\u53E0\u533A\u57DF\u7684\u4F53\u7CFB\u3002" }
+          {
+            type: "paragraph",
+            html: "\u897F\u65B9\u661F\u5EA7\u548C\u4E2D\u56FD\u661F\u5B98\u662F\u4E24\u5957\u4E0D\u540C\u6587\u5316\u7CFB\u7EDF\u3002\u73B0\u4EE3\u897F\u65B9\u661F\u5EA7\u4F7F\u7528 IAU 88 \u661F\u5EA7\u548C\u8FB9\u754C\u4F53\u7CFB\uFF1B\u4E2D\u56FD\u661F\u5B98\u6765\u81EA\u4F20\u7EDF\u5929\u6587\u6587\u5316\uFF0C\u5E38\u4EE5\u82E5\u5E72\u6052\u661F\u8FDE\u7EBF\u548C\u540D\u79F0\u7EC4\u7EC7\uFF0C\u5E76\u4E0D\u80FD\u7B80\u5355\u89C6\u4E3A\u897F\u65B9\u661F\u5EA7\u7684\u7FFB\u8BD1\u3002"
+          },
+          {
+            type: "table",
+            headers: ["\u6570\u636E\u7C7B\u578B", "\u5B58\u50A8\u65B9\u5F0F", "\u7528\u9014"],
+            rows: [
+              [
+                "\u6052\u661F",
+                "\u76EE\u5F55\u7F16\u53F7\u3001RA/Dec\u3001\u661F\u7B49\u3001\u989C\u8272\u6307\u6570\u3001\u540D\u79F0\u6620\u5C04",
+                "\u7ED8\u5236\u661F\u70B9\u3001\u641C\u7D22\u3001\u70B9\u51FB\u548C\u6807\u7B7E\u3002"
+              ],
+              [
+                "\u6DF1\u7A7A\u5929\u4F53",
+                "\u4EAE\u76EE\u6807\u70B9\u4F4D\u3001Messier \u5168\u8868\u3001Caldwell \u5168\u8868\u548C\u540D\u79F0\u522B\u540D",
+                "\u663E\u793A\u661F\u7CFB\u3001\u661F\u4E91\u3001\u661F\u56E2\u7B49\u6DF1\u7A7A\u76EE\u6807\uFF1B\u53EF\u641C\u7D22 M\u3001C\u3001NGC\u3001IC \u548C\u5E38\u7528\u540D\u79F0\u3002"
+              ],
+              ["\u897F\u65B9\u661F\u5EA7\u7EBF", "\u6309\u661F\u5EA7\u5206\u7EC4\u7684\u6052\u661F\u8FDE\u7EBF", "\u663E\u793A\u73B0\u4EE3\u5E38\u89C1\u661F\u5EA7\u56FE\u6848\u3002"],
+              ["IAU \u661F\u5EA7\u8FB9\u754C", "\u5929\u533A\u8FB9\u754C\u70B9\u5217", "\u663E\u793A\u73B0\u4EE3\u5929\u6587\u5B66\u7684\u661F\u5EA7\u5206\u533A\u3002"],
+              [
+                "\u4E2D\u56FD\u661F\u5B98",
+                "\u661F\u5B98\u540D\u79F0\u3001\u5173\u8054\u6052\u661F\u3001\u8FDE\u7EBF\u3001\u6807\u7B7E\u4F4D\u7F6E",
+                "\u663E\u793A\u4F20\u7EDF\u4E2D\u56FD\u661F\u7A7A\u4F53\u7CFB\u3002"
+              ],
+              [
+                "\u4F20\u7EDF\u5929\u533A",
+                "\u4E09\u57A3\u3001\u56DB\u8C61\u3001\u4E8C\u5341\u516B\u5BBF\u7B49\u533A\u57DF\u7684\u53EF\u89C6\u5316\u8FB9\u754C\u6216\u6807\u7B7E",
+                "\u63D0\u4F9B\u6587\u5316\u5C42\u7EA7\u53C2\u8003\uFF0C\u4E0D\u7B49\u540C\u4E8E IAU \u6CD5\u5B9A\u8FB9\u754C\u3002"
+              ]
+            ]
+          },
+          {
+            type: "note",
+            html: "\u5F53\u524D\u6DF1\u7A7A\u6570\u636E\u5E93\u5305\u542B\u5B8C\u6574 Messier 110 \u4E2A\u76EE\u6807\u3001\u5B8C\u6574 Caldwell 109 \u4E2A\u76EE\u6807\uFF0C\u5E76\u4FDD\u7559\u5C11\u91CF\u539F\u6709\u4EAE\u76EE\u6807\u3002\u661F\u56FE\u662F\u5426\u76F4\u63A5\u663E\u793A\u67D0\u4E2A\u6DF1\u7A7A\u76EE\u6807\u4ECD\u53D7\u201C\u4EAE\u6DF1\u7A7A\u5929\u4F53\u201D\u5F00\u5173\u548C\u5F53\u524D\u661F\u7B49\u9608\u503C\u5F71\u54CD\uFF1B\u641C\u7D22\u7D22\u5F15\u4F1A\u8986\u76D6\u8FD9\u4E9B\u76EE\u6807\u7684\u4E3B\u8981\u7F16\u53F7\u548C\u522B\u540D\u3002"
+          },
+          {
+            type: "paragraph",
+            html: "\u4E09\u57A3\u3001\u4E8C\u5341\u516B\u5BBF\u3001\u56DB\u8C61\u662F\u4F20\u7EDF\u4E2D\u56FD\u5929\u6587\u5B66\u4E2D\u7EC4\u7EC7\u5929\u7A7A\u7684\u65B9\u5F0F\u3002\u661F\u5B98\u66F4\u50CF\u4E00\u4E2A\u4E2A\u5C0F\u7684\u661F\u7EC4\u6216\u5B98\u7F72\u540D\u79F0\uFF1B\u661F\u5EA7\u5219\u662F\u73B0\u4EE3\u5929\u6587\u5B66\u628A\u5168\u5929\u5212\u5206\u6210 88 \u4E2A\u4E92\u4E0D\u91CD\u53E0\u533A\u57DF\u7684\u4F53\u7CFB\u3002"
+          },
+          {
+            type: "paragraph",
+            html: "\u672C\u7248\u672C\u5F00\u59CB\u4E3A\u90E8\u5206\u897F\u65B9\u661F\u5EA7\u548C\u4E2D\u56FD\u661F\u5B98\u8865\u5145\u66F4\u957F\u7684\u6587\u5316\u8BF4\u660E\uFF1A\u897F\u65B9\u90E8\u5206\u4F1A\u8BF4\u660E\u795E\u8BDD\u89D2\u8272\u3001\u8C61\u5F81\u542B\u4E49\u3001\u76F8\u5173\u661F\u5EA7\u548C\u9002\u5408\u89C2\u6D4B\u6708\u4EFD\uFF1B\u4E2D\u56FD\u90E8\u5206\u4F1A\u8BF4\u660E\u661F\u5B98\u542B\u4E49\u3001\u4E09\u57A3/\u4E8C\u5341\u516B\u5BBF/\u56DB\u8C61\u5173\u7CFB\u3001\u300A\u6B65\u5929\u6B4C\u300B\u5F0F\u63CF\u8FF0\u7EBF\u7D22\uFF0C\u4EE5\u53CA\u5FC5\u8981\u65F6\u7684\u5206\u91CE\u63D0\u793A\u3002"
+          },
+          {
+            type: "warning",
+            html: "\u5206\u91CE\u662F\u53E4\u4EE3\u5929\u6587\u2014\u5730\u7406\u5BF9\u5E94\u4F53\u7CFB\uFF0C\u4E0D\u7B49\u540C\u4E8E\u73B0\u4EE3\u884C\u653F\u533A\uFF0C\u4E5F\u4E0D\u662F\u79D1\u5B66\u5730\u7406\u8FB9\u754C\u3002\u8BF4\u660E\u4E2D\u7684\u73B0\u4EE3\u5730\u70B9\u53EA\u80FD\u7406\u89E3\u4E3A\u201C\u5927\u81F4\u5BF9\u5E94\u201D\u6216\u201C\u5E38\u89C1\u89E3\u91CA\u201D\uFF0C\u4E0D\u540C\u6587\u732E\u4F1A\u6709\u5DEE\u5F02\u3002"
+          },
+          {
+            type: "note",
+            html: "\u661F\u5EA7\u8FDE\u7EBF\u662F\u4FBF\u4E8E\u8BA4\u661F\u7684\u56FE\u6848\uFF1B\u661F\u5EA7\u8FB9\u754C\u662F\u73B0\u4EE3\u5929\u6587\u5B66\u5212\u5206\u5168\u5929\u533A\u57DF\u7684\u8FB9\u754C\u3002\u8FB9\u754C\u663E\u793A\u5982\u679C\u51FA\u73B0\u65AD\u88C2\u3001\u6781\u533A\u8DF3\u7EBF\u6216\u8DE8 0\xB0 \u7ECF\u7EBF\u5F02\u5E38\uFF0C\u5E94\u4F18\u5148\u770B debug / \u63A7\u5236\u53F0\u8BCA\u65AD\uFF0C\u4E0D\u5E94\u624B\u5DE5\u628A\u8FB9\u754C\u753B\u6210\u60F3\u8C61\u4E2D\u7684\u95ED\u5408\u56FE\u6848\u3002"
+          }
         ]
       },
       {
         id: "stars-names",
         title: "9. \u6052\u661F\u3001\u661F\u7B49\u3001\u989C\u8272\u3001\u5149\u8C31\u4E0E\u547D\u540D",
         blocks: [
-          { type: "paragraph", html: "\u89C6\u661F\u7B49\u63CF\u8FF0\u4ECE\u5730\u7403\u770B\u8D77\u6765\u7684\u4EAE\u5EA6\uFF0C\u6570\u503C\u8D8A\u5C0F\u8D8A\u4EAE\u3002\u7EDD\u5BF9\u661F\u7B49\u5219\u628A\u6052\u661F\u90FD\u653E\u5230 10 \u79D2\u5DEE\u8DDD\u5904\u6BD4\u8F83\u771F\u5B9E\u53D1\u5149\u80FD\u529B\u3002B\u2212V \u8272\u6307\u6570\u8D8A\u5C0F\u901A\u5E38\u8D8A\u84DD\u3001\u8D8A\u70ED\uFF1B\u8D8A\u5927\u901A\u5E38\u8D8A\u7EA2\u3001\u8D8A\u51B7\u3002" },
-          { type: "formula", html: "m_1 - m_2 = -2.5\xA0log_{10}(F_1/F_2)" },
-          { type: "table", headers: ["\u5149\u8C31\u578B", "\u989C\u8272\u503E\u5411", "\u6E29\u5EA6\u5927\u81F4\u8D8B\u52BF"], rows: [
-            ["O", "\u84DD", "\u6700\u9AD8\u6E29\uFF0C\u6781\u4EAE\uFF0C\u5BFF\u547D\u77ED\u3002"],
-            ["B", "\u84DD\u767D", "\u5F88\u70ED\uFF0C\u5E38\u89C1\u4E8E\u5E74\u8F7B\u4EAE\u661F\u3002"],
-            ["A", "\u767D", "\u7EC7\u5973\u661F\u3001\u5929\u72FC\u661F\u9644\u8FD1\u7C7B\u578B\u3002"],
-            ["F", "\u9EC4\u767D", "\u6BD4\u592A\u9633\u7565\u70ED\u3002"],
-            ["G", "\u9EC4", "\u592A\u9633\u5C5E\u4E8E G \u578B\u4E3B\u5E8F\u661F\u3002"],
-            ["K", "\u6A59", "\u6BD4\u592A\u9633\u51B7\u3002"],
-            ["M", "\u7EA2", "\u6700\u5E38\u89C1\uFF0C\u6E29\u5EA6\u4F4E\uFF0C\u7EA2\u77EE\u661F\u5F88\u591A\u3002"]
-          ] },
-          { type: "note", html: "\u7ECF\u5178\u82F1\u6587\u8BB0\u5FC6\u53E5\uFF1A<em>Oh Be A Fine Girl/Guy, Kiss Me</em>\u3002\u5B83\u5E2E\u52A9\u8BB0\u4F4F O/B/A/F/G/K/M \u4ECE\u9AD8\u6E29\u5230\u4F4E\u6E29\u6392\u5217\u3002\u5929\u6587\u5B66\u4E5F\u9700\u8981\u4E00\u70B9\u5E7D\u9ED8\uFF0C\u4E0D\u7136\u80CC\u661F\u8868\u4F1A\u6BD4\u770B\u4E91\u8FD8\u50AC\u7720\u3002" }
+          {
+            type: "paragraph",
+            html: "\u89C6\u661F\u7B49\u63CF\u8FF0\u4ECE\u5730\u7403\u770B\u8D77\u6765\u7684\u4EAE\u5EA6\uFF0C\u6570\u503C\u8D8A\u5C0F\u8D8A\u4EAE\u3002\u7EDD\u5BF9\u661F\u7B49\u5219\u628A\u6052\u661F\u90FD\u653E\u5230 10 \u79D2\u5DEE\u8DDD\u5904\u6BD4\u8F83\u771F\u5B9E\u53D1\u5149\u80FD\u529B\u3002B\u2212V \u8272\u6307\u6570\u8D8A\u5C0F\u901A\u5E38\u8D8A\u84DD\u3001\u8D8A\u70ED\uFF1B\u8D8A\u5927\u901A\u5E38\u8D8A\u7EA2\u3001\u8D8A\u51B7\u3002"
+          },
+          {
+            type: "formula",
+            html: "m_1 - m_2 = -2.5\xA0log_{10}(F_1/F_2)"
+          },
+          {
+            type: "table",
+            headers: ["\u5149\u8C31\u578B", "\u989C\u8272\u503E\u5411", "\u6E29\u5EA6\u5927\u81F4\u8D8B\u52BF"],
+            rows: [
+              ["O", "\u84DD", "\u6700\u9AD8\u6E29\uFF0C\u6781\u4EAE\uFF0C\u5BFF\u547D\u77ED\u3002"],
+              ["B", "\u84DD\u767D", "\u5F88\u70ED\uFF0C\u5E38\u89C1\u4E8E\u5E74\u8F7B\u4EAE\u661F\u3002"],
+              ["A", "\u767D", "\u7EC7\u5973\u661F\u3001\u5929\u72FC\u661F\u9644\u8FD1\u7C7B\u578B\u3002"],
+              ["F", "\u9EC4\u767D", "\u6BD4\u592A\u9633\u7565\u70ED\u3002"],
+              ["G", "\u9EC4", "\u592A\u9633\u5C5E\u4E8E G \u578B\u4E3B\u5E8F\u661F\u3002"],
+              ["K", "\u6A59", "\u6BD4\u592A\u9633\u51B7\u3002"],
+              ["M", "\u7EA2", "\u6700\u5E38\u89C1\uFF0C\u6E29\u5EA6\u4F4E\uFF0C\u7EA2\u77EE\u661F\u5F88\u591A\u3002"]
+            ]
+          },
+          {
+            type: "paragraph",
+            html: "\u540C\u4E00\u9897\u6052\u661F\u53EF\u80FD\u540C\u65F6\u6709\u4E13\u540D\u3001\u62DC\u8033\u5B57\u6BCD\u3001Flamsteed \u7F16\u53F7\u3001HIP/HD/HR \u7F16\u53F7\u3001\u4E2D\u56FD\u661F\u5B98\u540D\u548C\u661F\u5B98\u5185\u90E8\u5E8F\u53F7\u3002\u9875\u9762\u4F1A\u4F18\u5148\u663E\u793A\u53EF\u8BFB\u4E13\u540D\u6216\u201C\u7F16\u53F7 + \u661F\u5EA7\u5C5E\u683C/\u4E2D\u6587\u661F\u5EA7\u201D\u7684\u7EC4\u5408\uFF0C\u5C3D\u91CF\u907F\u514D\u53EA\u663E\u793A\u4E00\u4E2A\u88F8\u6570\u5B57\u3002"
+          },
+          {
+            type: "paragraph",
+            html: "\u5982\u679C\u4F60\u770B\u5230\u7C7B\u4F3C <code>29 Orionis</code>\uFF0C\u5B83\u901A\u5E38\u662F Flamsteed \u7F16\u53F7\uFF0C\u8868\u793A\u730E\u6237\u5EA7\u7B2C 29 \u53F7\u661F\uFF1B\u5982\u679C\u770B\u5230\u4E2D\u6587\u91CC\u7684\u201C\u4E00\u3001\u4E8C\u3001\u4E09\u201D\uFF0C\u901A\u5E38\u662F\u4E2D\u56FD\u661F\u5B98\u5185\u90E8\u7684\u7B2C\u51E0\u661F\uFF0C\u4E0D\u662F\u6052\u661F\u4EAE\u5EA6\u6392\u540D\u3002\u771F\u6B63\u7684\u201C\u5168\u5929\u7B2C\u51E0\u4EAE\u661F\u201D\u4F1A\u5728\u4FE1\u606F\u6D6E\u7A97\u91CC\u5355\u72EC\u6807\u6CE8\uFF0C\u4E14\u53EA\u5BF9\u5F53\u524D\u661F\u8868\u6309\u89C6\u661F\u7B49\u6392\u5E8F\u540E\u8FDB\u5165\u524D 100 \u7684\u6052\u661F\u663E\u793A\u3002"
+          },
+          {
+            type: "note",
+            html: "\u7ECF\u5178\u82F1\u6587\u8BB0\u5FC6\u53E5\uFF1A<em>Oh Be A Fine Girl/Guy, Kiss Me</em>\u3002\u5B83\u5E2E\u52A9\u8BB0\u4F4F O/B/A/F/G/K/M \u4ECE\u9AD8\u6E29\u5230\u4F4E\u6E29\u6392\u5217\u3002\u5929\u6587\u5B66\u4E5F\u9700\u8981\u4E00\u70B9\u5E7D\u9ED8\uFF0C\u4E0D\u7136\u80CC\u661F\u8868\u4F1A\u6BD4\u770B\u4E91\u8FD8\u50AC\u7720\u3002"
+          }
         ]
       },
       {
         id: "solar-system-ecliptic",
         title: "10. \u592A\u9633\u3001\u6708\u4EAE\u3001\u884C\u661F\u4E0E\u9EC4\u9053",
         blocks: [
-          { type: "paragraph", html: "\u6052\u661F\u80CC\u666F\u5728\u77ED\u65F6\u95F4\u5185\u51E0\u4E4E\u56FA\u5B9A\uFF0C\u4F46\u592A\u9633\u3001\u6708\u4EAE\u548C\u884C\u661F\u4F1A\u5728\u6052\u661F\u80CC\u666F\u4E0A\u79FB\u52A8\u3002\u592A\u9633\u7684\u5468\u5E74\u89C6\u8FD0\u52A8\u5B9A\u4E49\u4E86\u9EC4\u9053\uFF1B\u6708\u4EAE\u548C\u884C\u661F\u5927\u591A\u9760\u8FD1\u9EC4\u9053\uFF0C\u662F\u56E0\u4E3A\u592A\u9633\u7CFB\u4E3B\u8981\u5929\u4F53\u7684\u8F68\u9053\u5E73\u9762\u5927\u81F4\u63A5\u8FD1\u3002" },
-          { type: "paragraph", html: "\u592A\u9633\u4F4D\u7F6E\u4F7F\u7528 Meeus lightweight \u592A\u9633\u6A21\u578B\uFF0C\u6708\u4EAE\u4F4D\u7F6E\u4F7F\u7528 Meeus \u6708\u7403\u4E3B\u8981\u5468\u671F\u9879\u3002\u661F\u56FE\u4E0A\u7684\u6708\u4EAE\u4F1A\u6309\u5F53\u524D\u6708\u76F8\u76F4\u63A5\u753B\u6210\u660E\u6697\u5706\u76D8\uFF1B\u70B9\u51FB\u6708\u4EAE\u65F6\uFF0C\u4FE1\u606F\u6D6E\u7A97\u4F1A\u663E\u793A\u6708\u76F8\u540D\u79F0\u3001\u7167\u660E\u6BD4\u4F8B\u3001\u6708\u9F84\u548C\u8DDD\u79BB\uFF1B\u70B9\u51FB\u592A\u9633\u6216\u6708\u4EAE\u65F6\u4E5F\u4F1A\u663E\u793A\u7B97\u6CD5\u6765\u6E90\u4E0E\u7CBE\u5EA6\u8FB9\u754C\u3002" },
-          { type: "paragraph", html: "\u884C\u661F\u4ECD\u4FDD\u7559\u9879\u76EE\u539F\u6765\u7684 simple orbital model\uFF0C\u4E0D\u5F15\u5165 VSOP87\uFF0C\u4E5F\u4E0D\u63A5\u5165 JPL DE \u4E13\u4E1A\u661F\u5386\u3002\u8FD9\u6837\u80FD\u5148\u63D0\u5347\u6700\u5BB9\u6613\u770B\u51FA\u8BEF\u5DEE\u7684\u592A\u9633\u3001\u6708\u4EAE\u548C\u6708\u76F8\uFF0C\u540C\u65F6\u4FDD\u6301\u672C\u5730\u7F51\u9875\u7684\u8F7B\u91CF\u7ED3\u6784\u3002" },
-          { type: "warning", html: "Meeus lightweight \u9002\u5408\u6559\u5B66\u548C\u89C2\u661F\u53C2\u8003\uFF0C\u4F46\u4E0D\u662F\u4E13\u4E1A\u661F\u5386\u3002\u4E0D\u8981\u7528\u672C\u9879\u76EE\u5224\u5B9A\u65E5\u98DF\u3001\u6708\u98DF\u3001\u63A9\u661F\u3001\u822A\u6D77\u5B9A\u4F4D\u6216\u79D1\u7814\u7EA7\u7CBE\u786E\u89C2\u6D4B\u3002" }
+          {
+            type: "paragraph",
+            html: "\u6052\u661F\u80CC\u666F\u5728\u77ED\u65F6\u95F4\u5185\u51E0\u4E4E\u56FA\u5B9A\uFF0C\u4F46\u592A\u9633\u3001\u6708\u4EAE\u548C\u884C\u661F\u4F1A\u5728\u6052\u661F\u80CC\u666F\u4E0A\u79FB\u52A8\u3002\u592A\u9633\u7684\u5468\u5E74\u89C6\u8FD0\u52A8\u5B9A\u4E49\u4E86\u9EC4\u9053\uFF1B\u6708\u4EAE\u548C\u884C\u661F\u5927\u591A\u9760\u8FD1\u9EC4\u9053\uFF0C\u662F\u56E0\u4E3A\u592A\u9633\u7CFB\u4E3B\u8981\u5929\u4F53\u7684\u8F68\u9053\u5E73\u9762\u5927\u81F4\u63A5\u8FD1\u3002"
+          },
+          {
+            type: "paragraph",
+            html: "\u592A\u9633\u4F4D\u7F6E\u4F7F\u7528 Meeus lightweight \u592A\u9633\u6A21\u578B\uFF0C\u6708\u4EAE\u4F4D\u7F6E\u4F7F\u7528 Meeus \u6708\u7403\u4E3B\u8981\u5468\u671F\u9879\u3002\u661F\u56FE\u4E0A\u7684\u6708\u4EAE\u4F1A\u6309\u5F53\u524D\u6708\u76F8\u76F4\u63A5\u753B\u6210\u660E\u6697\u5706\u76D8\uFF1B\u70B9\u51FB\u6708\u4EAE\u65F6\uFF0C\u4FE1\u606F\u6D6E\u7A97\u4F1A\u663E\u793A\u6708\u76F8\u540D\u79F0\u3001\u7167\u660E\u6BD4\u4F8B\u3001\u6708\u9F84\u548C\u8DDD\u79BB\uFF1B\u70B9\u51FB\u592A\u9633\u6216\u6708\u4EAE\u65F6\u4E5F\u4F1A\u663E\u793A\u7B97\u6CD5\u6765\u6E90\u4E0E\u7CBE\u5EA6\u8FB9\u754C\u3002"
+          },
+          {
+            type: "paragraph",
+            html: "\u884C\u661F\u4ECD\u4FDD\u7559\u9879\u76EE\u539F\u6765\u7684 simple orbital model\uFF0C\u4E0D\u5F15\u5165 VSOP87\uFF0C\u4E5F\u4E0D\u63A5\u5165 JPL DE \u4E13\u4E1A\u661F\u5386\u3002\u8FD9\u6837\u80FD\u5148\u63D0\u5347\u6700\u5BB9\u6613\u770B\u51FA\u8BEF\u5DEE\u7684\u592A\u9633\u3001\u6708\u4EAE\u548C\u6708\u76F8\uFF0C\u540C\u65F6\u4FDD\u6301\u672C\u5730\u7F51\u9875\u7684\u8F7B\u91CF\u7ED3\u6784\u3002"
+          },
+          {
+            type: "warning",
+            html: "Meeus lightweight \u9002\u5408\u6559\u5B66\u548C\u89C2\u661F\u53C2\u8003\uFF0C\u4F46\u4E0D\u662F\u4E13\u4E1A\u661F\u5386\u3002\u4E0D\u8981\u7528\u672C\u9879\u76EE\u5224\u5B9A\u65E5\u98DF\u3001\u6708\u98DF\u3001\u63A9\u661F\u3001\u822A\u6D77\u5B9A\u4F4D\u6216\u79D1\u7814\u7EA7\u7CBE\u786E\u89C2\u6D4B\u3002"
+          }
         ]
       },
       {
         id: "precession-j2000",
         title: "11. \u5C81\u5DEE\u3001J2000 \u4E0E\u8FDC\u65E5\u671F\u8FD1\u4F3C",
         blocks: [
-          { type: "paragraph", html: "J2000 \u662F\u6E90\u6570\u636E\u5E38\u7528\u7684\u53C2\u8003\u5386\u5143\uFF0C\u53EF\u7406\u89E3\u4E3A\u201C\u628A\u5929\u7403\u5750\u6807\u5728 2000 \u5E74\u9644\u8FD1\u5B9A\u683C\u201D\u3002\u5C81\u5DEE\u6539\u53D8\u7684\u662F\u5730\u7403\u81EA\u8F6C\u8F74\u65B9\u5411\uFF0C\u56E0\u6B64\u5317\u5929\u6781\u3001\u5929\u7403\u8D64\u9053\u548C\u6625\u5206\u70B9\u4F1A\u76F8\u5BF9\u6052\u661F\u80CC\u666F\u7F13\u6162\u79FB\u52A8\u3002" },
-          { type: "code", text: "J2000 source coordinates\n\u2192 epoch-of-date render coordinates\n\u2192 local Alt/Az coordinates\n\u2192 projection to screen pixels" },
-          { type: "paragraph", html: "\u661F\u5EA7\u548C\u661F\u5B98\u7684\u76F8\u5BF9\u5F62\u72B6\u6CA1\u6709\u56E0\u4E3A\u5C81\u5DEE\u88AB\u62C9\u626F\uFF1B\u5B83\u4EEC\u4F5C\u4E3A\u56FA\u5B9A\u6052\u661F\u80CC\u666F\u6574\u4F53\u8FDB\u5165\u5F53\u524D\u65E5\u671F\u663E\u793A\u5750\u6807\u3002\u53EA\u6539\u8D64\u9053\u7F51\u800C\u4E0D\u6539\u661F\u70B9\u3001\u6807\u7B7E\u3001\u641C\u7D22\u548C\u62FE\u53D6\uFF0C\u4F1A\u9020\u6210\u56FE\u5C42\u4E92\u76F8\u5BF9\u4E0D\u4E0A\u7684\u9519\u8BEF\u3002" },
-          { type: "warning", html: "\u672C\u9879\u76EE\u4E0D\u6A21\u62DF\u7AE0\u52A8\u3001\u6052\u661F\u81EA\u884C\u548C\u5927\u6C14\u6298\u5C04\u3002\u51E0\u5343\u5E74\u5C3A\u5EA6\u5185\u5317\u5929\u6781\u5927\u81F4\u53D8\u5316\u53EF\u7528\u4E8E\u5B66\u4E60\uFF0C\u4F46\u4E2A\u522B\u8FD1\u661F\u7684\u771F\u5B9E\u957F\u671F\u4F4D\u7F6E\u548C\u4E13\u4E1A\u53E4\u5929\u6587\u4E8B\u4EF6\u4ECD\u9700\u8981\u66F4\u9AD8\u7CBE\u5EA6\u6A21\u578B\u3002" }
+          {
+            type: "paragraph",
+            html: "J2000 \u662F\u6E90\u6570\u636E\u5E38\u7528\u7684\u53C2\u8003\u5386\u5143\uFF0C\u53EF\u7406\u89E3\u4E3A\u201C\u628A\u5929\u7403\u5750\u6807\u5728 2000 \u5E74\u9644\u8FD1\u5B9A\u683C\u201D\u3002\u5C81\u5DEE\u6539\u53D8\u7684\u662F\u5730\u7403\u81EA\u8F6C\u8F74\u65B9\u5411\uFF0C\u56E0\u6B64\u5317\u5929\u6781\u3001\u5929\u7403\u8D64\u9053\u548C\u6625\u5206\u70B9\u4F1A\u76F8\u5BF9\u6052\u661F\u80CC\u666F\u7F13\u6162\u79FB\u52A8\u3002"
+          },
+          {
+            type: "code",
+            text: "J2000 source coordinates\n\u2192 epoch-of-date render coordinates\n\u2192 local Alt/Az coordinates\n\u2192 projection to screen pixels"
+          },
+          {
+            type: "paragraph",
+            html: "\u661F\u5EA7\u548C\u661F\u5B98\u7684\u76F8\u5BF9\u5F62\u72B6\u6CA1\u6709\u56E0\u4E3A\u5C81\u5DEE\u88AB\u62C9\u626F\uFF1B\u5B83\u4EEC\u4F5C\u4E3A\u56FA\u5B9A\u6052\u661F\u80CC\u666F\u6574\u4F53\u8FDB\u5165\u5F53\u524D\u65E5\u671F\u663E\u793A\u5750\u6807\u3002\u53EA\u6539\u8D64\u9053\u7F51\u800C\u4E0D\u6539\u661F\u70B9\u3001\u6807\u7B7E\u3001\u641C\u7D22\u548C\u62FE\u53D6\uFF0C\u4F1A\u9020\u6210\u56FE\u5C42\u4E92\u76F8\u5BF9\u4E0D\u4E0A\u7684\u9519\u8BEF\u3002"
+          },
+          {
+            type: "warning",
+            html: "\u672C\u9879\u76EE\u4E0D\u6A21\u62DF\u7AE0\u52A8\u3001\u6052\u661F\u81EA\u884C\u548C\u5927\u6C14\u6298\u5C04\u3002\u51E0\u5343\u5E74\u5C3A\u5EA6\u5185\u5317\u5929\u6781\u5927\u81F4\u53D8\u5316\u53EF\u7528\u4E8E\u5B66\u4E60\uFF0C\u4F46\u4E2A\u522B\u8FD1\u661F\u7684\u771F\u5B9E\u957F\u671F\u4F4D\u7F6E\u548C\u4E13\u4E1A\u53E4\u5929\u6587\u4E8B\u4EF6\u4ECD\u9700\u8981\u66F4\u9AD8\u7CBE\u5EA6\u6A21\u578B\u3002"
+          }
         ]
       },
       {
         id: "accuracy-boundaries",
         title: "12. \u7CBE\u5EA6\u4E0E\u9002\u7528\u8303\u56F4",
         blocks: [
-          { type: "paragraph", html: "\u672C\u8F6F\u4EF6\u5B9A\u4F4D\u662F\u8F7B\u91CF\u7EA7\u672C\u5730\u5386\u53F2\u661F\u7A7A\u53EF\u89C6\u5316\u5DE5\u5177\uFF0C\u76EE\u6807\u662F\u8BA9\u7528\u6237\u76F4\u89C2\u770B\u5230\u4E0D\u540C\u65F6\u95F4\u3001\u5730\u70B9\u548C\u5750\u6807\u7CFB\u7EDF\u4E0B\u7684\u661F\u7A7A\u5173\u7CFB\u3002\u5B83\u53EF\u4EE5\u63A5\u8FD1 Stellarium \u7684\u5386\u53F2\u661F\u7A7A\u89C6\u89C9\u53C2\u8003\u6548\u679C\uFF0C\u4F46\u4E0D\u7B49\u540C\u4E8E Stellarium\u3001JPL DE \u661F\u5386\u6216\u4E13\u4E1A\u89C2\u6D4B\u8F6F\u4EF6\u7684\u7CBE\u5BC6\u661F\u5386\u7CBE\u5EA6\u3002" },
-          { type: "table", headers: ["\u5BF9\u8C61/\u56FE\u5C42", "\u5F53\u524D\u6A21\u578B", "\u9002\u7528\u8BF4\u660E"], rows: [
-            ["\u6052\u661F\u3001\u661F\u5EA7\u3001\u661F\u5B98", "\u661F\u8868\u5750\u6807 + \u8F7B\u91CF\u5C81\u5DEE\u6846\u67B6", "\u591A\u6570\u6052\u661F\u5728\u51E0\u767E\u5230\u4E00\u4E24\u5343\u5E74\u5C3A\u5EA6\u5185\u7528\u4E8E\u89C6\u89C9\u53C2\u8003\u901A\u5E38\u53EF\u63A5\u53D7\uFF1B\u4F46\u5F53\u524D\u6CA1\u6709\u5B8C\u6574\u4F20\u64AD\u6BCF\u9897\u6052\u661F\u7684\u81EA\u884C\u3001\u89C6\u5DEE\u548C\u5F84\u5411\u901F\u5EA6\uFF0C\u4E2A\u522B\u9AD8\u81EA\u884C\u6052\u661F\u4F1A\u968F\u5E74\u4EE3\u504F\u79BB\u3002"],
-            ["\u8D64\u9053\u7F51\u548C\u5317\u5929\u6781", "J2000 \u2192 epoch-of-date \u8F7B\u91CF\u5C81\u5DEE", "\u53EF\u5C55\u793A\u5317\u5929\u6781\u3001\u8D64\u9053\u7F51\u548C\u6625\u5206\u70B9\u968F\u5E74\u4EE3\u53D8\u5316\u7684\u5927\u8D8B\u52BF\uFF1B\u4E0D\u5305\u542B\u5B8C\u6574\u7AE0\u52A8\u7B49\u5C0F\u5E45\u5468\u671F\u9879\u3002"],
-            ["\u592A\u9633", "Meeus lightweight solar model", "\u9002\u5408\u663E\u793A\u592A\u9633\u5728\u9EC4\u9053\u9644\u8FD1\u7684\u5468\u5E74\u8FD0\u52A8\u548C\u4E00\u822C\u89C2\u661F\u53C2\u8003\uFF1B\u4E0D\u7528\u4E8E\u7CBE\u5BC6\u65E5\u98DF\u3001\u7CBE\u786E\u65E5\u51FA\u65E5\u843D\u3001\u5BFC\u822A\u6216\u79D1\u7814\u7EA7\u592A\u9633\u4F4D\u7F6E\u3002"],
-            ["\u6708\u4EAE\u4E0E\u6708\u76F8", "Meeus lunar periodic terms + phase approximation", "\u9002\u5408\u663E\u793A\u6708\u76F8\u3001\u7167\u660E\u6BD4\u4F8B\u3001\u6708\u9F84\u3001\u8DDD\u79BB\u548C\u5927\u81F4\u4F4D\u7F6E\uFF1B\u4E0D\u7528\u4E8E\u6708\u98DF\u3001\u63A9\u661F\u3001\u7CBE\u786E\u5408\u6708\u6216\u89D2\u5206\u7EA7\u89C2\u6D4B\u3002"],
-            ["\u884C\u661F", "JPL 1800\u20132050 \u8FD1\u4F3C\u8F68\u9053\u6839\u6570 / simple orbital model", "1800\u20132050 \u5E74\u5185\u9002\u5408\u89C6\u89C9\u661F\u56FE\u53C2\u8003\uFF1B\u8D85\u51FA\u8BE5\u533A\u95F4\u4ECD\u53EF\u663E\u793A\u5927\u81F4\u8FD0\u52A8\u8D8B\u52BF\uFF0C\u4F46\u4E0D\u627F\u8BFA\u4E0E Stellarium \u6216\u4E13\u4E1A\u661F\u5386\u4E00\u81F4\u3002"],
-            ["\u5730\u5E73\u7EBF", "\u51E0\u4F55\u5730\u5E73\u7EBF", "\u4E0D\u542B\u5927\u6C14\u6298\u5C04\u3001\u5C71\u8109\u3001\u5EFA\u7B51\u7269\u548C\u771F\u5B9E\u5730\u5F62\u906E\u6321\uFF1B\u63A5\u8FD1\u5730\u5E73\u7EBF\u7684\u89C6\u9AD8\u5EA6\u53EF\u80FD\u548C\u771F\u5B9E\u89C2\u6D4B\u4E0D\u540C\u3002"],
-            ["\u4F20\u7EDF\u5929\u533A", "\u6587\u5316\u53EF\u89C6\u5316\u53C2\u8003", "\u7528\u4E8E\u5E2E\u52A9\u7406\u89E3\u4E09\u57A3\u3001\u56DB\u8C61\u3001\u4E8C\u5341\u516B\u5BBF\u7B49\u4F20\u7EDF\u7ED3\u6784\uFF1B\u4E0D\u662F\u552F\u4E00\u5386\u53F2\u8FB9\u754C\uFF0C\u4E5F\u4E0D\u662F\u73B0\u4EE3 IAU \u6CD5\u5B9A\u8FB9\u754C\u3002"]
-          ] },
-          { type: "paragraph", html: "\u884C\u661F\u8BEF\u5DEE\u8981\u533A\u5206\u201C1800\u20132050 \u533A\u95F4\u5185\u7684\u8FD1\u4F3C\u91CF\u7EA7\u201D\u548C\u201C\u5411\u53E4\u4EE3\u6216\u672A\u6765\u5916\u63A8\u201D\u3002\u5F53\u524D\u884C\u661F\u6CA1\u6709\u4F7F\u7528 VSOP87\uFF0C\u4E5F\u6CA1\u6709\u63A5\u5165 JPL DE \u4E13\u4E1A\u661F\u5386\u3002\u4E0B\u8868\u8BEF\u5DEE\u91CF\u7EA7\u53EA\u9002\u7528\u4E8E 1800\u20132050 \u8FD1\u4F3C\u6839\u6570\u533A\u95F4\u5185\uFF0C\u4E0D\u80FD\u7406\u89E3\u4E3A\u5168\u5386\u53F2\u8303\u56F4\u627F\u8BFA\u3002" },
-          { type: "table", headers: ["\u884C\u661F", "1800\u20132050 \u8FD1\u4F3C\u8BEF\u5DEE\u91CF\u7EA7", "\u89E3\u91CA"], rows: [
-            ["\u6C34\u661F", "\u7EA6 15\u2033", "\u5185\u884C\u661F\u8FD0\u52A8\u5FEB\uFF0C\u8D85\u51FA\u533A\u95F4\u4E0D\u5EFA\u8BAE\u627F\u8BFA\u4F4D\u7F6E\u7CBE\u5EA6\u3002"],
-            ["\u91D1\u661F", "\u7EA6 20\u2033", "\u533A\u95F4\u5185\u89C6\u89C9\u4F4D\u7F6E\u901A\u5E38\u5F88\u7A33\u3002"],
-            ["\u706B\u661F", "\u7EA6 40\u2033", "\u533A\u95F4\u5185\u89C6\u89C9\u4F4D\u7F6E\u901A\u5E38\u5F88\u7A33\uFF1B\u51B2\u65E5\u524D\u540E\u82E5\u505A\u7CBE\u786E\u5BF9\u6BD4\u66F4\u5BB9\u6613\u770B\u51FA\u6A21\u578B\u5DEE\u5F02\u3002"],
-            ["\u6728\u661F", "\u7EA6 400\u2033", "\u7EA6 0.11\xB0\uFF0C\u4F4E\u4E8E 1\xB0 \u89C6\u89C9\u9608\u503C\uFF0C\u4F46\u4E0D\u662F VSOP87 \u7EA7\u3002"],
-            ["\u571F\u661F", "\u7EA6 600\u2033", "\u7EA6 0.17\xB0\uFF0C\u662F\u672C\u7EC4\u4E2D\u8BEF\u5DEE\u8F83\u5927\u7684\u884C\u661F\u4E4B\u4E00\uFF0C\u4F46\u533A\u95F4\u5185\u89C6\u89C9\u661F\u56FE\u4ECD\u53EF\u63A5\u53D7\u3002"],
-            ["\u5929\u738B\u661F", "\u7EA6 50\u2033", "\u533A\u95F4\u5185\u89C6\u89C9\u4F4D\u7F6E\u53EF\u7528\u3002"],
-            ["\u6D77\u738B\u661F", "\u7EA6 10\u2033", "\u533A\u95F4\u5185\u89C6\u89C9\u4F4D\u7F6E\u53EF\u7528\u3002"]
-          ] },
-          { type: "note", html: "\u7F51\u9875\u661F\u56FE\u91CC\u7684\u201C\u8089\u773C\u51E0\u4E4E\u4E0D\u53EF\u89C1\u201D\u901A\u5E38\u66F4\u63A5\u8FD1 0.5\xB0\u20131\xB0 \u7684\u89C6\u89C9\u9608\u503C\uFF1B\u771F\u6B63\u5929\u6587\u89C2\u6D4B\u4E2D\u7684\u8089\u773C\u89D2\u5206\u8FA8\u7387\u53EF\u63A5\u8FD1 1\u2032\uFF0C\u6807\u51C6\u66F4\u4E25\u683C\u3002\u4E0D\u8981\u628A\u9875\u9762\u4E0A\u770B\u8D77\u6765\u63A5\u8FD1\u8BEF\u89E3\u4E3A\u4E13\u4E1A\u661F\u5386\u7EA7\u7CBE\u5EA6\u3002" },
-          { type: "warning", html: "1582 \u5E74\u683C\u91CC\u9AD8\u5229\u5386\u6539\u9769\u4EE5\u524D\uFF0C\u5112\u7565\u5386 / \u683C\u91CC\u9AD8\u5229\u5386\u65E5\u671F\u5DEE\u5F02\u53EF\u80FD\u6BD4\u7B97\u6CD5\u8BEF\u5DEE\u66F4\u5F71\u54CD\u7ED3\u679C\u3002\u4E2D\u56FD\u53E4\u4EE3\u65E5\u671F\u8FD8\u6D89\u53CA\u519C\u5386\u3001\u8282\u6C14\u3001\u5730\u65B9\u65F6\u548C\u5386\u6CD5\u6362\u7B97\uFF1B\u8F93\u5165\u73B0\u4EE3\u516C\u5386\u5F0F\u65E5\u671F\u65F6\uFF0C\u5E94\u5148\u786E\u8BA4\u4F60\u548C\u5BF9\u7167\u8F6F\u4EF6\u4F7F\u7528\u7684\u662F\u540C\u4E00\u79CD\u65E5\u671F\u4F53\u7CFB\u3002" },
-          { type: "warning", html: "\u5F53\u524D\u672A\u5B8C\u6574\u5B9E\u73B0\u7AE0\u52A8\u3001\u6BCF\u9897\u6052\u661F\u7684\u957F\u671F\u81EA\u884C\u4F20\u64AD\u3001\u5927\u6C14\u6298\u5C04\u3001\u5730\u5F62\u5730\u5E73\u7EBF\u3001VSOP87 \u884C\u661F\u7406\u8BBA\u6216 JPL DE \u661F\u5386\u3002\u56E0\u6B64\u672C\u9879\u76EE\u9002\u5408\u6559\u5B66\u3001\u5386\u53F2\u661F\u7A7A\u89C6\u89C9\u53C2\u8003\u548C\u672C\u5730\u79BB\u7EBF\u6F14\u793A\uFF0C\u4E0D\u9002\u5408\u65E5\u98DF/\u6708\u98DF/\u63A9\u661F\u5224\u5B9A\u3001\u5BFC\u822A\u3001\u79D1\u7814\u7EA7\u53E4\u5929\u6587\u590D\u539F\u6216\u7CBE\u5BC6\u89C2\u6D4B\u8BA1\u5212\u3002" }
+          {
+            type: "paragraph",
+            html: "\u672C\u8F6F\u4EF6\u5B9A\u4F4D\u662F\u8F7B\u91CF\u7EA7\u672C\u5730\u5386\u53F2\u661F\u7A7A\u53EF\u89C6\u5316\u5DE5\u5177\uFF0C\u76EE\u6807\u662F\u8BA9\u7528\u6237\u76F4\u89C2\u770B\u5230\u4E0D\u540C\u65F6\u95F4\u3001\u5730\u70B9\u548C\u5750\u6807\u7CFB\u7EDF\u4E0B\u7684\u661F\u7A7A\u5173\u7CFB\u3002\u5B83\u53EF\u4EE5\u63A5\u8FD1 Stellarium \u7684\u5386\u53F2\u661F\u7A7A\u89C6\u89C9\u53C2\u8003\u6548\u679C\uFF0C\u4F46\u4E0D\u7B49\u540C\u4E8E Stellarium\u3001JPL DE \u661F\u5386\u6216\u4E13\u4E1A\u89C2\u6D4B\u8F6F\u4EF6\u7684\u7CBE\u5BC6\u661F\u5386\u7CBE\u5EA6\u3002"
+          },
+          {
+            type: "table",
+            headers: ["\u5BF9\u8C61/\u56FE\u5C42", "\u5F53\u524D\u6A21\u578B", "\u9002\u7528\u8BF4\u660E"],
+            rows: [
+              [
+                "\u6052\u661F\u3001\u661F\u5EA7\u3001\u661F\u5B98",
+                "\u661F\u8868\u5750\u6807 + \u8F7B\u91CF\u5C81\u5DEE\u6846\u67B6",
+                "\u591A\u6570\u6052\u661F\u5728\u51E0\u767E\u5230\u4E00\u4E24\u5343\u5E74\u5C3A\u5EA6\u5185\u7528\u4E8E\u89C6\u89C9\u53C2\u8003\u901A\u5E38\u53EF\u63A5\u53D7\uFF1B\u4F46\u5F53\u524D\u6CA1\u6709\u5B8C\u6574\u4F20\u64AD\u6BCF\u9897\u6052\u661F\u7684\u81EA\u884C\u3001\u89C6\u5DEE\u548C\u5F84\u5411\u901F\u5EA6\uFF0C\u4E2A\u522B\u9AD8\u81EA\u884C\u6052\u661F\u4F1A\u968F\u5E74\u4EE3\u504F\u79BB\u3002"
+              ],
+              [
+                "\u8D64\u9053\u7F51\u548C\u5317\u5929\u6781",
+                "J2000 \u2192 epoch-of-date \u8F7B\u91CF\u5C81\u5DEE",
+                "\u53EF\u5C55\u793A\u5317\u5929\u6781\u3001\u8D64\u9053\u7F51\u548C\u6625\u5206\u70B9\u968F\u5E74\u4EE3\u53D8\u5316\u7684\u5927\u8D8B\u52BF\uFF1B\u4E0D\u5305\u542B\u5B8C\u6574\u7AE0\u52A8\u7B49\u5C0F\u5E45\u5468\u671F\u9879\u3002"
+              ],
+              [
+                "\u592A\u9633",
+                "Meeus lightweight solar model",
+                "\u9002\u5408\u663E\u793A\u592A\u9633\u5728\u9EC4\u9053\u9644\u8FD1\u7684\u5468\u5E74\u8FD0\u52A8\u548C\u4E00\u822C\u89C2\u661F\u53C2\u8003\uFF1B\u4E0D\u7528\u4E8E\u7CBE\u5BC6\u65E5\u98DF\u3001\u7CBE\u786E\u65E5\u51FA\u65E5\u843D\u3001\u5BFC\u822A\u6216\u79D1\u7814\u7EA7\u592A\u9633\u4F4D\u7F6E\u3002"
+              ],
+              [
+                "\u6708\u4EAE\u4E0E\u6708\u76F8",
+                "Meeus lunar periodic terms + phase approximation",
+                "\u9002\u5408\u663E\u793A\u6708\u76F8\u3001\u7167\u660E\u6BD4\u4F8B\u3001\u6708\u9F84\u3001\u8DDD\u79BB\u548C\u5927\u81F4\u4F4D\u7F6E\uFF1B\u4E0D\u7528\u4E8E\u6708\u98DF\u3001\u63A9\u661F\u3001\u7CBE\u786E\u5408\u6708\u6216\u89D2\u5206\u7EA7\u89C2\u6D4B\u3002"
+              ],
+              [
+                "\u884C\u661F",
+                "JPL 1800\u20132050 \u8FD1\u4F3C\u8F68\u9053\u6839\u6570 / simple orbital model",
+                "1800\u20132050 \u5E74\u5185\u9002\u5408\u89C6\u89C9\u661F\u56FE\u53C2\u8003\uFF1B\u8D85\u51FA\u8BE5\u533A\u95F4\u4ECD\u53EF\u663E\u793A\u5927\u81F4\u8FD0\u52A8\u8D8B\u52BF\uFF0C\u4F46\u4E0D\u627F\u8BFA\u4E0E Stellarium \u6216\u4E13\u4E1A\u661F\u5386\u4E00\u81F4\u3002"
+              ],
+              [
+                "\u5730\u5E73\u7EBF",
+                "\u51E0\u4F55\u5730\u5E73\u7EBF",
+                "\u4E0D\u542B\u5927\u6C14\u6298\u5C04\u3001\u5C71\u8109\u3001\u5EFA\u7B51\u7269\u548C\u771F\u5B9E\u5730\u5F62\u906E\u6321\uFF1B\u63A5\u8FD1\u5730\u5E73\u7EBF\u7684\u89C6\u9AD8\u5EA6\u53EF\u80FD\u548C\u771F\u5B9E\u89C2\u6D4B\u4E0D\u540C\u3002"
+              ],
+              [
+                "\u4F20\u7EDF\u5929\u533A",
+                "\u6587\u5316\u53EF\u89C6\u5316\u53C2\u8003",
+                "\u7528\u4E8E\u5E2E\u52A9\u7406\u89E3\u4E09\u57A3\u3001\u56DB\u8C61\u3001\u4E8C\u5341\u516B\u5BBF\u7B49\u4F20\u7EDF\u7ED3\u6784\uFF1B\u4E0D\u662F\u552F\u4E00\u5386\u53F2\u8FB9\u754C\uFF0C\u4E5F\u4E0D\u662F\u73B0\u4EE3 IAU \u6CD5\u5B9A\u8FB9\u754C\u3002"
+              ]
+            ]
+          },
+          {
+            type: "paragraph",
+            html: "\u884C\u661F\u8BEF\u5DEE\u8981\u533A\u5206\u201C1800\u20132050 \u533A\u95F4\u5185\u7684\u8FD1\u4F3C\u91CF\u7EA7\u201D\u548C\u201C\u5411\u53E4\u4EE3\u6216\u672A\u6765\u5916\u63A8\u201D\u3002\u5F53\u524D\u884C\u661F\u6CA1\u6709\u4F7F\u7528 VSOP87\uFF0C\u4E5F\u6CA1\u6709\u63A5\u5165 JPL DE \u4E13\u4E1A\u661F\u5386\u3002\u4E0B\u8868\u8BEF\u5DEE\u91CF\u7EA7\u53EA\u9002\u7528\u4E8E 1800\u20132050 \u8FD1\u4F3C\u6839\u6570\u533A\u95F4\u5185\uFF0C\u4E0D\u80FD\u7406\u89E3\u4E3A\u5168\u5386\u53F2\u8303\u56F4\u627F\u8BFA\u3002"
+          },
+          {
+            type: "table",
+            headers: ["\u884C\u661F", "1800\u20132050 \u8FD1\u4F3C\u8BEF\u5DEE\u91CF\u7EA7", "\u89E3\u91CA"],
+            rows: [
+              ["\u6C34\u661F", "\u7EA6 15\u2033", "\u5185\u884C\u661F\u8FD0\u52A8\u5FEB\uFF0C\u8D85\u51FA\u533A\u95F4\u4E0D\u5EFA\u8BAE\u627F\u8BFA\u4F4D\u7F6E\u7CBE\u5EA6\u3002"],
+              ["\u91D1\u661F", "\u7EA6 20\u2033", "\u533A\u95F4\u5185\u89C6\u89C9\u4F4D\u7F6E\u901A\u5E38\u5F88\u7A33\u3002"],
+              [
+                "\u706B\u661F",
+                "\u7EA6 40\u2033",
+                "\u533A\u95F4\u5185\u89C6\u89C9\u4F4D\u7F6E\u901A\u5E38\u5F88\u7A33\uFF1B\u51B2\u65E5\u524D\u540E\u82E5\u505A\u7CBE\u786E\u5BF9\u6BD4\u66F4\u5BB9\u6613\u770B\u51FA\u6A21\u578B\u5DEE\u5F02\u3002"
+              ],
+              [
+                "\u6728\u661F",
+                "\u7EA6 400\u2033",
+                "\u7EA6 0.11\xB0\uFF0C\u4F4E\u4E8E 1\xB0 \u89C6\u89C9\u9608\u503C\uFF0C\u4F46\u4E0D\u662F VSOP87 \u7EA7\u3002"
+              ],
+              [
+                "\u571F\u661F",
+                "\u7EA6 600\u2033",
+                "\u7EA6 0.17\xB0\uFF0C\u662F\u672C\u7EC4\u4E2D\u8BEF\u5DEE\u8F83\u5927\u7684\u884C\u661F\u4E4B\u4E00\uFF0C\u4F46\u533A\u95F4\u5185\u89C6\u89C9\u661F\u56FE\u4ECD\u53EF\u63A5\u53D7\u3002"
+              ],
+              ["\u5929\u738B\u661F", "\u7EA6 50\u2033", "\u533A\u95F4\u5185\u89C6\u89C9\u4F4D\u7F6E\u53EF\u7528\u3002"],
+              ["\u6D77\u738B\u661F", "\u7EA6 10\u2033", "\u533A\u95F4\u5185\u89C6\u89C9\u4F4D\u7F6E\u53EF\u7528\u3002"]
+            ]
+          },
+          {
+            type: "note",
+            html: "\u7F51\u9875\u661F\u56FE\u91CC\u7684\u201C\u8089\u773C\u51E0\u4E4E\u4E0D\u53EF\u89C1\u201D\u901A\u5E38\u66F4\u63A5\u8FD1 0.5\xB0\u20131\xB0 \u7684\u89C6\u89C9\u9608\u503C\uFF1B\u771F\u6B63\u5929\u6587\u89C2\u6D4B\u4E2D\u7684\u8089\u773C\u89D2\u5206\u8FA8\u7387\u53EF\u63A5\u8FD1 1\u2032\uFF0C\u6807\u51C6\u66F4\u4E25\u683C\u3002\u4E0D\u8981\u628A\u9875\u9762\u4E0A\u770B\u8D77\u6765\u63A5\u8FD1\u8BEF\u89E3\u4E3A\u4E13\u4E1A\u661F\u5386\u7EA7\u7CBE\u5EA6\u3002"
+          },
+          {
+            type: "warning",
+            html: "1582 \u5E74\u683C\u91CC\u9AD8\u5229\u5386\u6539\u9769\u4EE5\u524D\uFF0C\u5112\u7565\u5386 / \u683C\u91CC\u9AD8\u5229\u5386\u65E5\u671F\u5DEE\u5F02\u53EF\u80FD\u6BD4\u7B97\u6CD5\u8BEF\u5DEE\u66F4\u5F71\u54CD\u7ED3\u679C\u3002\u4E2D\u56FD\u53E4\u4EE3\u65E5\u671F\u8FD8\u6D89\u53CA\u519C\u5386\u3001\u8282\u6C14\u3001\u5730\u65B9\u65F6\u548C\u5386\u6CD5\u6362\u7B97\uFF1B\u8F93\u5165\u73B0\u4EE3\u516C\u5386\u5F0F\u65E5\u671F\u65F6\uFF0C\u5E94\u5148\u786E\u8BA4\u4F60\u548C\u5BF9\u7167\u8F6F\u4EF6\u4F7F\u7528\u7684\u662F\u540C\u4E00\u79CD\u65E5\u671F\u4F53\u7CFB\u3002"
+          },
+          {
+            type: "warning",
+            html: "\u5F53\u524D\u672A\u5B8C\u6574\u5B9E\u73B0\u7AE0\u52A8\u3001\u6BCF\u9897\u6052\u661F\u7684\u957F\u671F\u81EA\u884C\u4F20\u64AD\u3001\u5927\u6C14\u6298\u5C04\u3001\u5730\u5F62\u5730\u5E73\u7EBF\u3001VSOP87 \u884C\u661F\u7406\u8BBA\u6216 JPL DE \u661F\u5386\u3002\u56E0\u6B64\u672C\u9879\u76EE\u9002\u5408\u6559\u5B66\u3001\u5386\u53F2\u661F\u7A7A\u89C6\u89C9\u53C2\u8003\u548C\u672C\u5730\u79BB\u7EBF\u6F14\u793A\uFF0C\u4E0D\u9002\u5408\u65E5\u98DF/\u6708\u98DF/\u63A9\u661F\u5224\u5B9A\u3001\u5BFC\u822A\u3001\u79D1\u7814\u7EA7\u53E4\u5929\u6587\u590D\u539F\u6216\u7CBE\u5BC6\u89C2\u6D4B\u8BA1\u5212\u3002"
+          }
         ]
       },
       {
         id: "browser-runtime",
         title: "13. \u7F51\u9875\u5982\u4F55\u5728\u6D4F\u89C8\u5668\u4E2D\u8FD0\u884C",
         blocks: [
-          { type: "paragraph", html: "\u8FD9\u4E2A\u9879\u76EE\u662F\u672C\u5730\u7F51\u9875\u5E94\u7528\u3002\u6D4F\u89C8\u5668\u6253\u5F00 <code>index.html</code> \u540E\uFF0C\u4F1A\u52A0\u8F7D\u6837\u5F0F\u3001\u811A\u672C\u3001\u7B2C\u4E09\u65B9\u5E93\u548C\u672C\u5730\u6570\u636E\u5206\u7247\u3002\u5237\u65B0\u9875\u9762\u65F6\uFF0C\u7A0B\u5E8F\u4F1A\u91CD\u65B0\u521D\u59CB\u5316\uFF1B\u4F46 localStorage \u4E2D\u4FDD\u5B58\u7684\u914D\u7F6E\u4F1A\u88AB\u91CD\u65B0\u8BFB\u51FA\uFF0C\u6240\u4EE5\u7528\u6237\u72B6\u6001\u53EF\u4EE5\u5EF6\u7EED\u3002" },
-          { type: "paragraph", html: "D3-Celestial \u8D1F\u8D23\u57FA\u7840\u661F\u56FE\u5F15\u64CE\uFF1A\u628A\u5929\u7403\u5750\u6807\u6295\u5F71\u5230\u5C4F\u5E55\u3001\u7BA1\u7406\u90E8\u5206\u56FE\u5C42\u548C\u6295\u5F71\u3002\u672C\u9879\u76EE\u5728\u5916\u5C42\u8865\u5145\u5730\u70B9\u3001\u65F6\u95F4\u3001\u4E2D\u6587\u661F\u5B98\u3001\u4F20\u7EDF\u5929\u533A\u3001\u5C81\u5DEE\u3001\u79FB\u52A8\u7AEF\u5E03\u5C40\u3001\u641C\u7D22\u3001\u4FE1\u606F\u6D6E\u7A97\u3001debug \u548C\u672C\u5730\u6570\u636E\u52A0\u8F7D\u3002" }
+          {
+            type: "paragraph",
+            html: "\u8FD9\u4E2A\u9879\u76EE\u662F\u672C\u5730\u7F51\u9875\u5E94\u7528\u3002\u6D4F\u89C8\u5668\u6253\u5F00 <code>index.html</code> \u540E\uFF0C\u4F1A\u52A0\u8F7D\u6837\u5F0F\u3001\u811A\u672C\u3001\u7B2C\u4E09\u65B9\u5E93\u548C\u672C\u5730\u6570\u636E\u5206\u7247\u3002\u5237\u65B0\u9875\u9762\u65F6\uFF0C\u7A0B\u5E8F\u4F1A\u91CD\u65B0\u521D\u59CB\u5316\uFF1B\u4F46 localStorage \u4E2D\u4FDD\u5B58\u7684\u914D\u7F6E\u4F1A\u88AB\u91CD\u65B0\u8BFB\u51FA\uFF0C\u6240\u4EE5\u7528\u6237\u72B6\u6001\u53EF\u4EE5\u5EF6\u7EED\u3002"
+          },
+          {
+            type: "paragraph",
+            html: "D3-Celestial \u8D1F\u8D23\u57FA\u7840\u661F\u56FE\u5F15\u64CE\uFF1A\u628A\u5929\u7403\u5750\u6807\u6295\u5F71\u5230\u5C4F\u5E55\u3001\u7BA1\u7406\u90E8\u5206\u56FE\u5C42\u548C\u6295\u5F71\u3002\u672C\u9879\u76EE\u5728\u5916\u5C42\u8865\u5145\u5730\u70B9\u3001\u65F6\u95F4\u3001\u4E2D\u6587\u661F\u5B98\u3001\u4F20\u7EDF\u5929\u533A\u3001\u5C81\u5DEE\u3001\u79FB\u52A8\u7AEF\u5E03\u5C40\u3001\u641C\u7D22\u3001\u4FE1\u606F\u6D6E\u7A97\u3001debug \u548C\u672C\u5730\u6570\u636E\u52A0\u8F7D\u3002"
+          }
         ]
       },
       {
         id: "local-storage-reset",
         title: "14. localStorage \u4FDD\u5B58\u4E0E\u91CD\u7F6E\u903B\u8F91",
         blocks: [
-          { type: "paragraph", html: "localStorage \u662F\u6D4F\u89C8\u5668\u63D0\u4F9B\u7684\u5C0F\u578B\u672C\u5730\u952E\u503C\u6570\u636E\u5E93\u3002\u5B83\u9002\u5408\u4FDD\u5B58\u7528\u6237\u504F\u597D\uFF0C\u4F46\u4E0D\u9002\u5408\u4FDD\u5B58\u5927\u661F\u8868\u3002\u9879\u76EE\u53EA\u5199\u5165\u672C\u9879\u76EE\u4E13\u7528 key\uFF0C\u907F\u514D\u5F71\u54CD\u5176\u4ED6\u7F51\u9875\u3002" },
-          { type: "code", text: "\u542F\u52A8\u9875\u9762\n\u2192 \u8BFB\u53D6\u672C\u9879\u76EE localStorage\n\u2192 \u6821\u9A8C schema \u548C astronomy model version\n\u2192 \u5408\u6CD5\u5219\u6062\u590D\u7528\u6237\u914D\u7F6E\n\u2192 \u4E0D\u5408\u6CD5\u6216\u7528\u6237\u70B9\u51FB\u91CD\u7F6E\uFF0C\u5219\u6062\u590D\u5185\u7F6E\u9ED8\u8BA4\u72B6\u6001" },
-          { type: "note", html: "\u5982\u679C\u4F60\u6B63\u5728\u5F00\u53D1\u548C\u6392\u67E5 bug\uFF0C\u91CD\u7F6E\u6309\u94AE\u662F\u6700\u5E72\u51C0\u7684\u56DE\u5230\u9ED8\u8BA4\u72B6\u6001\u65B9\u5F0F\u3002\u5B83\u6BD4\u624B\u52A8\u6539\u4E00\u5806\u5F00\u5173\u66F4\u53EF\u9760\u3002" }
+          {
+            type: "paragraph",
+            html: "localStorage \u662F\u6D4F\u89C8\u5668\u63D0\u4F9B\u7684\u5C0F\u578B\u672C\u5730\u952E\u503C\u6570\u636E\u5E93\u3002\u5B83\u9002\u5408\u4FDD\u5B58\u7528\u6237\u504F\u597D\uFF0C\u4F46\u4E0D\u9002\u5408\u4FDD\u5B58\u5927\u661F\u8868\u3002\u9879\u76EE\u53EA\u5199\u5165\u672C\u9879\u76EE\u4E13\u7528 key\uFF0C\u907F\u514D\u5F71\u54CD\u5176\u4ED6\u7F51\u9875\u3002"
+          },
+          {
+            type: "code",
+            text: "\u542F\u52A8\u9875\u9762\n\u2192 \u8BFB\u53D6\u672C\u9879\u76EE localStorage\n\u2192 \u6821\u9A8C schema \u548C astronomy model version\n\u2192 \u5408\u6CD5\u5219\u6062\u590D\u7528\u6237\u914D\u7F6E\n\u2192 \u4E0D\u5408\u6CD5\u6216\u7528\u6237\u70B9\u51FB\u91CD\u7F6E\uFF0C\u5219\u6062\u590D\u5185\u7F6E\u9ED8\u8BA4\u72B6\u6001"
+          },
+          {
+            type: "note",
+            html: "\u5982\u679C\u4F60\u6B63\u5728\u5F00\u53D1\u548C\u6392\u67E5 bug\uFF0C\u91CD\u7F6E\u6309\u94AE\u662F\u6700\u5E72\u51C0\u7684\u56DE\u5230\u9ED8\u8BA4\u72B6\u6001\u65B9\u5F0F\u3002\u5B83\u6BD4\u624B\u52A8\u6539\u4E00\u5806\u5F00\u5173\u66F4\u53EF\u9760\u3002"
+          }
         ]
       },
       {
         id: "debug-guide",
         title: "15. \u8C03\u8BD5\u9762\u677F\u600E\u4E48\u8BFB",
         blocks: [
-          { type: "table", headers: ["\u5B57\u6BB5\u6216\u72B6\u6001", "\u542B\u4E49", "\u600E\u4E48\u5224\u65AD"], rows: [
-            ["map / canvas / svg \u5C3A\u5BF8\u4E00\u81F4\u6027: OK", "\u661F\u56FE\u5BB9\u5668\u3001\u753B\u5E03\u548C\u53E0\u52A0\u5C42\u5C3A\u5BF8\u540C\u6B65", "\u5982\u679C\u4E0D\u662F OK\uFF0C\u4F18\u5148\u67E5 resize\u3001\u79FB\u52A8\u7AEF\u89C6\u53E3\u6216 D3 \u5185\u90E8\u5C3A\u5BF8\u3002"],
-            ["visualViewport \u4E0E canvas \u5C3A\u5BF8\u5DEE\u5F02", "\u771F\u5B9E\u624B\u673A\u53EF\u89C1\u533A\u57DF\u548C\u753B\u5E03\u5C3A\u5BF8\u4E0D\u540C\u6B65", "\u53EF\u80FD\u89E3\u91CA\u661F\u56FE\u88AB\u9650\u5236\u5728\u65E7\u6846\u91CC\u7684\u95EE\u9898\u3002"],
-            ["\u65F6\u95F4\u5237\u65B0\u94FE\u8DEF: recovered by fallback", "\u7B2C\u4E09\u65B9 skyview \u5931\u8D25\uFF0C\u4F46\u9879\u76EE fallback \u5DF2\u6062\u590D", "\u4E0D\u662F\u81F4\u547D\u9519\u8BEF\u3002"],
-            ["\u5730\u5E73 fallback: ok", "\u5730\u65B9\u6052\u661F\u65F6 fallback \u751F\u6548", "\u901A\u5E38\u8868\u793A\u65E9\u671F\u5E74\u4EFD\u4ECD\u80FD\u7EE7\u7EED\u5237\u65B0\u3002"],
-            ["rollback \u72B6\u6001: failed", "\u5019\u9009\u5237\u65B0\u5931\u8D25\u540E\u6062\u590D\u5FEB\u7167\u4E5F\u5931\u8D25", "\u9700\u8981\u91CD\u70B9\u590D\u5236 debug \u7ED9\u7EF4\u62A4\u8005\u3002"],
-            ["\u5929\u6587\u6A21\u578B: precession enabled", "\u56FA\u5B9A\u5929\u7403\u56FE\u5C42\u63A5\u5165\u5C81\u5DEE\u663E\u793A\u6846\u67B6", "\u7528\u4E8E\u6392\u67E5 J2000 \u4E0E\u5F53\u524D\u65E5\u671F\u5750\u6807\u662F\u5426\u6DF7\u7528\u3002"]
-          ] },
-          { type: "paragraph", html: "\u590D\u5236 debug \u65F6\u5C3D\u91CF\u590D\u5236\u5B8C\u6574\u9762\u677F\uFF0C\u4E0D\u8981\u53EA\u622A\u4E00\u884C\u3002\u6D4F\u89C8\u5668\u89C6\u53E3\u3001\u661F\u56FE\u5C3A\u5BF8\u3001\u65F6\u95F4\u94FE\u8DEF\u548C\u5929\u6587\u6A21\u578B\u5F80\u5F80\u9700\u8981\u4E00\u8D77\u770B\u3002" }
+          {
+            type: "table",
+            headers: ["\u5B57\u6BB5\u6216\u72B6\u6001", "\u542B\u4E49", "\u600E\u4E48\u5224\u65AD"],
+            rows: [
+              [
+                "map / canvas / svg \u5C3A\u5BF8\u4E00\u81F4\u6027: OK",
+                "\u661F\u56FE\u5BB9\u5668\u3001\u753B\u5E03\u548C\u53E0\u52A0\u5C42\u5C3A\u5BF8\u540C\u6B65",
+                "\u5982\u679C\u4E0D\u662F OK\uFF0C\u4F18\u5148\u67E5 resize\u3001\u79FB\u52A8\u7AEF\u89C6\u53E3\u6216 D3 \u5185\u90E8\u5C3A\u5BF8\u3002"
+              ],
+              [
+                "visualViewport \u4E0E canvas \u5C3A\u5BF8\u5DEE\u5F02",
+                "\u771F\u5B9E\u624B\u673A\u53EF\u89C1\u533A\u57DF\u548C\u753B\u5E03\u5C3A\u5BF8\u4E0D\u540C\u6B65",
+                "\u53EF\u80FD\u89E3\u91CA\u661F\u56FE\u88AB\u9650\u5236\u5728\u65E7\u6846\u91CC\u7684\u95EE\u9898\u3002"
+              ],
+              [
+                "\u65F6\u95F4\u5237\u65B0\u94FE\u8DEF: recovered by fallback",
+                "\u7B2C\u4E09\u65B9 skyview \u5931\u8D25\uFF0C\u4F46\u9879\u76EE fallback \u5DF2\u6062\u590D",
+                "\u4E0D\u662F\u81F4\u547D\u9519\u8BEF\u3002"
+              ],
+              [
+                "\u5730\u5E73 fallback: ok",
+                "\u5730\u65B9\u6052\u661F\u65F6 fallback \u751F\u6548",
+                "\u901A\u5E38\u8868\u793A\u65E9\u671F\u5E74\u4EFD\u4ECD\u80FD\u7EE7\u7EED\u5237\u65B0\u3002"
+              ],
+              [
+                "rollback \u72B6\u6001: failed",
+                "\u5019\u9009\u5237\u65B0\u5931\u8D25\u540E\u6062\u590D\u5FEB\u7167\u4E5F\u5931\u8D25",
+                "\u9700\u8981\u91CD\u70B9\u590D\u5236 debug \u7ED9\u7EF4\u62A4\u8005\u3002"
+              ],
+              [
+                "\u5929\u6587\u6A21\u578B: precession enabled",
+                "\u56FA\u5B9A\u5929\u7403\u56FE\u5C42\u63A5\u5165\u5C81\u5DEE\u663E\u793A\u6846\u67B6",
+                "\u7528\u4E8E\u6392\u67E5 J2000 \u4E0E\u5F53\u524D\u65E5\u671F\u5750\u6807\u662F\u5426\u6DF7\u7528\u3002"
+              ]
+            ]
+          },
+          {
+            type: "paragraph",
+            html: "\u63A7\u5236\u53F0\u4E2D\u7684\u661F\u5EA7\u8FB9\u754C\u8BCA\u65AD\u4F1A\u68C0\u67E5\u8FB9\u754C\u7EBF\u6570\u91CF\u3001\u76F8\u90BB\u661F\u5EA7\u914D\u5BF9\u3001\u7F3A\u5C11\u8FB9\u754C\u7684\u661F\u5EA7\u3001\u7591\u4F3C\u91CD\u590D\u8FB9\u754C\u3001\u60AC\u7A7A\u7AEF\u70B9\u3001\u8DE8\u65E5\u671F\u7EBF\u7247\u6BB5\u548C\u6781\u533A\u7247\u6BB5\u3002\u5B83\u7528\u4E8E\u5224\u65AD\u8FB9\u754C\u5F02\u5E38\u662F\u6570\u636E\u95EE\u9898\u3001\u8DE8 0\xB0 \u7ECF\u7EBF\u95EE\u9898\u3001\u6781\u533A\u6295\u5F71\u95EE\u9898\uFF0C\u8FD8\u662F\u6E32\u67D3\u88C1\u526A\u95EE\u9898\u3002"
+          },
+          {
+            type: "paragraph",
+            html: "\u590D\u5236 debug \u65F6\u5C3D\u91CF\u590D\u5236\u5B8C\u6574\u9762\u677F\uFF0C\u4E0D\u8981\u53EA\u622A\u4E00\u884C\u3002\u6D4F\u89C8\u5668\u89C6\u53E3\u3001\u661F\u56FE\u5C3A\u5BF8\u3001\u65F6\u95F4\u94FE\u8DEF\u548C\u5929\u6587\u6A21\u578B\u5F80\u5F80\u9700\u8981\u4E00\u8D77\u770B\u3002"
+          }
         ]
       },
       {
         id: "data-content-organization",
         title: "16. \u6570\u636E\u6587\u4EF6\u4E0E\u5185\u5BB9\u6587\u4EF6\u5982\u4F55\u7EC4\u7EC7",
         blocks: [
-          { type: "paragraph", html: "\u9879\u76EE\u628A\u4E0D\u540C\u7C7B\u578B\u8D44\u6599\u5206\u5F00\u7BA1\u7406\uFF1A\u5929\u6587\u6570\u636E\u5B58\u653E\u6052\u661F\u3001\u661F\u5EA7\u3001\u661F\u5B98\u3001\u8FB9\u754C\u548C\u57CE\u5E02\uFF1B\u5185\u5BB9\u6570\u636E\u5B58\u653E\u8BF4\u660E\u4E66\uFF1BUI \u6587\u6848\u548C\u72B6\u6001\u63D0\u793A\u9010\u6B65\u72EC\u7ACB\u7BA1\u7406\u3002\u8FD9\u6837\u53EF\u4EE5\u907F\u514D\u4E00\u4E2A HTML \u6587\u4EF6\u540C\u65F6\u627F\u62C5\u9875\u9762\u7ED3\u6784\u3001\u8BF4\u660E\u4E66\u6B63\u6587\u3001\u6570\u636E\u548C\u903B\u8F91\u3002" },
-          { type: "table", headers: ["\u7C7B\u522B", "\u4F8B\u5B50", "\u4E3A\u4EC0\u4E48\u5206\u5F00"], rows: [
-            ["\u5929\u6587\u6570\u636E", "\u6052\u661F\u3001\u661F\u5B98\u3001\u661F\u5EA7\u7EBF\u3001\u8FB9\u754C\u3001\u94F6\u6CB3", "\u4F53\u91CF\u5927\uFF0C\u7ED3\u6784\u7A33\u5B9A\uFF0C\u4E3B\u8981\u4F9B\u6E32\u67D3\u548C\u641C\u7D22\u4F7F\u7528\u3002"],
-            ["\u5185\u5BB9\u6570\u636E", "\u5E2E\u52A9\u8BF4\u660E\u4E66", "\u7ECF\u5E38\u6269\u5199\u548C\u8C03\u6574\u7AE0\u8282\uFF0C\u4E0D\u5E94\u6C61\u67D3 HTML\u3002"],
-            ["UI \u6587\u6848", "\u6309\u94AE\u540D\u3001\u72B6\u6001\u63D0\u793A", "\u65B9\u4FBF\u591A\u8BED\u8A00\u548C\u7EDF\u4E00\u7BA1\u7406\u3002"],
-            ["\u67B6\u6784\u6587\u6863", "\u7EF4\u62A4\u8005\u8BF4\u660E", "\u7528\u4E8E\u8BB0\u5F55\u6E90\u7801\u7ED3\u6784\u548C\u5B9E\u73B0\u7EC6\u8282\u3002"]
-          ] }
+          {
+            type: "paragraph",
+            html: "\u9879\u76EE\u628A\u4E0D\u540C\u7C7B\u578B\u8D44\u6599\u5206\u5F00\u7BA1\u7406\uFF1A\u5929\u6587\u6570\u636E\u5B58\u653E\u6052\u661F\u3001\u661F\u5EA7\u3001\u661F\u5B98\u3001\u8FB9\u754C\u548C\u57CE\u5E02\uFF1B\u5185\u5BB9\u6570\u636E\u5B58\u653E\u8BF4\u660E\u4E66\uFF1BUI \u6587\u6848\u548C\u72B6\u6001\u63D0\u793A\u9010\u6B65\u72EC\u7ACB\u7BA1\u7406\u3002\u8FD9\u6837\u53EF\u4EE5\u907F\u514D\u4E00\u4E2A HTML \u6587\u4EF6\u540C\u65F6\u627F\u62C5\u9875\u9762\u7ED3\u6784\u3001\u8BF4\u660E\u4E66\u6B63\u6587\u3001\u6570\u636E\u548C\u903B\u8F91\u3002"
+          },
+          {
+            type: "table",
+            headers: ["\u7C7B\u522B", "\u4F8B\u5B50", "\u4E3A\u4EC0\u4E48\u5206\u5F00"],
+            rows: [
+              [
+                "\u5929\u6587\u6570\u636E",
+                "\u6052\u661F\u3001\u661F\u5B98\u3001\u661F\u5EA7\u7EBF\u3001\u8FB9\u754C\u3001\u94F6\u6CB3",
+                "\u4F53\u91CF\u5927\uFF0C\u7ED3\u6784\u7A33\u5B9A\uFF0C\u4E3B\u8981\u4F9B\u6E32\u67D3\u548C\u641C\u7D22\u4F7F\u7528\u3002"
+              ],
+              ["\u5185\u5BB9\u6570\u636E", "\u5E2E\u52A9\u8BF4\u660E\u4E66", "\u7ECF\u5E38\u6269\u5199\u548C\u8C03\u6574\u7AE0\u8282\uFF0C\u4E0D\u5E94\u6C61\u67D3 HTML\u3002"],
+              ["UI \u6587\u6848", "\u6309\u94AE\u540D\u3001\u72B6\u6001\u63D0\u793A", "\u65B9\u4FBF\u591A\u8BED\u8A00\u548C\u7EDF\u4E00\u7BA1\u7406\u3002"],
+              ["\u67B6\u6784\u6587\u6863", "\u7EF4\u62A4\u8005\u8BF4\u660E", "\u7528\u4E8E\u8BB0\u5F55\u6E90\u7801\u7ED3\u6784\u548C\u5B9E\u73B0\u7EC6\u8282\u3002"]
+            ]
+          }
         ]
       },
       {
         id: "d3-celestial-role",
         title: "17. D3-Celestial \u4E0E\u672C\u9879\u76EE\u7684\u5206\u5DE5",
         blocks: [
-          { type: "paragraph", html: "D3-Celestial \u662F\u57FA\u7840\u661F\u56FE\u6E32\u67D3\u5F15\u64CE\uFF0C\u8D1F\u8D23\u5F88\u591A\u5E95\u5C42\u6295\u5F71\u548C\u5929\u7403\u7ED8\u5236\u5DE5\u4F5C\u3002\u5B83\u50CF\u4E00\u53F0\u901A\u7528\u661F\u56FE\u53D1\u52A8\u673A\uFF1B\u672C\u9879\u76EE\u5219\u50CF\u9A7E\u9A76\u8231\u548C\u5916\u6302\u4EEA\u8868\uFF0C\u628A\u5730\u70B9\u3001\u65F6\u95F4\u3001\u4E2D\u6587\u661F\u5B98\u3001\u4F20\u7EDF\u5929\u533A\u3001\u8C03\u8BD5\u4FE1\u606F\u548C\u79FB\u52A8\u7AEF\u4F53\u9A8C\u8865\u9F50\u3002" },
-          { type: "paragraph", html: "\u7B2C\u4E09\u65B9\u5E93\u89E3\u51B3\u901A\u7528\u95EE\u9898\uFF0C\u4F46\u4E0D\u4F1A\u5B8C\u5168\u7406\u89E3\u672C\u9879\u76EE\u7684\u6587\u5316\u56FE\u5C42\u3001\u5E2E\u52A9\u6587\u6863\u3001\u83DC\u5355\u7ED3\u6784\u548C debug \u9700\u6C42\u3002\u56E0\u6B64\u9879\u76EE\u4EE3\u7801\u4F1A\u5728\u5916\u5C42\u505A\u6570\u636E\u6865\u63A5\u3001\u5C3A\u5BF8\u540C\u6B65\u3001\u62FE\u53D6\u3001\u6807\u7B7E\u548C\u72B6\u6001\u7BA1\u7406\u3002" }
+          {
+            type: "paragraph",
+            html: "D3-Celestial \u662F\u57FA\u7840\u661F\u56FE\u6E32\u67D3\u5F15\u64CE\uFF0C\u8D1F\u8D23\u5F88\u591A\u5E95\u5C42\u6295\u5F71\u548C\u5929\u7403\u7ED8\u5236\u5DE5\u4F5C\u3002\u5B83\u50CF\u4E00\u53F0\u901A\u7528\u661F\u56FE\u53D1\u52A8\u673A\uFF1B\u672C\u9879\u76EE\u5219\u50CF\u9A7E\u9A76\u8231\u548C\u5916\u6302\u4EEA\u8868\uFF0C\u628A\u5730\u70B9\u3001\u65F6\u95F4\u3001\u4E2D\u6587\u661F\u5B98\u3001\u4F20\u7EDF\u5929\u533A\u3001\u8C03\u8BD5\u4FE1\u606F\u548C\u79FB\u52A8\u7AEF\u4F53\u9A8C\u8865\u9F50\u3002"
+          },
+          {
+            type: "paragraph",
+            html: "\u7B2C\u4E09\u65B9\u5E93\u89E3\u51B3\u901A\u7528\u95EE\u9898\uFF0C\u4F46\u4E0D\u4F1A\u5B8C\u5168\u7406\u89E3\u672C\u9879\u76EE\u7684\u6587\u5316\u56FE\u5C42\u3001\u5E2E\u52A9\u6587\u6863\u3001\u83DC\u5355\u7ED3\u6784\u548C debug \u9700\u6C42\u3002\u56E0\u6B64\u9879\u76EE\u4EE3\u7801\u4F1A\u5728\u5916\u5C42\u505A\u6570\u636E\u6865\u63A5\u3001\u5C3A\u5BF8\u540C\u6B65\u3001\u62FE\u53D6\u3001\u6807\u7B7E\u548C\u72B6\u6001\u7BA1\u7406\u3002"
+          }
         ]
       },
       {
         id: "source-architecture",
         title: "18. \u6E90\u7801\u67B6\u6784\u4E0E\u5B9E\u73B0\u6982\u89C8",
         blocks: [
-          { type: "paragraph", html: "\u4ECE\u521D\u5B66\u8005\u89D2\u5EA6\u770B\uFF0C\u9879\u76EE\u53EF\u4EE5\u5206\u6210\u56DB\u5C42\uFF1A\u9875\u9762\u58F3\u3001\u5E94\u7528\u72B6\u6001\u3001\u6570\u636E\u5185\u5BB9\u3001\u661F\u56FE\u5F15\u64CE\u3002\u9875\u9762\u58F3\u63D0\u4F9B\u6309\u94AE\u548C\u5BB9\u5668\uFF1B\u5E94\u7528\u72B6\u6001\u8BB0\u5F55\u5730\u70B9\u3001\u65F6\u95F4\u3001\u56FE\u5C42\u548C\u89C6\u89D2\uFF1B\u6570\u636E\u5185\u5BB9\u63D0\u4F9B\u6052\u661F\u3001\u661F\u5B98\u3001\u8BF4\u660E\u4E66\uFF1B\u661F\u56FE\u5F15\u64CE\u628A\u5929\u7403\u5750\u6807\u753B\u6210\u5C4F\u5E55\u56FE\u50CF\u3002" },
-          { type: "table", headers: ["\u8DEF\u5F84", "\u4F5C\u7528"], rows: [
-            ["index.html", "\u9875\u9762\u5165\u53E3\u548C\u57FA\u672C DOM \u58F3\u3002"],
-            ["src/app.ts", "\u4E3B\u72B6\u6001\u3001\u4EA4\u4E92\u3001\u83DC\u5355\u3001\u641C\u7D22\u3001debug \u548C\u661F\u56FE\u63A7\u5236\u3002"],
-            ["src/config.ts", "\u9ED8\u8BA4\u914D\u7F6E\u3001\u83DC\u5355\u987A\u5E8F\u3001\u4E3B\u9898\u3001\u5929\u6587\u6A21\u578B\u8FB9\u754C\u3002"],
-            ["src/data/content/help-manual.ts", "\u5E2E\u52A9\u8BF4\u660E\u4E66\u7ED3\u6784\u5316\u5185\u5BB9\u3002"],
-            ["src/astronomy/precession.ts", "\u8F7B\u91CF\u5C81\u5DEE\u5750\u6807\u8F6C\u6362\u3002"],
-            ["docs/ARCHITECTURE_GUIDE.md", "\u66F4\u5B8C\u6574\u7684\u7EF4\u62A4\u8005\u67B6\u6784\u8BF4\u660E\u3002"]
-          ] },
-          { type: "note", html: "\u7F51\u9875\u5E2E\u52A9\u6587\u6863\u4F1A\u89E3\u91CA\u4E3B\u8981\u903B\u8F91\uFF1B\u771F\u6B63\u8981\u6539\u4EE3\u7801\u65F6\uFF0C\u8BF7\u518D\u8BFB docs/ARCHITECTURE_GUIDE.md\u3002" }
+          {
+            type: "paragraph",
+            html: "\u4ECE\u521D\u5B66\u8005\u89D2\u5EA6\u770B\uFF0C\u9879\u76EE\u53EF\u4EE5\u5206\u6210\u56DB\u5C42\uFF1A\u9875\u9762\u58F3\u3001\u5E94\u7528\u72B6\u6001\u3001\u6570\u636E\u5185\u5BB9\u3001\u661F\u56FE\u5F15\u64CE\u3002\u9875\u9762\u58F3\u63D0\u4F9B\u6309\u94AE\u548C\u5BB9\u5668\uFF1B\u5E94\u7528\u72B6\u6001\u8BB0\u5F55\u5730\u70B9\u3001\u65F6\u95F4\u3001\u56FE\u5C42\u548C\u89C6\u89D2\uFF1B\u6570\u636E\u5185\u5BB9\u63D0\u4F9B\u6052\u661F\u3001\u661F\u5B98\u3001\u8BF4\u660E\u4E66\uFF1B\u661F\u56FE\u5F15\u64CE\u628A\u5929\u7403\u5750\u6807\u753B\u6210\u5C4F\u5E55\u56FE\u50CF\u3002"
+          },
+          {
+            type: "table",
+            headers: ["\u8DEF\u5F84", "\u4F5C\u7528"],
+            rows: [
+              ["index.html", "\u9875\u9762\u5165\u53E3\u548C\u57FA\u672C DOM \u58F3\u3002"],
+              ["src/app.ts", "\u4E3B\u72B6\u6001\u3001\u4EA4\u4E92\u3001\u83DC\u5355\u3001\u641C\u7D22\u3001debug \u548C\u661F\u56FE\u63A7\u5236\u3002"],
+              ["src/config.ts", "\u9ED8\u8BA4\u914D\u7F6E\u3001\u83DC\u5355\u987A\u5E8F\u3001\u4E3B\u9898\u3001\u5929\u6587\u6A21\u578B\u8FB9\u754C\u3002"],
+              ["src/data/content/help-manual.ts", "\u5E2E\u52A9\u8BF4\u660E\u4E66\u7ED3\u6784\u5316\u5185\u5BB9\u3002"],
+              ["src/astronomy/precession.ts", "\u8F7B\u91CF\u5C81\u5DEE\u5750\u6807\u8F6C\u6362\u3002"],
+              ["docs/ARCHITECTURE_GUIDE.md", "\u66F4\u5B8C\u6574\u7684\u7EF4\u62A4\u8005\u67B6\u6784\u8BF4\u660E\u3002"]
+            ]
+          },
+          {
+            type: "note",
+            html: "\u7F51\u9875\u5E2E\u52A9\u6587\u6863\u4F1A\u89E3\u91CA\u4E3B\u8981\u903B\u8F91\uFF1B\u771F\u6B63\u8981\u6539\u4EE3\u7801\u65F6\uFF0C\u8BF7\u518D\u8BFB docs/ARCHITECTURE_GUIDE.md\u3002"
+          }
         ]
       },
       {
         id: "version-info",
         title: "19. \u7248\u672C\u4FE1\u606F",
         blocks: [
-          { type: "paragraph", html: "\u5F53\u524D\u8BF4\u660E\u4E66\u5BF9\u5E94\u9879\u76EE\u7248\u672C\uFF1A<strong>5.5.1</strong>\u3002" },
-          { type: "paragraph", html: "\u672C\u7248\u672C\u8865\u5168 Messier \u4E0E Caldwell \u6DF1\u7A7A\u76EE\u5F55\uFF0C\u5E76\u540C\u6B65\u66F4\u65B0\u6DF1\u7A7A\u6570\u636E\u6765\u6E90\u3001\u641C\u7D22\u522B\u540D\u548C\u7EF4\u62A4\u6587\u6863\u3002\u66F4\u5B8C\u6574\u7684\u7248\u672C\u8BB0\u5F55\u89C1 <code>docs/VERSION_HISTORY.md</code>\u3002" }
+          {
+            type: "paragraph",
+            html: "\u5F53\u524D\u8BF4\u660E\u4E66\u5BF9\u5E94\u9879\u76EE\u7248\u672C\uFF1A<strong>5.5.3</strong>\u3002"
+          },
+          {
+            type: "paragraph",
+            html: "\u672C\u7248\u672C\u4FEE\u590D 5.5.2 \u5F15\u5165\u7684\u661F\u540D\u663E\u793A\u517C\u5BB9\u95EE\u9898\uFF0C\u5E76\u4FEE\u590D\u661F\u56FE\u5DF2\u7ED8\u5236\u4F46 loading \u906E\u7F69\u4E0D\u5173\u95ED\u3001\u5BFC\u81F4\u90E8\u5206\u4EA4\u4E92\u88AB\u8DF3\u8FC7\u7684\u95EE\u9898\u3002\u66F4\u5B8C\u6574\u7684\u7248\u672C\u8BB0\u5F55\u89C1 <code>docs/VERSION_HISTORY.md</code>\u3002"
+          }
         ]
       }
     ]
@@ -1850,7 +3224,9 @@
     if (!Number.isFinite(jd)) return null;
     const T = julianCenturyFromJulianDate(jd);
     const L0 = normalizeDegrees(280.46646 + 36000.76983 * T + 3032e-7 * T * T);
-    const M = normalizeDegrees(357.52911 + 35999.05029 * T - 1537e-7 * T * T + T * T * T / 2449e4);
+    const M = normalizeDegrees(
+      357.52911 + 35999.05029 * T - 1537e-7 * T * T + T * T * T / 2449e4
+    );
     const Mrad = degToRad(M);
     const e = 0.016708634 - T * (42037e-9 + 1267e-10 * T);
     const C = (1.914602 - T * (4817e-6 + 14e-6 * T)) * Math.sin(Mrad) + (0.019993 - 101e-6 * T) * Math.sin(2 * Mrad) + 289e-6 * Math.sin(3 * Mrad);
@@ -1860,7 +3236,11 @@
     const apparentLongitude = trueLongitude - 569e-5 - 478e-5 * Math.sin(degToRad(omega));
     const meanObliquity = meanObliquityMeeusDeg(T);
     const trueObliquity = meanObliquity + 256e-5 * Math.cos(degToRad(omega));
-    const [ra, dec] = eclipticToEquatorialDeg(apparentLongitude, 0, trueObliquity);
+    const [ra, dec] = eclipticToEquatorialDeg(
+      apparentLongitude,
+      0,
+      trueObliquity
+    );
     const distanceAu = 1.000001018 * (1 - e * e) / (1 + e * Math.cos(degToRad(trueAnomaly)));
     return {
       julianDate: jd,
@@ -1891,8 +3271,13 @@
     ["\u6B8B\u6708", "Waning Crescent"]
   ];
   function calculateMoonPhase(moonLongitudeDeg, sunLongitudeDeg) {
-    const elongation = normalizeDegrees(Number(moonLongitudeDeg) - Number(sunLongitudeDeg));
-    const illumination = Math.max(0, Math.min(1, (1 - Math.cos(degToRad(elongation))) / 2));
+    const elongation = normalizeDegrees(
+      Number(moonLongitudeDeg) - Number(sunLongitudeDeg)
+    );
+    const illumination = Math.max(
+      0,
+      Math.min(1, (1 - Math.cos(degToRad(elongation))) / 2)
+    );
     const ageDays = elongation / 360 * SYNODIC_MONTH_DAYS;
     const index = Math.floor((elongation + 22.5) % 360 / 45);
     const [phaseNameZh, phaseNameEn] = PHASE_NAMES[index] || PHASE_NAMES[0];
@@ -2043,11 +3428,21 @@
     const T2 = T * T;
     const T3 = T2 * T;
     const T4 = T3 * T;
-    const Lp = normalizeDegrees(218.3164477 + 481267.88123421 * T - 15786e-7 * T2 + T3 / 538841 - T4 / 65194e3);
-    const D = normalizeDegrees(297.8501921 + 445267.1114034 * T - 18819e-7 * T2 + T3 / 545868 - T4 / 113065e3);
-    const M = normalizeDegrees(357.5291092 + 35999.0502909 * T - 1536e-7 * T2 + T3 / 2449e4);
-    const Mp = normalizeDegrees(134.9633964 + 477198.8675055 * T + 87414e-7 * T2 + T3 / 69699 - T4 / 14712e3);
-    const F = normalizeDegrees(93.272095 + 483202.0175233 * T - 36539e-7 * T2 - T3 / 3526e3 + T4 / 86331e4);
+    const Lp = normalizeDegrees(
+      218.3164477 + 481267.88123421 * T - 15786e-7 * T2 + T3 / 538841 - T4 / 65194e3
+    );
+    const D = normalizeDegrees(
+      297.8501921 + 445267.1114034 * T - 18819e-7 * T2 + T3 / 545868 - T4 / 113065e3
+    );
+    const M = normalizeDegrees(
+      357.5291092 + 35999.0502909 * T - 1536e-7 * T2 + T3 / 2449e4
+    );
+    const Mp = normalizeDegrees(
+      134.9633964 + 477198.8675055 * T + 87414e-7 * T2 + T3 / 69699 - T4 / 14712e3
+    );
+    const F = normalizeDegrees(
+      93.272095 + 483202.0175233 * T - 36539e-7 * T2 - T3 / 3526e3 + T4 / 86331e4
+    );
     const E = 1 - 2516e-6 * T - 74e-7 * T2;
     let sumLongitude = 0;
     let sumDistance = 0;
@@ -2080,7 +3475,10 @@
     const obliquity = meanObliquityMeeusDeg(T);
     const [ra, dec] = eclipticToEquatorialDeg(longitude, latitude, obliquity);
     const sun = calculateMeeusSun(date);
-    const phase = calculateMoonPhase(longitude, sun ? sun.apparentLongitudeDeg : longitude);
+    const phase = calculateMoonPhase(
+      longitude,
+      sun ? sun.apparentLongitudeDeg : longitude
+    );
     return {
       julianDate: jd,
       julianCentury: T,
@@ -2090,7 +3488,9 @@
       rightAscensionDeg: ra,
       declinationDeg: dec,
       meanLongitudeDeg: Lp,
-      elongationDeg: normalizeDegrees(longitude - (sun ? sun.apparentLongitudeDeg : longitude)),
+      elongationDeg: normalizeDegrees(
+        longitude - (sun ? sun.apparentLongitudeDeg : longitude)
+      ),
       sunMeanAnomalyDeg: M,
       moonMeanAnomalyDeg: Mp,
       argumentOfLatitudeDeg: F,
@@ -2100,11 +3500,31 @@
 
   // src/astronomy/bodies-simple.ts
   var BODY_NAMES = {
-    sol: { id: "sol", name: "Sun", en: "Sun", zh: "\u592A\u9633", desig: "Sol", sym: "\u2609" },
-    lun: { id: "lun", name: "Moon", en: "Moon", zh: "\u6708\u7403", desig: "Lun", sym: "\u263E" }
+    sol: {
+      id: "sol",
+      name: "Sun",
+      en: "Sun",
+      zh: "\u592A\u9633",
+      desig: "Sol",
+      sym: "\u2609"
+    },
+    lun: {
+      id: "lun",
+      name: "Moon",
+      en: "Moon",
+      zh: "\u6708\u7403",
+      desig: "Lun",
+      sym: "\u263E"
+    }
   };
   function cloneBody(base, id) {
-    const fallback = BODY_NAMES[id] || { id, name: id, en: id, zh: id, desig: id };
+    const fallback = BODY_NAMES[id] || {
+      id,
+      name: id,
+      en: id,
+      zh: id,
+      desig: id
+    };
     return {
       ...fallback,
       ...base || {},
@@ -2131,7 +3551,10 @@
     if (id === "sol") {
       const sun = calculateMeeusSun(date);
       if (!sun) return null;
-      const epochCoord = [normalizeCelestialLongitude(sun.rightAscensionDeg), sun.declinationDeg];
+      const epochCoord = [
+        normalizeCelestialLongitude(sun.rightAscensionDeg),
+        sun.declinationDeg
+      ];
       base.ephemeris = {
         ...base.ephemeris,
         pos: epochCoord.slice(),
@@ -2152,7 +3575,10 @@
     if (id === "lun") {
       const moon = calculateMeeusMoon(date);
       if (!moon) return null;
-      const epochCoord = [normalizeCelestialLongitude(moon.rightAscensionDeg), moon.declinationDeg];
+      const epochCoord = [
+        normalizeCelestialLongitude(moon.rightAscensionDeg),
+        moon.declinationDeg
+      ];
       base.ephemeris = {
         ...base.ephemeris,
         pos: epochCoord.slice(),
@@ -2189,12 +3615,19 @@
       const observer = origin(options.date).spherical();
       const planets = objects.map((fn) => {
         const id = fn.id();
-        const meeusBody = id === "sol" || id === "lun" ? calculateMeeusSolarSystemBody(id, fn, options.date, observer, options.displayCoordinateForEpochEquatorial) : null;
+        const meeusBody = id === "sol" || id === "lun" ? calculateMeeusSolarSystemBody(
+          id,
+          fn,
+          options.date,
+          observer,
+          options.displayCoordinateForEpochEquatorial
+        ) : null;
         if (meeusBody) return meeusBody;
         const body = fn(options.date).equatorial(observer);
         const ep = body && body.ephemeris || {};
         const eq = ep.pos;
-        if (!eq || !Number.isFinite(eq[0]) || !Number.isFinite(eq[1])) return null;
+        if (!eq || !Number.isFinite(eq[0]) || !Number.isFinite(eq[1]))
+          return null;
         const epochCoord = options.epochEquatorialFromJ2000(eq);
         return {
           id,
@@ -2204,7 +3637,10 @@
           displayCoord: options.displayCoordinateForEpochEquatorial(epochCoord)
         };
       }).filter(Boolean);
-      options.noteTimeRenderDebug({ planetStatus: "ok", planetCount: planets.length });
+      options.noteTimeRenderDebug({
+        planetStatus: "ok",
+        planetCount: planets.length
+      });
       return planets;
     } catch (err) {
       console.warn("Planet position calculation failed", err);
@@ -2225,7 +3661,9 @@
     ["ArrowRight", "\u2192"]
   ];
   function pressedArrowKeysLabel(keys) {
-    const labels = ARROW_KEY_LABELS.filter(([key]) => keys.has(key)).map(([, label]) => label);
+    const labels = ARROW_KEY_LABELS.filter(([key]) => keys.has(key)).map(
+      ([, label]) => label
+    );
     return labels.length ? labels.join(" ") : "none";
   }
   function keyboardPanDeltaForKey(key, step) {
@@ -2302,13 +3740,19 @@
       const speed = Number(cfg("interaction.keyboardPanDegreesPerSecond", 72)) || 72;
       const vector = keyboardPanUnitVector(skyPanKeys);
       if (!vector) return;
-      applyKeyboardPanDelta(vector.lon * speed * dt, vector.lat * speed * dt, "keyboard pan frame");
+      applyKeyboardPanDelta(
+        vector.lon * speed * dt,
+        vector.lat * speed * dt,
+        "keyboard pan frame"
+      );
     }
     function animationLoop(now) {
       const dt = Math.min(0.25, (now - getLastFrame()) / 1e3);
       setLastFrame(now);
       if (getPlaying()) {
-        const current = DateTime.fromISO(String(state.instant || ""), { zone: "utc" });
+        const current = DateTime.fromISO(String(state.instant || ""), {
+          zone: "utc"
+        });
         const nextInstant = (current.isValid ? current : DateTime.fromISO(defaults.instant, { zone: "utc" })).plus({ seconds: dt * Number(state.speed) });
         const iso = nextInstant.isValid ? nextInstant.toISO() : null;
         const renderDate = renderableDateForDateTime(nextInstant);
@@ -2320,7 +3764,9 @@
             jsDateYear: String(renderDate.getUTCFullYear()),
             julianDate: (julianDateFromDate3(renderDate) || 0).toFixed(5),
             updateSource: "playback",
-            precision: precisionStatusForYear2(nextInstant.setZone(safeZoneForCoordinates2()).year),
+            precision: precisionStatusForYear2(
+              nextInstant.setZone(safeZoneForCoordinates2()).year
+            ),
             refreshHealth: "healthy",
             currentFatalError: "-",
             recoveredOriginalError: "-",
@@ -2391,7 +3837,10 @@
       deepSky: !!cfg("defaults.showDeepSky", false),
       speed: Number(cfg("defaults.timeSpeed", 3600)),
       panelOpen: !!cfg("defaults.panelOpen", true),
-      poleAxisConstraintEnabled: !!cfg("defaults.poleAxisConstraintEnabled", true),
+      poleAxisConstraintEnabled: !!cfg(
+        "defaults.poleAxisConstraintEnabled",
+        true
+      ),
       projection: cfg("defaults.projection", "airy"),
       coordinateSystem: cfg("defaults.coordinateSystem", "horizontal"),
       menuCollapsed: Array.isArray(cfg("defaults.menuCollapsed", [])) ? cfg("defaults.menuCollapsed", []).slice() : [],
@@ -2482,7 +3931,10 @@
       state.cityEn = cityEn;
       syncControls();
       updateHUD(true);
-      noteTimeRenderDebug({ updateSource: "location update", rollbackStatus: "unused" });
+      noteTimeRenderDebug({
+        updateSource: "location update",
+        rollbackStatus: "unused"
+      });
       const ok = updateSkyView(true, "location update");
       if (!ok) {
         Object.assign(state, previousLocation);
@@ -2495,7 +3947,10 @@
         );
         return false;
       }
-      updateActiveTimeDebug({ updateSource: "location update", rollbackStatus: "unused" });
+      updateActiveTimeDebug({
+        updateSource: "location update",
+        rollbackStatus: "unused"
+      });
       save();
       if (notice)
         showToast(`${t("locationApplied")} \xB7 ${resolved} \xB7 ${t("sameInstant")}`);
@@ -2679,11 +4134,16 @@
     const safeMin = Number.isFinite(min) ? min : 1;
     const safeMax = Math.max(safeMin, Number.isFinite(max) ? max : safeMin);
     const number = Number(value);
-    return Math.max(safeMin, Math.min(safeMax, Number.isFinite(number) ? number : safeMin));
+    return Math.max(
+      safeMin,
+      Math.min(safeMax, Number.isFinite(number) ? number : safeMin)
+    );
   }
   function viewMapScale(view, fallback, clamp) {
-    if (view && Object.prototype.hasOwnProperty.call(view, "mapScale")) return clamp(view.mapScale);
-    if (view && Object.prototype.hasOwnProperty.call(view, "zoom")) return clamp(view.zoom);
+    if (view && Object.prototype.hasOwnProperty.call(view, "mapScale"))
+      return clamp(view.mapScale);
+    if (view && Object.prototype.hasOwnProperty.call(view, "zoom"))
+      return clamp(view.zoom);
     return clamp(fallback);
   }
   function viewKey(projection, coordinateSystem) {
@@ -2704,7 +4164,10 @@
     if (options.isHorizontalView) {
       return {
         ...options.fallbackView,
-        mapScale: options.viewMapScale(options.savedView || options.fallbackView, options.fallbackView.mapScale)
+        mapScale: options.viewMapScale(
+          options.savedView || options.fallbackView,
+          options.fallbackView.mapScale
+        )
       };
     }
     return options.savedView || options.fallbackView;
@@ -2816,7 +4279,8 @@
     return "-";
   }
   function debugRefreshHealthValue(value, zh) {
-    if (value === "recovered") return zh ? "fallback \u5DF2\u6062\u590D" : "recovered by fallback";
+    if (value === "recovered")
+      return zh ? "fallback \u5DF2\u6062\u590D" : "recovered by fallback";
     if (value === "failed") return zh ? "\u5931\u8D25" : "failed";
     if (value === "pending") return zh ? "\u5237\u65B0\u4E2D" : "pending";
     return zh ? "\u6B63\u5E38" : "healthy";
@@ -2834,7 +4298,17 @@
   // src/ui/debug-overlay.ts
   function createDebugOverlayController(services) {
     const {
-      dom: { $, document: document2, window: window2, navigator: navigator2, screen: screen2, performance: performance2, setTimeout: setTimeout2, clearTimeout: clearTimeout2, requestAnimationFrame: requestAnimationFrame2 },
+      dom: {
+        $,
+        document: document2,
+        window: window2,
+        navigator: navigator2,
+        screen: screen2,
+        performance: performance2,
+        setTimeout: setTimeout2,
+        clearTimeout: clearTimeout2,
+        requestAnimationFrame: requestAnimationFrame2
+      },
       appState,
       config: { cfg, getMapScale },
       layout: { elementRect: elementRect2 },
@@ -2868,10 +4342,7 @@
     const { timeRenderDebug, timeFieldDebugText: timeFieldDebugText2 } = time;
     const { astronomyModelDebug } = astronomy;
     const { poleAxisDebug } = interaction;
-    const {
-      mobileResizeDebug,
-      getLayerSelectionNodes
-    } = layers;
+    const { mobileResizeDebug, getLayerSelectionNodes } = layers;
     let debugVisible = !!initialVisible, lastDebugUpdate = 0, lastDebugPlainText = "", debugCopyStatus = "idle", debugCopyTimer = null, debugLastAction = "none", debugFramePending = false;
     let debugPointerActive = false, debugPointerSkyCoord = null, playing = false, skyReady = false, rebuildInProgress = false, pointerMoved = false, clickStart = null, paneDrag = null, rotationPointerDrag = null;
     function refreshRuntimeState() {
@@ -2893,7 +4364,10 @@
     }
     function debugRefreshIntervalMs() {
       const configured = Number(cfg("debug.refreshMs", 200));
-      return Math.max(100, Math.min(500, Number.isFinite(configured) ? configured : 200));
+      return Math.max(
+        100,
+        Math.min(500, Number.isFinite(configured) ? configured : 200)
+      );
     }
     function noteDebugLastAction(action) {
       debugLastAction = action || "none";
@@ -2921,7 +4395,9 @@
       const loadedStars = Array.isArray(ORIGINAL_STARS) ? ORIGINAL_STARS.length : 0;
       const threshold = Number(state.magnitude);
       const starsWithinMagnitude = Array.isArray(ORIGINAL_STARS) ? ORIGINAL_STARS.filter((feature) => {
-        const mag = Number(feature && feature.properties && feature.properties.mag);
+        const mag = Number(
+          feature && feature.properties && feature.properties.mag
+        );
         return Number.isFinite(mag) && Number.isFinite(threshold) && mag <= threshold;
       }).length : 0;
       return {
@@ -3063,24 +4539,37 @@
         debugValue(point.visible ? "visible" : "unavailable")
       ];
     }
-    function debugStatusSummary({ view: view2, poleStats, rotationStats, controlMode, uiMatches }) {
+    function debugStatusSummary({
+      view: view2,
+      poleStats,
+      rotationStats,
+      controlMode,
+      uiMatches
+    }) {
       const errors = [];
       const warnings = [];
       const center = view2 && view2.center;
       const eulerActive = controlMode === "Euler constrained";
       const quaternionActive = controlMode === "Quaternion free";
       if (!uiMatches) errors.push("toggle mismatch");
-      if (!Object.prototype.hasOwnProperty.call(PROJECTION_DEFAULTS, state.projection))
+      if (!Object.prototype.hasOwnProperty.call(
+        PROJECTION_DEFAULTS,
+        state.projection
+      ))
         errors.push("projection invalid");
-      if (!["horizontal", "equatorial", "ecliptic", "galactic"].includes(state.coordinateSystem))
+      if (!["horizontal", "equatorial", "ecliptic", "galactic"].includes(
+        state.coordinateSystem
+      ))
         errors.push("coordinate invalid");
       if (!Array.isArray(center) || center.slice(0, 3).some((value) => !Number.isFinite(Number(value))))
         errors.push("rendered view non-finite");
       if (eulerActive && !poleStats.polesDefined) errors.push("poles undefined");
       if (quaternionActive) {
         const norm = Number(rotationStats.norm);
-        if (!Number.isFinite(norm) || Math.abs(norm - 1) > 0.05) errors.push("quaternion norm error");
-        else if (Math.abs(norm - 1) > 1e-3) warnings.push("quaternion norm drift");
+        if (!Number.isFinite(norm) || Math.abs(norm - 1) > 0.05)
+          errors.push("quaternion norm error");
+        else if (Math.abs(norm - 1) > 1e-3)
+          warnings.push("quaternion norm drift");
       }
       if (poleStats.guardActive) warnings.push("pole guard active");
       if (poleStats.polesDefined && (!poleStats.positivePoint || !poleStats.negativePoint))
@@ -3366,11 +4855,17 @@
         ),
         debugLine(
           zh ? "\u6587\u6863\u89C6\u53E3 documentElement" : "documentElement viewport",
-          debugSizeParts(document2.documentElement.clientWidth, document2.documentElement.clientHeight)
+          debugSizeParts(
+            document2.documentElement.clientWidth,
+            document2.documentElement.clientHeight
+          )
         ),
         debugLine(
           zh ? "visualViewport \u5C3A\u5BF8" : "visualViewport size",
-          window2.visualViewport ? debugSizeParts(window2.visualViewport.width, window2.visualViewport.height) : [debugValue("-")]
+          window2.visualViewport ? debugSizeParts(
+            window2.visualViewport.width,
+            window2.visualViewport.height
+          ) : [debugValue("-")]
         ),
         debugLine(
           zh ? "visualViewport scale/offset" : "visualViewport scale/offset",
@@ -3383,12 +4878,27 @@
             debugValue(Math.round(window2.visualViewport.offsetTop || 0))
           ] : [debugValue("-")]
         ),
-        debugLine(zh ? "\u5C4F\u5E55 screen" : "screen", debugSizeParts(screen2.width, screen2.height)),
-        debugLine(zh ? "\u5C4F\u5E55\u65B9\u5411" : "orientation", [debugValue(screen2.orientation?.type || String(window2.orientation ?? "-"))]),
-        debugLine(zh ? "\u6700\u540E resize \u6765\u6E90" : "last resize source", [debugValue(mobileResizeDebug.lastSource)]),
-        debugLine(zh ? "\u6700\u540E resize \u72B6\u6001" : "last resize status", [debugValue(mobileResizeDebug.lastStatus)]),
-        debugLine(zh ? "\u6700\u540E resize \u65F6\u95F4" : "last resize time", [debugValue(mobileResizeDebug.lastAt)]),
-        debugLine(zh ? "\u6700\u540E resize \u9519\u8BEF" : "last resize error", [debugValue(mobileResizeDebug.lastError)]),
+        debugLine(
+          zh ? "\u5C4F\u5E55 screen" : "screen",
+          debugSizeParts(screen2.width, screen2.height)
+        ),
+        debugLine(zh ? "\u5C4F\u5E55\u65B9\u5411" : "orientation", [
+          debugValue(
+            screen2.orientation?.type || String(window2.orientation ?? "-")
+          )
+        ]),
+        debugLine(zh ? "\u6700\u540E resize \u6765\u6E90" : "last resize source", [
+          debugValue(mobileResizeDebug.lastSource)
+        ]),
+        debugLine(zh ? "\u6700\u540E resize \u72B6\u6001" : "last resize status", [
+          debugValue(mobileResizeDebug.lastStatus)
+        ]),
+        debugLine(zh ? "\u6700\u540E resize \u65F6\u95F4" : "last resize time", [
+          debugValue(mobileResizeDebug.lastAt)
+        ]),
+        debugLine(zh ? "\u6700\u540E resize \u9519\u8BEF" : "last resize error", [
+          debugValue(mobileResizeDebug.lastError)
+        ]),
         debugLine(label.dpr, [
           debugValue(Number(window2.devicePixelRatio || 1).toFixed(2))
         ]),
@@ -3414,13 +4924,30 @@
         debugLine(label.mapScale, debugScaleParts(metrics.scale)),
         debugLine(label.renderMode, [debugValue(metrics.renderMode || "FULL")]),
         debugLine(label.viewportTriggerRule, [
-          debugValue("virtualSkyWidth > viewportWidth && virtualSkyHeight > viewportHeight")
+          debugValue(
+            "virtualSkyWidth > viewportWidth && virtualSkyHeight > viewportHeight"
+          )
         ]),
-        debugLine(label.viewportTriggerResult, debugBoolParts(!!metrics.viewportTrigger)),
-        debugLine(label.baseSkySize, debugSizeParts(metrics.baseWidth, metrics.baseHeight)),
-        debugLine(label.virtualSkySize, debugSizeParts(metrics.virtualWidth, metrics.virtualHeight)),
-        debugLine(label.canvasCssTarget, debugSizeParts(metrics.canvasCssWidth, metrics.canvasCssHeight)),
-        debugLine(label.canvasBitmapTarget, debugSizeParts(metrics.canvasBitmapWidth, metrics.canvasBitmapHeight)),
+        debugLine(
+          label.viewportTriggerResult,
+          debugBoolParts(!!metrics.viewportTrigger)
+        ),
+        debugLine(
+          label.baseSkySize,
+          debugSizeParts(metrics.baseWidth, metrics.baseHeight)
+        ),
+        debugLine(
+          label.virtualSkySize,
+          debugSizeParts(metrics.virtualWidth, metrics.virtualHeight)
+        ),
+        debugLine(
+          label.canvasCssTarget,
+          debugSizeParts(metrics.canvasCssWidth, metrics.canvasCssHeight)
+        ),
+        debugLine(
+          label.canvasBitmapTarget,
+          debugSizeParts(metrics.canvasBitmapWidth, metrics.canvasBitmapHeight)
+        ),
         debugLine(label.overflow, [
           debugSep("X="),
           debugValue(Math.round(metrics.overflowX)),
@@ -3431,7 +4958,10 @@
         ]),
         debugLine(label.paneCenter, debugPointParts(paneCenter)),
         debugLine(label.mapCenter, debugPointParts(mapCenter)),
-        debugLine(label.centerDelta, debugCenterDeltaParts(centerDelta, formatSigned)),
+        debugLine(
+          label.centerDelta,
+          debugCenterDeltaParts(centerDelta, formatSigned)
+        ),
         debugLine(label.canvasCenter, debugPointParts(canvasCenter)),
         debugLine(
           label.canvasCenterDelta,
@@ -3481,12 +5011,20 @@
             ).length
           )
         ]),
-        debugLine(label.starStats, [debugValue(zh ? "\u5F53\u524D\u661F\u7B49\u9608\u503C\u5BF9\u5E94\u6570\u91CF" : "current magnitude threshold count")]),
-        debugLine(label.loadedStars, [debugValue(starMagnitudeStats.loadedStars)]),
+        debugLine(label.starStats, [
+          debugValue(
+            zh ? "\u5F53\u524D\u661F\u7B49\u9608\u503C\u5BF9\u5E94\u6570\u91CF" : "current magnitude threshold count"
+          )
+        ]),
+        debugLine(label.loadedStars, [
+          debugValue(starMagnitudeStats.loadedStars)
+        ]),
         debugLine(label.starLimit, [
           debugValue(Number(starMagnitudeStats.threshold || 0).toFixed(2))
         ]),
-        debugLine(label.starsWithinMagnitude, [debugValue(starMagnitudeStats.starsWithinMagnitude)]),
+        debugLine(label.starsWithinMagnitude, [
+          debugValue(starMagnitudeStats.starsWithinMagnitude)
+        ]),
         debugLine(zh ? "\u5F53\u524D\u65F6\u533A" : "current time zone", [
           debugValue(timeRenderDebug.timezone || state.zone || "-")
         ]),
@@ -3575,9 +5113,10 @@
         debugLine(zh ? "\u8FDC\u65E5\u671F\u7CBE\u5EA6" : "date precision", [
           debugValue(timeRenderDebug.precision || "-")
         ]),
-        debugLine(zh ? "\u5DF2\u6062\u590D\u7684 skyview \u539F\u59CB\u9519\u8BEF" : "recovered skyview original error", [
-          debugValue(timeRenderDebug.recoveredOriginalError || "-")
-        ]),
+        debugLine(
+          zh ? "\u5DF2\u6062\u590D\u7684 skyview \u539F\u59CB\u9519\u8BEF" : "recovered skyview original error",
+          [debugValue(timeRenderDebug.recoveredOriginalError || "-")]
+        ),
         debugLine(zh ? "\u5F53\u524D\u81F4\u547D\u9519\u8BEF" : "current fatal error", [
           debugValue(timeRenderDebug.currentFatalError || "-")
         ]),
@@ -3588,7 +5127,9 @@
           debugValue(timeRenderDebug.errorStack || "-")
         ]),
         debugBlankLine(),
-        debugGroup(zh ? "\u5929\u6587\u6A21\u578B / \u5386\u5143\u4E00\u81F4\u6027" : "Astronomy model / epoch consistency"),
+        debugGroup(
+          zh ? "\u5929\u6587\u6A21\u578B / \u5386\u5143\u4E00\u81F4\u6027" : "Astronomy model / epoch consistency"
+        ),
         debugLine(zh ? "\u6E90\u6570\u636E\u5386\u5143" : "source epoch", [
           debugValue(astronomyModelDebug.sourceEpoch || "-")
         ]),
@@ -3601,9 +5142,14 @@
         debugLine(zh ? "\u5C81\u5DEE\u6A21\u578B" : "precession model", [
           debugValue(astronomyModelDebug.precessionModel || "-")
         ]),
-        debugLine(zh ? "\u7AE0\u52A8 / \u81EA\u884C / \u6298\u5C04" : "nutation / proper motion / refraction", [
-          debugValue(`${astronomyModelDebug.nutation} / ${astronomyModelDebug.properMotion} / ${astronomyModelDebug.refraction}`)
-        ]),
+        debugLine(
+          zh ? "\u7AE0\u52A8 / \u81EA\u884C / \u6298\u5C04" : "nutation / proper motion / refraction",
+          [
+            debugValue(
+              `${astronomyModelDebug.nutation} / ${astronomyModelDebug.properMotion} / ${astronomyModelDebug.refraction}`
+            )
+          ]
+        ),
         debugLine(zh ? "J2000 \u8D77\u7B97\u5112\u7565\u4E16\u7EAA T" : "Julian centuries from J2000", [
           debugValue(astronomyModelDebug.julianCenturiesT || "-")
         ]),
@@ -3636,7 +5182,9 @@
           debugValue(astronomyModelDebug.fixedLayerPrecession || "-")
         ]),
         debugLine(zh ? "\u8FB9\u754C / \u661F\u5B98\u5C81\u5DEE" : "boundary / asterism precession", [
-          debugValue(`${astronomyModelDebug.boundaryPrecession || "-"} / ${astronomyModelDebug.asterismPrecession || "-"}`)
+          debugValue(
+            `${astronomyModelDebug.boundaryPrecession || "-"} / ${astronomyModelDebug.asterismPrecession || "-"}`
+          )
         ]),
         debugLine(zh ? "\u641C\u7D22/\u62FE\u53D6\u5750\u6807\u6846\u67B6" : "search/pick coordinate frame", [
           debugValue(astronomyModelDebug.searchPickFrame || "-")
@@ -3677,7 +5225,9 @@
         debugLine(label.poleAxisConstraint, [
           debugValue(poleAxisConstraintEnabled() ? "ON" : "OFF"),
           debugSep(" ui="),
-          debugValue(poleToggle ? poleToggle.checked ? "ON" : "OFF" : "unavailable")
+          debugValue(
+            poleToggle ? poleToggle.checked ? "ON" : "OFF" : "unavailable"
+          )
         ]),
         debugLine(label.viewControlMode, [
           debugValue(controlMode),
@@ -3686,14 +5236,26 @@
         // Debug 里分开最终渲染视角、欧拉状态和四元数状态：渲染视角来自
         // Celestial.rotate()，欧拉/四元数只在各自控制模式 active 时显示，避免旧缓存误导。
         debugLine(label.renderedViewState, debugRenderedViewParts(view2.center)),
-        debugLine(label.eulerState, debugEulerStateParts(view2.center, eulerActive)),
-        debugLine(label.quaternionState, debugQuaternionStateParts(rotationStats, quaternionActive)),
+        debugLine(
+          label.eulerState,
+          debugEulerStateParts(view2.center, eulerActive)
+        ),
+        debugLine(
+          label.quaternionState,
+          debugQuaternionStateParts(rotationStats, quaternionActive)
+        ),
         // 方向键长按只显示 active/idle 和当前按键，不显示每帧移动量；
         // 每帧 delta 太快且难截图，真正有价值的是动画帧循环是否启动和是否释放。
-        debugLine(label.keyboardPan, [debugValue(skyPanKeys.size ? "active" : "idle")]),
+        debugLine(label.keyboardPan, [
+          debugValue(skyPanKeys.size ? "active" : "idle")
+        ]),
         debugLine(label.pressedArrowKeys, [debugValue(pressedArrowKeysLabel2())]),
-        debugLine(label.poleGuard, [debugValue(poleStats.guardActive ? "ON" : "OFF")]),
-        debugLine(label.poleGuardReason, [debugValue(poleStats.guardReason || "none")]),
+        debugLine(label.poleGuard, [
+          debugValue(poleStats.guardActive ? "ON" : "OFF")
+        ]),
+        debugLine(label.poleGuardReason, [
+          debugValue(poleStats.guardReason || "none")
+        ]),
         debugLine(label.poleGuardThreshold, [
           debugSep("enter="),
           debugValue(formatAngle(poleGuardEnterDeg())),
@@ -3712,11 +5274,19 @@
         debugLine(label.pointerNegativePoleDistance, [
           debugValue(formatAngleOrUnavailable(poleStats.pointerNegativeDeg))
         ]),
-        debugLine(label.positivePolePoint, debugPolePointParts(poleStats.positivePoint)),
-        debugLine(label.negativePolePoint, debugPolePointParts(poleStats.negativePoint)),
+        debugLine(
+          label.positivePolePoint,
+          debugPolePointParts(poleStats.positivePoint)
+        ),
+        debugLine(
+          label.negativePolePoint,
+          debugPolePointParts(poleStats.negativePoint)
+        ),
         debugLine(label.poleCenterline, [
           debugSep("x="),
-          debugValue(Number.isFinite(poleStats.centerlineX) ? Math.round(poleStats.centerlineX) : "-"),
+          debugValue(
+            Number.isFinite(poleStats.centerlineX) ? Math.round(poleStats.centerlineX) : "-"
+          ),
           debugUnit("px")
         ]),
         debugLine(label.poleDx, [
@@ -3727,7 +5297,9 @@
           debugValue(formatSigned(poleStats.negativeDx)),
           debugUnit("px")
         ]),
-        debugLine(label.poleAxisAngle, [debugValue(formatAngle(poleStats.axisAngleDeg))]),
+        debugLine(label.poleAxisAngle, [
+          debugValue(formatAngle(poleStats.axisAngleDeg))
+        ]),
         debugLine(label.poleAxisAngleRule, [
           debugValue("0\xB0 = vertical, 90\xB0 = horizontal")
         ]),
@@ -3776,7 +5348,10 @@
     function queueDebugOverlayUpdate() {
       if (!debugVisible || debugFramePending) return;
       debugFramePending = true;
-      const delay = Math.max(0, debugRefreshIntervalMs() - (performance2.now() - lastDebugUpdate));
+      const delay = Math.max(
+        0,
+        debugRefreshIntervalMs() - (performance2.now() - lastDebugUpdate)
+      );
       setTimeout2(() => {
         requestAnimationFrame2(() => {
           debugFramePending = false;
@@ -3935,7 +5510,8 @@
         copyParts.push(section.title);
         (section.blocks || []).forEach((block) => {
           sectionEl.appendChild(createGuideElement(block));
-          if (block.html) copyParts.push(String(block.html).replace(/<[^>]+>/g, ""));
+          if (block.html)
+            copyParts.push(String(block.html).replace(/<[^>]+>/g, ""));
           if (block.text) copyParts.push(block.text);
           if (block.items) copyParts.push(block.items.join("\n"));
         });
@@ -3954,7 +5530,9 @@
     }
     function guidePageTitle(page) {
       const heading = page.querySelector("h3");
-      return String(heading?.textContent || (guideLang() === "zh" ? "\u8BF4\u660E" : "Guide")).trim();
+      return String(
+        heading?.textContent || (guideLang() === "zh" ? "\u8BF4\u660E" : "Guide")
+      ).trim();
     }
     function closeGuidePageDropdown() {
       const dropdown = $("guide-page-dropdown");
@@ -3970,7 +5548,9 @@
       if (!dropdown || !trigger || !menu) return;
       dropdown.classList.add("open");
       trigger.setAttribute("aria-expanded", "true");
-      const active = menu.querySelector('[aria-selected="true"]');
+      const active = menu.querySelector(
+        '[aria-selected="true"]'
+      );
       active?.scrollIntoView({ block: "nearest" });
     }
     function toggleGuidePageDropdown() {
@@ -3982,7 +5562,9 @@
     function focusGuidePageOption(offset) {
       const menu = $("guide-page-menu");
       if (!menu) return;
-      const options = Array.from(menu.querySelectorAll(".guide-page-option"));
+      const options = Array.from(
+        menu.querySelectorAll(".guide-page-option")
+      );
       if (!options.length) return;
       const active = document.activeElement;
       const current = Math.max(0, options.indexOf(active));
@@ -4046,7 +5628,10 @@
       if (!article) return;
       const sections = guidePages(article);
       const lang = guideLang();
-      pageByLang[lang] = Math.max(0, Math.min(index, Math.max(0, sections.length - 1)));
+      pageByLang[lang] = Math.max(
+        0,
+        Math.min(index, Math.max(0, sections.length - 1))
+      );
       updateGuidePaginationUI(true);
     }
     function setGuidePage(offset) {
@@ -4054,7 +5639,10 @@
       if (!article) return;
       const sections = guidePages(article);
       const lang = guideLang();
-      pageByLang[lang] = Math.max(0, Math.min(pageByLang[lang] + offset, Math.max(0, sections.length - 1)));
+      pageByLang[lang] = Math.max(
+        0,
+        Math.min(pageByLang[lang] + offset, Math.max(0, sections.length - 1))
+      );
       updateGuidePaginationUI(true);
     }
     function openTechnicalGuide() {
@@ -4361,6 +5949,15 @@
     copiedObject: "\u5929\u4F53\u4FE1\u606F\u5DF2\u590D\u5236",
     westernCultureMeaning: "\u897F\u65B9\u6587\u5316",
     chineseCultureMeaning: "\u4E2D\u56FD\u6587\u5316",
+    brightStarRank: "\u5168\u5929\u4EAE\u661F\u6392\u540D",
+    rankPrefix: "\u7B2C ",
+    rankSuffix: " \u4EAE\u661F\uFF08\u6309\u5F53\u524D\u661F\u8868\u89C6\u661F\u7B49\u6392\u5E8F\uFF09",
+    starNameExplanation: "\u661F\u540D\u8BF4\u660E",
+    bestViewingMonths: "\u5927\u81F4\u9002\u5408\u89C2\u6D4B\u6708\u4EFD\uFF1A",
+    relatedConstellations: "\u76F8\u5173\u661F\u5EA7",
+    fourSymbol: "\u56DB\u8C61",
+    enclosure: "\u6240\u5C5E\u4E09\u57A3",
+    fenye: "\u5206\u91CE",
     noReliableTraditionalBoundary: "\u5F53\u524D\u6570\u636E\u4E0D\u628A\u6BCF\u4E2A\u661F\u5B98\u5F3A\u884C\u5C01\u95ED\uFF1B\u4EC5\u663E\u793A\u4E09\u57A3\u3001\u56DB\u8C61\u3001\u8FD1\u5357\u6781\u661F\u533A\u53CA\u53EF\u9009\u4E3B\u9898\u533A\u3002",
     resetDefaults: "\u6062\u590D\u9ED8\u8BA4\u914D\u7F6E",
     resetDefaultsConfirm: "\u786E\u5B9A\u6062\u590D\u9ED8\u8BA4\u914D\u7F6E\u5417\uFF1F\u8FD9\u4F1A\u91CD\u7F6E\u5730\u70B9\u3001\u65F6\u95F4\u3001\u89C6\u56FE\u3001\u5B57\u4F53\u548C\u6240\u6709\u663E\u793A\u53C2\u6570\u3002"
@@ -4422,6 +6019,15 @@
     copiedObject: "Object information copied",
     westernCultureMeaning: "Western culture",
     chineseCultureMeaning: "Chinese culture",
+    brightStarRank: "Bright-star rank",
+    rankPrefix: "#",
+    rankSuffix: " by visual magnitude in the bundled star catalog",
+    starNameExplanation: "Name note",
+    bestViewingMonths: "Approx. best months: ",
+    relatedConstellations: "Related constellations",
+    fourSymbol: "Four Symbol",
+    enclosure: "Enclosure",
+    fenye: "Fenye allocation",
     noReliableTraditionalBoundary: "Individual asterisms are not forced into fake closed polygons; only higher-level traditional regions and optional thematic zones are shown.",
     resetDefaults: "Reset to defaults",
     resetDefaultsConfirm: "Reset all settings to defaults? This will reset location, time, view, font size, and all display options."
@@ -4606,8 +6212,12 @@
           markTimeFieldSelected(field);
         });
         field.addEventListener("input", () => {
-          field.value = field.value.replace(id === "time-year" ? /[^0-9-]/g : /\D/g, "");
-          if (id === "time-year") field.value = field.value.replace(/(?!^)-/g, "");
+          field.value = field.value.replace(
+            id === "time-year" ? /[^0-9-]/g : /\D/g,
+            ""
+          );
+          if (id === "time-year")
+            field.value = field.value.replace(/(?!^)-/g, "");
           setTimeFieldWidths2();
           noteTimeRenderDebug({
             inputStatus: "draft",
@@ -4619,7 +6229,8 @@
           field.classList.remove("time-part-active");
           field.dataset.replaceOnType = "1";
           const shell = $("observer-time-fields");
-          if (shell && event.relatedTarget && shell.contains(event.relatedTarget)) return;
+          if (shell && event.relatedTarget && shell.contains(event.relatedTarget))
+            return;
           syncTimeInputs();
         });
         field.addEventListener("keydown", (e) => {
@@ -4674,8 +6285,14 @@
           }
         });
       });
-      $("time-step-minus").addEventListener("click", () => shiftObserverTimeByControl(-1));
-      $("time-step-plus").addEventListener("click", () => shiftObserverTimeByControl(1));
+      $("time-step-minus").addEventListener(
+        "click",
+        () => shiftObserverTimeByControl(-1)
+      );
+      $("time-step-plus").addEventListener(
+        "click",
+        () => shiftObserverTimeByControl(1)
+      );
       $("time-step-value").addEventListener("keydown", (e) => {
         if (e.key === "Enter" && !e.isComposing) {
           e.preventDefault();
@@ -4690,7 +6307,11 @@
       document2.querySelectorAll("[data-shift-unit]").forEach(
         (btn) => btn.addEventListener(
           "click",
-          () => shiftObserverTime(btn.dataset.shiftUnit, btn.dataset.shiftValue, "shortcut")
+          () => shiftObserverTime(
+            btn.dataset.shiftUnit,
+            btn.dataset.shiftValue,
+            "shortcut"
+          )
         )
       );
       $("play").addEventListener("click", () => {
@@ -4818,7 +6439,8 @@
       });
       $("guide-page-menu").addEventListener("click", (e) => e.stopPropagation());
       document2.addEventListener("click", (e) => {
-        if (!$("guide-page-dropdown")?.contains(e.target)) closeGuidePageDropdown();
+        if (!$("guide-page-dropdown")?.contains(e.target))
+          closeGuidePageDropdown();
       });
       $("guide-next-page").addEventListener("click", () => setGuidePage(1));
       $("reset-defaults-btn").addEventListener("click", resetAllDefaults);
@@ -4880,7 +6502,8 @@
         state.lang === "zh" ? "\u661F\u56FE\u533A\u57DF\uFF0C\u53EF\u7528\u65B9\u5411\u952E\u5E73\u79FB" : "Sky map, use arrow keys to pan"
       );
       document2.addEventListener("keydown", (event) => {
-        if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
+        if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key))
+          return;
         if (isTextEditingTarget2(event.target)) return;
         if (!getSkyReady() || !window2.Celestial) return;
         event.preventDefault();
@@ -4892,7 +6515,8 @@
         }
       });
       document2.addEventListener("keyup", (event) => {
-        if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
+        if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key))
+          return;
         if (skyPanKeys.delete(event.key)) {
           if (!skyPanKeys.size) flushKeyboardPanView();
           queueDebugOverlayUpdate();
@@ -4914,11 +6538,20 @@
         }
       });
       window2.addEventListener("resize", () => scheduleSkyResize("window.resize"));
-      window2.addEventListener("orientationchange", () => scheduleSkyResize("orientationchange"));
+      window2.addEventListener(
+        "orientationchange",
+        () => scheduleSkyResize("orientationchange")
+      );
       window2.addEventListener("pageshow", () => scheduleSkyResize("pageshow"));
       if (window2.visualViewport) {
-        window2.visualViewport.addEventListener("resize", () => scheduleSkyResize("visualViewport.resize"));
-        window2.visualViewport.addEventListener("scroll", () => scheduleSkyResize("visualViewport.scroll"));
+        window2.visualViewport.addEventListener(
+          "resize",
+          () => scheduleSkyResize("visualViewport.resize")
+        );
+        window2.visualViewport.addEventListener(
+          "scroll",
+          () => scheduleSkyResize("visualViewport.scroll")
+        );
       }
     }
     return { bind };
@@ -4951,6 +6584,76 @@
     return [norm(ra), radToDeg(dec)];
   }
 
+  // src/data/star-display.ts
+  function cleanStarNameToken(value) {
+    return String(value || "").replace(/[\u200e\u200f\u202a-\u202e]/g, "").replace(/\s+/g, " ").trim();
+  }
+  function isBareFlamsteedNumber(value) {
+    return /^[0-9]+[A-Za-z]?$/u.test(cleanStarNameToken(value));
+  }
+  function isBareChineseOrdinal(value) {
+    return /^[一二三四五六七八九十]$/u.test(cleanStarNameToken(value));
+  }
+  function normalizeHip(value, fallbackId) {
+    const raw = cleanStarNameToken(value || fallbackId);
+    if (!raw) return "";
+    const digits = raw.replace(/^HIP\s*/i, "").replace(/[^\d]/g, "");
+    return digits ? `HIP ${digits}` : "";
+  }
+  function bayerName(value, lang, meta = {}) {
+    const bayer = cleanStarNameToken(value);
+    if (!bayer) return "";
+    const suffix = lang === "zh" ? meta.zh || meta.abbr : meta.abbr || meta.gen;
+    return suffix ? `${bayer} ${suffix}` : "";
+  }
+  function flamsteedName(value, lang, meta = {}) {
+    const flam = cleanStarNameToken(value);
+    if (!isBareFlamsteedNumber(flam)) return "";
+    const suffix = lang === "zh" ? meta.zh || meta.abbr : meta.abbr || meta.gen;
+    return suffix ? `${flam} ${suffix}` : "";
+  }
+  function variableName(value, lang, meta = {}) {
+    const variable = cleanStarNameToken(value);
+    if (!variable || isBareFlamsteedNumber(variable)) return "";
+    const suffix = lang === "zh" ? meta.zh || meta.abbr : meta.abbr || meta.gen;
+    return suffix ? `${variable} ${suffix}` : variable;
+  }
+  function formatStarDisplayName(options) {
+    const entry = options.nameEntry || {};
+    const constellation = options.constellation || {};
+    const simplify = options.simplifyChinese || ((value) => value);
+    const zh = cleanStarNameToken(entry.zh);
+    const proper = cleanStarNameToken(entry.name);
+    const candidates = options.lang === "zh" ? [
+      zh && !isBareChineseOrdinal(zh) ? simplify(zh) : "",
+      proper,
+      bayerName(entry.bayer || entry.desig, "zh", constellation),
+      flamsteedName(entry.flam || entry.desig, "zh", constellation),
+      variableName(entry.var, "zh", constellation),
+      options.allowHipFallback ? normalizeHip(entry.hip, options.id) : ""
+    ] : [
+      proper,
+      bayerName(entry.bayer || entry.desig, "en", constellation),
+      flamsteedName(entry.flam || entry.desig, "en", constellation),
+      variableName(entry.var, "en", constellation),
+      options.allowHipFallback ? normalizeHip(entry.hip, options.id) : ""
+    ];
+    return candidates.find(Boolean) || "";
+  }
+  function explainStarDisplayNameZh(nameEntry) {
+    const desig = cleanStarNameToken(nameEntry.desig);
+    const zh = cleanStarNameToken(nameEntry.zh);
+    if (isBareFlamsteedNumber(desig) || isBareFlamsteedNumber(nameEntry.flam))
+      return "\u8BE5\u661F\u6CA1\u6709\u5E38\u7528\u4E13\u540D\u65F6\u4F1A\u4F7F\u7528 Flamsteed \u7F16\u53F7\uFF1B\u7F16\u53F7\u5FC5\u987B\u548C\u661F\u5EA7\u540D\u4E00\u8D77\u8BFB\uFF0C\u4F8B\u5982\u201C29 \u53CC\u9C7C\u5EA7\u201D\uFF0C\u4E0D\u80FD\u53EA\u8BFB\u4F5C\u201C29\u201D\u3002";
+    if (zh && /[一二三四五六七八九十]$/u.test(zh))
+      return "\u4E2D\u6587\u661F\u540D\u672B\u5C3E\u7684\u4E00\u3001\u4E8C\u3001\u4E09\u591A\u4E3A\u661F\u5B98\u5185\u90E8\u5E8F\u53F7\uFF0C\u4F8B\u5982\u201C\u7EC7\u5973\u4E00\u201D\u201C\u58C1\u5BBF\u4E00\u201D\uFF0C\u5FC5\u987B\u548C\u661F\u5B98\u540D\u8FDE\u5728\u4E00\u8D77\u7406\u89E3\u3002";
+    if (nameEntry.bayer)
+      return "\u8BE5\u540D\u79F0\u5C5E\u4E8E Bayer \u547D\u540D\u4F53\u7CFB\uFF0C\u7528\u5E0C\u814A\u5B57\u6BCD\u52A0\u661F\u5EA7\u540D\u8868\u793A\u6052\u661F\u3002";
+    if (nameEntry.var)
+      return "\u8BE5\u540D\u79F0\u5C5E\u4E8E\u53D8\u91CF\u661F\u547D\u540D\u4F53\u7CFB\uFF0C\u5B57\u6BCD\u7F16\u53F7\u9700\u8981\u548C\u661F\u5EA7\u540D\u4E00\u8D77\u4F7F\u7528\u3002";
+    return "";
+  }
+
   // src/ui/object-info.ts
   function infoPairLine(a, b, c, d) {
     return `<div class="floating-info-pair"><span class="floating-field"><b>${a}\uFF1A</b><em>${b || "\u2014"}</em></span><span class="floating-field"><b>${c}\uFF1A</b><em>${d || "\u2014"}</em></span></div>`;
@@ -4977,7 +6680,9 @@
       horizontalFor,
       cityName,
       formatLocalLong,
-      objectLabel
+      objectLabel,
+      extendedCulture,
+      brightStarRanks
     } = options;
     let chineseStarAsterismIndex = null;
     const chineseAsterismCoordinateEntries = [];
@@ -5037,7 +6742,12 @@
     }
     function uniqueTokens(values) {
       const seen = /* @__PURE__ */ new Set();
-      return values.map((value) => cleanNameToken(value, { allowSingleGreek: false, allowBareNumber: false })).filter(Boolean).filter((value) => {
+      return values.map(
+        (value) => cleanNameToken(value, {
+          allowSingleGreek: false,
+          allowBareNumber: false
+        })
+      ).filter(Boolean).filter((value) => {
         const key = value.toLowerCase();
         if (seen.has(key)) return false;
         seen.add(key);
@@ -5050,22 +6760,38 @@
       );
       const props = feature && feature.properties || {};
       return {
-        gen: cleanNameToken(props.gen || props.name || abbr, { allowBareNumber: true }),
-        zh: cleanNameToken(props.zh || abbr, { allowBareNumber: true })
+        gen: cleanNameToken(props.gen || props.name || abbr, {
+          allowBareNumber: true
+        }),
+        zh: cleanNameToken(props.zh || abbr, { allowBareNumber: true }),
+        abbr: cleanNameToken(props.desig || feature?.id || abbr, {
+          allowBareNumber: true
+        })
       };
     }
     function formatStarNameTokens(obj) {
       if (!obj || obj.type !== "star") return [];
       const n = starNames2[String(obj.d && obj.d.id)] || {};
       const meta = constellationMeta(n.c);
-      const bayer = cleanNameToken(n.bayer || n.desig, { allowSingleGreek: true });
+      const safeDisplay = formatStarDisplayName({
+        id: obj.d && obj.d.id,
+        nameEntry: n,
+        lang: state.lang === "zh" ? "zh" : "en",
+        constellation: meta,
+        simplifyChinese: simplifyChinese2,
+        allowHipFallback: false
+      });
+      const bayer = cleanNameToken(n.bayer || n.desig, {
+        allowSingleGreek: true
+      });
       const flam = cleanNameToken(n.flam, { allowBareNumber: true });
-      const values = [n.zh, n.name];
+      const values = [safeDisplay, n.zh, n.name];
       if (bayer && meta.gen && !/^\d+$/u.test(bayer)) {
         values.push(`${bayer} ${meta.gen}`);
         if (meta.zh) values.push(`${meta.zh} ${bayer}`);
       }
-      if (flam && meta.gen && /^\d+[A-Za-z]?$/u.test(flam)) values.push(`${flam} ${meta.gen}`);
+      if (flam && meta.gen && /^\d+[A-Za-z]?$/u.test(flam))
+        values.push(`${flam} ${meta.gen}`);
       return uniqueTokens(values);
     }
     function floatingRowValue(rows, label) {
@@ -5077,7 +6803,9 @@
       if (obj.type === "star") {
         const n = starNames2[String(obj.d.id)] || {};
         const values = [];
-        const hip = cleanNameToken(n.hip || (obj.d.id ? `HIP ${obj.d.id}` : ""), { allowBareNumber: true });
+        const hip = cleanNameToken(n.hip || (obj.d.id ? `HIP ${obj.d.id}` : ""), {
+          allowBareNumber: true
+        });
         const hd = cleanNameToken(n.hd || p.hd, { allowBareNumber: true });
         const hr = cleanNameToken(n.hr || p.hr, { allowBareNumber: true });
         const gaia = cleanNameToken(n.gaia || p.gaia, { allowBareNumber: true });
@@ -5088,7 +6816,8 @@
         return uniqueTokens(values).join(" / ") || floatingRowValue(rows, t("catalogId"));
       }
       if (obj.type === "dso") return p.desig || String(obj.d.id || "\u2014");
-      if (obj.type === "planet") return String(obj.planetId || obj.d.id || "").toUpperCase();
+      if (obj.type === "planet")
+        return String(obj.planetId || obj.d.id || "").toUpperCase();
       return floatingRowValue(rows, t("catalogId"));
     }
     function cultureRowsForImportantStar(obj, p, n) {
@@ -5100,15 +6829,34 @@
       );
       if (!Number.isFinite(Number(p.mag)) || Number(p.mag) > threshold) return [];
       const rows = [], lang = state.lang === "zh" ? "zh" : "en";
-      const western = cultureNotes.westernConstellations && cultureNotes.westernConstellations[n.c];
-      if (western && western[lang])
-        rows.push([t("westernCultureMeaning"), western[lang]]);
+      const western = extendedCulture?.westernConstellations?.[n.c] || cultureNotes.westernConstellations?.[n.c];
+      if (western) {
+        if (western.mythologyZh || western.symbolismZh) {
+          const months = western.bestViewingMonthsNorth?.length ? `${t("bestViewingMonths")}${western.bestViewingMonthsNorth.join(" / ")}` : "";
+          rows.push([
+            t("westernCultureMeaning"),
+            [
+              western.mythologyZh,
+              western.symbolismZh,
+              western.relatedConstellations?.length ? `${t("relatedConstellations")}\uFF1A${western.relatedConstellations.join(" / ")}` : "",
+              months
+            ].filter(Boolean).join(" ")
+          ]);
+        } else if (western[lang])
+          rows.push([t("westernCultureMeaning"), western[lang]]);
+      }
       const asterisms = chineseAsterismsForStar(obj.d && obj.d.id);
       const match = asterisms.find(
-        (name) => cultureNotes.chineseAsterisms && cultureNotes.chineseAsterisms[name]
+        (name) => extendedCulture?.chineseAsterisms?.[name] || cultureNotes.chineseAsterisms?.[name]
       );
       if (match) {
-        const note = cultureNotes.chineseAsterisms[match][lang];
+        const extended = extendedCulture?.chineseAsterisms?.[match];
+        const note = extended ? [
+          extended.meaningZh,
+          extended.fourSymbol ? `${t("fourSymbol")}\uFF1A${extended.fourSymbol}` : "",
+          extended.buTianGeNote,
+          extended.fenye ? `${t("fenye")}\uFF1A${extended.fenye.ancientRegion}\uFF1B${extended.fenye.modernApproximation}\u3002${extended.fenye.caution}` : ""
+        ].filter(Boolean).join(" ") : cultureNotes.chineseAsterisms[match][lang];
         if (note)
           rows.push([
             t("chineseCultureMeaning"),
@@ -5142,13 +6890,52 @@
         const others = formatStarNameTokens(obj);
         if (others.length)
           rows.splice(1, 0, [t("otherNames"), others.join(" / ")]);
+        const rank = brightStarRanks?.get(String(obj.d.id));
+        if (rank)
+          rows.splice(1, 0, [
+            t("brightStarRank"),
+            `${t("rankPrefix")}${rank.rank}${t("rankSuffix")}`
+          ]);
+        const explanation = explainStarDisplayNameZh(n);
+        if (state.lang === "zh" && explanation)
+          rows.push([t("starNameExplanation"), explanation]);
         if (p.bv !== void 0 && p.bv !== "")
           rows.push([t("spectralInfo"), String(p.bv)]);
         rows.push([t("catalogId"), formatCatalogTokens(obj, rows)]);
         rows.push(...cultureRowsForImportantStar(obj, p, n));
       } else if (obj.type === "dso")
         rows.push([t("catalogId"), p.desig || String(obj.d.id)]);
-      else if (obj.type === "planet") {
+      else if (obj.type === "constellation") {
+        const note = extendedCulture?.westernConstellations?.[String(obj.d.id || p.desig || "")];
+        if (note) {
+          rows.push([t("catalogId"), p.desig || String(obj.d.id)]);
+          rows.push([
+            t("westernCultureMeaning"),
+            [
+              note.mythologyZh,
+              note.symbolismZh,
+              note.relatedConstellations?.length ? `${t("relatedConstellations")}\uFF1A${note.relatedConstellations.join(" / ")}` : "",
+              note.bestViewingMonthsNorth?.length ? `${t("bestViewingMonths")}${note.bestViewingMonthsNorth.join(" / ")}` : ""
+            ].filter(Boolean).join(" ")
+          ]);
+        }
+      } else if (obj.type === "asterism") {
+        const name = simplifyChinese2(p.name || p.desig || String(obj.d.id));
+        const note = extendedCulture?.chineseAsterisms?.[name];
+        if (note) {
+          rows.push([t("catalogId"), p.desig || String(obj.d.id)]);
+          rows.push([
+            t("chineseCultureMeaning"),
+            [
+              note.meaningZh,
+              note.fourSymbol ? `${t("fourSymbol")}\uFF1A${note.fourSymbol}` : "",
+              note.enclosure ? `${t("enclosure")}\uFF1A${note.enclosure}` : "",
+              note.buTianGeNote,
+              note.fenye ? `${t("fenye")}\uFF1A${note.fenye.ancientRegion}\uFF1B${note.fenye.modernApproximation}\u3002${note.fenye.caution}` : ""
+            ].filter(Boolean).join(" ")
+          ]);
+        }
+      } else if (obj.type === "planet") {
         const ep = obj.d && obj.d.ephemeris || {};
         if (!["sol", "lun"].includes(obj.planetId) && Number.isFinite(Number(ep.mag)))
           rows.splice(1, 0, [t("magnitude"), Number(ep.mag).toFixed(2)]);
@@ -5190,7 +6977,9 @@
       const type = floatingRowValue(rows, t("objectType"));
       const catalog = formatCatalogTokens(obj, rows);
       const title = cleanNameToken(
-        state.lang === "zh" ? simplifyChinese2(obj.label || objectLabel(obj.type, obj.d || { properties: {} })) : obj.label || objectLabel(obj.type, obj.d || { properties: {} }),
+        state.lang === "zh" ? simplifyChinese2(
+          obj.label || objectLabel(obj.type, obj.d || { properties: {} })
+        ) : obj.label || objectLabel(obj.type, obj.d || { properties: {} }),
         { allowBareNumber: true }
       ) || "\u2014";
       const names = obj.type === "star" ? formatStarNameTokens(obj) : uniqueTokens([floatingRowValue(rows, t("otherNames")), title]);
@@ -5198,7 +6987,25 @@
       const notes = rows.filter(([key, value]) => noteKeys.includes(key) && value).map(([key, value]) => infoSingleLine(key, value)).join("");
       return {
         title,
-        html: infoPairLine(t("objectType"), type, t("catalogId"), catalog) + infoSingleLine(state.lang === "zh" ? "\u540D\u79F0" : "Names", names.join(" / ") || title) + infoPairLine(t("magnitude"), floatingRowValue(rows, t("magnitude")), t("spectralInfo"), floatingRowValue(rows, t("spectralInfo"))) + infoPairLine(t("rightAscension"), floatingRowValue(rows, t("rightAscension")), t("declination"), floatingRowValue(rows, t("declination"))) + infoPairLine(t("altitude"), floatingRowValue(rows, t("altitude")), t("azimuth"), floatingRowValue(rows, t("azimuth"))) + notes
+        html: infoPairLine(t("objectType"), type, t("catalogId"), catalog) + infoSingleLine(
+          state.lang === "zh" ? "\u540D\u79F0" : "Names",
+          names.join(" / ") || title
+        ) + infoPairLine(
+          t("magnitude"),
+          floatingRowValue(rows, t("magnitude")),
+          t("spectralInfo"),
+          floatingRowValue(rows, t("spectralInfo"))
+        ) + infoPairLine(
+          t("rightAscension"),
+          floatingRowValue(rows, t("rightAscension")),
+          t("declination"),
+          floatingRowValue(rows, t("declination"))
+        ) + infoPairLine(
+          t("altitude"),
+          floatingRowValue(rows, t("altitude")),
+          t("azimuth"),
+          floatingRowValue(rows, t("azimuth"))
+        ) + notes
       };
     }
     return {
@@ -5251,56 +7058,85 @@
     options.stars.forEach((feature) => {
       const coord = candidateCoord(feature);
       const names = options.starNames[String(feature.id)] || {};
-      addSearchEntry(entries, "star", feature, coord, [
-        label("star", feature),
-        names.name,
-        names.zh,
-        names.bayer,
-        names.flam,
-        names.hip,
-        names.hd,
-        feature.id ? `HIP ${feature.id}` : ""
-      ], simplify);
+      addSearchEntry(
+        entries,
+        "star",
+        feature,
+        coord,
+        [
+          label("star", feature),
+          names.name,
+          names.zh,
+          names.bayer,
+          names.flam,
+          names.var,
+          names.hip,
+          names.hd,
+          feature.id ? `HIP ${feature.id}` : ""
+        ],
+        simplify
+      );
     });
     options.deepSkyFeatures.forEach((feature) => {
       const coord = candidateCoord(feature);
       const names = options.deepSkyNames[String(feature.id)] || {};
       const props = feature.properties || {};
-      addSearchEntry(entries, "dso", feature, coord, [
-        label("dso", feature),
-        names.name,
-        names.zh,
-        props.desig,
-        props.messier,
-        props.caldwell,
-        props.ngc,
-        props.ic,
-        props.objectTitle,
-        ...Array.isArray(props.aliases) ? props.aliases : [],
-        feature.id
-      ], simplify);
+      addSearchEntry(
+        entries,
+        "dso",
+        feature,
+        coord,
+        [
+          label("dso", feature),
+          names.name,
+          names.zh,
+          props.desig,
+          props.messier,
+          props.caldwell,
+          props.ngc,
+          props.ic,
+          props.objectTitle,
+          ...Array.isArray(props.aliases) ? props.aliases : [],
+          feature.id
+        ],
+        simplify
+      );
     });
     options.constellationNameFeatures.forEach((feature) => {
       const props = feature.properties || {};
-      addSearchEntry(entries, "constellation", feature, candidateCoord(feature), [
-        label("constellation", feature),
-        props.zh,
-        props.en,
-        props.name,
-        props.desig,
-        feature.id
-      ], simplify);
+      addSearchEntry(
+        entries,
+        "constellation",
+        feature,
+        candidateCoord(feature),
+        [
+          label("constellation", feature),
+          props.zh,
+          props.en,
+          props.name,
+          props.desig,
+          feature.id
+        ],
+        simplify
+      );
     });
     options.asterismNameFeatures.forEach((feature) => {
       const props = feature.properties || {};
-      addSearchEntry(entries, "asterism", feature, candidateCoord(feature), [
-        label("asterism", feature),
-        props.name,
-        props.en,
-        props.pinyin,
-        props.desig,
-        feature.id
-      ], simplify);
+      addSearchEntry(
+        entries,
+        "asterism",
+        feature,
+        candidateCoord(feature),
+        [
+          label("asterism", feature),
+          props.name,
+          props.en,
+          props.pinyin,
+          props.desig,
+          feature.id
+        ],
+        simplify
+      );
     });
     options.planets.forEach((item) => {
       addSearchEntry(
@@ -5316,7 +7152,11 @@
           item.id
         ],
         simplify,
-        { planetId: item.id, displayCoord: item.displayCoord, epochCoord: item.epochCoord }
+        {
+          planetId: item.id,
+          displayCoord: item.displayCoord,
+          epochCoord: item.epochCoord
+        }
       );
     });
     return entries;
@@ -5365,11 +7205,15 @@
       const p = d.properties || {};
       if (type === "star") {
         const n = sources.starNames[String(d.id)] || {};
-        if (state.cultureMode === "western")
-          return state.lang === "zh" ? simplifyChinese2(n.zh || n.name || n.desig || n.hip || `HIP ${d.id}`) : n.name || n.desig || n.hip || `HIP ${d.id}`;
-        return simplifyChinese2(
-          n.zh || n.name || n.desig || n.hip || `HIP ${d.id}`
-        );
+        const meta = constellationMeta(n.c);
+        return formatStarDisplayName({
+          id: d.id,
+          nameEntry: n,
+          lang: state.lang === "zh" ? "zh" : "en",
+          constellation: meta,
+          simplifyChinese: simplifyChinese2,
+          allowHipFallback: true
+        });
       }
       if (type === "dso") {
         const n = sources.deepSkyNames[String(d.id)] || {};
@@ -5444,7 +7288,10 @@
       objectSearchActiveIndex = buttons.length ? (index + buttons.length) % buttons.length : -1;
       buttons.forEach((button, i) => {
         button.classList.toggle("active", i === objectSearchActiveIndex);
-        button.setAttribute("aria-selected", String(i === objectSearchActiveIndex));
+        button.setAttribute(
+          "aria-selected",
+          String(i === objectSearchActiveIndex)
+        );
       });
       if (buttons[objectSearchActiveIndex])
         buttons[objectSearchActiveIndex].scrollIntoView({ block: "nearest" });
@@ -5506,10 +7353,12 @@
         if (composing || e.isComposing) return;
         if (e.key === "ArrowDown") {
           e.preventDefault();
-          if (objectSearchResults.length) setObjectSearchActive(objectSearchActiveIndex + 1);
+          if (objectSearchResults.length)
+            setObjectSearchActive(objectSearchActiveIndex + 1);
         } else if (e.key === "ArrowUp") {
           e.preventDefault();
-          if (objectSearchResults.length) setObjectSearchActive(objectSearchActiveIndex - 1);
+          if (objectSearchResults.length)
+            setObjectSearchActive(objectSearchActiveIndex - 1);
         } else if (e.key === "Enter") {
           const entry = objectSearchResults[objectSearchActiveIndex] || objectSearchResults[0];
           if (entry) {
@@ -5785,7 +7634,9 @@
       "--info-text": cfg("components.infoTextColor", "#d8e8f5"),
       "--info-muted": cfg("components.infoMutedColor", "#8da4bb")
     };
-    Object.entries(vars).forEach(([key, value]) => rootStyle.setProperty(key, value));
+    Object.entries(vars).forEach(
+      ([key, value]) => rootStyle.setProperty(key, value)
+    );
   }
   function applyRootFontScale(fontScale, rootStyle = document.documentElement.style) {
     const scale = Number(fontScale);
@@ -5813,7 +7664,9 @@
     return id ? $(id) : null;
   }
   function timeFieldDebugText($) {
-    return TIME_FIELD_KEYS.map((key) => `${key}=${timeFieldByKey($, key)?.value || ""}`).join(" ");
+    return TIME_FIELD_KEYS.map(
+      (key) => `${key}=${timeFieldByKey($, key)?.value || ""}`
+    ).join(" ");
   }
   function displayTimeParts(dt) {
     return {
@@ -5869,7 +7722,10 @@
     const heightFactor = ratio >= 1 ? 1 : 1 / Math.max(ratio, 1e-4);
     const fitByWidth = pane.width / widthFactor;
     const fitByHeight = pane.height / heightFactor;
-    const baseFitSide = Math.max(1, Math.min(fitByWidth, fitByHeight) * fitPadding);
+    const baseFitSide = Math.max(
+      1,
+      Math.min(fitByWidth, fitByHeight) * fitPadding
+    );
     const mapScale = options.clampMapScale(options.mapScale);
     const baseWidth = Math.max(1, Math.round(baseFitSide * widthFactor));
     const baseHeight = Math.max(1, Math.round(baseFitSide * heightFactor));
@@ -5924,7 +7780,14 @@
     if (canvas.height !== bitmapHeight) canvas.height = bitmapHeight;
     const context = canvas.getContext("2d");
     if (context && typeof context.setTransform === "function") {
-      context.setTransform(metrics.devicePixelRatio, 0, 0, metrics.devicePixelRatio, 0, 0);
+      context.setTransform(
+        metrics.devicePixelRatio,
+        0,
+        0,
+        metrics.devicePixelRatio,
+        0,
+        0
+      );
     }
   }
   function applyMapBoxMetrics(map, metrics) {
@@ -6048,7 +7911,13 @@
     }
     const viewCenter = finiteSkyCoord(center || currentCenter);
     const pointer = finiteSkyCoord(pointerCoord);
-    const centerlineX = canvasRect2 && Number.isFinite(canvasRect2.width) ? canvasRect2.width / 2 : metrics.width / 2, positivePoint = projectCurrentCoordinatePoint(celestial, poles.positiveCoord), negativePoint = projectCurrentCoordinatePoint(celestial, poles.negativeCoord), positiveDx = positivePoint ? positivePoint.x - centerlineX : NaN, negativeDx = negativePoint ? negativePoint.x - centerlineX : NaN;
+    const centerlineX = canvasRect2 && Number.isFinite(canvasRect2.width) ? canvasRect2.width / 2 : metrics.width / 2, positivePoint = projectCurrentCoordinatePoint(
+      celestial,
+      poles.positiveCoord
+    ), negativePoint = projectCurrentCoordinatePoint(
+      celestial,
+      poles.negativeCoord
+    ), positiveDx = positivePoint ? positivePoint.x - centerlineX : NaN, negativeDx = negativePoint ? negativePoint.x - centerlineX : NaN;
     let axisAngleDeg = NaN;
     if (positivePoint && negativePoint) {
       const dx = positivePoint.x - negativePoint.x, dy = positivePoint.y - negativePoint.y;
@@ -6072,7 +7941,15 @@
     return debug;
   }
   function evaluatePointerPoleGuard(options) {
-    const { debug, pointerCoord, center, enterDeg, exitDeg, pointerGuardEnabled, updateDiagnostics } = options;
+    const {
+      debug,
+      pointerCoord,
+      center,
+      enterDeg,
+      exitDeg,
+      pointerGuardEnabled,
+      updateDiagnostics
+    } = options;
     const threshold = debug.guardActive ? exitDeg : enterDeg;
     const diag = updateDiagnostics(pointerCoord, center);
     const candidates = (pointerGuardEnabled ? [
@@ -6379,14 +8256,24 @@
         return 0;
       }
     }
+    function localDataLoadCount(file) {
+      const counts = window2.__RSO_LOAD_COUNTS__ || {};
+      return Number(counts[file] || counts[`src/data/${file}`] || 0) || 0;
+    }
+    function canvasIsDrawable(canvas) {
+      if (!canvas) return false;
+      const rect = canvas.getBoundingClientRect();
+      return Number(canvas.width) > 0 || Number(canvas.height) > 0 || Number(rect.width) > 0 || Number(rect.height) > 0;
+    }
     function waitForCanvas(viewState = null, generation = appState.getRebuildGeneration()) {
       clearTimeout2(appState.getLoadTimer());
       const started = performance2.now();
       const check = () => {
         if (generation !== appState.getRebuildGeneration()) return;
         const canvas = document2.querySelector("#celestial-map canvas");
-        const starsLoaded = dataLayerCount(".star") > 0;
-        if (canvas && starsLoaded) {
+        const starsLoaded = dataLayerCount(".star") > 0 || localDataLoadCount("stars/stars.6.json") > 0 || localDataLoadCount("stars.6.json") > 0;
+        const canvasReady = canvasIsDrawable(canvas) && (starsLoaded || performance2.now() - started > 800);
+        if (canvasReady) {
           appState.setSkyReady(true);
           view.syncRenderedMapBox();
           stabilizeDataSelections();
@@ -6404,9 +8291,15 @@
           const savedView = current.projectionViews && current.projectionViews[view.viewKey()];
           const shouldRestoreViewState = viewState && !view.isHorizontalView();
           if (shouldRestoreViewState) view.restoreView(viewState);
-          else if (savedView && !view.isHorizontalView()) view.restoreView(savedView);
+          else if (savedView && !view.isHorizontalView())
+            view.restoreView(savedView);
           else if (view.isHorizontalView())
-            view.setMapScale(view.viewMapScale(savedView || view.desiredView(), current.mapScale));
+            view.setMapScale(
+              view.viewMapScale(
+                savedView || view.desiredView(),
+                current.mapScale
+              )
+            );
           actions.updateSelectedObject();
           setTimeout2(() => {
             if (generation !== appState.getRebuildGeneration()) return;
@@ -6443,7 +8336,10 @@
         appState.setSuppressResizeUntil(performance2.now() + 1200);
         const generation = appState.incrementRebuildGeneration();
         const current = state();
-        current.mapScale = view.viewMapScale(viewState || view.desiredView(), current.mapScale);
+        current.mapScale = view.viewMapScale(
+          viewState || view.desiredView(),
+          current.mapScale
+        );
         $("celestial-map").innerHTML = "";
         appState.setSkyReady(false);
         overlays.registerChineseOverlay();
@@ -6933,7 +8829,10 @@
     const sinDec = Math.sin(beta) * Math.cos(eps) + Math.cos(beta) * Math.sin(eps) * Math.sin(lambda);
     const y = Math.sin(lambda) * Math.cos(eps) - Math.tan(beta) * Math.sin(eps);
     const x = Math.cos(lambda);
-    return [normalizeSignedDegrees(Math.atan2(y, x) * RAD_TO_DEG), Math.asin(Math.max(-1, Math.min(1, sinDec))) * RAD_TO_DEG];
+    return [
+      normalizeSignedDegrees(Math.atan2(y, x) * RAD_TO_DEG),
+      Math.asin(Math.max(-1, Math.min(1, sinDec))) * RAD_TO_DEG
+    ];
   }
   function diagnosticsForDate(date) {
     const jd = julianDateFromDate2(date);
@@ -6987,7 +8886,8 @@
         normalizeCelestialLongitude3(coord[0]),
         Number(coord[1])
       ];
-      if (!Number.isFinite(equatorial[0]) || !Number.isFinite(equatorial[1])) return null;
+      if (!Number.isFinite(equatorial[0]) || !Number.isFinite(equatorial[1]))
+        return null;
       if (projectionCoordinateTransform() === "equatorial") return equatorial;
       try {
         return Celestial2.getPoint(equatorial, projectionCoordinateTransform());
@@ -7052,7 +8952,8 @@
       return projectionCoordinateTransform() === "galactic";
     }
     function prepareDatasetForEpoch(path, data) {
-      if (!data || data.type !== "FeatureCollection" || !Array.isArray(data.features)) return data;
+      if (!data || data.type !== "FeatureCollection" || !Array.isArray(data.features))
+        return data;
       if (useNativeGalacticFixedSkyFrame()) {
         astronomyModelDebug.fixedLayerPrecession = "native galactic fixed-sky frame";
         astronomyModelDebug.lastPrecessionError = "-";
@@ -7061,7 +8962,10 @@
       const date = currentInstantDate();
       let transformed = 0;
       data.features.forEach((feature) => {
-        if (applyFeatureGeometryFrame(feature, (coord) => epochEquatorialFromJ2000(coord, date)))
+        if (applyFeatureGeometryFrame(
+          feature,
+          (coord) => epochEquatorialFromJ2000(coord, date)
+        ))
           transformed += 1;
       });
       astronomyModelDebug.fixedLayerPrecession = `${transformed} features prepared`;
@@ -7144,8 +9048,7 @@
           astronomyModelDebug.fixedLayerPrecession += `, ${syncedMilkyWayMasks} Milky Way masks synced`;
         astronomyModelDebug.boundaryPrecession = transformed ? "connected" : astronomyModelDebug.boundaryPrecession;
         astronomyModelDebug.asterismPrecession = transformed ? "connected" : astronomyModelDebug.asterismPrecession;
-        if (onDisplayedFeaturesTransformed)
-          onDisplayedFeaturesTransformed();
+        if (onDisplayedFeaturesTransformed) onDisplayedFeaturesTransformed();
         astronomyModelDebug.lastPrecessionError = "-";
       } catch (err) {
         astronomyModelDebug.lastPrecessionError = debugErrorText2(err);
@@ -7445,7 +9348,11 @@
           }
           debug.setDebugPointer(
             true,
-            view.invertSkyCoordinateAtClient(event.clientX, event.clientY, canvas)
+            view.invertSkyCoordinateAtClient(
+              event.clientX,
+              event.clientY,
+              canvas
+            )
           );
           debug.queueDebugOverlayUpdate();
         },
@@ -7504,8 +9411,7 @@
       if (!state.getSkyReady() || !window2.Celestial) return false;
       releaseMenuFocusForSkyInteraction();
       const unit = event.deltaMode === 1 ? 36 : event.deltaMode === 2 ? window2.innerHeight : 1, delta = Number(event.deltaY || 0) * unit, steps = -delta / 240, factor = Math.pow(mapScaleButtonFactor(), steps);
-      if (!Number.isFinite(factor) || Math.abs(factor - 1) < 1e-4)
-        return false;
+      if (!Number.isFinite(factor) || Math.abs(factor - 1) < 1e-4) return false;
       event.preventDefault();
       event.stopPropagation();
       if (typeof event.stopImmediatePropagation === "function")
@@ -7546,7 +9452,10 @@
         y: event.clientY,
         lastX: event.clientX,
         lastY: event.clientY,
-        anchorCoord: view.invertSkyCoordinateAtClient(event.clientX, event.clientY),
+        anchorCoord: view.invertSkyCoordinateAtClient(
+          event.clientX,
+          event.clientY
+        ),
         center: center.slice(),
         moved: false
       });
@@ -7655,9 +9564,13 @@
       scaleFont
     } = options;
     function drawMoonPhaseDisk(ctx, point, style, ephemeris) {
-      const illumination = Math.max(0, Math.min(1, Number(ephemeris.illumination)));
+      const illumination = Math.max(
+        0,
+        Math.min(1, Number(ephemeris.illumination))
+      );
       const phaseAngle = Number(ephemeris.phaseAngleDeg);
-      if (!Number.isFinite(illumination) || !Number.isFinite(phaseAngle)) return false;
+      if (!Number.isFinite(illumination) || !Number.isFinite(phaseAngle))
+        return false;
       const diameter = Math.max(
         Number(cfg("moonPhase.overlayMinSize", 16)) || 16,
         Number(style.size) || 17
@@ -7682,7 +9595,10 @@
       ctx.beginPath();
       ctx.arc(point[0], point[1], radius, 0, Math.PI * 2);
       ctx.strokeStyle = outline;
-      ctx.lineWidth = Math.max(0.8, Number(cfg("moonPhase.outlineWidth", 1)) || 1);
+      ctx.lineWidth = Math.max(
+        0.8,
+        Number(cfg("moonPhase.outlineWidth", 1)) || 1
+      );
       ctx.stroke();
       ctx.restore();
       return true;
@@ -7861,7 +9777,11 @@
         Celestial2.context,
         text,
         point,
-        { ...style, font: scaleFont(style.font), baseline: style.baseline || "middle" },
+        {
+          ...style,
+          font: scaleFont(style.font),
+          baseline: style.baseline || "middle"
+        },
         align
       );
     }
@@ -7977,7 +9897,8 @@
         const pt = Celestial2.mapProjection(display);
         if (pt && Number.isFinite(pt[0]) && Number.isFinite(pt[1])) point = pt;
       }
-      if (!point && currentSelected.coord) point = projectEquatorialCoordinate(currentSelected.coord);
+      if (!point && currentSelected.coord)
+        point = projectEquatorialCoordinate(currentSelected.coord);
       if (!point) return;
       drawSelectionReticle(Celestial2.context, point, {
         stroke: cfg("selectionMarker.stroke", "#8eeaff"),
@@ -8012,7 +9933,9 @@
       const points = [];
       for (let lon = -180; lon <= 180; lon += 2) {
         const coord = [lon, 0];
-        points.push(Celestial2.clip(coord) ? Celestial2.mapProjection(coord) : null);
+        points.push(
+          Celestial2.clip(coord) ? Celestial2.mapProjection(coord) : null
+        );
       }
       drawProjectedLine(points, style);
     }
@@ -8221,7 +10144,10 @@
   function rotateVectorByQuaternion(v, q) {
     const nq = normalizeQuaternion(q);
     const p = { w: 0, x: v[0], y: v[1], z: v[2] };
-    const r = multiplyQuaternions(multiplyQuaternions(nq, p), conjugateQuaternion(nq));
+    const r = multiplyQuaternions(
+      multiplyQuaternions(nq, p),
+      conjugateQuaternion(nq)
+    );
     return [r.x, r.y, r.z];
   }
   function quaternionFromRotationMatrix(m) {
@@ -8279,11 +10205,14 @@
   function localNorthEast(lonDeg, latDeg) {
     const lon = lonDeg * Math.PI / 180;
     const lat = latDeg * Math.PI / 180;
-    const north = normalizeVec3([
-      -Math.sin(lat) * Math.cos(lon),
-      -Math.sin(lat) * Math.sin(lon),
-      Math.cos(lat)
-    ], [0, 0, 1]);
+    const north = normalizeVec3(
+      [
+        -Math.sin(lat) * Math.cos(lon),
+        -Math.sin(lat) * Math.sin(lon),
+        Math.cos(lat)
+      ],
+      [0, 0, 1]
+    );
     const east = normalizeVec3([-Math.sin(lon), Math.cos(lon), 0], [0, 1, 0]);
     return { north, east };
   }
@@ -8293,11 +10222,14 @@
     const roll = (Number(center && center[2]) || 0) * Math.PI / 180;
     const forward = normalizeVec3(longitudeLatitudeToVector(lon, lat), [1, 0, 0]);
     const { north, east } = localNorthEast(lon, lat);
-    const up = normalizeVec3([
-      north[0] * Math.cos(roll) + east[0] * Math.sin(roll),
-      north[1] * Math.cos(roll) + east[1] * Math.sin(roll),
-      north[2] * Math.cos(roll) + east[2] * Math.sin(roll)
-    ], [0, 0, 1]);
+    const up = normalizeVec3(
+      [
+        north[0] * Math.cos(roll) + east[0] * Math.sin(roll),
+        north[1] * Math.cos(roll) + east[1] * Math.sin(roll),
+        north[2] * Math.cos(roll) + east[2] * Math.sin(roll)
+      ],
+      [0, 0, 1]
+    );
     const right = normalizeVec3(crossVec3(up, forward), [0, 1, 0]);
     const trueUp = normalizeVec3(crossVec3(forward, right), up);
     return quaternionFromRotationMatrix([
@@ -8359,7 +10291,10 @@
     function applyPointerDelta(options) {
       const dx = Number(options.dx) || 0;
       const dy = Number(options.dy) || 0;
-      const shortSide = Math.max(180, Math.min(Number(options.width) || 0, Number(options.height) || 0));
+      const shortSide = Math.max(
+        180,
+        Math.min(Number(options.width) || 0, Number(options.height) || 0)
+      );
       const sensitivity = Number.isFinite(Number(options.sensitivity)) ? Number(options.sensitivity) : 1;
       const radiansPerPixel = Math.PI / shortSide * sensitivity;
       const angleX = dx * radiansPerPixel;
@@ -8368,10 +10303,15 @@
       const right = rotateVectorByQuaternion([0, 1, 0], orientation);
       const qDeltaX = quaternionFromAxisAngle(up, angleX);
       const qDeltaY = quaternionFromAxisAngle(right, angleY);
-      orientation = normalizeQuaternion(multiplyQuaternions(multiplyQuaternions(qDeltaY, qDeltaX), orientation));
+      orientation = normalizeQuaternion(
+        multiplyQuaternions(multiplyQuaternions(qDeltaY, qDeltaX), orientation)
+      );
       center = centerFromQuaternion(orientation, center);
       lastPointerDelta = { dx, dy };
-      lastAngleDelta = { x: angleX * 180 / Math.PI, y: angleY * 180 / Math.PI };
+      lastAngleDelta = {
+        x: angleX * 180 / Math.PI,
+        y: angleY * 180 / Math.PI
+      };
       lastSyncReason = "pointer-delta-fallback";
       dragMode = "delta";
       grabAnchor = null;
@@ -8389,7 +10329,10 @@
       const qDelta = quaternionBetweenVectors(from, to, fallbackAxis);
       orientation = normalizeQuaternion(multiplyQuaternions(qDelta, orientation));
       center = centerFromQuaternion(orientation, center);
-      lastPointerDelta = { dx: Number(options.dx) || 0, dy: Number(options.dy) || 0 };
+      lastPointerDelta = {
+        dx: Number(options.dx) || 0,
+        dy: Number(options.dy) || 0
+      };
       const angle = angleBetweenVec3(from, to);
       lastAngleDelta = { x: 0, y: angle * 180 / Math.PI };
       lastSyncReason = "pointer-grab";
@@ -8501,7 +10444,10 @@
             Celestial2.resize(nextMetrics.width);
             applyMapBoxMetrics2(nextMetrics);
             if (nextMetrics.renderMode === "VIEWPORT_CANVAS" && Celestial2.mapProjection && Celestial2.mapProjection.translate) {
-              Celestial2.mapProjection.translate([nextMetrics.width / 2, nextMetrics.height / 2]);
+              Celestial2.mapProjection.translate([
+                nextMetrics.width / 2,
+                nextMetrics.height / 2
+              ]);
             }
             syncInternalZoomForMetrics2(nextMetrics);
             syncRenderedMapBox(nextMetrics);
@@ -8566,17 +10512,19 @@
         if (state.coordinateSystem === "horizontal") {
           updateSkyView(true);
           clearTimeout2(getCustomViewRestoreTimer());
-          setCustomViewRestoreTimer(setTimeout2(() => {
-            try {
-              setMapScale(targetScale);
-              syncInternalZoomForMetrics2(projectionCanvasMetrics2());
-              redrawAndSyncMapBox("horizontal reset");
-              state.projectionViews[viewKey2()] = { mapScale: targetScale };
-              save();
-            } catch (err) {
-              console.warn("Horizontal reset failed", err);
-            }
-          }, 120));
+          setCustomViewRestoreTimer(
+            setTimeout2(() => {
+              try {
+                setMapScale(targetScale);
+                syncInternalZoomForMetrics2(projectionCanvasMetrics2());
+                redrawAndSyncMapBox("horizontal reset");
+                state.projectionViews[viewKey2()] = { mapScale: targetScale };
+                save();
+              } catch (err) {
+                console.warn("Horizontal reset failed", err);
+              }
+            }, 120)
+          );
           return;
         }
         const v = {
@@ -8634,7 +10582,9 @@
   }
   function isTextEditingTarget(target) {
     if (!target || !target.closest) return false;
-    return !!target.closest("input,select,textarea,[contenteditable='true'],.modal,#debug-overlay");
+    return !!target.closest(
+      "input,select,textarea,[contenteditable='true'],.modal,#debug-overlay"
+    );
   }
 
   // src/ui/controls.ts
@@ -8693,8 +10643,12 @@
       $("magnitude-value").textContent = Number(state.magnitude).toFixed(1);
       $("star-size").value = state.starSize;
       $("star-size-value").textContent = `${state.starSize} px`;
-      const starNameMin = Number(cfg("sky.stars.properNameMagnitudeLimitMin", 2.1));
-      const starNameMax = Number(cfg("sky.stars.properNameMagnitudeLimitMax", 4));
+      const starNameMin = Number(
+        cfg("sky.stars.properNameMagnitudeLimitMin", 2.1)
+      );
+      const starNameMax = Number(
+        cfg("sky.stars.properNameMagnitudeLimitMax", 4)
+      );
       const starNameValue = Number(
         state.starNameMagnitudeLimit ?? defaults.starNameMagnitudeLimit
       ).toFixed(1);
@@ -8731,7 +10685,11 @@
     return { syncControls };
   }
   function createRegionUiController(options) {
-    const { dom: { $ }, getState, t } = options;
+    const {
+      dom: { $ },
+      getState,
+      t
+    } = options;
     function updateRegionLegend() {
       const state = getState();
       const el = $("region-legend");
@@ -8776,7 +10734,9 @@
   function initializeMenuSections(options) {
     const panel = options.panel;
     if (!panel || panel.dataset.menuSectionsReady === "true") return;
-    const collapsible = new Set(Array.isArray(options.collapsible) ? options.collapsible : []);
+    const collapsible = new Set(
+      Array.isArray(options.collapsible) ? options.collapsible : []
+    );
     panel.querySelectorAll("[data-menu-id]").forEach((section) => {
       const id = section.dataset.menuId;
       const title = section.querySelector(".section-title");
@@ -8790,7 +10750,11 @@
       const toggle = () => {
         const isCollapsed = section.classList.toggle("section-collapsed");
         title.setAttribute("aria-expanded", String(!isCollapsed));
-        const ids = Array.from(panel.querySelectorAll(".section-collapsible.section-collapsed")).map((item) => item.dataset.menuId).filter(Boolean);
+        const ids = Array.from(
+          panel.querySelectorAll(
+            ".section-collapsible.section-collapsed"
+          )
+        ).map((item) => item.dataset.menuId).filter(Boolean);
         options.setCollapsedIds(ids);
         options.save();
         options.scheduleSkyResize("menu-section-toggle");
@@ -8812,13 +10776,16 @@
     let activeIndex = -1;
     let composing = false;
     const setActive = (index) => {
-      const buttons = Array.from(box.querySelectorAll(".city-option"));
+      const buttons = Array.from(
+        box.querySelectorAll(".city-option")
+      );
       activeIndex = buttons.length ? (index + buttons.length) % buttons.length : -1;
       buttons.forEach((button, i) => {
         button.classList.toggle("active", i === activeIndex);
         button.setAttribute("aria-selected", String(i === activeIndex));
       });
-      if (buttons[activeIndex]) buttons[activeIndex].scrollIntoView({ block: "nearest" });
+      if (buttons[activeIndex])
+        buttons[activeIndex].scrollIntoView({ block: "nearest" });
     };
     const choose = (city) => {
       if (!city) return;
@@ -8864,7 +10831,9 @@
         else setActive(activeIndex - 1);
       } else if (event.key === "Enter") {
         const text = input.value.trim();
-        const city = found[activeIndex] || options.cities.find((x) => x.zh === text || x.en.toLowerCase() === text.toLowerCase());
+        const city = found[activeIndex] || options.cities.find(
+          (x) => x.zh === text || x.en.toLowerCase() === text.toLowerCase()
+        );
         if (city) {
           event.preventDefault();
           choose(city);
@@ -8875,7 +10844,8 @@
       }
     });
     document.addEventListener("mousedown", (event) => {
-      if (!event.target.closest(".city-search-wrap")) box.classList.remove("open");
+      if (!event.target.closest(".city-search-wrap"))
+        box.classList.remove("open");
     });
   }
 
@@ -9026,9 +10996,22 @@
     const STAR_NAMES = starNames();
     const DSO_NAMES = deepSkyNames();
     const ORIGINAL_STARS = starFeatures();
+    const BRIGHT_STAR_RANKS = buildBrightStarRankMap(ORIGINAL_STARS, 100);
     const ORIGINAL_STAR_COORDS = starCoordinateMap();
     const ORIGINAL_DSO_COORDS = deepSkyCoordinateMap(), ORIGINAL_CONSTELLATION_COORDS = westernConstellationCoordinateMap(), ORIGINAL_ASTERISM_COORDS = chineseAsterismCoordinateMap();
     const CN_ASTERISM_NAMES = chineseAsterismNameMap();
+    if (cfg("debug.boundaryDiagnostics", false)) {
+      try {
+        logConstellationBoundaryDiagnostics(
+          diagnoseConstellationBoundaries({
+            boundaryFeatures: westernConstellationBoundaryFeatures(),
+            constellationFeatures: westernConstellationNameFeatures()
+          })
+        );
+      } catch (error) {
+        console.warn("[RSO] \u661F\u5EA7\u8FB9\u754C\u8BCA\u65AD\u5931\u8D25", error);
+      }
+    }
     const getStorage = getProjectStorage;
     function t(key) {
       return I18N[state.lang] && I18N[state.lang][key] || key;
@@ -9133,7 +11116,9 @@
       );
       if (!Number.isFinite(Number(state.fontScale)) || Number(state.fontScale) <= 0)
         state.fontScale = defaults.fontScale;
-      const starNameMin = Number(cfg("sky.stars.properNameMagnitudeLimitMin", 2.1)), starNameMax = Number(cfg("sky.stars.properNameMagnitudeLimitMax", 4)), starNameDefault = Number(defaults.starNameMagnitudeLimit);
+      const starNameMin = Number(
+        cfg("sky.stars.properNameMagnitudeLimitMin", 2.1)
+      ), starNameMax = Number(cfg("sky.stars.properNameMagnitudeLimitMax", 4)), starNameDefault = Number(defaults.starNameMagnitudeLimit);
       state.starNameMagnitudeLimit = clampNumber(
         Number.isFinite(Number(state.starNameMagnitudeLimit)) ? Number(state.starNameMagnitudeLimit) : starNameDefault,
         Number.isFinite(starNameMin) ? starNameMin : 2.1,
@@ -9164,7 +11149,11 @@
     }
     function timeZoneOffsetDebug(dt) {
       if (!dt || !dt.isValid)
-        return { timezone: state.zone || "-", utcOffset: "-", utcOffsetNote: "unknown" };
+        return {
+          timezone: state.zone || "-",
+          utcOffset: "-",
+          utcOffsetNote: "unknown"
+        };
       const seconds = Math.round(Number(dt.offset) * 60), hasHistoricalSeconds = Number.isFinite(seconds) && Math.abs(seconds % 60) !== 0, historicalYear = Number.isFinite(dt.year) && dt.year < 1970;
       return {
         timezone: dt.zoneName || state.zone || "-",
@@ -9202,7 +11191,9 @@
       };
     }
     function updateActiveTimeDebug(extra = {}) {
-      const active = DateTime.fromISO(String(state.instant || ""), { zone: "utc" });
+      const active = DateTime.fromISO(String(state.instant || ""), {
+        zone: "utc"
+      });
       const data = renderDebugFromDateTime(active);
       noteTimeRenderDebug({
         activeDisplay: data.display,
@@ -9348,7 +11339,10 @@
       if (!snapshot) return false;
       state.instant = snapshot.instant;
       playing = snapshot.playing;
-      state.mapScale = viewMapScale2({ mapScale: snapshot.mapScale }, state.mapScale);
+      state.mapScale = viewMapScale2(
+        { mapScale: snapshot.mapScale },
+        state.mapScale
+      );
       let ok = true;
       try {
         if (window.Celestial && snapshot.center) {
@@ -9603,13 +11597,15 @@
       return debugOverlayController ? debugOverlayController.debugRefreshIntervalMs() : 200;
     }
     function noteDebugLastAction(action) {
-      if (debugOverlayController) debugOverlayController.noteDebugLastAction(action);
+      if (debugOverlayController)
+        debugOverlayController.noteDebugLastAction(action);
     }
     function updateDebugOverlay(force = false) {
       return debugOverlayController && debugOverlayController.updateDebugOverlay(force);
     }
     function queueDebugOverlayUpdate() {
-      if (debugOverlayController) debugOverlayController.queueDebugOverlayUpdate();
+      if (debugOverlayController)
+        debugOverlayController.queueDebugOverlayUpdate();
     }
     function setDebugVisible(open) {
       if (debugOverlayController) debugOverlayController.setDebugVisible(open);
@@ -9621,7 +11617,8 @@
       return !!(debugOverlayController && debugOverlayController.isVisible());
     }
     function setDebugPointer(active, coord = null) {
-      if (debugOverlayController) debugOverlayController.setPointer(active, coord);
+      if (debugOverlayController)
+        debugOverlayController.setPointer(active, coord);
     }
     function syncInternalZoomForMetrics2(metrics = projectionCanvasMetrics2()) {
       syncInternalZoomForMetrics(metrics, window.Celestial);
@@ -9681,7 +11678,11 @@
     function syncRotationFromCurrentView(reason = "sync") {
       const center = currentCelestialCenter2();
       if (center) rotationController.syncFromCenter(center, reason);
-      updatePoleAxisDebug(null, center, poleAxisConstraintEnabled() ? "euler-constrained" : "quaternion-free");
+      updatePoleAxisDebug(
+        null,
+        center,
+        poleAxisConstraintEnabled() ? "euler-constrained" : "quaternion-free"
+      );
       return center;
     }
     function setCelestialCenter(center, reason = "center update") {
@@ -9689,7 +11690,11 @@
       const normalized = normalizeCenterForControlMode(center);
       Celestial.rotate({ center: normalized.slice() });
       rotationController.syncFromCenter(normalized, reason);
-      updatePoleAxisDebug(null, normalized, poleAxisConstraintEnabled() ? "euler-constrained" : "quaternion-free");
+      updatePoleAxisDebug(
+        null,
+        normalized,
+        poleAxisConstraintEnabled() ? "euler-constrained" : "quaternion-free"
+      );
       return true;
     }
     function applyQuaternionPointerDelta(dx, dy, rect, reason = "quaternion drag fallback") {
@@ -9708,7 +11713,12 @@
       return true;
     }
     function invertSkyCoordinateAtClient2(clientX, clientY, canvas = null) {
-      return invertSkyCoordinateAtClient(clientX, clientY, canvas, window.Celestial);
+      return invertSkyCoordinateAtClient(
+        clientX,
+        clientY,
+        canvas,
+        window.Celestial
+      );
     }
     function applyQuaternionGrabDrag(anchorCoord, currentCoord, dx, dy, reason = "quaternion grab drag") {
       if (!window.Celestial || !anchorCoord || !currentCoord) return false;
@@ -9729,7 +11739,13 @@
       if (!window.Celestial || !rect) return false;
       const center = normalizeCenterForControlMode(currentCelestialCenter2());
       const metrics = projectionCanvasMetrics2();
-      const shortSide = Math.max(180, Math.min(Number(metrics.virtualWidth) || Number(rect.width) || 0, Number(metrics.virtualHeight) || Number(rect.height) || 0));
+      const shortSide = Math.max(
+        180,
+        Math.min(
+          Number(metrics.virtualWidth) || Number(rect.width) || 0,
+          Number(metrics.virtualHeight) || Number(rect.height) || 0
+        )
+      );
       const sensitivity = Number(cfg("interaction.dragSensitivity", 1)) || 1;
       const degreesPerPixel = 180 / shortSide * sensitivity;
       const guard = evaluatePoleGuard(currentCoord, center);
@@ -9745,7 +11761,11 @@
       ];
       noteDebugLastAction(guard.guardActive ? "pole guard active" : "euler drag");
       setCelestialCenter(next, reason);
-      updatePoleAxisDebug(currentCoord, next, guard.guardActive ? "guard-active" : "euler-constrained");
+      updatePoleAxisDebug(
+        currentCoord,
+        next,
+        guard.guardActive ? "guard-active" : "euler-constrained"
+      );
       redrawAndSyncMapBox(reason);
       queueDebugOverlayUpdate();
       return true;
@@ -9791,7 +11811,9 @@
     }
     function redrawAndSyncMapBox(reason = "redraw", metrics = projectionCanvasMetrics2()) {
       let ok = true;
-      const hasFollowUpRedraw = /time|location|observer|sky view|playback/i.test(String(reason));
+      const hasFollowUpRedraw = /time|location|observer|sky view|playback/i.test(
+        String(reason)
+      );
       try {
         const totalStarted = performance.now();
         const syncStarted = performance.now();
@@ -9867,7 +11889,10 @@
           Celestial.resize(metrics.width);
           applyMapBoxMetrics2(metrics);
           if (metrics.renderMode === "VIEWPORT_CANVAS" && Celestial.mapProjection && Celestial.mapProjection.translate) {
-            Celestial.mapProjection.translate([metrics.width / 2, metrics.height / 2]);
+            Celestial.mapProjection.translate([
+              metrics.width / 2,
+              metrics.height / 2
+            ]);
           }
           syncInternalZoomForMetrics2(metrics);
           redrawAndSyncMapBox(reason, metrics);
@@ -9939,7 +11964,10 @@
       state.mapScale = next;
       const metrics = projectionCanvasMetrics2(state.projection, next);
       if (options.deferRedraw) {
-        scheduleCelestialCanvasResize(metrics, options.reason || "scheduled map scale");
+        scheduleCelestialCanvasResize(
+          metrics,
+          options.reason || "scheduled map scale"
+        );
       } else {
         resizeCelestialCanvas(metrics, options.reason || "map scale");
       }
@@ -10048,7 +12076,10 @@
       return referenceOverlayController.horizontalFor(coord, options);
     }
     function equatorialFromHorizontal2(azimuth, altitude) {
-      return referenceOverlayController.equatorialFromHorizontal(azimuth, altitude);
+      return referenceOverlayController.equatorialFromHorizontal(
+        azimuth,
+        altitude
+      );
     }
     function scaleFont(font) {
       const scale = Number(state.fontScale) || 1;
@@ -10102,7 +12133,12 @@
       horizontalFor,
       cityName,
       formatLocalLong,
-      objectLabel
+      objectLabel,
+      extendedCulture: {
+        westernConstellations: WESTERN_CONSTELLATION_CULTURE,
+        chineseAsterisms: CHINESE_ASTERISM_CULTURE
+      },
+      brightStarRanks: BRIGHT_STAR_RANKS
     });
     const objectSearchController = createObjectSearchController({
       $,
@@ -10347,7 +12383,8 @@
           };
       }
       showObjectInfo(currentSelected);
-      if (skyReady && window.Celestial) redrawAndSyncMapBox("selected object refresh");
+      if (skyReady && window.Celestial)
+        redrawAndSyncMapBox("selected object refresh");
     }
     function ensureFloatingObjectInfo() {
       let panel = $("floating-object-info-card");
@@ -10547,7 +12584,10 @@
     }
     function updateSkyView(force = false, reason = "sky view") {
       if (!skyReady || !window.Celestial || !DateTime) {
-        noteTimeRenderDebug({ skyviewStatus: "skipped", fallbackStatus: "unused" });
+        noteTimeRenderDebug({
+          skyviewStatus: "skipped",
+          fallbackStatus: "unused"
+        });
         return true;
       }
       try {
@@ -10562,14 +12602,25 @@
             });
             if (poleAxisConstraintEnabled()) {
               const skyviewCenter = currentCelestialCenter2();
-              if (skyviewCenter) setCelestialCenter(skyviewCenter, "horizontal skyview constrained");
+              if (skyviewCenter)
+                setCelestialCenter(
+                  skyviewCenter,
+                  "horizontal skyview constrained"
+                );
             }
             syncRotationFromCurrentView("horizontal skyview");
-            noteTimeRenderDebug({ skyviewStatus: "ok", fallbackStatus: "unused" });
-            if (force) redrawOk = redrawAndSyncMapBox(reason || "horizontal sky view");
+            noteTimeRenderDebug({
+              skyviewStatus: "ok",
+              fallbackStatus: "unused"
+            });
+            if (force)
+              redrawOk = redrawAndSyncMapBox(reason || "horizontal sky view");
             else syncMapBoxAfterRedraw(projectionCanvasMetrics2());
           } catch (skyviewErr) {
-            console.warn("Celestial skyview failed; trying local sidereal fallback", skyviewErr);
+            console.warn(
+              "Celestial skyview failed; trying local sidereal fallback",
+              skyviewErr
+            );
             noteTimeRenderDebug({
               skyviewStatus: "failed",
               fallbackStatus: "pending",
@@ -10579,10 +12630,16 @@
               errorStack: debugStackText(skyviewErr),
               lastError: `skyview failed: ${debugErrorText(skyviewErr)}`
             });
-            redrawOk = applyHorizontalSkyViewFallback(reason || "horizontal skyview fallback", skyviewErr);
+            redrawOk = applyHorizontalSkyViewFallback(
+              reason || "horizontal skyview fallback",
+              skyviewErr
+            );
           }
         } else {
-          noteTimeRenderDebug({ skyviewStatus: "skipped", fallbackStatus: "unused" });
+          noteTimeRenderDebug({
+            skyviewStatus: "skipped",
+            fallbackStatus: "unused"
+          });
           if (force) redrawOk = redrawAndSyncMapBox(reason || "sky view");
         }
         try {
@@ -10717,7 +12774,8 @@
       return pointerInteractionController.releaseMenuFocusForSkyInteraction();
     }
     function applyKeyboardPanDelta(lonDelta, latDelta, reason = "keyboard pan") {
-      if (!skyReady || !window.Celestial || isTextEditingTarget2(document.activeElement)) return false;
+      if (!skyReady || !window.Celestial || isTextEditingTarget2(document.activeElement))
+        return false;
       const center = Celestial.rotate();
       if (!Array.isArray(center)) return false;
       const next = normalizeCenterForControlMode(center);
@@ -10749,7 +12807,8 @@
       try {
         if (storage) {
           Object.keys(storage).forEach((key) => {
-            if (/^(real-sky-observatory|rso-|__rso_)/i.test(key)) removeStorageKey(key);
+            if (/^(real-sky-observatory|rso-|__rso_)/i.test(key))
+              removeStorageKey(key);
           });
           removeStorageKey(STORAGE_KEY);
         }

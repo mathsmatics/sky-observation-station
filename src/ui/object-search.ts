@@ -4,6 +4,7 @@ import {
   buildObjectSearchIndexFromSources,
   searchObjectEntries,
 } from "../data/object-search-index";
+import { formatStarDisplayName } from "../data/star-display";
 
 export function createObjectSearchController(options) {
   const {
@@ -31,13 +32,15 @@ export function createObjectSearchController(options) {
     const p = d.properties || {};
     if (type === "star") {
       const n = sources.starNames[String(d.id)] || {};
-      if (state.cultureMode === "western")
-        return state.lang === "zh"
-          ? simplifyChinese(n.zh || n.name || n.desig || n.hip || `HIP ${d.id}`)
-          : n.name || n.desig || n.hip || `HIP ${d.id}`;
-      return simplifyChinese(
-        n.zh || n.name || n.desig || n.hip || `HIP ${d.id}`,
-      );
+      const meta = constellationMeta(n.c);
+      return formatStarDisplayName({
+        id: d.id,
+        nameEntry: n,
+        lang: state.lang === "zh" ? "zh" : "en",
+        constellation: meta,
+        simplifyChinese,
+        allowHipFallback: true,
+      });
     }
     if (type === "dso") {
       const n = sources.deepSkyNames[String(d.id)] || {};
@@ -149,7 +152,10 @@ export function createObjectSearchController(options) {
       : -1;
     buttons.forEach((button, i) => {
       button.classList.toggle("active", i === objectSearchActiveIndex);
-      button.setAttribute("aria-selected", String(i === objectSearchActiveIndex));
+      button.setAttribute(
+        "aria-selected",
+        String(i === objectSearchActiveIndex),
+      );
     });
     if (buttons[objectSearchActiveIndex])
       buttons[objectSearchActiveIndex].scrollIntoView({ block: "nearest" });
@@ -215,12 +221,16 @@ export function createObjectSearchController(options) {
       if (composing || e.isComposing) return;
       if (e.key === "ArrowDown") {
         e.preventDefault();
-        if (objectSearchResults.length) setObjectSearchActive(objectSearchActiveIndex + 1);
+        if (objectSearchResults.length)
+          setObjectSearchActive(objectSearchActiveIndex + 1);
       } else if (e.key === "ArrowUp") {
         e.preventDefault();
-        if (objectSearchResults.length) setObjectSearchActive(objectSearchActiveIndex - 1);
+        if (objectSearchResults.length)
+          setObjectSearchActive(objectSearchActiveIndex - 1);
       } else if (e.key === "Enter") {
-        const entry = objectSearchResults[objectSearchActiveIndex] || objectSearchResults[0];
+        const entry =
+          objectSearchResults[objectSearchActiveIndex] ||
+          objectSearchResults[0];
         if (entry) {
           e.preventDefault();
           selectObjectSearchResult(entry);

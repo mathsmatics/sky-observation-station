@@ -7,7 +7,11 @@
  * 分散成过细文件后难以追踪显示顺序。
  */
 
-export function drawProjectedLine(context: CanvasRenderingContext2D, points: any[], style: any): void {
+export function drawProjectedLine(
+  context: CanvasRenderingContext2D,
+  points: any[],
+  style: any,
+): void {
   if (!context || !Array.isArray(points) || points.length < 2) return;
   context.save();
   context.strokeStyle = style.stroke;

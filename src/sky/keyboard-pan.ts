@@ -7,9 +7,9 @@ export const ARROW_KEY_LABELS = [
 ];
 
 export function pressedArrowKeysLabel(keys) {
-  const labels = ARROW_KEY_LABELS
-    .filter(([key]) => keys.has(key))
-    .map(([, label]) => label);
+  const labels = ARROW_KEY_LABELS.filter(([key]) => keys.has(key)).map(
+    ([, label]) => label,
+  );
   return labels.length ? labels.join(" ") : "none";
 }
 

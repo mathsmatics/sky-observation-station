@@ -6,13 +6,18 @@
  * “可独立维护”的控件逻辑，例如城市搜索和菜单分区折叠。
  */
 
-export function readIntegerField(element: HTMLInputElement | null): number | null {
+export function readIntegerField(
+  element: HTMLInputElement | null,
+): number | null {
   if (!element) return null;
   const value = Number.parseInt(String(element.value || ""), 10);
   return Number.isFinite(value) ? value : null;
 }
 
-export function setDisabled(element: HTMLElement | null, disabled: boolean): void {
+export function setDisabled(
+  element: HTMLElement | null,
+  disabled: boolean,
+): void {
   if (!element) return;
   (element as HTMLButtonElement).disabled = !!disabled;
 }
@@ -48,7 +53,9 @@ export function createSectionShell(options: {
  *
  * 这里不修改状态，也不触发重绘；它只负责让 DOM 控件显示当前 state。
  */
-export function createControlSyncController(options: any): { syncControls: () => void } {
+export function createControlSyncController(options: any): {
+  syncControls: () => void;
+} {
   const {
     dom: { $ },
     getState,
@@ -74,14 +81,19 @@ export function createControlSyncController(options: any): { syncControls: () =>
     $("projection-select").value = state.projection;
     $("coordinate-select").value = state.coordinateSystem;
     if ($("pole-axis-constraint"))
-      $("pole-axis-constraint").checked = state.poleAxisConstraintEnabled !== false;
+      $("pole-axis-constraint").checked =
+        state.poleAxisConstraintEnabled !== false;
     $("traditional-detail").value = state.traditionalDetail;
     $("magnitude").value = state.magnitude;
     $("magnitude-value").textContent = Number(state.magnitude).toFixed(1);
     $("star-size").value = state.starSize;
     $("star-size-value").textContent = `${state.starSize} px`;
-    const starNameMin = Number(cfg("sky.stars.properNameMagnitudeLimitMin", 2.1));
-    const starNameMax = Number(cfg("sky.stars.properNameMagnitudeLimitMax", 4.0));
+    const starNameMin = Number(
+      cfg("sky.stars.properNameMagnitudeLimitMin", 2.1),
+    );
+    const starNameMax = Number(
+      cfg("sky.stars.properNameMagnitudeLimitMax", 4.0),
+    );
     const starNameValue = Number(
       state.starNameMagnitudeLimit ?? defaults.starNameMagnitudeLimit,
     ).toFixed(1);
@@ -129,7 +141,11 @@ export function createRegionUiController(options: any): {
   updateRegionLegend: () => void;
   regionVisible: (prop: any) => boolean;
 } {
-  const { dom: { $ }, getState, t } = options;
+  const {
+    dom: { $ },
+    getState,
+    t,
+  } = options;
 
   function updateRegionLegend(): void {
     const state = getState();
@@ -168,7 +184,10 @@ export function createRegionUiController(options: any): {
   return { updateBoundaryUI, updateRegionLegend, regionVisible };
 }
 
-export function applyMenuSectionOrder(panel: HTMLElement | null, order: string[]): void {
+export function applyMenuSectionOrder(
+  panel: HTMLElement | null,
+  order: string[],
+): void {
   if (!panel || panel.dataset.menuOrderChecked === "true") return;
   (Array.isArray(order) ? order : []).forEach((id) => {
     const section = panel.querySelector(`[data-menu-id="${id}"]`);
@@ -187,7 +206,9 @@ export function initializeMenuSections(options: {
 }): void {
   const panel = options.panel;
   if (!panel || panel.dataset.menuSectionsReady === "true") return;
-  const collapsible = new Set(Array.isArray(options.collapsible) ? options.collapsible : []);
+  const collapsible = new Set(
+    Array.isArray(options.collapsible) ? options.collapsible : [],
+  );
   panel.querySelectorAll<HTMLElement>("[data-menu-id]").forEach((section) => {
     const id = section.dataset.menuId;
     const title = section.querySelector<HTMLElement>(".section-title");
@@ -201,7 +222,11 @@ export function initializeMenuSections(options: {
     const toggle = () => {
       const isCollapsed = section.classList.toggle("section-collapsed");
       title.setAttribute("aria-expanded", String(!isCollapsed));
-      const ids = Array.from(panel.querySelectorAll<HTMLElement>(".section-collapsible.section-collapsed"))
+      const ids = Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          ".section-collapsible.section-collapsed",
+        ),
+      )
         .map((item) => item.dataset.menuId)
         .filter(Boolean);
       options.setCollapsedIds(ids as string[]);
@@ -225,7 +250,14 @@ export function setupCitySearch(options: {
   citySearchText: (city: any) => string;
   getLanguage: () => "zh" | "en";
   getMaxResults: () => number;
-  setObserver: (lat: any, lon: any, zone: any, cityZh: any, cityEn: any, persist: boolean) => void;
+  setObserver: (
+    lat: any,
+    lon: any,
+    zone: any,
+    cityZh: any,
+    cityEn: any,
+    persist: boolean,
+  ) => void;
 }): void {
   const input = options.input;
   const box = options.box;
@@ -234,13 +266,18 @@ export function setupCitySearch(options: {
   let activeIndex = -1;
   let composing = false;
   const setActive = (index: number) => {
-    const buttons = Array.from(box.querySelectorAll<HTMLElement>(".city-option"));
-    activeIndex = buttons.length ? (index + buttons.length) % buttons.length : -1;
+    const buttons = Array.from(
+      box.querySelectorAll<HTMLElement>(".city-option"),
+    );
+    activeIndex = buttons.length
+      ? (index + buttons.length) % buttons.length
+      : -1;
     buttons.forEach((button, i) => {
       button.classList.toggle("active", i === activeIndex);
       button.setAttribute("aria-selected", String(i === activeIndex));
     });
-    if (buttons[activeIndex]) buttons[activeIndex].scrollIntoView({ block: "nearest" });
+    if (buttons[activeIndex])
+      buttons[activeIndex].scrollIntoView({ block: "nearest" });
   };
   const choose = (city: any) => {
     if (!city) return;
@@ -251,7 +288,9 @@ export function setupCitySearch(options: {
   const render = (query = "") => {
     const q = String(query).trim().toLowerCase();
     const max = Math.max(1, Math.floor(Number(options.getMaxResults()) || 60));
-    found = options.cities.filter((c) => !q || options.citySearchText(c).includes(q)).slice(0, max);
+    found = options.cities
+      .filter((c) => !q || options.citySearchText(c).includes(q))
+      .slice(0, max);
     box.innerHTML = "";
     found.forEach((city, index) => {
       const button = document.createElement("button");
@@ -286,7 +325,11 @@ export function setupCitySearch(options: {
       else setActive(activeIndex - 1);
     } else if (event.key === "Enter") {
       const text = input.value.trim();
-      const city = found[activeIndex] || options.cities.find((x) => x.zh === text || x.en.toLowerCase() === text.toLowerCase());
+      const city =
+        found[activeIndex] ||
+        options.cities.find(
+          (x) => x.zh === text || x.en.toLowerCase() === text.toLowerCase(),
+        );
       if (city) {
         event.preventDefault();
         choose(city);
@@ -297,6 +340,7 @@ export function setupCitySearch(options: {
     }
   });
   document.addEventListener("mousedown", (event) => {
-    if (!(event.target as HTMLElement).closest(".city-search-wrap")) box.classList.remove("open");
+    if (!(event.target as HTMLElement).closest(".city-search-wrap"))
+      box.classList.remove("open");
   });
 }

@@ -28,9 +28,17 @@ const PHASE_NAMES = [
   ["残月", "Waning Crescent"],
 ];
 
-export function calculateMoonPhase(moonLongitudeDeg: number, sunLongitudeDeg: number): MoonPhaseInfo {
-  const elongation = normalizeDegrees(Number(moonLongitudeDeg) - Number(sunLongitudeDeg));
-  const illumination = Math.max(0, Math.min(1, (1 - Math.cos(degToRad(elongation))) / 2));
+export function calculateMoonPhase(
+  moonLongitudeDeg: number,
+  sunLongitudeDeg: number,
+): MoonPhaseInfo {
+  const elongation = normalizeDegrees(
+    Number(moonLongitudeDeg) - Number(sunLongitudeDeg),
+  );
+  const illumination = Math.max(
+    0,
+    Math.min(1, (1 - Math.cos(degToRad(elongation))) / 2),
+  );
   const ageDays = (elongation / 360) * SYNODIC_MONTH_DAYS;
   // 以 45° 为一个八分区间，并用 +22.5° 把区间中心对齐到新月、上弦、满月等名称。
   const index = Math.floor(((elongation + 22.5) % 360) / 45);

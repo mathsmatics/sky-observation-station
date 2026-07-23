@@ -21,6 +21,10 @@ export function westernConstellationLineFeatures(): GeoJsonFeature[] {
   return catalogFeatures<GeoJsonFeature>("westernConstellationLines");
 }
 
+export function westernConstellationBoundaryFeatures(): GeoJsonFeature[] {
+  return catalogFeatures<GeoJsonFeature>("westernConstellationBounds");
+}
+
 export function westernConstellationCoordinateMap(): Map<string, number[]> {
   return pointFeatureCoordinateMap("westernConstellationNames");
 }

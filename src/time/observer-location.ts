@@ -74,7 +74,10 @@ export function createObserverLocationController(services) {
     state.cityEn = cityEn;
     syncControls();
     updateHUD(true);
-    noteTimeRenderDebug({ updateSource: "location update", rollbackStatus: "unused" });
+    noteTimeRenderDebug({
+      updateSource: "location update",
+      rollbackStatus: "unused",
+    });
     const ok = updateSkyView(true, "location update");
     if (!ok) {
       Object.assign(state, previousLocation);
@@ -82,12 +85,17 @@ export function createObserverLocationController(services) {
       syncControls();
       updateHUD(true);
       showToast(
-        state.lang === "zh" ? "地点刷新失败，已恢复上一个有效地点" : "Location refresh failed; restored the previous valid location",
+        state.lang === "zh"
+          ? "地点刷新失败，已恢复上一个有效地点"
+          : "Location refresh failed; restored the previous valid location",
         true,
       );
       return false;
     }
-    updateActiveTimeDebug({ updateSource: "location update", rollbackStatus: "unused" });
+    updateActiveTimeDebug({
+      updateSource: "location update",
+      rollbackStatus: "unused",
+    });
     save();
     if (notice)
       showToast(`${t("locationApplied")} · ${resolved} · ${t("sameInstant")}`);

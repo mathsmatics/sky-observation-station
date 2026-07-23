@@ -79,8 +79,15 @@ export function createViewModeController(services) {
           const nextMetrics = projectionCanvasMetrics(next);
           Celestial.resize(nextMetrics.width);
           applyMapBoxMetrics(nextMetrics);
-          if (nextMetrics.renderMode === "VIEWPORT_CANVAS" && Celestial.mapProjection && Celestial.mapProjection.translate) {
-            Celestial.mapProjection.translate([nextMetrics.width / 2, nextMetrics.height / 2]);
+          if (
+            nextMetrics.renderMode === "VIEWPORT_CANVAS" &&
+            Celestial.mapProjection &&
+            Celestial.mapProjection.translate
+          ) {
+            Celestial.mapProjection.translate([
+              nextMetrics.width / 2,
+              nextMetrics.height / 2,
+            ]);
           }
           syncInternalZoomForMetrics(nextMetrics);
           syncRenderedMapBox(nextMetrics);
@@ -152,7 +159,10 @@ export function createViewModeController(services) {
           options.preferSaved &&
           state.projectionViews &&
           state.projectionViews[viewKey()],
-        configured = state.coordinateSystem === "horizontal" ? coordinateViewDefault() : saved || coordinateViewDefault(),
+        configured =
+          state.coordinateSystem === "horizontal"
+            ? coordinateViewDefault()
+            : saved || coordinateViewDefault(),
         targetScale = viewMapScale(saved || configured, defaults.mapScale);
       if (state.coordinateSystem !== "horizontal" && saved) {
         restoreView(saved);
@@ -163,17 +173,19 @@ export function createViewModeController(services) {
         // 地平坐标视角的中心始终由当前地点和时间的本地天空计算，不恢复旧 center。
         updateSkyView(true);
         clearTimeout(getCustomViewRestoreTimer());
-        setCustomViewRestoreTimer(setTimeout(() => {
-          try {
-            setMapScale(targetScale);
-            syncInternalZoomForMetrics(projectionCanvasMetrics());
-            redrawAndSyncMapBox("horizontal reset");
-            state.projectionViews[viewKey()] = { mapScale: targetScale };
-            save();
-          } catch (err) {
-            console.warn("Horizontal reset failed", err);
-          }
-        }, 120));
+        setCustomViewRestoreTimer(
+          setTimeout(() => {
+            try {
+              setMapScale(targetScale);
+              syncInternalZoomForMetrics(projectionCanvasMetrics());
+              redrawAndSyncMapBox("horizontal reset");
+              state.projectionViews[viewKey()] = { mapScale: targetScale };
+              save();
+            } catch (err) {
+              console.warn("Horizontal reset failed", err);
+            }
+          }, 120),
+        );
         return;
       }
       const v = {

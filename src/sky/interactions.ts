@@ -15,7 +15,10 @@ export type ReticleStyle = {
   armLength?: number;
 };
 
-export function skyEventPoint(canvas: HTMLCanvasElement, event: PointerEvent | MouseEvent): [number, number] {
+export function skyEventPoint(
+  canvas: HTMLCanvasElement,
+  event: PointerEvent | MouseEvent,
+): [number, number] {
   const rect = canvas.getBoundingClientRect();
   // D3-Celestial 的投影坐标使用 CSS 像素；这里不能按 devicePixelRatio 放大，
   // 否则高分屏上点击拾取会系统性偏移。
@@ -30,12 +33,18 @@ export function drawFourArmReticle(
   if (!context || !point) return;
   const [x, y] = point;
   const gap = Number.isFinite(style.gap) ? Number(style.gap) : 9;
-  const armLength = Number.isFinite(style.armLength) ? Number(style.armLength) : 13;
+  const armLength = Number.isFinite(style.armLength)
+    ? Number(style.armLength)
+    : 13;
   const outer = gap + armLength;
   context.save();
   context.strokeStyle = style.stroke || "#8eeaff";
-  context.globalAlpha = Number.isFinite(style.opacity) ? Number(style.opacity) : 0.88;
-  context.lineWidth = Number.isFinite(style.lineWidth) ? Number(style.lineWidth) : 1.5;
+  context.globalAlpha = Number.isFinite(style.opacity)
+    ? Number(style.opacity)
+    : 0.88;
+  context.lineWidth = Number.isFinite(style.lineWidth)
+    ? Number(style.lineWidth)
+    : 1.5;
   context.lineCap = "round";
   context.beginPath();
   // 四条短线等长，中心留空，不画圆，不挡住选中的天体点。

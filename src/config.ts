@@ -1,5 +1,5 @@
 /**
- * 真实星空观测台 5.5.1 —— 用户可配置文件
+ * 真实星空观测台 5.5.3 —— 用户可配置文件
  * ------------------------------------------------------------
  * 修改本文件后，运行 npm run build 并刷新 index.html 即可生效。
  *
@@ -176,6 +176,7 @@ window.RSO_CONFIG = {
     enabled: true,
     defaultOpen: false,
     refreshMs: 200,
+    boundaryDiagnostics: false, // 打开后在控制台输出星座边界数据诊断。
   },
 
   /** 页面布局尺寸，单位通常是 CSS px。 */

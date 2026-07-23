@@ -90,59 +90,88 @@ export function buildObjectSearchIndexFromSources(options: {
   options.stars.forEach((feature) => {
     const coord = candidateCoord(feature);
     const names = options.starNames[String(feature.id)] || {};
-    addSearchEntry(entries, "star", feature, coord, [
-      label("star", feature),
-      names.name,
-      names.zh,
-      names.bayer,
-      names.flam,
-      names.hip,
-      names.hd,
-      feature.id ? `HIP ${feature.id}` : "",
-    ], simplify);
+    addSearchEntry(
+      entries,
+      "star",
+      feature,
+      coord,
+      [
+        label("star", feature),
+        names.name,
+        names.zh,
+        names.bayer,
+        names.flam,
+        names.var,
+        names.hip,
+        names.hd,
+        feature.id ? `HIP ${feature.id}` : "",
+      ],
+      simplify,
+    );
   });
 
   options.deepSkyFeatures.forEach((feature) => {
     const coord = candidateCoord(feature);
     const names = options.deepSkyNames[String(feature.id)] || {};
     const props = feature.properties || {};
-    addSearchEntry(entries, "dso", feature, coord, [
-      label("dso", feature),
-      names.name,
-      names.zh,
-      props.desig,
-      props.messier,
-      props.caldwell,
-      props.ngc,
-      props.ic,
-      props.objectTitle,
-      ...(Array.isArray(props.aliases) ? props.aliases : []),
-      feature.id,
-    ], simplify);
+    addSearchEntry(
+      entries,
+      "dso",
+      feature,
+      coord,
+      [
+        label("dso", feature),
+        names.name,
+        names.zh,
+        props.desig,
+        props.messier,
+        props.caldwell,
+        props.ngc,
+        props.ic,
+        props.objectTitle,
+        ...(Array.isArray(props.aliases) ? props.aliases : []),
+        feature.id,
+      ],
+      simplify,
+    );
   });
 
   options.constellationNameFeatures.forEach((feature) => {
     const props = feature.properties || {};
-    addSearchEntry(entries, "constellation", feature, candidateCoord(feature), [
-      label("constellation", feature),
-      props.zh,
-      props.en,
-      props.name,
-      props.desig,
-      feature.id,
-    ], simplify);
+    addSearchEntry(
+      entries,
+      "constellation",
+      feature,
+      candidateCoord(feature),
+      [
+        label("constellation", feature),
+        props.zh,
+        props.en,
+        props.name,
+        props.desig,
+        feature.id,
+      ],
+      simplify,
+    );
   });
 
   options.asterismNameFeatures.forEach((feature) => {
     const props = feature.properties || {};
-    addSearchEntry(entries, "asterism", feature, candidateCoord(feature), [
-      label("asterism", feature),
-      props.name,
-      props.en,
-      props.pinyin,
-      props.desig,
-      feature.id,
-    ], simplify);
+    addSearchEntry(
+      entries,
+      "asterism",
+      feature,
+      candidateCoord(feature),
+      [
+        label("asterism", feature),
+        props.name,
+        props.en,
+        props.pinyin,
+        props.desig,
+        feature.id,
+      ],
+      simplify,
+    );
   });
 
   options.planets.forEach((item) => {
@@ -159,7 +188,11 @@ export function buildObjectSearchIndexFromSources(options: {
         item.id,
       ],
       simplify,
-      { planetId: item.id, displayCoord: item.displayCoord, epochCoord: item.epochCoord },
+      {
+        planetId: item.id,
+        displayCoord: item.displayCoord,
+        epochCoord: item.epochCoord,
+      },
     );
   });
 
@@ -191,7 +224,10 @@ export function searchObjectEntries(
     .map((item: any) => item.entry);
 }
 
-export function brightestStarEntries(entries: SearchEntrySeed[], limit = 50): SearchEntrySeed[] {
+export function brightestStarEntries(
+  entries: SearchEntrySeed[],
+  limit = 50,
+): SearchEntrySeed[] {
   return entries
     .filter((entry) => entry.type === "star")
     .slice()

@@ -188,4 +188,3 @@ export function simplifyChinese(value) {
     (ch) => TRAD_TO_SIMP[ch] || ch,
   );
 }
-

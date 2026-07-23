@@ -1,5 +1,9 @@
 // @ts-nocheck
 import { formatDec, formatRA } from "../astronomy/coordinates";
+import {
+  explainStarDisplayNameZh,
+  formatStarDisplayName,
+} from "../data/star-display";
 
 function infoPairLine(a: string, b: string, c: string, d: string): string {
   return `<div class="floating-info-pair"><span class="floating-field"><b>${a}：</b><em>${b || "—"}</em></span><span class="floating-field"><b>${c}：</b><em>${d || "—"}</em></span></div>`;
@@ -29,6 +33,8 @@ export function createObjectInfoFormatter(options) {
     cityName,
     formatLocalLong,
     objectLabel,
+    extendedCulture,
+    brightStarRanks,
   } = options;
 
   let chineseStarAsterismIndex = null;
@@ -100,7 +106,12 @@ export function createObjectInfoFormatter(options) {
   function uniqueTokens(values) {
     const seen = new Set();
     return values
-      .map((value) => cleanNameToken(value, { allowSingleGreek: false, allowBareNumber: false }))
+      .map((value) =>
+        cleanNameToken(value, {
+          allowSingleGreek: false,
+          allowBareNumber: false,
+        }),
+      )
       .filter(Boolean)
       .filter((value) => {
         const key = value.toLowerCase();
@@ -112,12 +123,18 @@ export function createObjectInfoFormatter(options) {
 
   function constellationMeta(abbr) {
     const feature = westernConstellationNameFeatures().find(
-      (item) => String(item.id || item.properties?.desig || "") === String(abbr || ""),
+      (item) =>
+        String(item.id || item.properties?.desig || "") === String(abbr || ""),
     );
     const props = (feature && feature.properties) || {};
     return {
-      gen: cleanNameToken(props.gen || props.name || abbr, { allowBareNumber: true }),
+      gen: cleanNameToken(props.gen || props.name || abbr, {
+        allowBareNumber: true,
+      }),
       zh: cleanNameToken(props.zh || abbr, { allowBareNumber: true }),
+      abbr: cleanNameToken(props.desig || feature?.id || abbr, {
+        allowBareNumber: true,
+      }),
     };
   }
 
@@ -125,14 +142,25 @@ export function createObjectInfoFormatter(options) {
     if (!obj || obj.type !== "star") return [];
     const n = starNames[String(obj.d && obj.d.id)] || {};
     const meta = constellationMeta(n.c);
-    const bayer = cleanNameToken(n.bayer || n.desig, { allowSingleGreek: true });
+    const safeDisplay = formatStarDisplayName({
+      id: obj.d && obj.d.id,
+      nameEntry: n,
+      lang: state.lang === "zh" ? "zh" : "en",
+      constellation: meta,
+      simplifyChinese,
+      allowHipFallback: false,
+    });
+    const bayer = cleanNameToken(n.bayer || n.desig, {
+      allowSingleGreek: true,
+    });
     const flam = cleanNameToken(n.flam, { allowBareNumber: true });
-    const values = [n.zh, n.name];
+    const values = [safeDisplay, n.zh, n.name];
     if (bayer && meta.gen && !/^\d+$/u.test(bayer)) {
       values.push(`${bayer} ${meta.gen}`);
       if (meta.zh) values.push(`${meta.zh} ${bayer}`);
     }
-    if (flam && meta.gen && /^\d+[A-Za-z]?$/u.test(flam)) values.push(`${flam} ${meta.gen}`);
+    if (flam && meta.gen && /^\d+[A-Za-z]?$/u.test(flam))
+      values.push(`${flam} ${meta.gen}`);
     return uniqueTokens(values);
   }
 
@@ -146,7 +174,9 @@ export function createObjectInfoFormatter(options) {
     if (obj.type === "star") {
       const n = starNames[String(obj.d.id)] || {};
       const values = [];
-      const hip = cleanNameToken(n.hip || (obj.d.id ? `HIP ${obj.d.id}` : ""), { allowBareNumber: true });
+      const hip = cleanNameToken(n.hip || (obj.d.id ? `HIP ${obj.d.id}` : ""), {
+        allowBareNumber: true,
+      });
       const hd = cleanNameToken(n.hd || p.hd, { allowBareNumber: true });
       const hr = cleanNameToken(n.hr || p.hr, { allowBareNumber: true });
       const gaia = cleanNameToken(n.gaia || p.gaia, { allowBareNumber: true });
@@ -154,10 +184,14 @@ export function createObjectInfoFormatter(options) {
       if (hd) values.push(/^HD\s/i.test(hd) ? hd : `HD ${hd}`);
       if (hr) values.push(/^HR\s/i.test(hr) ? hr : `HR ${hr}`);
       if (gaia) values.push(/^Gaia\s/i.test(gaia) ? gaia : `Gaia ${gaia}`);
-      return uniqueTokens(values).join(" / ") || floatingRowValue(rows, t("catalogId"));
+      return (
+        uniqueTokens(values).join(" / ") ||
+        floatingRowValue(rows, t("catalogId"))
+      );
     }
     if (obj.type === "dso") return p.desig || String(obj.d.id || "—");
-    if (obj.type === "planet") return String(obj.planetId || obj.d.id || "").toUpperCase();
+    if (obj.type === "planet")
+      return String(obj.planetId || obj.d.id || "").toUpperCase();
     return floatingRowValue(rows, t("catalogId"));
   }
 
@@ -172,17 +206,51 @@ export function createObjectInfoFormatter(options) {
     const rows = [],
       lang = state.lang === "zh" ? "zh" : "en";
     const western =
-      cultureNotes.westernConstellations &&
-      cultureNotes.westernConstellations[n.c];
-    if (western && western[lang])
-      rows.push([t("westernCultureMeaning"), western[lang]]);
+      extendedCulture?.westernConstellations?.[n.c] ||
+      cultureNotes.westernConstellations?.[n.c];
+    if (western) {
+      if (western.mythologyZh || western.symbolismZh) {
+        const months = western.bestViewingMonthsNorth?.length
+          ? `${t("bestViewingMonths")}${western.bestViewingMonthsNorth.join(" / ")}`
+          : "";
+        rows.push([
+          t("westernCultureMeaning"),
+          [
+            western.mythologyZh,
+            western.symbolismZh,
+            western.relatedConstellations?.length
+              ? `${t("relatedConstellations")}：${western.relatedConstellations.join(" / ")}`
+              : "",
+            months,
+          ]
+            .filter(Boolean)
+            .join(" "),
+        ]);
+      } else if (western[lang])
+        rows.push([t("westernCultureMeaning"), western[lang]]);
+    }
     const asterisms = chineseAsterismsForStar(obj.d && obj.d.id);
     const match = asterisms.find(
       (name) =>
-        cultureNotes.chineseAsterisms && cultureNotes.chineseAsterisms[name],
+        extendedCulture?.chineseAsterisms?.[name] ||
+        cultureNotes.chineseAsterisms?.[name],
     );
     if (match) {
-      const note = cultureNotes.chineseAsterisms[match][lang];
+      const extended = extendedCulture?.chineseAsterisms?.[match];
+      const note = extended
+        ? [
+            extended.meaningZh,
+            extended.fourSymbol
+              ? `${t("fourSymbol")}：${extended.fourSymbol}`
+              : "",
+            extended.buTianGeNote,
+            extended.fenye
+              ? `${t("fenye")}：${extended.fenye.ancientRegion}；${extended.fenye.modernApproximation}。${extended.fenye.caution}`
+              : "",
+          ]
+            .filter(Boolean)
+            .join(" ")
+        : cultureNotes.chineseAsterisms[match][lang];
       if (note)
         rows.push([
           t("chineseCultureMeaning"),
@@ -231,13 +299,65 @@ export function createObjectInfoFormatter(options) {
       const others = formatStarNameTokens(obj);
       if (others.length)
         rows.splice(1, 0, [t("otherNames"), others.join(" / ")]);
+      const rank = brightStarRanks?.get(String(obj.d.id));
+      if (rank)
+        rows.splice(1, 0, [
+          t("brightStarRank"),
+          `${t("rankPrefix")}${rank.rank}${t("rankSuffix")}`,
+        ]);
+      const explanation = explainStarDisplayNameZh(n);
+      if (state.lang === "zh" && explanation)
+        rows.push([t("starNameExplanation"), explanation]);
       if (p.bv !== undefined && p.bv !== "")
         rows.push([t("spectralInfo"), String(p.bv)]);
       rows.push([t("catalogId"), formatCatalogTokens(obj, rows)]);
       rows.push(...cultureRowsForImportantStar(obj, p, n));
     } else if (obj.type === "dso")
       rows.push([t("catalogId"), p.desig || String(obj.d.id)]);
-    else if (obj.type === "planet") {
+    else if (obj.type === "constellation") {
+      const note =
+        extendedCulture?.westernConstellations?.[
+          String(obj.d.id || p.desig || "")
+        ];
+      if (note) {
+        rows.push([t("catalogId"), p.desig || String(obj.d.id)]);
+        rows.push([
+          t("westernCultureMeaning"),
+          [
+            note.mythologyZh,
+            note.symbolismZh,
+            note.relatedConstellations?.length
+              ? `${t("relatedConstellations")}：${note.relatedConstellations.join(" / ")}`
+              : "",
+            note.bestViewingMonthsNorth?.length
+              ? `${t("bestViewingMonths")}${note.bestViewingMonthsNorth.join(" / ")}`
+              : "",
+          ]
+            .filter(Boolean)
+            .join(" "),
+        ]);
+      }
+    } else if (obj.type === "asterism") {
+      const name = simplifyChinese(p.name || p.desig || String(obj.d.id));
+      const note = extendedCulture?.chineseAsterisms?.[name];
+      if (note) {
+        rows.push([t("catalogId"), p.desig || String(obj.d.id)]);
+        rows.push([
+          t("chineseCultureMeaning"),
+          [
+            note.meaningZh,
+            note.fourSymbol ? `${t("fourSymbol")}：${note.fourSymbol}` : "",
+            note.enclosure ? `${t("enclosure")}：${note.enclosure}` : "",
+            note.buTianGeNote,
+            note.fenye
+              ? `${t("fenye")}：${note.fenye.ancientRegion}；${note.fenye.modernApproximation}。${note.fenye.caution}`
+              : "",
+          ]
+            .filter(Boolean)
+            .join(" "),
+        ]);
+      }
+    } else if (obj.type === "planet") {
       const ep = (obj.d && obj.d.ephemeris) || {};
       if (
         !["sol", "lun"].includes(obj.planetId) &&
@@ -247,7 +367,9 @@ export function createObjectInfoFormatter(options) {
       if (obj.planetId === "lun" && cfg("moonPhase.enabled", true)) {
         const phaseName = state.lang === "zh" ? ep.phaseNameZh : ep.phaseNameEn;
         if (phaseName) rows.push([t("moonPhase"), String(phaseName)]);
-        const illum = Number.isFinite(Number(ep.illumination)) ? Number(ep.illumination) : Number(ep.phase);
+        const illum = Number.isFinite(Number(ep.illumination))
+          ? Number(ep.illumination)
+          : Number(ep.phase);
         if (Number.isFinite(illum))
           rows.push([
             t("illumination"),
@@ -284,15 +406,19 @@ export function createObjectInfoFormatter(options) {
     const rows = objectRows(obj);
     const type = floatingRowValue(rows, t("objectType"));
     const catalog = formatCatalogTokens(obj, rows);
-    const title = cleanNameToken(
-      state.lang === "zh"
-        ? simplifyChinese(obj.label || objectLabel(obj.type, obj.d || { properties: {} }))
-        : obj.label || objectLabel(obj.type, obj.d || { properties: {} }),
-      { allowBareNumber: true },
-    ) || "—";
-    const names = obj.type === "star"
-      ? formatStarNameTokens(obj)
-      : uniqueTokens([floatingRowValue(rows, t("otherNames")), title]);
+    const title =
+      cleanNameToken(
+        state.lang === "zh"
+          ? simplifyChinese(
+              obj.label || objectLabel(obj.type, obj.d || { properties: {} }),
+            )
+          : obj.label || objectLabel(obj.type, obj.d || { properties: {} }),
+        { allowBareNumber: true },
+      ) || "—";
+    const names =
+      obj.type === "star"
+        ? formatStarNameTokens(obj)
+        : uniqueTokens([floatingRowValue(rows, t("otherNames")), title]);
     const noteKeys = [t("westernCultureMeaning"), t("chineseCultureMeaning")];
     const notes = rows
       .filter(([key, value]) => noteKeys.includes(key) && value)
@@ -302,10 +428,28 @@ export function createObjectInfoFormatter(options) {
       title,
       html:
         infoPairLine(t("objectType"), type, t("catalogId"), catalog) +
-        infoSingleLine(state.lang === "zh" ? "名称" : "Names", names.join(" / ") || title) +
-        infoPairLine(t("magnitude"), floatingRowValue(rows, t("magnitude")), t("spectralInfo"), floatingRowValue(rows, t("spectralInfo"))) +
-        infoPairLine(t("rightAscension"), floatingRowValue(rows, t("rightAscension")), t("declination"), floatingRowValue(rows, t("declination"))) +
-        infoPairLine(t("altitude"), floatingRowValue(rows, t("altitude")), t("azimuth"), floatingRowValue(rows, t("azimuth"))) +
+        infoSingleLine(
+          state.lang === "zh" ? "名称" : "Names",
+          names.join(" / ") || title,
+        ) +
+        infoPairLine(
+          t("magnitude"),
+          floatingRowValue(rows, t("magnitude")),
+          t("spectralInfo"),
+          floatingRowValue(rows, t("spectralInfo")),
+        ) +
+        infoPairLine(
+          t("rightAscension"),
+          floatingRowValue(rows, t("rightAscension")),
+          t("declination"),
+          floatingRowValue(rows, t("declination")),
+        ) +
+        infoPairLine(
+          t("altitude"),
+          floatingRowValue(rows, t("altitude")),
+          t("azimuth"),
+          floatingRowValue(rows, t("azimuth")),
+        ) +
         notes,
     };
   }

@@ -54,9 +54,15 @@ export function skyPaneSize(element: HTMLElement | null): SkyPaneMetrics {
   return { width, height, ratio: width / Math.max(1, height) };
 }
 
-export function projectionNaturalRatio(celestial: any, projectionName: string): number {
+export function projectionNaturalRatio(
+  celestial: any,
+  projectionName: string,
+): number {
   try {
-    const meta = celestial && celestial.projections ? celestial.projections()[projectionName] : null;
+    const meta =
+      celestial && celestial.projections
+        ? celestial.projections()[projectionName]
+        : null;
     const ratio = meta && Number(meta.ratio);
     return Number.isFinite(ratio) && ratio > 0 ? ratio : 1;
   } catch (_) {
@@ -79,7 +85,10 @@ export function projectionCanvasMetrics(options: {
   const heightFactor = ratio >= 1 ? 1 : 1 / Math.max(ratio, 0.0001);
   const fitByWidth = pane.width / widthFactor;
   const fitByHeight = pane.height / heightFactor;
-  const baseFitSide = Math.max(1, Math.min(fitByWidth, fitByHeight) * fitPadding);
+  const baseFitSide = Math.max(
+    1,
+    Math.min(fitByWidth, fitByHeight) * fitPadding,
+  );
   const mapScale = options.clampMapScale(options.mapScale);
   const baseWidth = Math.max(1, Math.round(baseFitSide * widthFactor));
   const baseHeight = Math.max(1, Math.round(baseFitSide * heightFactor));
@@ -87,14 +96,17 @@ export function projectionCanvasMetrics(options: {
   const virtualHeight = Math.max(1, Math.round(baseHeight * mapScale));
   // 只有虚拟星图宽高都超过当前星图区时，才把物理 Canvas 切换到视口大小。
   // 这样低倍全天浏览继续使用原有完整画布，高倍局部浏览不再清空和重绘巨型位图。
-  const viewportTrigger = virtualWidth > pane.width && virtualHeight > pane.height;
+  const viewportTrigger =
+    virtualWidth > pane.width && virtualHeight > pane.height;
   const renderMode = viewportTrigger ? "VIEWPORT_CANVAS" : "FULL";
   const width = viewportTrigger ? pane.width : virtualWidth;
   const height = viewportTrigger ? pane.height : virtualHeight;
   const dpr = Math.max(1, Number(window.devicePixelRatio || 1));
   // D3-Celestial 的投影比例由宽度驱动。VIEWPORT_CANVAS 下，视觉放大倍率
   // 从“放大真实画布”转为“放大 D3 内部投影”，因此按虚拟宽度/物理宽度同步内部 zoom。
-  const internalZoom = viewportTrigger ? Math.max(1, virtualWidth / Math.max(1, width)) : 1;
+  const internalZoom = viewportTrigger
+    ? Math.max(1, virtualWidth / Math.max(1, width))
+    : 1;
   return {
     paneWidth: pane.width,
     paneHeight: pane.height,
@@ -133,7 +145,10 @@ function forceElementCssSize(node: HTMLElement, width: number, height: number) {
   node.style.setProperty("box-sizing", "border-box");
 }
 
-function syncCanvasBitmapSize(canvas: HTMLCanvasElement, metrics: ProjectionCanvasMetrics) {
+function syncCanvasBitmapSize(
+  canvas: HTMLCanvasElement,
+  metrics: ProjectionCanvasMetrics,
+) {
   const bitmapWidth = Math.max(1, Math.round(metrics.canvasBitmapWidth));
   const bitmapHeight = Math.max(1, Math.round(metrics.canvasBitmapHeight));
   if (canvas.width !== bitmapWidth) canvas.width = bitmapWidth;
@@ -142,11 +157,21 @@ function syncCanvasBitmapSize(canvas: HTMLCanvasElement, metrics: ProjectionCanv
   // 后续仍按 CSS 像素坐标绘制，同时让 Debug 能看到真实 bitmap 尺寸。
   const context = canvas.getContext("2d");
   if (context && typeof context.setTransform === "function") {
-    context.setTransform(metrics.devicePixelRatio, 0, 0, metrics.devicePixelRatio, 0, 0);
+    context.setTransform(
+      metrics.devicePixelRatio,
+      0,
+      0,
+      metrics.devicePixelRatio,
+      0,
+      0,
+    );
   }
 }
 
-export function applyMapBoxMetrics(map: HTMLElement | null, metrics: ProjectionCanvasMetrics): ProjectionCanvasMetrics {
+export function applyMapBoxMetrics(
+  map: HTMLElement | null,
+  metrics: ProjectionCanvasMetrics,
+): ProjectionCanvasMetrics {
   if (!map) return metrics;
   forceElementCssSize(map, metrics.width, metrics.height);
   map.querySelectorAll<HTMLElement>("canvas, svg").forEach((node) => {
@@ -156,7 +181,9 @@ export function applyMapBoxMetrics(map: HTMLElement | null, metrics: ProjectionC
   return metrics;
 }
 
-export function canvasRect(mapSelector = "#celestial-map canvas"): DOMRect | null {
+export function canvasRect(
+  mapSelector = "#celestial-map canvas",
+): DOMRect | null {
   const canvas = document.querySelector<HTMLCanvasElement>(mapSelector);
   return canvas ? canvas.getBoundingClientRect() : null;
 }
