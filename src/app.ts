@@ -19,17 +19,11 @@ import {
   deepSkyFeatures,
   deepSkyNames,
 } from "./data/deep-sky";
-import {
-  candidateCoord,
-} from "./data/object-search-index";
 import { starCoordinateMap, starFeatures, starNames } from "./data/stars";
 import {
   traditionalRegionLabelPath,
   traditionalRegionPath,
 } from "./data/traditional-regions";
-import {
-  eclipticJ2000ToEquatorialJ2000,
-} from "./astronomy/precession";
 import { helpManualForLanguage } from "./data/content/help-manual";
 import { normalizeDegrees, clampNumber as clamp } from "./astronomy/angle";
 import {
@@ -47,7 +41,6 @@ import {
   safeZoneForCoordinates as safeTimezoneForCoordinates,
 } from "./astronomy/timezone";
 import { localSiderealDegrees } from "./astronomy/sidereal";
-import { equatorialFromHorizontal as equatorialFromHorizontalPure } from "./astronomy/coordinates";
 import { calculateCurrentPlanetPositions } from "./astronomy/bodies-simple";
 import { createDefaultState } from "./state/defaults";
 import { getProjectStorage, readJsonFromStorage, removeStorageKey, writeJsonToStorage } from "./state/storage";
@@ -80,7 +73,12 @@ import {
   resetInternalZoom as resetCelestialInternalZoom,
   syncInternalZoomForMetrics as syncCelestialInternalZoomForMetrics,
 } from "./sky/celestial-view";
+import { createCultureOverlayController } from "./sky/culture-overlays";
 import { createEpochFrameController } from "./sky/epoch-frame";
+import { createObjectPickingController } from "./sky/object-picking";
+import { createPlanetOverlayController } from "./sky/planet-overlay";
+import { createReferenceOverlayController } from "./sky/reference-overlays";
+import { createTraditionalRegionsOverlayController } from "./sky/traditional-regions-overlay";
 import {
   clampMapScale as clampProjectionMapScale,
   coordinateViewDefault as computeCoordinateViewDefault,
@@ -103,15 +101,8 @@ import {
   updatePoleAxisDiagnostics,
 } from "./sky/view-control";
 import {
-  drawProjectedLine as drawLayerProjectedLine,
-  drawReferenceText as drawLayerReferenceText,
   selectionNodes as getLayerSelectionNodes,
 } from "./sky/layers";
-import {
-  drawSearchReticle,
-  drawSelectionReticle,
-  skyEventPoint as getSkyEventPoint,
-} from "./sky/interactions";
 import {
   elementRect as getElementRect,
   isMobileLayout as isMobileLayoutByWidth,
@@ -198,12 +189,6 @@ import {
   let resizeTimer = null;
   let applyTimer = null;
   let loadTimer = null;
-  let chineseLinesReady = false;
-  let chineseNamesReady = false;
-  let westernDualLinesReady = false;
-  let westernDualLineFeatures = [];
-  let chineseLineFeatures = [];
-  let sharedCultureSegments = new Set();
   let traditionalRegionsReady = false,
     traditionalLabelsReady = false;
   let rebuildInProgress = false,
@@ -2650,167 +2635,26 @@ import {
    * 应用绘制时不修改原始数据对象。
    */
   function registerTraditionalRegionsOverlay() {
-    Celestial.add({
-      type: "json",
-      file: traditionalRegionPath(),
-      callback: function (error, json) {
-        if (error) {
-          console.warn("Traditional region data failed", error);
-          return;
-        }
-        const data = Celestial.getData(json, projectionCoordinateTransform());
-        Celestial.container
-          .selectAll(".rso-traditional-region")
-          .data(data.features)
-          .enter()
-          .append("path")
-          .attr("class", "rso-traditional-region");
-        traditionalRegionsReady = true;
-        redrawAndSyncMapBox("traditional regions loaded");
-      },
-      redraw: function () {
-        Celestial.container
-          .selectAll(".rso-traditional-region")
-          .each(function (d) {
-            const prop = d.properties || {};
-            if (!regionVisible(prop)) return;
-            let style;
-            const styleKey =
-              prop.kind === "battlefield"
-                ? "battlefield"
-                : prop.kind === "mansion"
-                  ? "mansion"
-                  : prop.kind === "enclosure"
-                    ? "enclosure"
-                    : prop.kind === "southpolar"
-                      ? "southernPolar"
-                      : "symbol";
-            const baseStyle = cfg(`traditionalRegions.${styleKey}`, {});
-            style = {
-              fill: baseStyle.fill || "rgba(0,0,0,0)",
-              stroke: baseStyle.stroke || "rgba(110,199,238,.52)",
-              width: Number(baseStyle.width ?? 0.75),
-              dash: Array.isArray(baseStyle.dash) ? baseStyle.dash : [4, 4],
-              opacity: Number(baseStyle.opacity ?? 1),
-            };
-            Celestial.setStyle(style);
-            Celestial.map(d);
-            Celestial.context.fill();
-            Celestial.context.stroke();
-          });
-      },
-    });
-    Celestial.add({
-      type: "json",
-      file: traditionalRegionLabelPath(),
-      callback: function (error, json) {
-        if (error) {
-          console.warn("Traditional region label data failed", error);
-          return;
-        }
-        const data = Celestial.getData(json, projectionCoordinateTransform());
-        Celestial.container
-          .selectAll(".rso-traditional-label")
-          .data(data.features)
-          .enter()
-          .append("path")
-          .attr("class", "rso-traditional-label");
-        traditionalLabelsReady = true;
-        redrawAndSyncMapBox("traditional labels loaded");
-      },
-      redraw: function () {
-        const occupied = [];
-        Celestial.container
-          .selectAll(".rso-traditional-label")
-          .each(function (d) {
-            const prop = d.properties || {};
-            if (!regionVisible(prop)) return;
-            const c = d.geometry && d.geometry.coordinates;
-            if (!c || !Celestial.clip(c)) return;
-            const pt = Celestial.mapProjection(c);
-            if (!pt || !Number.isFinite(pt[0])) return;
-            if (
-              occupied.some((p) => Math.hypot(p[0] - pt[0], p[1] - pt[1]) < 42)
-            )
-              return;
-            occupied.push(pt);
-            const label =
-              state.lang === "zh"
-                ? simplifyChinese(prop.name || prop.en)
-                : prop.en || prop.name;
-            const battle = prop.kind === "battlefield",
-              mansion = prop.kind === "mansion";
-            Celestial.setTextStyle({
-              fill: battle
-                ? cfg("labels.traditionalBattlefieldColor", "#ff9b78")
-                : mansion
-                  ? cfg("labels.traditionalMansionColor", "#dcc37c")
-                  : cfg("labels.traditionalMajorColor", "#8fd4f4"),
-              font: scaleFont(
-                battle
-                  ? cfg(
-                      "labels.traditionalBattlefieldFont",
-                      "700 11px Inter, Microsoft YaHei, sans-serif",
-                    )
-                  : mansion
-                    ? cfg(
-                        "labels.traditionalMansionFont",
-                        "600 9px Inter, Microsoft YaHei, sans-serif",
-                      )
-                    : cfg(
-                        "labels.traditionalMajorFont",
-                        "700 11px Inter, Microsoft YaHei, sans-serif",
-                      ),
-              ),
-              align: "center",
-              baseline: "middle",
-            });
-            Celestial.context.fillText(label, pt[0], pt[1]);
-          });
-      },
-    });
+    traditionalRegionsOverlayController.registerTraditionalRegionsOverlay();
   }
   function projectionCoordinateTransform() {
-    return coordinateViewSpec().transform;
+    return referenceOverlayController.projectionCoordinateTransform();
   }
+
   function coordinateViewSpec(coord = state.coordinateSystem) {
-    const configured = cfg(`coordinateViews.${coord}`, {}),
-      transform = ["equatorial", "ecliptic", "galactic"].includes(
-        configured.transform,
-      )
-        ? configured.transform
-        : "equatorial";
-    return {
-      transform,
-      orientation: configured.orientation || `${coord}-default`,
-    };
+    return referenceOverlayController.coordinateViewSpec(coord);
   }
+
   function isHorizontalView() {
-    return state.coordinateSystem === "horizontal";
+    return referenceOverlayController.isHorizontalView();
   }
 
   function horizontalFor(coord, options = {}) {
-    try {
-      const eq = options.alreadyEpoch ? coord : epochEquatorialFromJ2000(coord);
-      const h = Celestial.horizontal(currentInstantDate(), eq, [
-        Number(state.lat),
-        Number(state.lon),
-      ]);
-      return { alt: h[0], az: h[1] };
-    } catch (_) {
-      return { alt: NaN, az: NaN };
-    }
+    return referenceOverlayController.horizontalFor(coord, options);
   }
 
   function equatorialFromHorizontal(azimuth, altitude) {
-    return equatorialFromHorizontalPure({
-      azimuth,
-      altitude,
-      latitude: state.lat,
-      longitude: state.lon,
-      date: currentInstantDate(),
-      normalizeLongitude: normalizeCelestialLongitude,
-    });
+    return referenceOverlayController.equatorialFromHorizontal(azimuth, altitude);
   }
 
   function scaleFont(font) {
@@ -2821,251 +2665,37 @@ import {
   }
 
   function projectEquatorialCoordinate(coord) {
-    const display = displayCoordinateForEquatorial(coord);
-    if (!display || !Celestial.clip(display)) return null;
-    const pt = Celestial.mapProjection(display);
-    return pt && Number.isFinite(pt[0]) && Number.isFinite(pt[1]) ? pt : null;
+    return referenceOverlayController.projectEquatorialCoordinate(coord);
   }
 
   function projectEpochEquatorialCoordinate(coord) {
-    const display = displayCoordinateForEpochEquatorial(coord);
-    if (!display || !Celestial.clip(display)) return null;
-    const pt = Celestial.mapProjection(display);
-    return pt && Number.isFinite(pt[0]) && Number.isFinite(pt[1]) ? pt : null;
-  }
-
-  function projectHorizontalCoordinate(azimuth, altitude) {
-    return projectEpochEquatorialCoordinate(
-      equatorialFromHorizontal(azimuth, altitude),
-    );
+    return referenceOverlayController.projectEpochEquatorialCoordinate(coord);
   }
 
   function drawProjectedLine(points, style) {
-    const ctx = Celestial.context;
-    ctx.save();
-    ctx.beginPath();
-    ctx.strokeStyle = style.stroke;
-    ctx.globalAlpha = Number(style.opacity ?? 1);
-    ctx.lineWidth = Number(style.width ?? 1);
-    ctx.setLineDash(Array.isArray(style.dash) ? style.dash : []);
-    let previous = null,
-      drawing = false;
-    points.forEach((pt) => {
-      if (!pt) {
-        previous = null;
-        drawing = false;
-        return;
-      }
-      const jump =
-        previous && Math.hypot(pt[0] - previous[0], pt[1] - previous[1]) > 180;
-      if (!drawing || jump) {
-        ctx.moveTo(pt[0], pt[1]);
-        drawing = true;
-      } else ctx.lineTo(pt[0], pt[1]);
-      previous = pt;
-    });
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  function drawReferenceText(text, point, style, align = "center") {
-    if (!point) return;
-    drawLayerReferenceText(
-      Celestial.context,
-      text,
-      point,
-      { ...style, font: scaleFont(style.font), baseline: style.baseline || "middle" },
-      align,
-    );
-  }
-
-  function drawHorizonLayer() {
-    if (!state.horizon) return;
-    const style = cfg("sky.horizon", {}),
-      lineStyle = {
-        stroke: style.stroke || "#7f9bb6",
-        width: Number(style.width ?? 0.85),
-        opacity: Number(style.opacity ?? 0.68),
-      };
-    const points = [];
-    for (let az = 0; az <= 360; az += 2)
-      points.push(projectHorizontalCoordinate(az, 0));
-    drawProjectedLine(points, lineStyle);
-
-    const labels = [
-      ["N", 0],
-      ["E", 90],
-      ["S", 180],
-      ["W", 270],
-    ];
-    const labelAltitudes = Array.isArray(
-      cfg("sky.horizon.labelAltitudeFallbackDegrees", []),
-    )
-      ? cfg("sky.horizon.labelAltitudeFallbackDegrees", [])
-      : [2, 3, 4, 6, 8, 10];
-    labels.forEach(([label, az]) => {
-      const point = labelAltitudes
-        .map((alt) => projectHorizontalCoordinate(az, Number(alt)))
-        .find(Boolean);
-      if (!point) return;
-      drawReferenceText(label, point, {
-        fill: cfg("sky.horizon.labelColor", "#ff5656"),
-        font: cfg(
-          "sky.horizon.labelFont",
-          "900 15px Inter, Microsoft YaHei, sans-serif",
-        ),
-        opacity: 0.95,
-      });
-    });
-  }
-
-  function drawHorizontalGridLayer() {
-    if (!state.horizontalGrid) return;
-    const style = cfg("sky.horizontalGrid", {}),
-      lineStyle = {
-        stroke: style.stroke || "#6fa78f",
-        width: Number(style.width ?? 0.55),
-        opacity: Number(style.opacity ?? 0.34),
-      },
-      textStyle = {
-        fill: style.labelColor || "#a8dbc8",
-        font: style.labelFont || "600 10px Inter, Microsoft YaHei, sans-serif",
-        opacity: 0.76,
-      };
-
-    for (let alt = 15; alt <= 75; alt += 15) {
-      const points = [];
-      for (let az = 0; az <= 360; az += 3)
-        points.push(projectHorizontalCoordinate(az, alt));
-      drawProjectedLine(points, lineStyle);
-      drawReferenceText(
-        `${alt}°`,
-        projectHorizontalCoordinate(8, alt),
-        textStyle,
-        "left",
-      );
-    }
-    for (let az = 0; az < 360; az += 30) {
-      const points = [];
-      for (let alt = 0; alt <= 90; alt += 2)
-        points.push(projectHorizontalCoordinate(az, alt));
-      drawProjectedLine(points, lineStyle);
-      drawReferenceText(
-        `${az}°`,
-        projectHorizontalCoordinate(az, 10),
-        textStyle,
-      );
-    }
-  }
-
-  function drawEquatorialGridLabels() {
-    if (!state.grid) return;
-    const style = {
-      fill: cfg("sky.gridLabels.color", "#a8bdd3"),
-      font: cfg(
-        "sky.gridLabels.font",
-        "600 10px Inter, Microsoft YaHei, sans-serif",
-      ),
-      opacity: Number(cfg("sky.gridLabels.opacity", 0.72)),
-    };
-    for (let lon = 0; lon < 360; lon += 30)
-      drawReferenceText(
-        `${lon}°`,
-        projectEpochEquatorialCoordinate([normalizeCelestialLongitude(lon), 0]),
-        style,
-      );
-    for (let lat = -60; lat <= 60; lat += 30) {
-      if (lat === 0) continue;
-      drawReferenceText(
-        `${lat > 0 ? "+" : ""}${lat}°`,
-        projectEpochEquatorialCoordinate([0, lat]),
-        style,
-        "left",
-      );
-    }
-  }
-
-  function drawSearchHighlight() {
-    if (!searchHighlight || !searchHighlight.coord) return;
-    const pt = projectEquatorialCoordinate(searchHighlight.coord);
-    if (!pt) return;
-    drawSearchReticle(Celestial.context, pt);
-  }
-
-  /**
-   * 绘制点击选中标记。
-   * 与搜索准星分离：搜索仍然用圆形准星，点击选中只画四条等长短线，
-   * 中心留空，避免遮挡被选中的星点或行星图标。
-   */
-  function drawSelectionHighlight() {
-    if (!currentSelected) return;
-    let point = null;
-    const display = currentSelected.displayCoord || currentSelected.epochCoord;
-    if (display && Celestial.clip(display)) {
-      const pt = Celestial.mapProjection(display);
-      if (pt && Number.isFinite(pt[0]) && Number.isFinite(pt[1])) point = pt;
-    }
-    if (!point && currentSelected.coord) point = projectEquatorialCoordinate(currentSelected.coord);
-    if (!point) return;
-    drawSelectionReticle(Celestial.context, point, {
-      stroke: cfg("selectionMarker.stroke", "#8eeaff"),
-      opacity: Number(cfg("selectionMarker.opacity", 0.9)),
-      lineWidth: Number(cfg("selectionMarker.lineWidth", 1.45)),
-      gap: Number(cfg("selectionMarker.gap", 10)),
-      armLength: Number(cfg("selectionMarker.armLength", 13)),
-    });
-  }
-
-
-  function drawEclipticLineLayer() {
-    if (!state.ecliptic) return;
-    const style = {
-      stroke: cfg("sky.ecliptic.stroke", "#e5b85e"),
-      width: Number(cfg("sky.ecliptic.width", 1.15)),
-      opacity: Number(cfg("sky.ecliptic.opacity", 0.82)),
-    };
-    const points = [];
-    for (let lon = 0; lon <= 360; lon += 2) {
-      const eq = eclipticJ2000ToEquatorialJ2000(lon, 0);
-      points.push(projectEquatorialCoordinate(eq));
-    }
-    drawProjectedLine(points, style);
-  }
-
-  function drawGalacticEquatorLayer() {
-    if (state.coordinateSystem !== "galactic") return;
-    const style = {
-      stroke: cfg("sky.galacticEquator.stroke", "#b26dff"),
-      width: Number(cfg("sky.galacticEquator.width", 1.35)),
-      opacity: Number(cfg("sky.galacticEquator.opacity", 0.86)),
-    };
-    const points = [];
-    for (let lon = -180; lon <= 180; lon += 2) {
-      const coord = [lon, 0];
-      points.push(Celestial.clip(coord) ? Celestial.mapProjection(coord) : null);
-    }
-    drawProjectedLine(points, style);
+    referenceOverlayController.drawProjectedLine(points, style);
   }
 
   function registerReferenceOverlays() {
-    Celestial.add({
-      type: "raw",
-      callback: function () {},
-      redraw: function () {
-        drawHorizontalGridLayer();
-        drawHorizonLayer();
-        drawEquatorialGridLabels();
-        drawEclipticLineLayer();
-        drawGalacticEquatorLayer();
-        drawSearchHighlight();
-        drawSelectionHighlight();
-      },
-    });
+    referenceOverlayController.registerReferenceOverlays();
   }
 
   function selectionNodes(selector) {
     return getLayerSelectionNodes(Celestial, selector);
   }
+  const referenceOverlayController = createReferenceOverlayController({
+    getCelestial: () => window.Celestial,
+    state,
+    cfg,
+    currentInstantDate,
+    epochEquatorialFromJ2000,
+    displayCoordinateForEquatorial,
+    displayCoordinateForEpochEquatorial,
+    normalizeCelestialLongitude,
+    scaleFont,
+    getSearchHighlight: () => searchHighlight,
+    getCurrentSelected: () => currentSelected,
+  });
   const objectInfoFormatter = createObjectInfoFormatter({
     state,
     t,
@@ -3109,7 +2739,66 @@ import {
       floatingObjectInfoDismissed = false;
     },
   });
+  const objectPickingController = createObjectPickingController({
+    getCelestial: () => window.Celestial,
+    selectionNodes,
+    currentPlanetPositions,
+    originalStarCoords: ORIGINAL_STAR_COORDS,
+    originalDsoCoords: ORIGINAL_DSO_COORDS,
+    originalConstellationCoords: ORIGINAL_CONSTELLATION_COORDS,
+    originalAsterismCoords: ORIGINAL_ASTERISM_COORDS,
+    setFloatingObjectInfoDismissed: (dismissed) => {
+      floatingObjectInfoDismissed = dismissed;
+    },
+    objectLabel,
+    showObjectInfo,
+    redrawAndSyncMapBox,
+    t,
+  });
   const PLANET_STYLE = cfg("planets", {});
+  const planetOverlayController = createPlanetOverlayController({
+    getCelestial: () => window.Celestial,
+    state,
+    planetStyle: PLANET_STYLE,
+    currentPlanetPositions,
+    simplifyChinese,
+    scaleFont,
+  });
+  const traditionalRegionsOverlayController = createTraditionalRegionsOverlayController({
+    getCelestial: () => window.Celestial,
+    state,
+    cfg,
+    traditionalRegionPath,
+    traditionalRegionLabelPath,
+    projectionCoordinateTransform,
+    redrawAndSyncMapBox,
+    regionVisible,
+    simplifyChinese,
+    scaleFont,
+    setTraditionalRegionsReady: (ready) => {
+      traditionalRegionsReady = ready;
+    },
+    setTraditionalLabelsReady: (ready) => {
+      traditionalLabelsReady = ready;
+    },
+  });
+  const cultureOverlayController = createCultureOverlayController({
+    getCelestial: () => window.Celestial,
+    state,
+    cfg,
+    westernConstellationLinePath,
+    chineseAsterismLinePath,
+    chineseAsterismNamePath,
+    projectionCoordinateTransform,
+    redrawAndSyncMapBox,
+    showChineseCulture,
+    simplifyChinese,
+    scaleFont,
+    getMapScale,
+    registerReferenceOverlays,
+    registerTraditionalRegionsOverlay,
+    registerPlanetOverlay,
+  });
 
   function astronomyModelEnabled() {
     return !!cfg("astronomyModel.precession", true);
@@ -3127,8 +2816,8 @@ import {
     storageSchemaVersion: STORAGE_SCHEMA_VERSION,
     astronomyModelVersion: ASTRONOMY_MODEL_VERSION,
     onDisplayedFeaturesTransformed: () => {
-      if (westernDualLineFeatures.length || chineseLineFeatures.length)
-        rebuildSharedCultureSegments();
+      if (cultureOverlayController.hasLineFeatures())
+        cultureOverlayController.rebuildSharedCultureSegments();
     },
   });
 
@@ -3183,49 +2872,7 @@ import {
     return currentPlanetPositions().find((p) => p.id === id) || null;
   }
   function registerPlanetOverlay() {
-    Celestial.add({
-      type: "raw",
-      callback: function () {},
-      redraw: function () {
-        if (!state.planets) return;
-        const occupied = [];
-        currentPlanetPositions().forEach((item) => {
-          const c = item.displayCoord;
-          if (!c || !Celestial.clip(c)) return;
-          const pt = Celestial.mapProjection(c);
-          if (!pt || !Number.isFinite(pt[0]) || !Number.isFinite(pt[1])) return;
-          const style = PLANET_STYLE[item.id] || {
-            symbol: "●",
-            color: "#ffd477",
-            size: 17,
-          };
-          Celestial.setTextStyle({
-            fill: style.color,
-            font: `700 ${style.size}px "Segoe UI Symbol", "Lucida Sans Unicode", sans-serif`,
-            align: "center",
-            baseline: "middle",
-          });
-          Celestial.context.fillText(style.symbol, pt[0], pt[1]);
-          const label =
-            state.lang === "zh"
-              ? simplifyChinese(item.body.zh || item.body.name || item.id)
-              : item.body.en || item.body.name || item.id;
-          if (
-            label &&
-            !occupied.some((p) => Math.hypot(p[0] - pt[0], p[1] - pt[1]) < 34)
-          ) {
-            occupied.push(pt);
-            Celestial.setTextStyle({
-              fill: "#ffe5a5",
-              font: scaleFont("600 12px Inter, Microsoft YaHei, sans-serif"),
-              align: "left",
-              baseline: "top",
-            });
-            Celestial.context.fillText(label, pt[0] + 9, pt[1] + 7);
-          }
-        });
-      },
-    });
+    planetOverlayController.registerPlanetOverlay();
   }
 
   function objectLabel(type, d) {
@@ -3266,70 +2913,8 @@ import {
   function selectObjectSearchResult(entry) {
     objectSearchController.selectObjectSearchResult(entry);
   }
-  /**
-   * 在屏幕像素空间查找最近的可选天体或标签。
-   * 动态行星、恒星/深空目录、西方星座标签和中国星官标签使用不同命中半径，
-   * 以贴合它们在画面中的可见标记。
-   */
   function nearestCatalogObject(x, y) {
-    let best = null;
-    // D3 节点坐标已经是当前 transform 下的显示坐标；信息框仍需要原始赤道目录坐标。
-    const originalCoordForType = (type, d, fallback) => {
-      const id = String(d && d.id);
-      const coord =
-        type === "star"
-          ? ORIGINAL_STAR_COORDS.get(id)
-          : type === "dso"
-            ? ORIGINAL_DSO_COORDS.get(id)
-            : type === "constellation"
-              ? ORIGINAL_CONSTELLATION_COORDS.get(id)
-              : type === "asterism"
-                ? ORIGINAL_ASTERISM_COORDS.get(id)
-                : fallback;
-      return coord && coord.slice ? coord.slice() : fallback;
-    };
-    currentPlanetPositions().forEach((item) => {
-      const c = item.displayCoord;
-      if (!c || !Celestial.clip(c)) return;
-      const pt = Celestial.mapProjection(c);
-      if (!pt) return;
-      const dist = Math.hypot(pt[0] - x, pt[1] - y);
-      if (dist <= 20 && (!best || dist < best.dist))
-        best = {
-          type: "planet",
-          d: item.body,
-          coord: item.coord,
-          epochCoord: item.epochCoord,
-          displayCoord: c,
-          planetId: item.id,
-          dist,
-        };
-    });
-    const groups = [
-      [".star", "star", 12],
-      [".dso", "dso", 15],
-      [".constname", "constellation", 18],
-      [".rso-cn-name", "asterism", 18],
-    ];
-    groups.forEach(([selector, type, limit]) => {
-      selectionNodes(selector).forEach((node) => {
-        const d = node.__data__,
-          c = candidateCoord(d);
-        if (!c || !Number.isFinite(c[0]) || !Celestial.clip(c)) return;
-        const pt = Celestial.mapProjection(c);
-        if (!pt) return;
-        const dist = Math.hypot(pt[0] - x, pt[1] - y);
-        if (dist <= limit && (!best || dist < best.dist))
-          best = {
-            type,
-            d,
-            coord: originalCoordForType(type, d, c),
-            displayCoord: c,
-            dist,
-          };
-      });
-    });
-    return best;
+    return objectPickingController.nearestCatalogObject(x, y);
   }
   function normalizedLongitude(value) {
     const n = Number(value) || 0;
@@ -3344,150 +2929,6 @@ import {
     if (geometry.type === "LineString") callback(geometry.coordinates);
     else if (geometry.type === "MultiLineString")
       geometry.coordinates.forEach((line) => callback(line));
-  }
-  function eachSegment(feature, callback) {
-    eachLineString(feature && feature.geometry, (line) => {
-      for (let i = 1; i < line.length; i++) callback(line[i - 1], line[i]);
-    });
-  }
-  function segmentKey(a, b) {
-    const precision = Math.max(
-      1,
-      Math.min(6, Number(cfg("dualCultureLines.coordinatePrecision", 3)) || 3),
-    );
-    const ka = coordinateKey(a, precision),
-      kb = coordinateKey(b, precision);
-    return ka < kb ? `${ka}|${kb}` : `${kb}|${ka}`;
-  }
-  function rebuildSharedCultureSegments() {
-    const western = new Set();
-    westernDualLineFeatures.forEach((feature) =>
-      eachSegment(feature, (a, b) => western.add(segmentKey(a, b))),
-    );
-    const shared = new Set();
-    chineseLineFeatures.forEach((feature) =>
-      eachSegment(feature, (a, b) => {
-        const key = segmentKey(a, b);
-        if (western.has(key)) shared.add(key);
-      }),
-    );
-    sharedCultureSegments = shared;
-  }
-  function drawCenteredCultureSegment(a, b, style) {
-    const feature = {
-      type: "Feature",
-      properties: {},
-      geometry: { type: "LineString", coordinates: [a, b] },
-    };
-    Celestial.setStyle({ ...style, fill: "rgba(0,0,0,0)" });
-    Celestial.map(feature);
-    Celestial.context.stroke();
-  }
-  function dualCultureOffset() {
-    const scale = Math.max(1, getMapScale());
-    const base = Number(cfg("dualCultureLines.baseOffset", 1.15));
-    const gain = Number(cfg("dualCultureLines.zoomOffsetGain", 0.14));
-    const max = Number(cfg("dualCultureLines.maxOffset", 2.1));
-    return Math.min(max, base + Math.max(0, scale - 1) * gain);
-  }
-  function drawPhasedShortCultureSegment(p1, p2, style, direction) {
-    const ctx = Celestial.context,
-      haloWidth =
-        Number(style.width || 1) +
-        Number(cfg("dualCultureLines.haloExtraWidth", 1.3));
-    const dash = cfg("dualCultureLines.shortDash", [3, 2]),
-      phase = Number(cfg("dualCultureLines.shortDashPhase", 2.5));
-    ctx.save();
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    ctx.setLineDash(Array.isArray(dash) ? dash : [3, 2]);
-    ctx.lineDashOffset = direction > 0 ? phase : 0;
-    Celestial.setStyle({
-      stroke: cfg("dualCultureLines.haloColor", "rgba(1,5,12,.82)"),
-      width: haloWidth,
-      opacity: 1,
-      fill: "rgba(0,0,0,0)",
-    });
-    ctx.beginPath();
-    ctx.moveTo(p1[0], p1[1]);
-    ctx.lineTo(p2[0], p2[1]);
-    ctx.stroke();
-    Celestial.setStyle({ ...style, fill: "rgba(0,0,0,0)" });
-    ctx.beginPath();
-    ctx.moveTo(p1[0], p1[1]);
-    ctx.lineTo(p2[0], p2[1]);
-    ctx.stroke();
-    ctx.restore();
-  }
-  function drawOffsetCultureSegment(a, b, style, direction) {
-    if (!Celestial.clip(a) || !Celestial.clip(b)) {
-      drawCenteredCultureSegment(a, b, style);
-      return;
-    }
-    const p1 = Celestial.mapProjection(a),
-      p2 = Celestial.mapProjection(b);
-    if (!p1 || !p2 || !Number.isFinite(p1[0]) || !Number.isFinite(p2[0])) {
-      drawCenteredCultureSegment(a, b, style);
-      return;
-    }
-    const dx = p2[0] - p1[0],
-      dy = p2[1] - p1[1],
-      length = Math.hypot(dx, dy);
-    if (length < Number(cfg("dualCultureLines.minimumScreenLength", 8))) {
-      drawPhasedShortCultureSegment(p1, p2, style, direction);
-      return;
-    }
-    const offset = dualCultureOffset() * direction,
-      nx = -dy / length,
-      ny = dx / length;
-    const x1 = p1[0] + nx * offset,
-      y1 = p1[1] + ny * offset,
-      x2 = p2[0] + nx * offset,
-      y2 = p2[1] + ny * offset;
-    const ctx = Celestial.context,
-      haloWidth =
-        Number(style.width || 1) +
-        Number(cfg("dualCultureLines.haloExtraWidth", 1.3));
-    ctx.save();
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    Celestial.setStyle({
-      stroke: cfg("dualCultureLines.haloColor", "rgba(1,5,12,.82)"),
-      width: haloWidth,
-      opacity: 1,
-      fill: "rgba(0,0,0,0)",
-    });
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-    Celestial.setStyle({ ...style, fill: "rgba(0,0,0,0)" });
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.stroke();
-    ctx.restore();
-  }
-  function drawCultureFeature(feature, style, direction) {
-    const centered = [];
-    eachSegment(feature, (a, b) => {
-      const shared =
-        state.cultureMode === "both" &&
-        cfg("dualCultureLines.enabled", true) &&
-        sharedCultureSegments.has(segmentKey(a, b));
-      if (shared) drawOffsetCultureSegment(a, b, style, direction);
-      else centered.push([a, b]);
-    });
-    if (centered.length) {
-      const grouped = {
-        type: "Feature",
-        properties: {},
-        geometry: { type: "MultiLineString", coordinates: centered },
-      };
-      Celestial.setStyle({ ...style, fill: "rgba(0,0,0,0)" });
-      Celestial.map(grouped);
-      Celestial.context.stroke();
-    }
   }
   function chineseAsterismsForStar(starId) {
     return objectInfoFormatter.chineseAsterismsForStar(starId);
@@ -3588,34 +3029,11 @@ import {
     $("floating-object-grid").innerHTML = data.html;
   }
   function skyEventPoint(canvas, event) {
-    return getSkyEventPoint(canvas, event);
+    return objectPickingController.skyEventPoint(canvas, event);
   }
+
   function selectAtEvent(canvas, event) {
-    try {
-      const [x, y] = skyEventPoint(canvas, event);
-      const found = nearestCatalogObject(x, y);
-      if (found) {
-        floatingObjectInfoDismissed = false;
-        found.label = objectLabel(found.type, found.d);
-        showObjectInfo(found);
-        redrawAndSyncMapBox("object selection");
-        return;
-      }
-      const p = Celestial.mapProjection.invert([x, y]);
-      if (!p || !Number.isFinite(p[0])) return;
-      floatingObjectInfoDismissed = false;
-      showObjectInfo({
-        type: "skyPosition",
-        d: { properties: {} },
-        coord: p,
-        epochCoord: p,
-        displayCoord: p,
-        label: t("skyPosition"),
-      });
-      redrawAndSyncMapBox("sky position selection");
-    } catch (err) {
-      console.warn("Object picking failed", err);
-    }
+    objectPickingController.selectAtEvent(canvas, event);
   }
 
   /**
@@ -3817,158 +3235,7 @@ import {
    * 因此普通开关不需要重新创建数据。
    */
   function registerChineseOverlay() {
-    if (!window.Celestial) return;
-    Celestial.clear();
-    chineseLinesReady = false;
-    chineseNamesReady = false;
-    westernDualLinesReady = false;
-    westernDualLineFeatures = [];
-    chineseLineFeatures = [];
-    sharedCultureSegments = new Set();
-    registerReferenceOverlays();
-
-    Celestial.add({
-      type: "json",
-      file: westernConstellationLinePath(),
-      callback: function (error, json) {
-        if (error) {
-          console.warn("Western constellation line data failed", error);
-          return;
-        }
-        const data = Celestial.getData(json, projectionCoordinateTransform());
-        westernDualLineFeatures = data.features || [];
-        Celestial.container
-          .selectAll(".rso-western-dual-line")
-          .data(westernDualLineFeatures)
-          .enter()
-          .append("path")
-          .attr("class", "rso-western-dual-line");
-        westernDualLinesReady = true;
-        rebuildSharedCultureSegments();
-        redrawAndSyncMapBox("western dual culture lines loaded");
-      },
-      redraw: function () {
-        if (state.cultureMode !== "both" || !state.cultureLines) return;
-        const ws = cfg("dualCultureLines.western", {}),
-          style = {
-            stroke: ws.stroke || "#82b9df",
-            width: Number(ws.width ?? 1),
-            opacity: Number(ws.opacity ?? 0.68),
-          };
-        Celestial.container
-          .selectAll(".rso-western-dual-line")
-          .each(function (d) {
-            drawCultureFeature(d, style, -1);
-          });
-      },
-    });
-
-    Celestial.add({
-      type: "json",
-      file: chineseAsterismLinePath(),
-      callback: function (error, json) {
-        if (error) {
-          console.warn("Chinese asterism line data failed", error);
-          return;
-        }
-        const data = Celestial.getData(json, projectionCoordinateTransform());
-        chineseLineFeatures = data.features || [];
-        Celestial.container
-          .selectAll(".rso-cn-line")
-          .data(chineseLineFeatures)
-          .enter()
-          .append("path")
-          .attr("class", "rso-cn-line");
-        chineseLinesReady = true;
-        rebuildSharedCultureSegments();
-        redrawAndSyncMapBox("chinese asterism lines loaded");
-      },
-      redraw: function () {
-        if (!showChineseCulture() || !state.cultureLines) return;
-        const cs =
-          state.cultureMode === "both"
-            ? cfg("dualCultureLines.chinese", cfg("chinese.lineCombined", {}))
-            : cfg("chinese.lineOnly", {});
-        const style = {
-          stroke: cs.stroke || "#ffab7e",
-          fill: "rgba(0,0,0,0)",
-          width: Number(cs.width ?? 1.25),
-          opacity: Number(cs.opacity ?? 0.88),
-        };
-        Celestial.container.selectAll(".rso-cn-line").each(function (d) {
-          if (state.cultureMode === "both") drawCultureFeature(d, style, 1);
-          else {
-            Celestial.setStyle(style);
-            Celestial.map(d);
-            Celestial.context.stroke();
-          }
-        });
-      },
-    });
-
-    Celestial.add({
-      type: "json",
-      file: chineseAsterismNamePath(),
-      callback: function (error, json) {
-        if (error) {
-          console.warn("Chinese asterism name data failed", error);
-          return;
-        }
-        const data = Celestial.getData(json, projectionCoordinateTransform());
-        Celestial.container
-          .selectAll(".rso-cn-name")
-          .data(data.features)
-          .enter()
-          .append("path")
-          .attr("class", "rso-cn-name");
-        chineseNamesReady = true;
-        redrawAndSyncMapBox("chinese asterism names loaded");
-      },
-      redraw: function () {
-        if (!showChineseCulture() || !state.cultureNames) return;
-        const occupied = [];
-        Celestial.container.selectAll(".rso-cn-name").each(function (d) {
-          const c = d.geometry && d.geometry.coordinates;
-          if (!c || !Celestial.clip(c)) return;
-          const pt = Celestial.mapProjection(c);
-          if (!pt || !Number.isFinite(pt[0]) || !Number.isFinite(pt[1])) return;
-          const tooClose = occupied.some(
-            (p) => Math.hypot(p[0] - pt[0], p[1] - pt[1]) < 24,
-          );
-          if (tooClose) return;
-          const prop = d.properties || {};
-          const label =
-            state.lang === "zh"
-              ? simplifyChinese(prop.name || prop.desig || prop.en)
-              : prop.en || prop.pinyin || prop.name;
-          if (!label) return;
-          occupied.push(pt);
-          const rank = Number(prop.rank) || 3;
-          Celestial.setTextStyle({
-            fill:
-              state.cultureMode === "both"
-                ? cfg("labels.chineseCombinedColor", "#ffc5a9")
-                : cfg("chinese.name.fill", "#ffd5bf"),
-            font: scaleFont(
-              rank <= 1
-                ? cfg(
-                    "chinese.name.font",
-                    "700 11px Inter, Microsoft YaHei, sans-serif",
-                  )
-                : cfg(
-                    "labels.chineseSecondaryFont",
-                    "600 10px Inter, Microsoft YaHei, sans-serif",
-                  ),
-            ),
-            align: "center",
-            baseline: "middle",
-          });
-          Celestial.context.fillText(label, pt[0], pt[1]);
-        });
-      },
-    });
-    registerTraditionalRegionsOverlay();
-    registerPlanetOverlay();
+    cultureOverlayController.registerChineseOverlay();
   }
 
   function dedupeSelection(selector, keyFn) {
@@ -4145,7 +3412,7 @@ import {
     updateBoundaryUI();
     save();
     applyVisualConfig(true);
-    if (showChineseCulture() && !(chineseLinesReady || chineseNamesReady))
+    if (showChineseCulture() && !cultureOverlayController.hasChineseDataReady())
       showToast(
         state.lang === "zh"
           ? "中国星官数据仍在加载，完成后会自动显示。"
