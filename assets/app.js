@@ -1,60 +1,136 @@
 (() => {
   // src/config.ts
   window.RSO_CONFIG = {
-    /** 页面与主题 */
-    theme: {
-      pageBackground: "#02050d",
-      // 页面最底层背景
-      skyBackground: "#02050d",
-      // 星图区背景；使用均匀深色，避免缩放后边缘出现纯黑块
-      panelBackground: "#07101f",
-      // 左侧菜单主体背景
-      panelHeaderBackground: "#0a1729",
-      // 左侧标题区背景
-      panelSecondaryBackground: "#0d192d",
-      // 输入框、卡片等次级背景
-      border: "rgba(159,211,255,.22)",
-      // 菜单和控件边框
-      borderSoft: "rgba(159,211,255,.10)",
-      // 弱分隔线
-      text: "#eef7ff",
-      // 普通文字
-      mutedText: "#9db1c8",
-      // 次要说明文字
-      accent: "#77dcff",
-      // 主强调色
-      accentSecondary: "#8eabff",
-      // 次强调色
-      gold: "#ffd477",
-      // 黄道、提示等暖色
-      danger: "#ff8b8b",
-      // 错误提示
-      shadow: "0 22px 75px rgba(0,0,0,.52)"
+    /** 首次运行默认状态；用户保存过设置后，以 localStorage 中的状态为准。 */
+    defaults: {
+      latitude: 39.9042,
+      longitude: 116.4074,
+      timezone: "Asia/Shanghai",
+      cityZh: "\u5317\u4EAC",
+      cityEn: "Beijing",
+      instant: "1949-10-01T14:00:00.000Z",
+      language: "zh",
+      cultureMode: "western",
+      // western / chinese / both
+      projection: "airy",
+      coordinateSystem: "horizontal",
+      // horizontal / equatorial / ecliptic / galactic
+      poleAxisConstraintEnabled: true,
+      mapScale: 1,
+      timeSpeed: 3600,
+      panelOpen: true,
+      menuCollapsed: ["observer", "time", "viewProjection", "display"],
+      magnitudeLimit: 5.5,
+      starSize: 7,
+      fontScale: 1,
+      nightVision: false,
+      showStarNames: true,
+      showCultureLines: true,
+      showCultureNames: true,
+      showPlanets: true,
+      showMilkyWay: true,
+      showGrid: true,
+      showEcliptic: true,
+      showCelestialEquator: true,
+      showHorizon: true,
+      showHorizontalGrid: false,
+      showDeepSky: false,
+      showFloatingObjectInfo: true,
+      showRegionBoundaries: true,
+      traditionalDetail: "battlefields"
+      // major / battlefields / mansions
     },
-    /** 页面布局 */
-    layout: {
-      sidebarWidth: 360,
-      // 桌面端左侧菜单宽度
-      mobileSidebarWidth: 350,
-      // 移动端菜单最大宽度
-      panelToggleLeft: 8,
-      // Panel 按钮距浏览器最左侧
-      panelToggleTop: 8,
-      // Panel 按钮距浏览器最上侧
-      panelToggleSize: 36,
-      // Panel 按钮宽高
-      sidebarHeaderTopReserve: 44,
-      // 菜单展开时为左上角 Panel 按钮预留空间
-      skyMetaTop: 10,
-      // 星图文字信息距顶部
-      skyMetaRight: 12,
-      // 星图文字信息距右侧
-      skyMetaFontSize: 12,
-      // 星图上的“地点 · 日期时间”字号
-      skyMetaColor: "rgba(228,241,255,.88)"
-      // 星图上的“地点 · 日期时间”颜色
+    /** 天文模型边界：适合视觉星图，不作为专业星历。 */
+    astronomyModel: {
+      precession: true,
+      // 固定星空从 J2000 轻量岁差到当前显示历元
+      nutation: false,
+      properMotion: false,
+      refraction: false,
+      planetModel: "sun/moon Meeus lightweight; planets simple"
     },
-    /** 左侧菜单分组顺序；每个值对应一个稳定的 data-menu-id */
+    /** 月相：计算来自月日黄经差；图形直接画在原来的月球位置上。 */
+    moonPhase: {
+      enabled: true,
+      // 是否在月球信息中显示月相、照明比例和月龄
+      drawOnMoon: true,
+      // 是否把原月球符号替换为当前月相圆盘
+      overlayMinSize: 18,
+      // 月相圆盘最小直径，避免月亮在星图上过小看不清
+      darkFill: "rgba(8,12,22,.92)",
+      lightFill: "#f5f7ff",
+      outline: "rgba(245,247,255,.82)",
+      outlineWidth: 1
+    },
+    /** 鼠标、触摸、方向键和视图稳定性。 */
+    interaction: {
+      dragThreshold: 5,
+      // 小于该像素距离视为点击，大于才视为拖动
+      dragSensitivity: 1,
+      // 四元数自由拖动灵敏度；越大移动越快
+      poleGuardEnterDegrees: 10,
+      // 欧拉角中轴约束进入极区保护的角距离
+      poleGuardExitDegrees: 12,
+      // 退出阈值略大于进入阈值，用于滞回防抖
+      poleGuardPointerEnabled: true,
+      // 鼠标靠近当前坐标系极点时限制危险横向旋转
+      keyboardPanDegrees: 4,
+      // 方向键按下一次的即时平移角度
+      keyboardPanDegreesPerSecond: 72,
+      // 方向键长按时的连续平移角速度
+      viewRestoreDelayMs: 70,
+      resizeDebounceMs: 140,
+      minZoom: 1,
+      // 兼容旧配置路径；实际缩放优先读取 mapScale
+      maxZoom: 8,
+      zoomButtonFactor: 1.25
+    },
+    /** 应用层星图画布缩放。 */
+    mapScale: {
+      min: 1,
+      max: 8,
+      buttonFactor: 1.25
+    },
+    /**
+     * 坐标视角由两部分组成：
+     * transform 是 D3-Celestial 的坐标渲染基准；
+     * orientation 是项目用于说明和重置视角的朝向语义。
+     */
+    coordinateViews: {
+      horizontal: { transform: "equatorial", orientation: "local-sky" },
+      equatorial: { transform: "equatorial", orientation: "equatorial-default" },
+      ecliptic: { transform: "ecliptic", orientation: "ecliptic-default" },
+      galactic: { transform: "galactic", orientation: "galactic-default" }
+    },
+    /**
+     * 各坐标视角的默认中心与应用层画布缩放。
+     * center = [经向中心, 纬向中心, roll]，单位为度。
+     * 地平视角中心优先由当前地点和时间动态计算，这里只是回退值。
+     */
+    resetViews: {
+      horizontal: { center: [0, 0, 0], mapScale: 1 },
+      equatorial: { center: [0, 0, 0], mapScale: 1 },
+      ecliptic: { center: [0, 0, 0], mapScale: 1 },
+      galactic: { center: [0, 0, 0], mapScale: 1 }
+    },
+    /** 各投影初始内部 zoom；通常保持 1，只在单个投影明显不合适时微调。 */
+    projectionZoom: {
+      airy: 1,
+      orthographic: 1,
+      stereographic: 1,
+      azimuthalEquidistant: 1,
+      azimuthalEqualArea: 1,
+      aitoff: 1,
+      hammer: 1,
+      mollweide: 1,
+      winkel3: 1,
+      equirectangular: 1,
+      healpix: 1,
+      mercator: 1,
+      robinson: 1,
+      sinusoidal: 1
+    },
+    /** 左侧菜单分组顺序；每个值对应一个稳定的 data-menu-id。 */
     menu: {
       order: [
         "topInfo",
@@ -82,114 +158,54 @@
       ],
       defaultCollapsed: ["observer", "time", "viewProjection", "display"]
     },
-    /** 搜索候选项数量等轻量交互参数 */
+    /** 搜索候选数量等轻量交互参数。 */
     search: {
       cityMaxResults: 60
-      // 城市下拉最多显示的候选数量；避免 app.ts 内硬编码
     },
-    /** 调试面板：开发时打开，完成后可把 enabled 改为 false 隐藏开关 */
+    /** Debug 面板；拖动或方向键长按时会按 refreshMs 节流刷新。 */
     debug: {
       enabled: true,
-      // 是否显示左上角 DBG 开关
       defaultOpen: false,
-      // 页面打开时是否默认展开调试信息
       refreshMs: 200
-      // 调试信息刷新间隔；约 5 FPS，避免拖动时 Debug 自身造成卡顿
     },
-    /** 应用层星图画布缩放：缩放会改变 #celestial-map / canvas 的 CSS 尺寸 */
-    mapScale: {
-      min: 1,
-      max: 8,
-      // 保持 8x：高倍细节由 5.3.6 的视口 Canvas 模式承接
-      buttonFactor: 1.25
+    /** 页面布局尺寸，单位通常是 CSS px。 */
+    layout: {
+      sidebarWidth: 360,
+      mobileSidebarWidth: 350,
+      panelToggleLeft: 8,
+      panelToggleTop: 8,
+      panelToggleSize: 36,
+      sidebarHeaderTopReserve: 44,
+      skyMetaTop: 10,
+      skyMetaRight: 12,
+      skyMetaFontSize: 12,
+      skyMetaColor: "rgba(228,241,255,.88)"
     },
-    /** 鼠标、触摸和视图稳定性 */
-    interaction: {
-      dragThreshold: 5,
-      // 小于该像素距离视为“点击”，大于才视为“拖动”
-      dragSensitivity: 1,
-      // 四元数拖动灵敏度；越大移动越快
-      poleGuardEnterDegrees: 10,
-      // 欧拉角中轴约束：进入极区保护的角距离阈值
-      poleGuardExitDegrees: 12,
-      // 欧拉角中轴约束：退出极区保护的滞回阈值，略大于进入阈值避免边界抖动
-      poleGuardPointerEnabled: true,
-      // 鼠标靠近当前坐标系极点时，禁止危险的横向旋转
-      keyboardPanDegrees: 4,
-      // 方向键单次按下的即时平移角度
-      keyboardPanDegreesPerSecond: 72,
-      // 方向键长按时按 requestAnimationFrame 连续平移的角速度
-      minZoom: 1,
-      maxZoom: 8,
-      zoomButtonFactor: 1.25,
-      viewRestoreDelayMs: 70,
-      resizeDebounceMs: 140
+    /** 选中天体信息。 */
+    objectInfo: {
+      cultureNoteMagnitudeLimit: 2.1
     },
-    /** 天文模型边界：启用轻量岁差；太阳/月亮使用 Meeus lightweight；行星仍不是高精度历表 */
-    astronomyModel: {
-      precession: true,
-      nutation: false,
-      properMotion: false,
-      refraction: false,
-      planetModel: "sun/moon Meeus lightweight; planets simple"
+    /** 页面和控制面板主题颜色。 */
+    theme: {
+      pageBackground: "#02050d",
+      skyBackground: "#02050d",
+      panelBackground: "#07101f",
+      panelHeaderBackground: "#0a1729",
+      panelSecondaryBackground: "#0d192d",
+      border: "rgba(159,211,255,.22)",
+      borderSoft: "rgba(159,211,255,.10)",
+      text: "#eef7ff",
+      mutedText: "#9db1c8",
+      accent: "#77dcff",
+      accentSecondary: "#8eabff",
+      gold: "#ffd477",
+      danger: "#ff8b8b",
+      shadow: "0 22px 75px rgba(0,0,0,.52)"
     },
-    /** 程序首次运行时的默认状态；浏览器已保存的设置优先于这里 */
-    defaults: {
-      latitude: 39.9042,
-      longitude: 116.4074,
-      timezone: "Asia/Shanghai",
-      cityZh: "\u5317\u4EAC",
-      cityEn: "Beijing",
-      instant: "1949-10-01T14:00:00.000Z",
-      language: "zh",
-      cultureMode: "western",
-      // western / chinese / both
-      magnitudeLimit: 5.5,
-      starSize: 7,
-      showStarNames: true,
-      showCultureLines: true,
-      showCultureNames: true,
-      showPlanets: true,
-      showMilkyWay: true,
-      showGrid: true,
-      showEcliptic: true,
-      showCelestialEquator: true,
-      showHorizon: true,
-      showHorizontalGrid: false,
-      showFloatingObjectInfo: true,
-      fontScale: 1,
-      nightVision: false,
-      showDeepSky: false,
-      timeSpeed: 3600,
-      panelOpen: true,
-      poleAxisConstraintEnabled: true,
-      menuCollapsed: ["observer", "time", "viewProjection", "display"],
-      projection: "airy",
-      coordinateSystem: "horizontal",
-      // 坐标视角：horizontal / equatorial / ecliptic / galactic
-      showRegionBoundaries: true,
-      traditionalDetail: "battlefields",
-      // major / battlefields / mansions
-      mapScale: 1
-      // 初始星图画布缩放；1 表示画布短边等于 sky-pane 短边
-    },
-    /**
-     * 坐标视角由两部分组成：
-     * transform 是 D3-Celestial 的坐标渲染基准；
-     * orientation 是项目用于说明和重置视角的朝向语义。
-     */
-    coordinateViews: {
-      horizontal: { transform: "equatorial", orientation: "local-sky" },
-      equatorial: { transform: "equatorial", orientation: "equatorial-default" },
-      ecliptic: { transform: "ecliptic", orientation: "ecliptic-default" },
-      galactic: { transform: "galactic", orientation: "galactic-default" }
-    },
-    /** 星图基础绘制 */
+    /** 星图基础绘制样式。 */
     sky: {
       fillAvailablePane: false,
-      // 必须保持 false：画布尺寸由应用层 mapScale 模型控制，不把天球拉伸到容器比例
       removeEdgeVignette: false,
-      // 保留星空画布边缘视觉，不改变投影显示区域
       background: {
         fill: "#02050d",
         stroke: "rgba(116,151,183,.65)",
@@ -256,7 +272,7 @@
         opacity: 0.72
       }
     },
-    /** 西方星座样式 */
+    /** 西方星座样式。 */
     western: {
       line: {
         stroke: ["#82b9df", "#74a9cf", "#6797ba"],
@@ -273,14 +289,12 @@
       },
       boundary: {
         stroke: "#b9d8f0",
-        // 更亮的蓝灰色，避免在深色星空中看不清
         width: 1.2,
-        // 边界线宽
         opacity: 0.84,
         dash: [4, 3]
       }
     },
-    /** 中国星官样式 */
+    /** 中国星官样式。 */
     chinese: {
       lineOnly: { stroke: "#ffab7e", width: 1.25, opacity: 0.88 },
       lineCombined: { stroke: "#f08d63", width: 0.98, opacity: 0.68 },
@@ -289,37 +303,22 @@
         font: "700 11px Inter, Microsoft YaHei, sans-serif"
       }
     },
-    /** 中西两套连线同时显示时的重合线段处理 */
+    /** 中西两套连线同时显示时的重合线段处理。 */
     dualCultureLines: {
       enabled: true,
-      // true：对端点一致的重合线段进行双轨偏移
       coordinatePrecision: 3,
-      // 端点匹配精度（小数位）；3 通常足以识别同一恒星间的公共线段
       baseOffset: 1.15,
-      // 每条线相对原中心线的基础偏移（px）
       zoomOffsetGain: 0.14,
-      // 放大后每增加 1 倍缩放所增加的偏移（px）
       maxOffset: 2.1,
-      // 单侧最大偏移，避免过度偏离真实星位
       minimumScreenLength: 8,
-      // 屏幕长度低于该值时不用双轨偏移，改用错相短虚线
       shortDash: [3, 2],
-      // 极短公共线段的短虚线节奏
       shortDashPhase: 2.5,
-      // 中西两条短虚线的相位差（px）
       haloColor: "rgba(1,5,12,.82)",
-      // 双轨线下方的深色细描边，提高两种颜色的分离度
       haloExtraWidth: 1.3,
-      // 描边比彩色线额外增加的宽度（px）
       western: { stroke: "#82b9df", width: 1, opacity: 0.68 },
       chinese: { stroke: "#f08d63", width: 0.98, opacity: 0.68 }
     },
-    /** 选中天体信息 */
-    objectInfo: {
-      cultureNoteMagnitudeLimit: 2.1
-      // 视星等不大于该值的恒星尝试显示中西文化简述
-    },
-    /** 中国传统天区、三垣四象、二十八宿与主题战场 */
+    /** 中国传统天区、三垣四象、二十八宿与主题战场样式。 */
     traditionalRegions: {
       enclosure: {
         fill: "rgba(125,156,255,.018)",
@@ -352,19 +351,17 @@
         dash: [5, 4]
       }
     },
-    /** 常用控件与信息卡外观 */
+    /** 常用控件与信息卡外观。 */
     components: {
       panelToggleBackground: "rgba(8,19,36,.94)",
-      // 左上角 Panel 按钮背景
       toolButtonBackground: "rgba(255,255,255,.045)",
-      // 菜单内缩放/重置/全屏按钮背景
       infoCardBackground: "linear-gradient(145deg,rgba(11,27,48,.94),rgba(7,16,31,.96))",
       infoCardBorder: "rgba(119,220,255,.22)",
       infoTitleColor: "#f4fbff",
       infoTextColor: "#d8e8f5",
       infoMutedColor: "#8da4bb"
     },
-    /** 自定义图层的文字与辅助线样式 */
+    /** 自定义图层的文字与辅助线样式。 */
     labels: {
       planetColor: "#ffe5a5",
       planetFont: "600 12px Inter, Microsoft YaHei, sans-serif",
@@ -382,46 +379,17 @@
       legendMajorColor: "rgba(83,174,224,.55)",
       legendBattlefieldColor: "rgba(235,114,73,.65)"
     },
-    /** 太阳、月球和行星符号 */
+    /** 太阳、月球和行星符号。月球启用月相圆盘时只使用颜色和尺寸。 */
     planets: {
       sol: { symbol: "\u2609", color: "#ffe45c", size: 21 },
       mer: { symbol: "\u263F", color: "#cfd5dc", size: 17 },
       ven: { symbol: "\u2640", color: "#fff0b8", size: 18 },
-      lun: { symbol: "\u25CF", color: "#f5f7ff", size: 17 },
+      lun: { symbol: "\u25CF", color: "#f5f7ff", size: 18 },
       mar: { symbol: "\u2642", color: "#ff9068", size: 18 },
       jup: { symbol: "\u2643", color: "#ffc266", size: 19 },
       sat: { symbol: "\u2644", color: "#f2d88d", size: 19 },
       ura: { symbol: "\u2645", color: "#85e3ff", size: 18 },
       nep: { symbol: "\u2646", color: "#799dff", size: 18 }
-    },
-    /**
-     * “坐标视角”使用的默认中心与应用层画布缩放。
-     * center = [经向中心, 纬向中心, 旋转角]，单位为度。
-     * transform 由 coordinateViews 配置；这里仅配置视角朝向。
-     * horizontal 的中心会优先由当前地点和时间的天顶动态计算；这里是回退值。
-     */
-    resetViews: {
-      horizontal: { center: [0, 0, 0], mapScale: 1 },
-      equatorial: { center: [0, 0, 0], mapScale: 1 },
-      ecliptic: { center: [0, 0, 0], mapScale: 1 },
-      galactic: { center: [0, 0, 0], mapScale: 1 }
-    },
-    /** 说明：下面列出各投影初始缩放，可单独微调 */
-    projectionZoom: {
-      airy: 1,
-      orthographic: 1,
-      stereographic: 1,
-      azimuthalEquidistant: 1,
-      azimuthalEqualArea: 1,
-      aitoff: 1,
-      hammer: 1,
-      mollweide: 1,
-      winkel3: 1,
-      equirectangular: 1,
-      healpix: 1,
-      mercator: 1,
-      robinson: 1,
-      sinusoidal: 1
     }
   };
 
@@ -1597,7 +1565,7 @@
         title: "10. \u592A\u9633\u3001\u6708\u4EAE\u3001\u884C\u661F\u4E0E\u9EC4\u9053",
         blocks: [
           { type: "paragraph", html: "\u6052\u661F\u80CC\u666F\u5728\u77ED\u65F6\u95F4\u5185\u51E0\u4E4E\u56FA\u5B9A\uFF0C\u4F46\u592A\u9633\u3001\u6708\u4EAE\u548C\u884C\u661F\u4F1A\u5728\u6052\u661F\u80CC\u666F\u4E0A\u79FB\u52A8\u3002\u592A\u9633\u7684\u5468\u5E74\u89C6\u8FD0\u52A8\u5B9A\u4E49\u4E86\u9EC4\u9053\uFF1B\u6708\u4EAE\u548C\u884C\u661F\u5927\u591A\u9760\u8FD1\u9EC4\u9053\uFF0C\u662F\u56E0\u4E3A\u592A\u9633\u7CFB\u4E3B\u8981\u5929\u4F53\u7684\u8F68\u9053\u5E73\u9762\u5927\u81F4\u63A5\u8FD1\u3002" },
-          { type: "paragraph", html: "5.3.4 \u8D77\uFF0C\u592A\u9633\u4F4D\u7F6E\u6539\u7528 Meeus lightweight \u592A\u9633\u6A21\u578B\uFF0C\u6708\u4EAE\u4F4D\u7F6E\u6539\u7528 Meeus \u6708\u7403\u4E3B\u8981\u5468\u671F\u9879\u3002\u70B9\u51FB\u6708\u4EAE\u65F6\uFF0C\u4FE1\u606F\u6D6E\u7A97\u4F1A\u663E\u793A\u6708\u76F8\u540D\u79F0\u3001\u7167\u660E\u6BD4\u4F8B\u3001\u6708\u9F84\u548C\u8DDD\u79BB\uFF1B\u70B9\u51FB\u592A\u9633\u6216\u6708\u4EAE\u65F6\u4E5F\u4F1A\u663E\u793A\u7B97\u6CD5\u6765\u6E90\u4E0E\u7CBE\u5EA6\u8FB9\u754C\u3002" },
+          { type: "paragraph", html: "\u592A\u9633\u4F4D\u7F6E\u4F7F\u7528 Meeus lightweight \u592A\u9633\u6A21\u578B\uFF0C\u6708\u4EAE\u4F4D\u7F6E\u4F7F\u7528 Meeus \u6708\u7403\u4E3B\u8981\u5468\u671F\u9879\u3002\u661F\u56FE\u4E0A\u7684\u6708\u4EAE\u4F1A\u6309\u5F53\u524D\u6708\u76F8\u76F4\u63A5\u753B\u6210\u660E\u6697\u5706\u76D8\uFF1B\u70B9\u51FB\u6708\u4EAE\u65F6\uFF0C\u4FE1\u606F\u6D6E\u7A97\u4F1A\u663E\u793A\u6708\u76F8\u540D\u79F0\u3001\u7167\u660E\u6BD4\u4F8B\u3001\u6708\u9F84\u548C\u8DDD\u79BB\uFF1B\u70B9\u51FB\u592A\u9633\u6216\u6708\u4EAE\u65F6\u4E5F\u4F1A\u663E\u793A\u7B97\u6CD5\u6765\u6E90\u4E0E\u7CBE\u5EA6\u8FB9\u754C\u3002" },
           { type: "paragraph", html: "\u884C\u661F\u4ECD\u4FDD\u7559\u9879\u76EE\u539F\u6765\u7684 simple orbital model\uFF0C\u4E0D\u5F15\u5165 VSOP87\uFF0C\u4E5F\u4E0D\u63A5\u5165 JPL DE \u4E13\u4E1A\u661F\u5386\u3002\u8FD9\u6837\u80FD\u5148\u63D0\u5347\u6700\u5BB9\u6613\u770B\u51FA\u8BEF\u5DEE\u7684\u592A\u9633\u3001\u6708\u4EAE\u548C\u6708\u76F8\uFF0C\u540C\u65F6\u4FDD\u6301\u672C\u5730\u7F51\u9875\u7684\u8F7B\u91CF\u7ED3\u6784\u3002" },
           { type: "warning", html: "Meeus lightweight \u9002\u5408\u6559\u5B66\u548C\u89C2\u661F\u53C2\u8003\uFF0C\u4F46\u4E0D\u662F\u4E13\u4E1A\u661F\u5386\u3002\u4E0D\u8981\u7528\u672C\u9879\u76EE\u5224\u5B9A\u65E5\u98DF\u3001\u6708\u98DF\u3001\u63A9\u661F\u3001\u822A\u6D77\u5B9A\u4F4D\u6216\u79D1\u7814\u7EA7\u7CBE\u786E\u89C2\u6D4B\u3002" }
         ]
@@ -3907,7 +3875,7 @@
         const ep = obj.d && obj.d.ephemeris || {};
         if (!["sol", "lun"].includes(obj.planetId) && Number.isFinite(Number(ep.mag)))
           rows.splice(1, 0, [t("magnitude"), Number(ep.mag).toFixed(2)]);
-        if (obj.planetId === "lun") {
+        if (obj.planetId === "lun" && cfg("moonPhase.enabled", true)) {
           const phaseName = state.lang === "zh" ? ep.phaseNameZh : ep.phaseNameEn;
           if (phaseName) rows.push([t("moonPhase"), String(phaseName)]);
           const illum = Number.isFinite(Number(ep.illumination)) ? Number(ep.illumination) : Number(ep.phase);
@@ -5650,11 +5618,45 @@
     const {
       getCelestial,
       state,
+      cfg,
       planetStyle,
       currentPlanetPositions,
       simplifyChinese: simplifyChinese2,
       scaleFont
     } = options;
+    function drawMoonPhaseDisk(ctx, point, style, ephemeris) {
+      const illumination = Math.max(0, Math.min(1, Number(ephemeris.illumination)));
+      const phaseAngle = Number(ephemeris.phaseAngleDeg);
+      if (!Number.isFinite(illumination) || !Number.isFinite(phaseAngle)) return false;
+      const diameter = Math.max(
+        Number(cfg("moonPhase.overlayMinSize", 16)) || 16,
+        Number(style.size) || 17
+      ), radius = diameter / 2, step = Math.max(0.6, radius / 18), waxing = (phaseAngle % 360 + 360) % 360 < 180, lightFill = cfg("moonPhase.lightFill", style.color || "#f5f7ff"), darkFill = cfg("moonPhase.darkFill", "rgba(8,12,22,.92)"), outline = cfg("moonPhase.outline", "rgba(245,247,255,.82)");
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(point[0], point[1], radius, 0, Math.PI * 2);
+      ctx.fillStyle = darkFill;
+      ctx.fill();
+      ctx.clip();
+      ctx.fillStyle = lightFill;
+      for (let y = -radius; y <= radius; y += step) {
+        const half = Math.sqrt(Math.max(0, radius * radius - y * y));
+        const terminator = (1 - 2 * illumination) * half;
+        const x1 = waxing ? terminator : -half;
+        const x2 = waxing ? half : -terminator;
+        if (x2 > x1)
+          ctx.fillRect(point[0] + x1, point[1] + y, x2 - x1, step + 0.25);
+      }
+      ctx.restore();
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(point[0], point[1], radius, 0, Math.PI * 2);
+      ctx.strokeStyle = outline;
+      ctx.lineWidth = Math.max(0.8, Number(cfg("moonPhase.outlineWidth", 1)) || 1);
+      ctx.stroke();
+      ctx.restore();
+      return true;
+    }
     function registerPlanetOverlay() {
       const Celestial2 = getCelestial();
       Celestial2.add({
@@ -5674,13 +5676,17 @@
               color: "#ffd477",
               size: 17
             };
-            Celestial2.setTextStyle({
-              fill: style.color,
-              font: `700 ${style.size}px "Segoe UI Symbol", "Lucida Sans Unicode", sans-serif`,
-              align: "center",
-              baseline: "middle"
-            });
-            Celestial2.context.fillText(style.symbol, pt[0], pt[1]);
+            const ephemeris = item.body && item.body.ephemeris || {};
+            const drewMoonPhase = item.id === "lun" && cfg("moonPhase.enabled", true) && cfg("moonPhase.drawOnMoon", true) && drawMoonPhaseDisk(Celestial2.context, pt, style, ephemeris);
+            if (!drewMoonPhase) {
+              Celestial2.setTextStyle({
+                fill: style.color,
+                font: `700 ${style.size}px "Segoe UI Symbol", "Lucida Sans Unicode", sans-serif`,
+                align: "center",
+                baseline: "middle"
+              });
+              Celestial2.context.fillText(style.symbol, pt[0], pt[1]);
+            }
             const label = state.lang === "zh" ? simplifyChinese2(item.body.zh || item.body.name || item.id) : item.body.en || item.body.name || item.id;
             if (label && !occupied.some((p) => Math.hypot(p[0] - pt[0], p[1] - pt[1]) < 34)) {
               occupied.push(pt);
@@ -9156,6 +9162,7 @@
     const planetOverlayController = createPlanetOverlayController({
       getCelestial: () => window.Celestial,
       state,
+      cfg,
       planetStyle: PLANET_STYLE,
       currentPlanetPositions,
       simplifyChinese,

@@ -237,7 +237,7 @@ export function createObjectInfoFormatter(options) {
         Number.isFinite(Number(ep.mag))
       )
         rows.splice(1, 0, [t("magnitude"), Number(ep.mag).toFixed(2)]);
-      if (obj.planetId === "lun") {
+      if (obj.planetId === "lun" && cfg("moonPhase.enabled", true)) {
         const phaseName = state.lang === "zh" ? ep.phaseNameZh : ep.phaseNameEn;
         if (phaseName) rows.push([t("moonPhase"), String(phaseName)]);
         const illum = Number.isFinite(Number(ep.illumination)) ? Number(ep.illumination) : Number(ep.phase);

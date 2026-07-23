@@ -173,7 +173,7 @@ export const HELP_MANUAL_ZH: HelpManual = {
       title: "10. 太阳、月亮、行星与黄道",
       blocks: [
         { type: "paragraph", html: "恒星背景在短时间内几乎固定，但太阳、月亮和行星会在恒星背景上移动。太阳的周年视运动定义了黄道；月亮和行星大多靠近黄道，是因为太阳系主要天体的轨道平面大致接近。" },
-        { type: "paragraph", html: "5.3.4 起，太阳位置改用 Meeus lightweight 太阳模型，月亮位置改用 Meeus 月球主要周期项。点击月亮时，信息浮窗会显示月相名称、照明比例、月龄和距离；点击太阳或月亮时也会显示算法来源与精度边界。" },
+        { type: "paragraph", html: "太阳位置使用 Meeus lightweight 太阳模型，月亮位置使用 Meeus 月球主要周期项。星图上的月亮会按当前月相直接画成明暗圆盘；点击月亮时，信息浮窗会显示月相名称、照明比例、月龄和距离；点击太阳或月亮时也会显示算法来源与精度边界。" },
         { type: "paragraph", html: "行星仍保留项目原来的 simple orbital model，不引入 VSOP87，也不接入 JPL DE 专业星历。这样能先提升最容易看出误差的太阳、月亮和月相，同时保持本地网页的轻量结构。" },
         { type: "warning", html: "Meeus lightweight 适合教学和观星参考，但不是专业星历。不要用本项目判定日食、月食、掩星、航海定位或科研级精确观测。" }
       ]

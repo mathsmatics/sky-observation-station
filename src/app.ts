@@ -337,8 +337,7 @@ import {
     return Number(cfg("mapScale.min", cfg("interaction.minZoom", 1))) || 1;
   }
   function mapScaleMax() {
-    // 5.3.5 统一把应用层星图最大缩放限制为配置中的 8x；这里仍保留
-    // fallback，是为了兼容旧配置文件，但不会再把 12x 写散到交互逻辑里。
+    // 最大缩放优先由 mapScale 配置控制；interaction.maxZoom 只作为旧配置兼容入口。
     return Number(cfg("mapScale.max", cfg("interaction.maxZoom", 8))) || 8;
   }
   function mapScaleButtonFactor() {
@@ -2760,6 +2759,7 @@ import {
   const planetOverlayController = createPlanetOverlayController({
     getCelestial: () => window.Celestial,
     state,
+    cfg,
     planetStyle: PLANET_STYLE,
     currentPlanetPositions,
     simplifyChinese,
@@ -3609,7 +3609,7 @@ import {
 
   /**
    * 为 Canvas 添加指针处理：区分拖动/点击、两套视角控制模式、滚轮视角保存和天体拾取。
-   * 约束关闭时沿用 5.3.8 的四元数抓点拖动；约束开启时改走欧拉角路径，
+   * 约束关闭时使用四元数抓点拖动；约束开启时改走欧拉角路径，
    * 让当前坐标视角的极轴保持竖直，并在极点附近启用滞回保护。
    */
   function attachCanvasInfo(canvas) {
@@ -3679,7 +3679,7 @@ import {
               // 中心经纬度并把 roll 归零，使极轴天然落在当前投影的中央经线方向。
               applyEulerConstrainedPointerDelta(dx, dy, rect, currentCoord, "euler constrained drag");
             } else {
-              // 关闭约束时完整保留 5.3.8：优先抓住鼠标下的天球点，再用最短弧
+              // 关闭约束时优先抓住鼠标下的天球点，再用最短弧
               // 四元数把当前点旋回锚点；只有反投影失败时才退回像素增量方案。
               const grabbed = rotationPointerDrag.anchorCoord && currentCoord
                 ? applyQuaternionGrabDrag(

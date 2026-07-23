@@ -5,9 +5,9 @@ import { calculateMeeusMoon } from "./meeus-moon";
 /**
  * 太阳系天体统一适配层。
  *
- * 5.3.4 起，太阳和月亮在这里替换为 Meeus lightweight 结果；行星仍保留
+ * 太阳和月亮使用项目内的 Meeus lightweight 结果；行星仍保留
  * D3-Celestial 暴露的 simple orbital model。这样 UI、搜索、点击拾取和图层绘制
- * 继续只依赖一个出口，不需要知道每个天体背后使用了哪套算法。
+ * 只依赖一个出口，不需要知道每个天体背后使用了哪套算法。
  */
 
 const BODY_NAMES = {
