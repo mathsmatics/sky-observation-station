@@ -1,6 +1,13 @@
 // @ts-nocheck
 import { formatDec, formatRA } from "../astronomy/coordinates";
-import { infoPairLine, infoSingleLine } from "./panels";
+
+function infoPairLine(a: string, b: string, c: string, d: string): string {
+  return `<div class="floating-info-pair"><span class="floating-field"><b>${a}：</b><em>${b || "—"}</em></span><span class="floating-field"><b>${c}：</b><em>${d || "—"}</em></span></div>`;
+}
+
+function infoSingleLine(a: string, b: string): string {
+  return `<div class="floating-info-single"><b>${a}：</b><em>${b || "—"}</em></div>`;
+}
 
 export function createObjectInfoFormatter(options) {
   const {

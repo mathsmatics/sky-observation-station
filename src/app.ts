@@ -44,6 +44,7 @@ import { createDefaultState } from "./state/defaults";
 import { getProjectStorage, readJsonFromStorage, removeStorageKey, writeJsonToStorage } from "./state/storage";
 import { createObserverLocationController } from "./time/observer-location";
 import { createTimeInputActions } from "./time/time-input-actions";
+import { createAppShellController } from "./ui/app-shell";
 import { createDebugOverlayController } from "./ui/debug-overlay";
 import { createHelpRenderer } from "./ui/help";
 import { I18N } from "./ui/i18n";
@@ -75,9 +76,11 @@ import {
   resetInternalZoom as resetCelestialInternalZoom,
   syncInternalZoomForMetrics as syncCelestialInternalZoomForMetrics,
 } from "./sky/celestial-view";
+import { createCelestialDisplayController } from "./sky/celestial-display";
 import { createCultureOverlayController } from "./sky/culture-overlays";
 import { createEpochFrameController } from "./sky/epoch-frame";
 import { createObjectPickingController } from "./sky/object-picking";
+import { createPointerInteractionController } from "./sky/pointer-interactions";
 import { createPlanetOverlayController } from "./sky/planet-overlay";
 import { createReferenceOverlayController } from "./sky/reference-overlays";
 import { createTraditionalRegionsOverlayController } from "./sky/traditional-regions-overlay";
@@ -113,6 +116,8 @@ import {
 import { debugErrorText, debugStackText } from "./ui/debug-panel";
 import {
   applyMenuSectionOrder as applyMenuSectionOrderToPanel,
+  createControlSyncController,
+  createRegionUiController,
   createSectionShell as createMenuSectionShell,
   initializeMenuSections as initializeCollapsibleMenuSections,
   readIntegerField as readIntegerControlField,
@@ -182,6 +187,8 @@ import {
   let currentSelected = null,
     customViewRestoreTimer = null,
     lastRenderedSize = null,
+    celestialDisplayController = null,
+    pointerInteractionController = null,
     debugOverlayController = null,
     animationDebugLastUpdate = 0,
     mapBoxSyncFramePending = false,
@@ -874,6 +881,14 @@ import {
     openTechnicalGuide,
   } = helpRenderer;
 
+  const regionUiController = createRegionUiController({
+    dom: { $ },
+    getState: () => state,
+    t,
+  });
+  const { updateBoundaryUI, updateRegionLegend, regionVisible } =
+    regionUiController;
+
   function applyI18n() {
     document.documentElement.lang = state.lang === "zh" ? "zh-CN" : "en";
     document.body.classList.toggle("lang-en", state.lang === "en");
@@ -913,105 +928,26 @@ import {
     updateGuidePaginationUI(false);
   }
 
-  function syncControls() {
-    $("observer-lat").value = Number(state.lat).toFixed(4);
-    $("observer-lon").value = Number(state.lon).toFixed(4);
-    $("observer-timezone").value = state.zone;
-    syncTimeInputs();
-    $("speed").value = String(state.speed);
-    $("language-select").value = state.lang;
-    $("culture-select").value = state.cultureMode;
-    $("projection-select").value = state.projection;
-    $("coordinate-select").value = state.coordinateSystem;
-    if ($("pole-axis-constraint"))
-      $("pole-axis-constraint").checked = state.poleAxisConstraintEnabled !== false;
-    $("traditional-detail").value = state.traditionalDetail;
-    $("magnitude").value = state.magnitude;
-    $("magnitude-value").textContent = Number(state.magnitude).toFixed(1);
-    $("star-size").value = state.starSize;
-    $("star-size-value").textContent = `${state.starSize} px`;
-    const starNameMin = Number(cfg("sky.stars.properNameMagnitudeLimitMin", 2.1)),
-      starNameMax = Number(cfg("sky.stars.properNameMagnitudeLimitMax", 4.0));
-    $("star-name-density").min = String(starNameMin);
-    $("star-name-density").max = String(starNameMax);
-    $("star-name-density").value = Number(state.starNameMagnitudeLimit).toFixed(1);
-    $("star-name-density-value").textContent = Number(
-      state.starNameMagnitudeLimit,
-    ).toFixed(1);
-    const checks = {
-      "star-names": "starNames",
-      "culture-lines": "cultureLines",
-      "culture-names": "cultureNames",
-      planets: "planets",
-      "milky-way": "milkyWay",
-      grid: "grid",
-      "horizontal-grid": "horizontalGrid",
-      ecliptic: "ecliptic",
-      equator: "equator",
-      horizon: "horizon",
-      "night-vision": "nightVision",
-      "deep-sky": "deepSky",
-      "region-boundaries": "regionBoundaries",
-      "floating-object-info": "floatingObjectInfo",
-    };
-    Object.entries(checks).forEach(
-      ([id, key]) => ($(id).checked = !!state[key]),
-    );
-    $("sky-stage").classList.toggle("night-vision", state.nightVision);
-    applyFontScale();
-    updateFloatingObjectInfo();
-    setPanel(state.panelOpen, false);
-    updateProjectionHelp();
-    updateBoundaryUI();
-  }
+  const controlSyncController = createControlSyncController({
+    dom: { $ },
+    getState: () => state,
+    defaults,
+    cfg,
+    syncTimeInputs,
+    applyFontScale,
+    updateFloatingObjectInfo,
+    setPanel,
+    updateProjectionHelp,
+    updateBoundaryUI,
+  });
+  const { syncControls } = controlSyncController;
 
   function createSectionShell(id, titleKey, hintKey, contentClass = "") {
     return createMenuSectionShell({ id, titleKey, hintKey, contentClass, t });
   }
 
   function initializeIntegratedLayout() {
-    if ($("app-shell")) return;
-    const shell = document.createElement("div");
-    shell.id = "app-shell";
-    const sidebar = document.createElement("aside");
-    sidebar.id = "sidebar";
-    const pane = document.createElement("main");
-    pane.id = "sky-pane";
-    const top = document.querySelector(".topbar");
-    const brand = document.querySelector(".brand");
-    const selector = document.querySelector(".selector-card");
-    const hud = document.querySelector(".hud");
-    const panel = $("control-panel");
-
-    const head = document.createElement("div");
-    head.id = "sidebar-head";
-    if (brand) head.appendChild(brand);
-    sidebar.appendChild(head);
-
-    const infoShell = createSectionShell("topInfo", "topInfo", "topInfoHint", "top-info-section");
-    if (hud) infoShell.body.appendChild(hud);
-    panel.prepend(infoShell.section);
-
-    const cultureShell = createSectionShell("cultureSettings", "cultureSettings", "cultureSettingsHint", "culture-settings-section");
-    if (selector) cultureShell.body.appendChild(selector);
-    const searchSection = panel.querySelector('[data-menu-id="search"]');
-    if (searchSection && searchSection.nextSibling) panel.insertBefore(cultureShell.section, searchSection.nextSibling);
-    else panel.appendChild(cultureShell.section);
-
-    sidebar.appendChild(panel);
-    applyMenuSectionOrder(panel);
-    initializeMenuSections(panel);
-    pane.appendChild($("sky-stage"));
-    const skyMeta = $("sky-meta");
-    if (skyMeta) pane.appendChild(skyMeta);
-    shell.append(sidebar, pane);
-    document.body.insertBefore(shell, document.body.firstChild);
-    if (top) top.remove();
-    if (window.ResizeObserver) {
-      resizeObserver = new ResizeObserver(() => scheduleSkyResize("resize-observer"));
-      resizeObserver.observe(pane);
-      resizeObserver.observe(sidebar);
-    }
+    appShellController.initializeIntegratedLayout();
   }
 
   function applyMenuSectionOrder(panel = $("control-panel")) {
@@ -1035,6 +971,22 @@ import {
       scheduleSkyResize,
     });
   }
+
+  const appShellController = createAppShellController({
+    dom: {
+      $,
+      document,
+      window,
+      ResizeObserver: window.ResizeObserver,
+    },
+    createSectionShell,
+    applyMenuSectionOrder,
+    initializeMenuSections,
+    scheduleSkyResize,
+    setResizeObserver: (observer) => {
+      resizeObserver = observer;
+    },
+  });
 
   /**
    * 判断当前是否使用移动端布局。
@@ -1588,33 +1540,6 @@ import {
       setObserver,
     });
   }
-  function updateBoundaryUI() {
-    const box = $("region-boundaries");
-    if (!box) return;
-    const disabled = state.cultureMode === "both";
-    box.disabled = disabled;
-    box.closest(".toggle").style.opacity = disabled ? ".45" : "1";
-    box.checked = !!state.regionBoundaries;
-    updateRegionLegend();
-  }
-  function updateRegionLegend() {
-    const el = $("region-legend");
-    if (!el) return;
-    const show = state.cultureMode === "chinese" && state.regionBoundaries;
-    el.classList.toggle("show", show);
-    if (!show) {
-      el.innerHTML = "";
-      return;
-    }
-    el.innerHTML = `<b>${t("regionLegendTitle")}</b><br><span class="region-chip"><i style="background:rgba(83,174,224,.55)"></i>${t("regionLegendMajor")}</span>${state.traditionalDetail !== "major" ? `<br><span class="region-chip"><i style="background:rgba(235,114,73,.65)"></i>${t("regionLegendBattle")}</span>` : ""}<div style="margin-top:5px">${t("noReliableTraditionalBoundary")}</div>`;
-  }
-  function regionVisible(prop) {
-    if (state.cultureMode !== "chinese" || !state.regionBoundaries)
-      return false;
-    if (prop.kind === "mansion") return state.traditionalDetail === "mansions";
-    if (prop.kind === "battlefield") return state.traditionalDetail !== "major";
-    return true;
-  }
   /**
    * 注册中国传统天区复原多边形和标签。
    * 可见性由星空体系、边界开关和细分层级控制；源几何保留在预加载数据层中，
@@ -2016,204 +1941,15 @@ import {
     $("floating-object-grid").innerHTML = data.html;
   }
   function skyEventPoint(canvas, event) {
-    return objectPickingController.skyEventPoint(canvas, event);
+    return pointerInteractionController.skyEventPoint(canvas, event);
   }
 
   function selectAtEvent(canvas, event) {
-    objectPickingController.selectAtEvent(canvas, event);
+    pointerInteractionController.selectAtEvent(canvas, event);
   }
 
-  /**
-   * 将应用状态转换为 D3-Celestial 显示配置。
-   * 这是从界面状态流向渲染图层的主要配置入口。
-   */
   function buildSkyConfig() {
-    const zh = state.lang === "zh",
-      showWestern = showWesternCulture(),
-      size = skyPaneSize(),
-      metrics = applyMapBoxMetrics(projectionCanvasMetrics());
-    lastRenderedSize = { width: size.width, height: size.height };
-    const horizontal = isHorizontalView(),
-      properType =
-        state.cultureMode === "western" ? (zh ? "zh" : "name") : "zh";
-    return {
-      width: metrics.width,
-      projection: state.projection,
-      projectionRatio: null,
-      transform: projectionCoordinateTransform(),
-      center: null,
-      orientationfixed: true,
-      disableAnimations: true,
-      geopos: [state.lat, state.lon],
-      follow: horizontal ? "zenith" : "center",
-      zoomlevel: 1,
-      zoomextend: mapScaleMax(),
-      adaptable: true,
-      interactive: true,
-      form: false,
-      controls: false,
-      location: true,
-      lang: zh ? "zh" : "en",
-      culture: "iau",
-      container: "celestial-map",
-      datapath: CATALOG_DATA_PATH,
-      stars: {
-        show: true,
-        limit: Number(state.magnitude),
-        colors: true,
-        style: { fill: "#ffffff", opacity: 1 },
-        designation: false,
-        propername: state.starNames,
-        propernameType: properType,
-        propernameStyle: {
-          fill: cfg("sky.stars.properNameColor", "#f1e7c9"),
-          font: scaleFont(
-            cfg(
-              "sky.stars.properNameFont",
-              "600 12px Inter, Microsoft YaHei, sans-serif",
-            ),
-          ),
-          align: "right",
-          baseline: "bottom",
-        },
-        propernameLimit: Number(state.starNameMagnitudeLimit),
-        size: Number(state.starSize),
-        exponent: Number(cfg("sky.stars.exponent", -0.28)),
-        data: datasetFile("stars"),
-      },
-      dsos: {
-        show: state.deepSky,
-        limit: 6,
-        names: state.deepSky,
-        namesType: zh ? "zh" : "name",
-        nameLimit: 4.8,
-        nameStyle: {
-          fill: cfg("sky.deepSky.nameColor", "#acd2ee"),
-          font: scaleFont(
-            cfg(
-              "sky.deepSky.nameFont",
-              "500 10px Inter, Microsoft YaHei, sans-serif",
-            ),
-          ),
-          align: "left",
-          baseline: "top",
-        },
-        data: datasetFile("deepSky"),
-      },
-      planets: {
-        show: false,
-        which: [
-          "sol",
-          "mer",
-          "ven",
-          "ter",
-          "lun",
-          "mar",
-          "jup",
-          "sat",
-          "ura",
-          "nep",
-        ],
-        names: false,
-        namesType: zh ? "zh" : "en",
-        symbolType: "symbol",
-        symbolStyle: {
-          fill: "#ffd477",
-          font: "bold 19px Lucida Sans Unicode, Segoe UI Symbol, sans-serif",
-          align: "center",
-          baseline: "middle",
-        },
-        nameStyle: {
-          fill: "#ffe5a5",
-          font: "600 12px Inter, Microsoft YaHei, sans-serif",
-          align: "right",
-          baseline: "top",
-        },
-      },
-      constellations: {
-        names: showWestern && state.cultureNames,
-        namesType: zh ? "zh" : "en",
-        nameStyle: {
-          fill: "#cce9ff",
-          align: "center",
-          baseline: "middle",
-          font: [
-            scaleFont("600 14px Inter, Microsoft YaHei, sans-serif"),
-            scaleFont("600 12px Inter, Microsoft YaHei, sans-serif"),
-            scaleFont("600 10px Inter, Microsoft YaHei, sans-serif"),
-          ],
-        },
-        lines:
-          showWestern && state.cultureLines && state.cultureMode !== "both",
-        lineStyle: {
-          stroke: cfg("western.line.stroke.0", "#82b9df"),
-          width: Number(cfg("western.line.width.0", 1.1)),
-          opacity:
-            state.cultureMode === "both"
-              ? Number(cfg("western.line.opacity.2", 0.58))
-              : Number(cfg("western.line.opacity.0", 0.78)),
-        },
-        bounds:
-          showWestern &&
-          state.cultureMode === "western" &&
-          state.regionBoundaries,
-        boundStyle: {
-          stroke: cfg("western.boundary.stroke", "#b9d8f0"),
-          width: Number(cfg("western.boundary.width", 1.2)),
-          opacity: Number(cfg("western.boundary.opacity", 0.84)),
-          dash: cfg("western.boundary.dash", [4, 3]),
-        },
-      },
-      mw: {
-        show: state.milkyWay,
-        style: {
-          fill: cfg("sky.milkyWay.fill", "#8ab3d6"),
-          opacity: Number(cfg("sky.milkyWay.opacity", 0.12)),
-        },
-      },
-      lines: {
-        graticule: {
-          show: state.grid,
-          stroke: cfg("sky.coordinateGrid.stroke", "#7590a9"),
-          width: Number(cfg("sky.coordinateGrid.width", 0.55)),
-          opacity: Number(cfg("sky.coordinateGrid.opacity", 0.34)),
-          lon: { pos: [""] },
-          lat: { pos: [""] },
-        },
-        equatorial: {
-          show: state.equator,
-          stroke: cfg("sky.celestialEquator.stroke", "#6faee8"),
-          width: Number(cfg("sky.celestialEquator.width", 1.1)),
-          opacity: Number(cfg("sky.celestialEquator.opacity", 0.7)),
-        },
-        ecliptic: {
-          show: false,
-          stroke: cfg("sky.ecliptic.stroke", "#e5b85e"),
-          width: Number(cfg("sky.ecliptic.width", 1.15)),
-          opacity: Number(cfg("sky.ecliptic.opacity", 0.82)),
-        },
-        galactic: {
-          show: false,
-          stroke: cfg("labels.galacticGridColor", "#a887e7"),
-          width: Number(cfg("labels.galacticGridWidth", 1)),
-          opacity: Number(cfg("labels.galacticGridOpacity", 0.58)),
-        },
-        supergalactic: { show: false },
-      },
-      background: {
-        fill: "#020611",
-        opacity: 1,
-        stroke: "#53718d",
-        width: 1.0,
-      },
-      horizon: {
-        show: false,
-        stroke: "#ff5555",
-        width: 1.0,
-        fill: "#01030a",
-        opacity: 0.72,
-      },
-    };
+    return celestialDisplayController.buildSkyConfig();
   }
 
   /**
@@ -2225,175 +1961,123 @@ import {
     cultureOverlayController.registerChineseOverlay();
   }
 
-  function dedupeSelection(selector, keyFn) {
-    try {
-      const nodes = selectionNodes(selector),
-        seen = new Set();
-      nodes.forEach((node, index) => {
-        const d = node.__data__,
-          key = keyFn
-            ? keyFn(d, index)
-            : d && d.id !== undefined
-              ? String(d.id)
-              : JSON.stringify(d && d.geometry && d.geometry.coordinates);
-        if (seen.has(key)) d3.select(node).remove();
-        else seen.add(key);
-      });
-    } catch (_) {}
-  }
   function stabilizeDataSelections() {
-    dedupeSelection(".star", (d) => String(d && d.id));
-    dedupeSelection(".dso", (d) => String(d && d.id));
-    dedupeSelection(".planet", (d) =>
-      String((d && d.id) || (d && d.properties && d.properties.id)),
-    );
-    dedupeSelection(".constline", (d) => String(d && d.id));
-    dedupeSelection(".constname", (d) => String(d && d.id));
-    dedupeSelection(
-      ".boundaryline",
-      (d) =>
-        String(d && d.id) +
-        JSON.stringify(
-          d &&
-            d.geometry &&
-            d.geometry.coordinates &&
-            d.geometry.coordinates[0] &&
-            d.geometry.coordinates[0][0],
-        ),
-    );
-    dedupeSelection(".rso-western-dual-line", (d) => String(d && d.id));
-    dedupeSelection(".rso-cn-line", (d) => String(d && d.id));
-    dedupeSelection(".rso-cn-name", (d) => String(d && d.id));
-    dedupeSelection(".rso-traditional-region", (d) =>
-      String(d && d.properties && d.properties.id),
-    );
-    dedupeSelection(".rso-traditional-label", (d) =>
-      String(d && d.properties && d.properties.id),
-    );
+    return celestialDisplayController.stabilizeDataSelections();
   }
   function dataLayerCount(selector) {
-    try {
-      const sel =
-        Celestial.container && Celestial.container.selectAll(selector);
-      return sel && sel[0] ? sel[0].length : 0;
-    } catch (_) {
-      return 0;
-    }
+    return celestialDisplayController.dataLayerCount(selector);
   }
-  /**
-   * 等待 D3-Celestial 创建真实 Canvas 和目录选择集。
-   * 随后绑定交互处理、按需恢复保存视角，并清理当前重建代数对应的加载/快照遮罩。
-   */
   function waitForCanvas(viewState = null, generation = rebuildGeneration) {
-    clearTimeout(loadTimer);
-    const started = performance.now();
-    const check = () => {
-      if (generation !== rebuildGeneration) return;
-      const canvas = document.querySelector("#celestial-map canvas");
-      const starsLoaded = dataLayerCount(".star") > 0;
-      if (canvas && starsLoaded) {
-        skyReady = true;
-        syncRenderedMapBox();
-        stabilizeDataSelections();
-        [60, 220, 600].forEach((ms) =>
-          setTimeout(() => {
-            if (generation !== rebuildGeneration) return;
-            stabilizeDataSelections();
-            redrawAndSyncMapBox(`canvas stabilization ${ms}ms`);
-          }, ms),
-        );
-        attachCanvasInfo(canvas);
-        updateSkyView(true);
-        syncRotationFromCurrentView("canvas ready");
-        // 初始天空已由 Celestial 的 follow/zenith 配置居中。
-        // 这里只恢复显式快照或已保存视角；投影尚未稳定时强行写入默认旋转，
-        // 可能访问到 D3-Celestial 尚未初始化完成的内部中心。
-        const savedView =
-          state.projectionViews && state.projectionViews[viewKey()];
-        const shouldRestoreViewState = viewState && !isHorizontalView();
-        if (shouldRestoreViewState) restoreView(viewState);
-        else if (savedView && !isHorizontalView()) restoreView(savedView);
-        else if (isHorizontalView()) setMapScale(viewMapScale(savedView || desiredView(), state.mapScale));
-        updateSelectedObject();
-        setTimeout(() => {
-          if (generation !== rebuildGeneration) return;
-          rebuildInProgress = false;
-          suppressResizeUntil = performance.now() + 500;
-          lastRenderedSize = skyPaneSize();
-          setLoading(false);
-          const snap = $("sky-snapshot");
-          if (snap) {
-            snap.style.opacity = "0";
-            setTimeout(() => snap.remove(), 180);
-          }
-        }, 180);
-        return;
-      }
-      if (performance.now() - started > 15000) {
-        rebuildInProgress = false;
-        setLoading(true, t("loadFail"));
-        showToast(t("loadFail"), true);
-        return;
-      }
-      loadTimer = setTimeout(check, 150);
-    };
-    check();
+    return celestialDisplayController.waitForCanvas(viewState, generation);
   }
 
-  /**
-   * 按当前状态初始化或完整重建星图渲染器。
-   * 用于启动流程，也作为投影/坐标重建失败时的回退。
-   */
   function initialDisplay(viewState = null) {
-    if (!window.Celestial || !window.d3 || !DateTime) {
-      setLoading(true, t("loadFail"));
-      return;
-    }
-    try {
-      rebuildInProgress = true;
-      suppressResizeUntil = performance.now() + 1200;
-      const generation = ++rebuildGeneration;
-      state.mapScale = viewMapScale(viewState || desiredView(), state.mapScale);
-      $("celestial-map").innerHTML = "";
-      skyReady = false;
-      registerChineseOverlay();
-      Celestial.display(buildSkyConfig());
-      waitForCanvas(viewState, generation);
-    } catch (err) {
-      rebuildInProgress = false;
-      console.error(err);
-      setLoading(true, t("loadFail"));
-      showToast(t("loadFail"), true);
-    }
+    return celestialDisplayController.initialDisplay(viewState);
   }
 
   function applyVisualConfig(immediate = false) {
-    clearTimeout(applyTimer);
-    const run = () => {
-      if (!skyReady || !window.Celestial) return;
-      try {
-        const view = captureView();
-        const cfg = buildSkyConfig();
-        Celestial.apply({
-          stars: cfg.stars,
-          dsos: cfg.dsos,
-          planets: cfg.planets,
-          constellations: cfg.constellations,
-          mw: cfg.mw,
-          lines: cfg.lines,
-          horizon: cfg.horizon,
-          lang: cfg.lang,
-        });
-        redrawAndSyncMapBox("visual config");
-        restoreView(view);
-      } catch (err) {
-        console.warn("Incremental apply failed", err);
-        showToast(t("loadFail"), true);
-      }
-    };
-    if (immediate) run();
-    else applyTimer = setTimeout(run, 90);
+    return celestialDisplayController.applyVisualConfig(immediate);
   }
+
+  celestialDisplayController = createCelestialDisplayController({
+    dom: { $, document, window, performance, setTimeout, clearTimeout },
+    state: {
+      getState: () => state,
+      getSkyReady: () => skyReady,
+      setSkyReady: (value) => {
+        skyReady = value;
+      },
+      getRebuildInProgress: () => rebuildInProgress,
+      setRebuildInProgress: (value) => {
+        rebuildInProgress = value;
+      },
+      getRebuildGeneration: () => rebuildGeneration,
+      incrementRebuildGeneration: () => ++rebuildGeneration,
+      setSuppressResizeUntil: (value) => {
+        suppressResizeUntil = value;
+      },
+      setLastRenderedSize: (value) => {
+        lastRenderedSize = value;
+      },
+      getLoadTimer: () => loadTimer,
+      setLoadTimer: (value) => {
+        loadTimer = value;
+      },
+      getApplyTimer: () => applyTimer,
+      setApplyTimer: (value) => {
+        applyTimer = value;
+      },
+    },
+    config: { cfg, datasetFile, CATALOG_DATA_PATH, mapScaleMax },
+    layout: { skyPaneSize },
+    view: {
+      applyMapBoxMetrics,
+      projectionCanvasMetrics,
+      projectionCoordinateTransform,
+      isHorizontalView,
+      viewKey,
+      viewMapScale,
+      desiredView,
+      setMapScale,
+      restoreView,
+      syncRenderedMapBox,
+      redrawAndSyncMapBox,
+      captureView,
+    },
+    overlays: { showWesternCulture, registerChineseOverlay },
+    ui: { t, setLoading, showToast, scaleFont },
+    actions: {
+      DateTime,
+      selectionNodes,
+      attachCanvasInfo,
+      updateSkyView,
+      syncRotationFromCurrentView,
+      updateSelectedObject,
+    },
+  });
+
+  pointerInteractionController = createPointerInteractionController({
+    dom: { $, document, window, setTimeout },
+    state: {
+      getSkyReady: () => skyReady,
+      getClickStart: () => clickStart,
+      setClickStart: (value) => {
+        clickStart = value;
+      },
+      getPointerMoved: () => pointerMoved,
+      setPointerMoved: (value) => {
+        pointerMoved = value;
+      },
+      getPaneDrag: () => paneDrag,
+      setPaneDrag: (value) => {
+        paneDrag = value;
+      },
+      getRotationPointerDrag: () => rotationPointerDrag,
+      setRotationPointerDrag: (value) => {
+        rotationPointerDrag = value;
+      },
+    },
+    config: { cfg, mapScaleButtonFactor },
+    picking: objectPickingController,
+    view: {
+      canvasRect,
+      invertSkyCoordinateAtClient,
+      syncRotationFromCurrentView,
+      saveCurrentProjectionView,
+      save,
+      scaleMapByFactor,
+    },
+    interaction: {
+      rotationController,
+      poleAxisConstraintEnabled,
+      updatePoleAxisDebug,
+      applyEulerConstrainedPointerDelta,
+      applyQuaternionGrabDrag,
+      applyQuaternionPointerDelta,
+    },
+    debug: { setDebugPointer, queueDebugOverlayUpdate },
+  });
+
   function applyCultureMode() {
     applyI18n();
     updateBoundaryUI();
@@ -2593,155 +2277,8 @@ import {
     return observerLocation.setObserver(lat, lon, zone, cityZh, cityEn, notice);
   }
 
-  /**
-   * 为 Canvas 添加指针处理：区分拖动/点击、两套视角控制模式、滚轮视角保存和天体拾取。
-   * 约束关闭时使用四元数抓点拖动；约束开启时改走欧拉角路径，
-   * 让当前坐标视角的极轴保持竖直，并在极点附近启用滞回保护。
-   */
   function attachCanvasInfo(canvas) {
-    if (canvas.dataset.rsoBound) return;
-    canvas.dataset.rsoBound = "1";
-    const map = $("celestial-map");
-    canvas.addEventListener(
-      "pointerdown",
-      (event) => {
-        releaseMenuFocusForSkyInteraction();
-        clickStart = {
-          x: event.clientX,
-          y: event.clientY,
-          id: event.pointerId,
-        };
-        pointerMoved = false;
-        map.classList.add("dragging");
-        const center = syncRotationFromCurrentView("pointerdown");
-        const anchorCoord = invertSkyCoordinateAtClient(event.clientX, event.clientY, canvas);
-        setDebugPointer(true, anchorCoord);
-        rotationPointerDrag = center
-          ? {
-              id: event.pointerId,
-              lastX: event.clientX,
-              lastY: event.clientY,
-              anchorCoord,
-            }
-          : null;
-        try {
-          canvas.setPointerCapture(event.pointerId);
-        } catch (_) {}
-      },
-      { capture: true },
-    );
-    // 无论当前是四元数自由模式还是欧拉角约束模式，都由项目自己的视角控制层处理拖动。
-    // 否则 D3-Celestial 的原生 mousedown 会叠加一套内部旋转，导致中心、roll 和 Debug 失步。
-    canvas.addEventListener(
-      "mousedown",
-      (event) => {
-        if (!rotationPointerDrag) return;
-        event.preventDefault();
-        event.stopImmediatePropagation();
-      },
-      { capture: true },
-    );
-    canvas.addEventListener(
-      "pointermove",
-      (event) => {
-        if (rotationPointerDrag && event.pointerId === rotationPointerDrag.id) {
-          const totalDx = clickStart ? event.clientX - clickStart.x : 0,
-            totalDy = clickStart ? event.clientY - clickStart.y : 0;
-          if (
-            Math.hypot(totalDx, totalDy) > Number(cfg("interaction.dragThreshold", 6))
-          ) {
-            pointerMoved = true;
-          }
-          if (pointerMoved) {
-            const dx = event.clientX - rotationPointerDrag.lastX,
-              dy = event.clientY - rotationPointerDrag.lastY;
-            const rect = canvas.getBoundingClientRect();
-            const currentCoord = invertSkyCoordinateAtClient(event.clientX, event.clientY, canvas);
-            setDebugPointer(true, currentCoord);
-            if (poleAxisConstraintEnabled()) {
-              // 开启“天极中轴约束”时不再使用四元数抓点拖动；欧拉角路径直接更新
-              // 中心经纬度并把 roll 归零，使极轴天然落在当前投影的中央经线方向。
-              applyEulerConstrainedPointerDelta(dx, dy, rect, currentCoord, "euler constrained drag");
-            } else {
-              // 关闭约束时优先抓住鼠标下的天球点，再用最短弧
-              // 四元数把当前点旋回锚点；只有反投影失败时才退回像素增量方案。
-              const grabbed = rotationPointerDrag.anchorCoord && currentCoord
-                ? applyQuaternionGrabDrag(
-                    rotationPointerDrag.anchorCoord,
-                    currentCoord,
-                    dx,
-                    dy,
-                    "quaternion grab drag",
-                  )
-                : false;
-              if (!grabbed)
-                applyQuaternionPointerDelta(dx, dy, rect, "quaternion drag fallback");
-            }
-            rotationPointerDrag.lastX = event.clientX;
-            rotationPointerDrag.lastY = event.clientY;
-          }
-          event.preventDefault();
-          event.stopImmediatePropagation();
-          return;
-        }
-        if (
-          clickStart &&
-          Math.hypot(
-            event.clientX - clickStart.x,
-            event.clientY - clickStart.y,
-          ) > Number(cfg("interaction.dragThreshold", 6))
-        ) {
-          pointerMoved = true;
-        }
-        setDebugPointer(true, invertSkyCoordinateAtClient(event.clientX, event.clientY, canvas));
-        queueDebugOverlayUpdate();
-      },
-      { capture: true },
-    );
-    const persistViewSoon = () =>
-      setTimeout(() => {
-        if (!skyReady) return;
-        syncRotationFromCurrentView("persist view");
-        saveCurrentProjectionView();
-        save();
-      }, 100);
-    const finish = (event) => {
-      map.classList.remove("dragging");
-      if (clickStart && event.pointerId === clickStart.id && !pointerMoved)
-        selectAtEvent(canvas, event);
-      if (rotationPointerDrag && event.pointerId === rotationPointerDrag.id) {
-        try {
-          canvas.releasePointerCapture(event.pointerId);
-        } catch (_) {}
-      }
-      clickStart = null;
-      pointerMoved = false;
-      rotationPointerDrag = null;
-      setDebugPointer(false, null);
-      persistViewSoon();
-    };
-    canvas.addEventListener("pointerup", finish, { capture: true });
-    canvas.addEventListener(
-      "pointercancel",
-      () => {
-        map.classList.remove("dragging");
-        clickStart = null;
-        pointerMoved = false;
-        rotationPointerDrag = null;
-        setDebugPointer(false, null);
-        persistViewSoon();
-      },
-      { capture: true },
-    );
-    canvas.addEventListener("wheel", handleMapScaleWheel, {
-      capture: true,
-      passive: false,
-    });
-    canvas.addEventListener("touchend", persistViewSoon, { passive: true });
-    canvas.addEventListener("mouseleave", () => {
-      map.classList.remove("dragging");
-      setDebugPointer(false, null);
-    });
+    return pointerInteractionController.attachCanvasInfo(canvas);
   }
 
   function setPanel(open, persist = true) {
@@ -2765,73 +2302,11 @@ import {
   }
 
   function clearCelestialDataSelections() {
-    if (!window.Celestial || !Celestial.container) return;
-    [
-      ".star",
-      ".dso",
-      ".planet",
-      ".constline",
-      ".constname",
-      ".boundaryline",
-      ".mw",
-      ".mwbg",
-      ".milkyWay",
-      ".milkyWayBg",
-      ".graticule",
-      ".graticule_lat",
-      ".graticule_lon",
-      ".equatorial",
-      ".ecliptic",
-      ".galactic",
-      ".supergalactic",
-      ".horizon",
-      ".outline",
-      ".background",
-      ".rso-cn-line",
-      ".rso-cn-name",
-      ".rso-traditional-region",
-      ".rso-traditional-label",
-    ].forEach((sel) => {
-      try {
-        Celestial.container.selectAll(sel).remove();
-      } catch (_) {}
-    });
+    return celestialDisplayController.clearCelestialDataSelections();
   }
 
-  /**
-   * 完整重载星图渲染器。
-   * 只用于启动、回退路径，以及坐标视角改变 D3-Celestial transform 时；
-   * 每次重建都从 src/data JS 分片经 loader 返回的深拷贝数据开始，避免污染原始目录。
-   */
   function rebuildSkyPreservingPixels(view) {
-    if (rebuildInProgress) return;
-    try {
-      const canvas = document.querySelector("#celestial-map canvas");
-      if (canvas) {
-        const old = $("sky-snapshot");
-        if (old) old.remove();
-        const img = document.createElement("img");
-        img.className = "sky-snapshot";
-        img.id = "sky-snapshot";
-        img.src = canvas.toDataURL("image/png");
-        $("sky-stage").appendChild(img);
-      }
-    } catch (_) {}
-    try {
-      rebuildInProgress = true;
-      suppressResizeUntil = performance.now() + 1500;
-      const generation = ++rebuildGeneration;
-      clearCelestialDataSelections();
-      skyReady = false;
-      // 在现有渲染器中重新加载。由于 Celestial.getData() 会原地转换 GeoJSON 坐标，
-      // 打包数据层必须为每次请求返回新副本。
-      Celestial.reload(buildSkyConfig());
-      waitForCanvas(view, generation);
-    } catch (err) {
-      rebuildInProgress = false;
-      console.warn("Sky rebuild failed", err);
-      initialDisplay(view);
-    }
+    return celestialDisplayController.rebuildSkyPreservingPixels(view);
   }
   /**
    * 切换地图投影，不改变观测者、时间或图层。
@@ -2853,119 +2328,16 @@ import {
     return skyCanvasRect();
   }
   function handleMapScaleWheel(event) {
-    if (event.target.closest && event.target.closest("#debug-overlay"))
-      return false;
-    if (!skyReady || !window.Celestial) return false;
-    releaseMenuFocusForSkyInteraction();
-    const unit =
-        event.deltaMode === 1
-          ? 36
-          : event.deltaMode === 2
-            ? window.innerHeight
-            : 1,
-      delta = Number(event.deltaY || 0) * unit,
-      steps = -delta / 240,
-      factor = Math.pow(mapScaleButtonFactor(), steps);
-    if (!Number.isFinite(factor) || Math.abs(factor - 1) < 0.0001) return false;
-    event.preventDefault();
-    event.stopPropagation();
-    if (typeof event.stopImmediatePropagation === "function")
-      event.stopImmediatePropagation();
-    scaleMapByFactor(factor, { deferRedraw: true, reason: "wheel zoom" });
-    queueDebugOverlayUpdate();
-    return true;
+    return pointerInteractionController.handleMapScaleWheel(event);
   }
-  /**
-   * 开始处理星图区留白区域的拖动。
-   * Canvas 内部拖动仍由 D3-Celestial 负责，这里只覆盖空白边距。
-   */
   function beginPaneMarginDrag(event) {
-    if (
-      event.button !== 0 ||
-      event.target.closest(
-        "canvas,button,input,select,textarea,#debug-overlay,.info-card-rso",
-      )
-    )
-      return;
-    if (!skyReady || !window.Celestial) return;
-    releaseMenuFocusForSkyInteraction();
-    const center = Celestial.rotate();
-    if (!Array.isArray(center)) return;
-    rotationController.syncFromCenter(center, "pane margin pointerdown");
-    const pointerCoord = invertSkyCoordinateAtClient(event.clientX, event.clientY);
-    setDebugPointer(true, pointerCoord);
-    updatePoleAxisDebug(pointerCoord, center, poleAxisConstraintEnabled() ? "euler-constrained" : "quaternion-free");
-    paneDrag = {
-      id: event.pointerId,
-      x: event.clientX,
-      y: event.clientY,
-      lastX: event.clientX,
-      lastY: event.clientY,
-      anchorCoord: invertSkyCoordinateAtClient(event.clientX, event.clientY),
-      center: center.slice(),
-      moved: false,
-    };
-    $("celestial-map").classList.add("dragging");
-    try {
-      $("sky-pane").setPointerCapture(event.pointerId);
-    } catch (_) {}
-    event.preventDefault();
+    return pointerInteractionController.beginPaneMarginDrag(event);
   }
   function movePaneMarginDrag(event) {
-    if (!paneDrag || event.pointerId !== paneDrag.id) return;
-    const dx = event.clientX - paneDrag.x,
-      dy = event.clientY - paneDrag.y;
-    if (Math.hypot(dx, dy) > 4) {
-      paneDrag.moved = true;
-    }
-    const rect = canvasRect();
-    if (!rect) return;
-    try {
-      const stepDx = event.clientX - paneDrag.lastX;
-      const stepDy = event.clientY - paneDrag.lastY;
-      const currentCoord = invertSkyCoordinateAtClient(event.clientX, event.clientY);
-      setDebugPointer(true, currentCoord);
-      if (poleAxisConstraintEnabled()) {
-        applyEulerConstrainedPointerDelta(
-          stepDx,
-          stepDy,
-          rect,
-          currentCoord,
-          "pane margin euler constrained drag",
-        );
-      } else {
-        const grabbed = paneDrag.anchorCoord && currentCoord
-          ? applyQuaternionGrabDrag(
-              paneDrag.anchorCoord,
-              currentCoord,
-              stepDx,
-              stepDy,
-              "pane margin quaternion grab drag",
-            )
-          : false;
-        if (!grabbed)
-          applyQuaternionPointerDelta(
-            stepDx,
-            stepDy,
-            rect,
-            "pane margin quaternion drag fallback",
-          );
-      }
-      paneDrag.lastX = event.clientX;
-      paneDrag.lastY = event.clientY;
-    } catch (_) {}
-    event.preventDefault();
+    return pointerInteractionController.movePaneMarginDrag(event);
   }
   function endPaneMarginDrag(event) {
-    if (!paneDrag || event.pointerId !== paneDrag.id) return;
-    paneDrag = null;
-    $("celestial-map").classList.remove("dragging");
-    setDebugPointer(false, null);
-    try {
-      $("sky-pane").releasePointerCapture(event.pointerId);
-    } catch (_) {}
-    saveCurrentProjectionView();
-    save();
+    return pointerInteractionController.endPaneMarginDrag(event);
   }
 
   /**
@@ -2981,18 +2353,7 @@ import {
   }
 
   function releaseMenuFocusForSkyInteraction() {
-    const pane = $("sky-pane"),
-      active = document.activeElement;
-    if (active && active !== document.body && active !== pane) {
-      // 用户点回星图后，菜单里的 select/input 不能继续持有焦点；否则方向键会先改菜单选项，
-      // 看起来像“星图没动”。这里主动释放菜单焦点，再把键盘控制权交还给星图区域。
-      try {
-        if (!active.closest || !active.closest("#debug-overlay")) active.blur();
-      } catch (_) {}
-    }
-    try {
-      if (pane && document.activeElement !== pane) pane.focus({ preventScroll: true });
-    } catch (_) {}
+    return pointerInteractionController.releaseMenuFocusForSkyInteraction();
   }
 
   function applyKeyboardPanDelta(lonDelta, latDelta, reason = "keyboard pan") {

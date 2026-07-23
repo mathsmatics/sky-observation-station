@@ -43,6 +43,131 @@ export function createSectionShell(options: {
   return { section, body };
 }
 
+/**
+ * 把应用状态同步回菜单控件。
+ *
+ * 这里不修改状态，也不触发重绘；它只负责让 DOM 控件显示当前 state。
+ */
+export function createControlSyncController(options: any): { syncControls: () => void } {
+  const {
+    dom: { $ },
+    getState,
+    defaults,
+    cfg,
+    syncTimeInputs,
+    applyFontScale,
+    updateFloatingObjectInfo,
+    setPanel,
+    updateProjectionHelp,
+    updateBoundaryUI,
+  } = options;
+
+  function syncControls(): void {
+    const state = getState();
+    $("observer-lat").value = Number(state.lat).toFixed(4);
+    $("observer-lon").value = Number(state.lon).toFixed(4);
+    $("observer-timezone").value = state.zone;
+    syncTimeInputs();
+    $("speed").value = String(state.speed);
+    $("language-select").value = state.lang;
+    $("culture-select").value = state.cultureMode;
+    $("projection-select").value = state.projection;
+    $("coordinate-select").value = state.coordinateSystem;
+    if ($("pole-axis-constraint"))
+      $("pole-axis-constraint").checked = state.poleAxisConstraintEnabled !== false;
+    $("traditional-detail").value = state.traditionalDetail;
+    $("magnitude").value = state.magnitude;
+    $("magnitude-value").textContent = Number(state.magnitude).toFixed(1);
+    $("star-size").value = state.starSize;
+    $("star-size-value").textContent = `${state.starSize} px`;
+    const starNameMin = Number(cfg("sky.stars.properNameMagnitudeLimitMin", 2.1));
+    const starNameMax = Number(cfg("sky.stars.properNameMagnitudeLimitMax", 4.0));
+    const starNameValue = Number(
+      state.starNameMagnitudeLimit ?? defaults.starNameMagnitudeLimit,
+    ).toFixed(1);
+    $("star-name-density").min = String(starNameMin);
+    $("star-name-density").max = String(starNameMax);
+    $("star-name-density").value = starNameValue;
+    $("star-name-density-value").textContent = starNameValue;
+    const checks: Record<string, string> = {
+      "star-names": "starNames",
+      "culture-lines": "cultureLines",
+      "culture-names": "cultureNames",
+      planets: "planets",
+      "milky-way": "milkyWay",
+      grid: "grid",
+      "horizontal-grid": "horizontalGrid",
+      ecliptic: "ecliptic",
+      equator: "equator",
+      horizon: "horizon",
+      "night-vision": "nightVision",
+      "deep-sky": "deepSky",
+      "region-boundaries": "regionBoundaries",
+      "floating-object-info": "floatingObjectInfo",
+    };
+    Object.entries(checks).forEach(
+      ([id, key]) => (($(id) as HTMLInputElement).checked = !!state[key]),
+    );
+    $("sky-stage").classList.toggle("night-vision", state.nightVision);
+    applyFontScale();
+    updateFloatingObjectInfo();
+    setPanel(state.panelOpen, false);
+    updateProjectionHelp();
+    updateBoundaryUI();
+  }
+
+  return { syncControls };
+}
+
+/**
+ * 中国传统天区边界的菜单状态和图例。
+ *
+ * 这里只处理 UI 可见性和图例文字，不参与传统天区几何绘制。
+ */
+export function createRegionUiController(options: any): {
+  updateBoundaryUI: () => void;
+  updateRegionLegend: () => void;
+  regionVisible: (prop: any) => boolean;
+} {
+  const { dom: { $ }, getState, t } = options;
+
+  function updateRegionLegend(): void {
+    const state = getState();
+    const el = $("region-legend");
+    if (!el) return;
+    const show = state.cultureMode === "chinese" && state.regionBoundaries;
+    el.classList.toggle("show", show);
+    if (!show) {
+      el.innerHTML = "";
+      return;
+    }
+    el.innerHTML = `<b>${t("regionLegendTitle")}</b><br><span class="region-chip"><i style="background:rgba(83,174,224,.55)"></i>${t("regionLegendMajor")}</span>${state.traditionalDetail !== "major" ? `<br><span class="region-chip"><i style="background:rgba(235,114,73,.65)"></i>${t("regionLegendBattle")}</span>` : ""}<div style="margin-top:5px">${t("noReliableTraditionalBoundary")}</div>`;
+  }
+
+  function updateBoundaryUI(): void {
+    const state = getState();
+    const box = $("region-boundaries") as HTMLInputElement | null;
+    if (!box) return;
+    const disabled = state.cultureMode === "both";
+    box.disabled = disabled;
+    const toggle = box.closest(".toggle") as HTMLElement | null;
+    if (toggle) toggle.style.opacity = disabled ? ".45" : "1";
+    box.checked = !!state.regionBoundaries;
+    updateRegionLegend();
+  }
+
+  function regionVisible(prop: any): boolean {
+    const state = getState();
+    if (state.cultureMode !== "chinese" || !state.regionBoundaries)
+      return false;
+    if (prop.kind === "mansion") return state.traditionalDetail === "mansions";
+    if (prop.kind === "battlefield") return state.traditionalDetail !== "major";
+    return true;
+  }
+
+  return { updateBoundaryUI, updateRegionLegend, regionVisible };
+}
+
 export function applyMenuSectionOrder(panel: HTMLElement | null, order: string[]): void {
   if (!panel || panel.dataset.menuOrderChecked === "true") return;
   (Array.isArray(order) ? order : []).forEach((id) => {
