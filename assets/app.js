@@ -3141,6 +3141,476 @@
     resetDefaultsConfirm: "Reset all settings to defaults? This will reset location, time, view, font size, and all display options."
   });
 
+  // src/ui/panels.ts
+  function infoPairLine(a, b, c, d) {
+    return `<div class="floating-info-pair"><span class="floating-field"><b>${a}\uFF1A</b><em>${b || "\u2014"}</em></span><span class="floating-field"><b>${c}\uFF1A</b><em>${d || "\u2014"}</em></span></div>`;
+  }
+  function infoSingleLine(a, b) {
+    return `<div class="floating-info-single"><b>${a}\uFF1A</b><em>${b || "\u2014"}</em></div>`;
+  }
+
+  // src/ui/object-info.ts
+  function createObjectInfoFormatter(options) {
+    const {
+      state,
+      t,
+      cfg,
+      simplifyChinese: simplifyChinese2,
+      cultureNotes,
+      starNames: starNames2,
+      originalStarCoords,
+      chineseAsterismLineFeatures: chineseAsterismLineFeatures2,
+      chineseAsterismNames,
+      westernConstellationNameFeatures: westernConstellationNameFeatures2,
+      coordinateKey,
+      normalizedLongitude,
+      eachLineString,
+      objectEpochCoordinate,
+      horizontalFor,
+      cityName,
+      formatLocalLong,
+      objectLabel
+    } = options;
+    let chineseStarAsterismIndex = null;
+    const chineseAsterismCoordinateEntries = [];
+    function buildChineseStarAsterismIndex() {
+      if (chineseStarAsterismIndex) return chineseStarAsterismIndex;
+      const index = /* @__PURE__ */ new Map();
+      chineseAsterismLineFeatures2().forEach((feature) => {
+        const name = simplifyChinese2(
+          chineseAsterismNames.get(String(feature.id)) || ""
+        );
+        if (!name) return;
+        eachLineString(
+          feature.geometry,
+          (line) => line.forEach((coord) => {
+            const key = coordinateKey(coord, 3), list = index.get(key) || [];
+            if (!list.includes(name)) list.push(name);
+            index.set(key, list);
+            chineseAsterismCoordinateEntries.push({
+              coord: [Number(coord[0]), Number(coord[1])],
+              name
+            });
+          })
+        );
+      });
+      chineseStarAsterismIndex = index;
+      return index;
+    }
+    function chineseAsterismsForStar(starId) {
+      const coord = originalStarCoords.get(String(starId));
+      if (!coord) return [];
+      const index = buildChineseStarAsterismIndex(), exact = (index.get(coordinateKey(coord, 3)) || []).slice();
+      if (exact.length) return exact;
+      const matches = [];
+      chineseAsterismCoordinateEntries.forEach((entry) => {
+        let dLon = Math.abs(
+          normalizedLongitude(entry.coord[0]) - normalizedLongitude(coord[0])
+        );
+        dLon = Math.min(dLon, 360 - dLon);
+        const distance = Math.hypot(
+          dLon,
+          Number(entry.coord[1]) - Number(coord[1])
+        );
+        if (distance <= 0.03 && !matches.includes(entry.name))
+          matches.push(entry.name);
+      });
+      return matches;
+    }
+    function normalizeInfoToken(value) {
+      return simplifyChinese2(String(value || "")).replace(/[\u200e\u200f\u202a-\u202e]/g, "").replace(/\s+/g, " ").replace(/^\s*\/+|\/+\s*$/g, "").trim();
+    }
+    function cleanNameToken(value, extra = {}) {
+      const token = normalizeInfoToken(value);
+      if (!token || /^\/+$/u.test(token)) return "";
+      if (!extra.allowSingleGreek && /^[α-ωΑ-Ω]$/u.test(token)) return "";
+      if (!extra.allowBareNumber && /^[0-9]+$/u.test(token)) return "";
+      return token;
+    }
+    function uniqueTokens(values) {
+      const seen = /* @__PURE__ */ new Set();
+      return values.map((value) => cleanNameToken(value, { allowSingleGreek: false, allowBareNumber: false })).filter(Boolean).filter((value) => {
+        const key = value.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+    function constellationMeta(abbr) {
+      const feature = westernConstellationNameFeatures2().find(
+        (item) => String(item.id || item.properties?.desig || "") === String(abbr || "")
+      );
+      const props = feature && feature.properties || {};
+      return {
+        gen: cleanNameToken(props.gen || props.name || abbr, { allowBareNumber: true }),
+        zh: cleanNameToken(props.zh || abbr, { allowBareNumber: true })
+      };
+    }
+    function formatStarNameTokens(obj) {
+      if (!obj || obj.type !== "star") return [];
+      const n = starNames2[String(obj.d && obj.d.id)] || {};
+      const meta = constellationMeta(n.c);
+      const bayer = cleanNameToken(n.bayer || n.desig, { allowSingleGreek: true });
+      const flam = cleanNameToken(n.flam, { allowBareNumber: true });
+      const values = [n.zh, n.name];
+      if (bayer && meta.gen && !/^\d+$/u.test(bayer)) {
+        values.push(`${bayer} ${meta.gen}`);
+        if (meta.zh) values.push(`${meta.zh} ${bayer}`);
+      }
+      if (flam && meta.gen && /^\d+[A-Za-z]?$/u.test(flam)) values.push(`${flam} ${meta.gen}`);
+      return uniqueTokens(values);
+    }
+    function floatingRowValue(rows, label) {
+      const row = rows.find(([key]) => key === label);
+      return row ? row[1] : "\u2014";
+    }
+    function formatCatalogTokens(obj, rows) {
+      const p = obj.d && obj.d.properties || {};
+      if (obj.type === "star") {
+        const n = starNames2[String(obj.d.id)] || {};
+        const values = [];
+        const hip = cleanNameToken(n.hip || (obj.d.id ? `HIP ${obj.d.id}` : ""), { allowBareNumber: true });
+        const hd = cleanNameToken(n.hd || p.hd, { allowBareNumber: true });
+        const hr = cleanNameToken(n.hr || p.hr, { allowBareNumber: true });
+        const gaia = cleanNameToken(n.gaia || p.gaia, { allowBareNumber: true });
+        if (hip) values.push(/^HIP\s/i.test(hip) ? hip : `HIP ${hip}`);
+        if (hd) values.push(/^HD\s/i.test(hd) ? hd : `HD ${hd}`);
+        if (hr) values.push(/^HR\s/i.test(hr) ? hr : `HR ${hr}`);
+        if (gaia) values.push(/^Gaia\s/i.test(gaia) ? gaia : `Gaia ${gaia}`);
+        return uniqueTokens(values).join(" / ") || floatingRowValue(rows, t("catalogId"));
+      }
+      if (obj.type === "dso") return p.desig || String(obj.d.id || "\u2014");
+      if (obj.type === "planet") return String(obj.planetId || obj.d.id || "").toUpperCase();
+      return floatingRowValue(rows, t("catalogId"));
+    }
+    function cultureRowsForImportantStar(obj, p, n) {
+      const threshold = Number(
+        cfg(
+          "objectInfo.cultureNoteMagnitudeLimit",
+          cultureNotes.importantMagnitudeLimit || 2.1
+        )
+      );
+      if (!Number.isFinite(Number(p.mag)) || Number(p.mag) > threshold) return [];
+      const rows = [], lang = state.lang === "zh" ? "zh" : "en";
+      const western = cultureNotes.westernConstellations && cultureNotes.westernConstellations[n.c];
+      if (western && western[lang])
+        rows.push([t("westernCultureMeaning"), western[lang]]);
+      const asterisms = chineseAsterismsForStar(obj.d && obj.d.id);
+      const match = asterisms.find(
+        (name) => cultureNotes.chineseAsterisms && cultureNotes.chineseAsterisms[name]
+      );
+      if (match) {
+        const note = cultureNotes.chineseAsterisms[match][lang];
+        if (note)
+          rows.push([
+            t("chineseCultureMeaning"),
+            `${match}${state.lang === "zh" ? "\uFF1A" : ": "}${note}`
+          ]);
+      }
+      return rows;
+    }
+    function objectRows(obj) {
+      const sourceCoord = obj.coord, c = objectEpochCoordinate(obj) || sourceCoord, h = horizontalFor(c, { alreadyEpoch: true }), p = obj.d && obj.d.properties || {}, rows = [];
+      rows.push([
+        t("objectType"),
+        t(
+          obj.type === "dso" ? "deepSkyObject" : obj.type === "constellation" ? "westernConstellation" : obj.type === "asterism" ? "chineseAsterism" : obj.type === "star" ? "star" : obj.type === "planet" ? "solarSystemObject" : "skyPosition"
+        )
+      ]);
+      rows.push([t("rightAscension"), formatRA(c[0])]);
+      rows.push([t("declination"), formatDec(c[1])]);
+      rows.push([
+        t("altitude"),
+        Number.isFinite(h.alt) ? `${h.alt.toFixed(2)}\xB0` : "\u2014"
+      ]);
+      rows.push([
+        t("azimuth"),
+        Number.isFinite(h.az) ? `${h.az.toFixed(2)}\xB0` : "\u2014"
+      ]);
+      if (Number.isFinite(Number(p.mag)))
+        rows.splice(1, 0, [t("magnitude"), Number(p.mag).toFixed(2)]);
+      if (obj.type === "star") {
+        const n = starNames2[String(obj.d.id)] || {};
+        const others = formatStarNameTokens(obj);
+        if (others.length)
+          rows.splice(1, 0, [t("otherNames"), others.join(" / ")]);
+        if (p.bv !== void 0 && p.bv !== "")
+          rows.push([t("spectralInfo"), String(p.bv)]);
+        rows.push([t("catalogId"), formatCatalogTokens(obj, rows)]);
+        rows.push(...cultureRowsForImportantStar(obj, p, n));
+      } else if (obj.type === "dso")
+        rows.push([t("catalogId"), p.desig || String(obj.d.id)]);
+      else if (obj.type === "planet") {
+        const ep = obj.d && obj.d.ephemeris || {};
+        if (!["sol", "lun"].includes(obj.planetId) && Number.isFinite(Number(ep.mag)))
+          rows.splice(1, 0, [t("magnitude"), Number(ep.mag).toFixed(2)]);
+        if (obj.planetId === "lun") {
+          const phaseName = state.lang === "zh" ? ep.phaseNameZh : ep.phaseNameEn;
+          if (phaseName) rows.push([t("moonPhase"), String(phaseName)]);
+          const illum = Number.isFinite(Number(ep.illumination)) ? Number(ep.illumination) : Number(ep.phase);
+          if (Number.isFinite(illum))
+            rows.push([
+              t("illumination"),
+              `${(Math.max(0, Math.min(1, illum)) * 100).toFixed(1)}%`
+            ]);
+          if (Number.isFinite(Number(ep.age)))
+            rows.push([
+              t("moonAge"),
+              `${Number(ep.age).toFixed(1)} ${state.lang === "zh" ? "\u5929" : "days"}`
+            ]);
+        }
+        if (Number.isFinite(Number(ep.rt)))
+          rows.push([
+            t("distance"),
+            obj.planetId === "lun" ? `${Number(ep.rt).toLocaleString(void 0, { maximumFractionDigits: 0 })} km` : `${Number(ep.rt).toFixed(3)} AU`
+          ]);
+        if (obj.planetId === "sol" || obj.planetId === "lun") {
+          if (ep.model) rows.push([t("algorithm"), String(ep.model)]);
+          rows.push([t("precisionBoundary"), t("visualReferencePrecision")]);
+        }
+        rows.push([
+          t("catalogId"),
+          String(obj.planetId || obj.d.id || "").toUpperCase()
+        ]);
+      }
+      rows.push([t("observerPlace"), cityName()]);
+      rows.push([t("observerTime"), formatLocalLong()]);
+      return rows;
+    }
+    function renderFloatingObjectInfo(obj) {
+      const rows = objectRows(obj);
+      const type = floatingRowValue(rows, t("objectType"));
+      const catalog = formatCatalogTokens(obj, rows);
+      const title = cleanNameToken(
+        state.lang === "zh" ? simplifyChinese2(obj.label || objectLabel(obj.type, obj.d || { properties: {} })) : obj.label || objectLabel(obj.type, obj.d || { properties: {} }),
+        { allowBareNumber: true }
+      ) || "\u2014";
+      const names = obj.type === "star" ? formatStarNameTokens(obj) : uniqueTokens([floatingRowValue(rows, t("otherNames")), title]);
+      const noteKeys = [t("westernCultureMeaning"), t("chineseCultureMeaning")];
+      const notes = rows.filter(([key, value]) => noteKeys.includes(key) && value).map(([key, value]) => infoSingleLine(key, value)).join("");
+      return {
+        title,
+        html: infoPairLine(t("objectType"), type, t("catalogId"), catalog) + infoSingleLine(state.lang === "zh" ? "\u540D\u79F0" : "Names", names.join(" / ") || title) + infoPairLine(t("magnitude"), floatingRowValue(rows, t("magnitude")), t("spectralInfo"), floatingRowValue(rows, t("spectralInfo"))) + infoPairLine(t("rightAscension"), floatingRowValue(rows, t("rightAscension")), t("declination"), floatingRowValue(rows, t("declination"))) + infoPairLine(t("altitude"), floatingRowValue(rows, t("altitude")), t("azimuth"), floatingRowValue(rows, t("azimuth"))) + notes
+      };
+    }
+    return {
+      chineseAsterismsForStar,
+      constellationMeta,
+      objectRows,
+      renderFloatingObjectInfo
+    };
+  }
+
+  // src/ui/object-search.ts
+  function createObjectSearchController(options) {
+    const {
+      $,
+      state,
+      t,
+      simplifyChinese: simplifyChinese2,
+      sources,
+      currentPlanetPositions,
+      showObjectInfo,
+      centerOnObject,
+      highlightObject,
+      constellationMeta,
+      chineseAsterismsForStar,
+      beforeSelect
+    } = options;
+    let objectSearchIndex = null, objectSearchIndexLang = "", objectSearchIndexCultureMode = "", objectSearchResults = [], objectSearchActiveIndex = -1;
+    function objectLabel(type, d) {
+      const p = d.properties || {};
+      if (type === "star") {
+        const n = sources.starNames[String(d.id)] || {};
+        if (state.cultureMode === "western")
+          return state.lang === "zh" ? simplifyChinese2(n.zh || n.name || n.desig || n.hip || `HIP ${d.id}`) : n.name || n.desig || n.hip || `HIP ${d.id}`;
+        return simplifyChinese2(
+          n.zh || n.name || n.desig || n.hip || `HIP ${d.id}`
+        );
+      }
+      if (type === "dso") {
+        const n = sources.deepSkyNames[String(d.id)] || {};
+        return state.lang === "zh" ? simplifyChinese2(n.zh || p.desig || d.id) : n.name || p.desig || d.id;
+      }
+      if (type === "constellation")
+        return state.lang === "zh" ? simplifyChinese2(p.zh || p.name || p.desig || d.id) : p.en || p.name || p.desig || d.id;
+      if (type === "asterism")
+        return state.lang === "zh" ? simplifyChinese2(p.name || p.en) : p.en || p.name;
+      if (type === "planet")
+        return state.lang === "zh" ? simplifyChinese2(d.zh || d.name || d.id) : d.en || d.name || d.id;
+      return p.name || p.en || p.desig || d.id || t("skyPosition");
+    }
+    function objectSearchTypeLabel(type) {
+      return t(
+        type === "star" ? "searchResultStar" : type === "planet" ? "searchResultPlanet" : type === "constellation" ? "searchResultConstellation" : type === "asterism" ? "searchResultAsterism" : "searchResultDso"
+      );
+    }
+    function buildObjectSearchIndex() {
+      if (objectSearchIndex && objectSearchIndexLang === state.lang && objectSearchIndexCultureMode === state.cultureMode)
+        return objectSearchIndex;
+      objectSearchIndex = buildObjectSearchIndexFromSources({
+        stars: sources.stars,
+        starNames: sources.starNames,
+        deepSkyFeatures: sources.deepSkyFeatures(),
+        deepSkyNames: sources.deepSkyNames,
+        constellationNameFeatures: sources.constellationNameFeatures(),
+        asterismNameFeatures: sources.asterismNameFeatures(),
+        planets: [],
+        simplifyChinese: simplifyChinese2,
+        labelObject: objectLabel
+      });
+      objectSearchIndexLang = state.lang;
+      objectSearchIndexCultureMode = state.cultureMode;
+      return objectSearchIndex;
+    }
+    function currentPlanetSearchEntries() {
+      return buildObjectSearchIndexFromSources({
+        stars: [],
+        starNames: sources.starNames,
+        deepSkyFeatures: [],
+        deepSkyNames: sources.deepSkyNames,
+        constellationNameFeatures: [],
+        asterismNameFeatures: [],
+        planets: currentPlanetPositions(),
+        simplifyChinese: simplifyChinese2,
+        labelObject: objectLabel
+      });
+    }
+    function searchObjects(query) {
+      return searchObjectEntries(
+        query,
+        buildObjectSearchIndex().concat(currentPlanetSearchEntries()),
+        simplifyChinese2
+      );
+    }
+    function defaultBrightStarSuggestions() {
+      return brightestStarEntries(buildObjectSearchIndex(), 50);
+    }
+    function objectSearchDisplayTitle(entry) {
+      if (!entry) return "";
+      return state.lang === "zh" ? entry.names[0] : entry.names[1] || entry.names[0];
+    }
+    function objectSearchMetaText(entry) {
+      if (!entry) return "";
+      if (entry.type !== "star") return objectSearchTypeLabel(entry.type);
+      const names = sources.starNames[String(entry.d && entry.d.id)] || {}, meta = constellationMeta(names.c), western = state.lang === "zh" ? meta.zh : meta.gen || names.c || "", asterisms = chineseAsterismsForStar(entry.d && entry.d.id).slice(0, 2), parts = [western].concat(asterisms).filter(Boolean);
+      return parts.length ? parts.join(" / ") : objectSearchTypeLabel(entry.type);
+    }
+    function setObjectSearchActive(index) {
+      const box = $("object-suggestions"), buttons = box ? Array.from(box.querySelectorAll(".object-option")) : [];
+      objectSearchActiveIndex = buttons.length ? (index + buttons.length) % buttons.length : -1;
+      buttons.forEach((button, i) => {
+        button.classList.toggle("active", i === objectSearchActiveIndex);
+        button.setAttribute("aria-selected", String(i === objectSearchActiveIndex));
+      });
+      if (buttons[objectSearchActiveIndex])
+        buttons[objectSearchActiveIndex].scrollIntoView({ block: "nearest" });
+    }
+    function renderObjectSuggestions(results, empty = false) {
+      const box = $("object-suggestions");
+      objectSearchResults = results.slice();
+      objectSearchActiveIndex = -1;
+      box.innerHTML = "";
+      if (empty) {
+        const div = document.createElement("div");
+        div.className = "object-search-empty";
+        div.textContent = t("noObjectSearchResult");
+        box.appendChild(div);
+        box.classList.add("open");
+        return;
+      }
+      results.forEach((entry, index) => {
+        const button = document.createElement("button");
+        button.className = "object-option";
+        button.type = "button";
+        button.setAttribute("role", "option");
+        const name = document.createElement("span"), type = document.createElement("small");
+        name.textContent = objectSearchDisplayTitle(entry);
+        type.textContent = objectSearchMetaText(entry);
+        button.append(name, type);
+        button.addEventListener("mouseenter", () => setObjectSearchActive(index));
+        button.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          selectObjectSearchResult(entry);
+        });
+        box.appendChild(button);
+      });
+      box.classList.toggle("open", results.length > 0);
+      setObjectSearchActive(results.length ? 0 : -1);
+    }
+    function setupObjectSearch() {
+      const input = $("object-search"), box = $("object-suggestions");
+      if (!input || !box) return;
+      let composing = false;
+      input.addEventListener("compositionstart", () => composing = true);
+      input.addEventListener("compositionend", () => composing = false);
+      const showDefaultSuggestions = () => {
+        if (input.value.trim()) return;
+        renderObjectSuggestions(defaultBrightStarSuggestions(), false);
+      };
+      input.addEventListener("focus", showDefaultSuggestions);
+      input.addEventListener("click", showDefaultSuggestions);
+      input.addEventListener("input", () => {
+        const value = input.value.trim();
+        if (!value) {
+          showDefaultSuggestions();
+          return;
+        }
+        const results = searchObjects(value);
+        renderObjectSuggestions(results, results.length === 0);
+      });
+      input.addEventListener("keydown", (e) => {
+        if (composing || e.isComposing) return;
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          if (objectSearchResults.length) setObjectSearchActive(objectSearchActiveIndex + 1);
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          if (objectSearchResults.length) setObjectSearchActive(objectSearchActiveIndex - 1);
+        } else if (e.key === "Enter") {
+          const entry = objectSearchResults[objectSearchActiveIndex] || objectSearchResults[0];
+          if (entry) {
+            e.preventDefault();
+            selectObjectSearchResult(entry);
+            input.blur();
+          }
+        } else if (e.key === "Escape") box.classList.remove("open");
+      });
+      document.addEventListener("click", (event) => {
+        if (!event.target.closest("#object-search-section"))
+          box.classList.remove("open");
+      });
+    }
+    function selectObjectSearchResult(entry) {
+      beforeSelect();
+      const input = $("object-search");
+      if (input) input.value = objectSearchDisplayTitle(entry);
+      const obj = entry.type === "planet" ? {
+        type: "planet",
+        d: entry.d,
+        coord: entry.coord,
+        epochCoord: entry.epochCoord,
+        displayCoord: entry.displayCoord,
+        planetId: entry.planetId,
+        label: objectLabel("planet", entry.d)
+      } : {
+        type: entry.type,
+        d: entry.d,
+        coord: entry.coord,
+        label: objectLabel(entry.type, entry.d)
+      };
+      showObjectInfo(obj);
+      centerOnObject(obj);
+      highlightObject(obj);
+      $("object-suggestions").classList.remove("open");
+    }
+    return {
+      objectLabel,
+      setupObjectSearch,
+      selectObjectSearchResult
+    };
+  }
+
   // src/ui/text.ts
   var TRAD_TO_SIMP = {
     "\u81FA": "\u53F0",
@@ -3722,6 +4192,217 @@
     }
   }
 
+  // src/sky/epoch-frame.ts
+  function createEpochFrameController(options) {
+    const {
+      getCelestial,
+      selectionNodes: selectionNodes2,
+      projectionCoordinateTransform,
+      currentInstantDate,
+      astronomyModelEnabled,
+      normalizeCelestialLongitude: normalizeCelestialLongitude3,
+      debugErrorText: debugErrorText2,
+      astronomyModelDebug,
+      storageSchemaVersion,
+      astronomyModelVersion,
+      onDisplayedFeaturesTransformed
+    } = options;
+    function epochEquatorialFromJ2000(coord, date = currentInstantDate()) {
+      if (!coord) return null;
+      const source = [normalizeCelestialLongitude3(coord[0]), Number(coord[1])];
+      if (!Number.isFinite(source[0]) || !Number.isFinite(source[1])) return null;
+      if (!astronomyModelEnabled()) return source;
+      try {
+        return precessEquatorialJ2000ToDate(source, date);
+      } catch (err) {
+        astronomyModelDebug.lastPrecessionError = debugErrorText2(err);
+        return source;
+      }
+    }
+    function displayCoordinateForEpochEquatorial(coord) {
+      const Celestial2 = getCelestial();
+      if (!coord) return null;
+      const equatorial = [
+        normalizeCelestialLongitude3(coord[0]),
+        Number(coord[1])
+      ];
+      if (!Number.isFinite(equatorial[0]) || !Number.isFinite(equatorial[1])) return null;
+      if (projectionCoordinateTransform() === "equatorial") return equatorial;
+      try {
+        return Celestial2.getPoint(equatorial, projectionCoordinateTransform());
+      } catch (_) {
+        return equatorial;
+      }
+    }
+    function displayCoordinateForEquatorial(coord) {
+      return displayCoordinateForEpochEquatorial(epochEquatorialFromJ2000(coord));
+    }
+    function cloneGeometry(geometry) {
+      return geometry ? JSON.parse(JSON.stringify(geometry)) : null;
+    }
+    function mapGeometryCoordinates(geometry, mapper) {
+      if (!geometry || !Array.isArray(geometry.coordinates)) return geometry;
+      const mapCoord = (value) => {
+        if (Array.isArray(value) && value.length >= 2 && Number.isFinite(Number(value[0])) && Number.isFinite(Number(value[1]))) {
+          const mapped = mapper([Number(value[0]), Number(value[1])]);
+          return mapped ? [mapped[0], mapped[1]] : [Number(value[0]), Number(value[1])];
+        }
+        return Array.isArray(value) ? value.map(mapCoord) : value;
+      };
+      return { ...geometry, coordinates: mapCoord(geometry.coordinates) };
+    }
+    function ensureFeatureSourceGeometry(feature) {
+      if (!feature || !feature.geometry) return null;
+      feature.properties = feature.properties || {};
+      if (!feature.properties.__rsoJ2000Geometry)
+        feature.properties.__rsoJ2000Geometry = cloneGeometry(feature.geometry);
+      feature.properties.__rsoSourceEpoch = "J2000";
+      return feature.properties.__rsoJ2000Geometry;
+    }
+    function applyFeatureGeometryFrame(feature, mapper) {
+      const source = ensureFeatureSourceGeometry(feature);
+      if (!source) return false;
+      feature.geometry = mapGeometryCoordinates(source, mapper);
+      feature.properties.__rsoDisplayEpoch = "epoch-of-date";
+      return true;
+    }
+    function syncMilkyWayBackgroundMaskGeometry() {
+      const sourceNode = selectionNodes2(".milkyWay")[0] || selectionNodes2(".mw")[0], sourceFeature = sourceNode && sourceNode.__data__, sourceCoordinates = sourceFeature && sourceFeature.geometry && sourceFeature.geometry.coordinates && sourceFeature.geometry.coordinates[0];
+      if (!Array.isArray(sourceCoordinates)) return 0;
+      let synced = 0;
+      [".milkyWayBg", ".mwbg"].forEach((selector) => {
+        selectionNodes2(selector).forEach((node) => {
+          const feature = node && node.__data__;
+          if (!feature || !feature.geometry) return;
+          feature.geometry = {
+            type: "MultiPolygon",
+            coordinates: [
+              sourceCoordinates.map(
+                (ring) => Array.isArray(ring) ? ring.slice().reverse() : ring
+              )
+            ]
+          };
+          synced += 1;
+        });
+      });
+      return synced;
+    }
+    function useNativeGalacticFixedSkyFrame() {
+      return projectionCoordinateTransform() === "galactic";
+    }
+    function prepareDatasetForEpoch(path, data) {
+      if (!data || data.type !== "FeatureCollection" || !Array.isArray(data.features)) return data;
+      if (useNativeGalacticFixedSkyFrame()) {
+        astronomyModelDebug.fixedLayerPrecession = "native galactic fixed-sky frame";
+        astronomyModelDebug.lastPrecessionError = "-";
+        return data;
+      }
+      const date = currentInstantDate();
+      let transformed = 0;
+      data.features.forEach((feature) => {
+        if (applyFeatureGeometryFrame(feature, (coord) => epochEquatorialFromJ2000(coord, date)))
+          transformed += 1;
+      });
+      astronomyModelDebug.fixedLayerPrecession = `${transformed} features prepared`;
+      astronomyModelDebug.lastPrecessionError = "-";
+      return data;
+    }
+    function installDatasetEpochHook() {
+      window.__RSO_PREPARE_SKY_DATASET__ = function(path, data) {
+        try {
+          return prepareDatasetForEpoch(path, data);
+        } catch (err) {
+          astronomyModelDebug.lastPrecessionError = debugErrorText2(err);
+          console.warn("Epoch data preparation failed", path, err);
+          return data;
+        }
+      };
+    }
+    function updateAstronomyModelDebug() {
+      try {
+        const date = currentInstantDate();
+        const diag = diagnosticsForDate(date);
+        astronomyModelDebug.sourceEpoch = diag.sourceEpoch;
+        astronomyModelDebug.displayEpoch = diag.displayEpoch;
+        astronomyModelDebug.precessionStatus = astronomyModelEnabled() ? diag.precessionStatus : "disabled";
+        astronomyModelDebug.precessionModel = diag.modelName;
+        astronomyModelDebug.nutation = "off";
+        astronomyModelDebug.properMotion = "off";
+        astronomyModelDebug.refraction = "off";
+        astronomyModelDebug.julianCenturiesT = diag.julianCenturiesT.toFixed(8);
+        astronomyModelDebug.meanObliquity = `${diag.meanObliquityDegrees.toFixed(6)}\xB0`;
+        astronomyModelDebug.eclipticModel = diag.eclipticModel;
+        astronomyModelDebug.sunModel = "Meeus lightweight";
+        astronomyModelDebug.moonModel = "Meeus lunar periodic terms";
+        astronomyModelDebug.moonPhaseModel = "Meeus phase approximation";
+        astronomyModelDebug.planetModel = "simple orbital model";
+        astronomyModelDebug.vsop87 = "off";
+        astronomyModelDebug.precisionBoundary = "visual reference, not precision ephemeris";
+        astronomyModelDebug.planetEpochHandling = "connected to display frame";
+        astronomyModelDebug.storageSchemaVersion = storageSchemaVersion;
+        astronomyModelDebug.astronomyModelVersion = astronomyModelVersion;
+      } catch (err) {
+        astronomyModelDebug.lastPrecessionError = debugErrorText2(err);
+      }
+    }
+    function updateLoadedCoordinateFrame() {
+      const Celestial2 = getCelestial();
+      if (!Celestial2 || !Celestial2.container) return;
+      updateAstronomyModelDebug();
+      if (useNativeGalacticFixedSkyFrame()) {
+        astronomyModelDebug.fixedLayerPrecession = "native galactic fixed-sky frame";
+        astronomyModelDebug.lastPrecessionError = "-";
+        return;
+      }
+      const mapper = (coord) => displayCoordinateForEquatorial(coord);
+      const selectors = [
+        ".star",
+        ".dso",
+        ".constline",
+        ".constname",
+        ".boundaryline",
+        ".rso-western-dual-line",
+        ".rso-cn-line",
+        ".rso-cn-name",
+        ".rso-traditional-region",
+        ".rso-traditional-label",
+        ".milkyWay",
+        ".mw"
+      ];
+      let transformed = 0;
+      try {
+        selectors.forEach((selector) => {
+          selectionNodes2(selector).forEach((node) => {
+            const d = node && node.__data__;
+            if (applyFeatureGeometryFrame(d, mapper)) transformed += 1;
+          });
+        });
+        const syncedMilkyWayMasks = syncMilkyWayBackgroundMaskGeometry();
+        astronomyModelDebug.fixedLayerPrecession = transformed ? `${transformed} displayed features` : "no loaded feature geometry";
+        if (syncedMilkyWayMasks)
+          astronomyModelDebug.fixedLayerPrecession += `, ${syncedMilkyWayMasks} Milky Way masks synced`;
+        astronomyModelDebug.boundaryPrecession = transformed ? "connected" : astronomyModelDebug.boundaryPrecession;
+        astronomyModelDebug.asterismPrecession = transformed ? "connected" : astronomyModelDebug.asterismPrecession;
+        if (onDisplayedFeaturesTransformed)
+          onDisplayedFeaturesTransformed();
+        astronomyModelDebug.lastPrecessionError = "-";
+      } catch (err) {
+        astronomyModelDebug.lastPrecessionError = debugErrorText2(err);
+        console.warn("Loaded coordinate frame update failed", err);
+      }
+    }
+    return {
+      epochEquatorialFromJ2000,
+      displayCoordinateForEpochEquatorial,
+      displayCoordinateForEquatorial,
+      useNativeGalacticFixedSkyFrame,
+      prepareDatasetForEpoch,
+      installDatasetEpochHook,
+      updateAstronomyModelDebug,
+      updateLoadedCoordinateFrame
+    };
+  }
+
   // src/sky/projection.ts
   var PROJECTION_DEFAULTS = {
     airy: { center: [0, 0, 0], mapScale: 1 },
@@ -4178,14 +4859,6 @@
     return !!target.closest("input,select,textarea,[contenteditable='true'],.modal,#debug-overlay");
   }
 
-  // src/ui/panels.ts
-  function infoPairLine(a, b, c, d) {
-    return `<div class="floating-info-pair"><span class="floating-field"><b>${a}\uFF1A</b><em>${b || "\u2014"}</em></span><span class="floating-field"><b>${c}\uFF1A</b><em>${d || "\u2014"}</em></span></div>`;
-  }
-  function infoSingleLine(a, b) {
-    return `<div class="floating-info-single"><b>${a}\uFF1A</b><em>${b || "\u2014"}</em></div>`;
-  }
-
   // src/ui/debug-panel.ts
   function debugSpan(text, className) {
     const span = document.createElement("span");
@@ -4546,6 +5219,12 @@
       redrawStatus: "skipped",
       redrawReason: "startup",
       redrawAt: "-",
+      fixedLayerSyncMs: "-",
+      celestialRedrawMs: "-",
+      redrawTotalMs: "-",
+      followUpFixedLayerSyncMs: "-",
+      followUpCelestialRedrawMs: "-",
+      followUpRedrawTotalMs: "-",
       rollbackStatus: "unused",
       planetStatus: "skipped",
       planetCount: "-",
@@ -4589,15 +5268,13 @@
       cacheMigration: "pending",
       lastPrecessionError: "-"
     };
-    let objectSearchIndex = null, objectSearchIndexLang = "", objectSearchIndexCultureMode = "", searchHighlight = null, searchHighlightTimer = null, floatingObjectInfoDismissed = false;
+    let searchHighlight = null, searchHighlightTimer = null, floatingObjectInfoDismissed = false;
     const STAR_NAMES = starNames();
     const DSO_NAMES = deepSkyNames();
     const ORIGINAL_STARS = starFeatures();
     const ORIGINAL_STAR_COORDS = starCoordinateMap();
     const ORIGINAL_DSO_COORDS = deepSkyCoordinateMap(), ORIGINAL_CONSTELLATION_COORDS = westernConstellationCoordinateMap(), ORIGINAL_ASTERISM_COORDS = chineseAsterismCoordinateMap();
     const CN_ASTERISM_NAMES = chineseAsterismNameMap();
-    let chineseStarAsterismIndex = null;
-    let chineseAsterismCoordinateEntries = [];
     const getStorage = getProjectStorage;
     function t(key) {
       return I18N[state.lang] && I18N[state.lang][key] || key;
@@ -4784,6 +5461,11 @@
     function noteTimeRenderDebug(patch = {}) {
       Object.assign(timeRenderDebug, patch);
       if (debugVisible) updateDebugOverlay(true);
+    }
+    function formatDebugDurationMs(value) {
+      const ms = Number(value);
+      if (!Number.isFinite(ms)) return "-";
+      return `${ms < 10 ? ms.toFixed(2) : ms.toFixed(1)} ms`;
     }
     function timeFieldByKey2(key) {
       return timeFieldByKey($, key);
@@ -5988,6 +6670,22 @@
         debugLine(zh ? "redraw \u65F6\u95F4" : "redraw at", [
           debugValue(timeRenderDebug.redrawAt || "-")
         ]),
+        debugLine(zh ? "\u661F\u56FE\u5237\u65B0\u8017\u65F6" : "sky redraw duration", [
+          debugSep("sync="),
+          debugValue(timeRenderDebug.fixedLayerSyncMs || "-"),
+          debugSep(" redraw="),
+          debugValue(timeRenderDebug.celestialRedrawMs || "-"),
+          debugSep(" total="),
+          debugValue(timeRenderDebug.redrawTotalMs || "-")
+        ]),
+        debugLine(zh ? "follow-up \u5237\u65B0\u8017\u65F6" : "follow-up redraw duration", [
+          debugSep("sync="),
+          debugValue(timeRenderDebug.followUpFixedLayerSyncMs || "-"),
+          debugSep(" redraw="),
+          debugValue(timeRenderDebug.followUpCelestialRedrawMs || "-"),
+          debugSep(" total="),
+          debugValue(timeRenderDebug.followUpRedrawTotalMs || "-")
+        ]),
         debugLine(zh ? "rollback \u72B6\u6001" : "rollback status", [
           debugValue(timeRenderDebug.rollbackStatus || "-")
         ]),
@@ -6287,13 +6985,26 @@
     }
     function redrawAndSyncMapBox(reason = "redraw", metrics = projectionCanvasMetrics2()) {
       let ok = true;
+      const hasFollowUpRedraw = /time|location|observer|sky view|playback/i.test(String(reason));
       try {
+        const totalStarted = performance.now();
+        const syncStarted = performance.now();
         updateLoadedCoordinateFrame();
+        const fixedLayerSyncMs = performance.now() - syncStarted;
+        const redrawStarted = performance.now();
         Celestial.redraw();
+        const celestialRedrawMs = performance.now() - redrawStarted;
+        const redrawTotalMs = performance.now() - totalStarted;
         noteTimeRenderDebug({
           redrawStatus: "ok",
           redrawReason: reason,
-          redrawAt: (/* @__PURE__ */ new Date()).toISOString()
+          redrawAt: (/* @__PURE__ */ new Date()).toISOString(),
+          fixedLayerSyncMs: formatDebugDurationMs(fixedLayerSyncMs),
+          celestialRedrawMs: formatDebugDurationMs(celestialRedrawMs),
+          redrawTotalMs: formatDebugDurationMs(redrawTotalMs),
+          followUpFixedLayerSyncMs: hasFollowUpRedraw ? "pending" : "-",
+          followUpCelestialRedrawMs: hasFollowUpRedraw ? "pending" : "-",
+          followUpRedrawTotalMs: hasFollowUpRedraw ? "pending" : "-"
         });
       } catch (err) {
         ok = false;
@@ -6308,15 +7019,24 @@
         });
       }
       syncMapBoxAfterRedraw(metrics);
-      if (/time|location|observer|sky view|playback/i.test(String(reason))) {
+      if (hasFollowUpRedraw) {
         requestAnimationFrame(() => {
           try {
+            const totalStarted = performance.now();
+            const syncStarted = performance.now();
             updateLoadedCoordinateFrame();
+            const fixedLayerSyncMs = performance.now() - syncStarted;
+            const redrawStarted = performance.now();
             Celestial.redraw();
+            const celestialRedrawMs = performance.now() - redrawStarted;
+            const redrawTotalMs = performance.now() - totalStarted;
             noteTimeRenderDebug({
               redrawStatus: "ok",
               redrawReason: `${reason} follow-up`,
-              redrawAt: (/* @__PURE__ */ new Date()).toISOString()
+              redrawAt: (/* @__PURE__ */ new Date()).toISOString(),
+              followUpFixedLayerSyncMs: formatDebugDurationMs(fixedLayerSyncMs),
+              followUpCelestialRedrawMs: formatDebugDurationMs(celestialRedrawMs),
+              followUpRedrawTotalMs: formatDebugDurationMs(redrawTotalMs)
             });
           } catch (err) {
             noteTimeRenderDebug({
@@ -6512,8 +7232,7 @@
       const disabled = state.cultureMode === "both";
       box.disabled = disabled;
       box.closest(".toggle").style.opacity = disabled ? ".45" : "1";
-      if (disabled) box.checked = false;
-      else box.checked = !!state.regionBoundaries;
+      box.checked = !!state.regionBoundaries;
       updateRegionLegend();
     }
     function updateRegionLegend() {
@@ -6878,190 +7597,93 @@
     function selectionNodes2(selector) {
       return selectionNodes(Celestial, selector);
     }
+    const objectInfoFormatter = createObjectInfoFormatter({
+      state,
+      t,
+      cfg,
+      simplifyChinese,
+      cultureNotes: CULTURE_NOTES,
+      starNames: STAR_NAMES,
+      originalStarCoords: ORIGINAL_STAR_COORDS,
+      chineseAsterismLineFeatures,
+      chineseAsterismNames: CN_ASTERISM_NAMES,
+      westernConstellationNameFeatures,
+      coordinateKey,
+      normalizedLongitude,
+      eachLineString,
+      objectEpochCoordinate,
+      horizontalFor,
+      cityName,
+      formatLocalLong,
+      objectLabel
+    });
+    const objectSearchController = createObjectSearchController({
+      $,
+      state,
+      t,
+      simplifyChinese,
+      sources: {
+        stars: ORIGINAL_STARS,
+        starNames: STAR_NAMES,
+        deepSkyFeatures,
+        deepSkyNames: DSO_NAMES,
+        constellationNameFeatures: westernConstellationNameFeatures,
+        asterismNameFeatures: chineseAsterismNameFeatures
+      },
+      currentPlanetPositions,
+      showObjectInfo,
+      centerOnObject,
+      highlightObject,
+      constellationMeta,
+      chineseAsterismsForStar,
+      beforeSelect: () => {
+        floatingObjectInfoDismissed = false;
+      }
+    });
     const PLANET_STYLE = cfg("planets", {});
     function astronomyModelEnabled() {
       return !!cfg("astronomyModel.precession", true);
     }
-    function epochEquatorialFromJ2000(coord, date = currentInstantDate()) {
-      if (!coord) return null;
-      const source = [normalizeCelestialLongitude2(coord[0]), Number(coord[1])];
-      if (!Number.isFinite(source[0]) || !Number.isFinite(source[1])) return null;
-      if (!astronomyModelEnabled()) return source;
-      try {
-        return precessEquatorialJ2000ToDate(source, date);
-      } catch (err) {
-        astronomyModelDebug.lastPrecessionError = debugErrorText(err);
-        return source;
+    const epochFrameController = createEpochFrameController({
+      getCelestial: () => window.Celestial,
+      selectionNodes: selectionNodes2,
+      projectionCoordinateTransform,
+      currentInstantDate,
+      astronomyModelEnabled,
+      normalizeCelestialLongitude: normalizeCelestialLongitude2,
+      debugErrorText,
+      astronomyModelDebug,
+      storageSchemaVersion: STORAGE_SCHEMA_VERSION,
+      astronomyModelVersion: ASTRONOMY_MODEL_VERSION,
+      onDisplayedFeaturesTransformed: () => {
+        if (westernDualLineFeatures.length || chineseLineFeatures.length)
+          rebuildSharedCultureSegments();
       }
+    });
+    function epochEquatorialFromJ2000(coord, date = currentInstantDate()) {
+      return epochFrameController.epochEquatorialFromJ2000(coord, date);
     }
     function displayCoordinateForEpochEquatorial(coord) {
-      if (!coord) return null;
-      const equatorial = [
-        normalizeCelestialLongitude2(coord[0]),
-        Number(coord[1])
-      ];
-      if (!Number.isFinite(equatorial[0]) || !Number.isFinite(equatorial[1])) return null;
-      if (coordinateViewSpec().transform === "equatorial") return equatorial;
-      try {
-        return Celestial.getPoint(equatorial, coordinateViewSpec().transform);
-      } catch (_) {
-        return equatorial;
-      }
+      return epochFrameController.displayCoordinateForEpochEquatorial(coord);
     }
     function displayCoordinateForEquatorial(coord) {
-      return displayCoordinateForEpochEquatorial(epochEquatorialFromJ2000(coord));
-    }
-    function cloneGeometry(geometry) {
-      return geometry ? JSON.parse(JSON.stringify(geometry)) : null;
-    }
-    function mapGeometryCoordinates(geometry, mapper) {
-      if (!geometry || !Array.isArray(geometry.coordinates)) return geometry;
-      const mapCoord = (value) => {
-        if (Array.isArray(value) && value.length >= 2 && Number.isFinite(Number(value[0])) && Number.isFinite(Number(value[1]))) {
-          const mapped = mapper([Number(value[0]), Number(value[1])]);
-          return mapped ? [mapped[0], mapped[1]] : [Number(value[0]), Number(value[1])];
-        }
-        return Array.isArray(value) ? value.map(mapCoord) : value;
-      };
-      return { ...geometry, coordinates: mapCoord(geometry.coordinates) };
-    }
-    function ensureFeatureSourceGeometry(feature) {
-      if (!feature || !feature.geometry) return null;
-      feature.properties = feature.properties || {};
-      if (!feature.properties.__rsoJ2000Geometry)
-        feature.properties.__rsoJ2000Geometry = cloneGeometry(feature.geometry);
-      feature.properties.__rsoSourceEpoch = "J2000";
-      return feature.properties.__rsoJ2000Geometry;
-    }
-    function applyFeatureGeometryFrame(feature, mapper) {
-      const source = ensureFeatureSourceGeometry(feature);
-      if (!source) return false;
-      feature.geometry = mapGeometryCoordinates(source, mapper);
-      feature.properties.__rsoDisplayEpoch = "epoch-of-date";
-      return true;
-    }
-    function syncMilkyWayBackgroundMaskGeometry() {
-      const sourceNode = selectionNodes2(".milkyWay")[0] || selectionNodes2(".mw")[0], sourceFeature = sourceNode && sourceNode.__data__, sourceCoordinates = sourceFeature && sourceFeature.geometry && sourceFeature.geometry.coordinates && sourceFeature.geometry.coordinates[0];
-      if (!Array.isArray(sourceCoordinates)) return 0;
-      let synced = 0;
-      [".milkyWayBg", ".mwbg"].forEach((selector) => {
-        selectionNodes2(selector).forEach((node) => {
-          const feature = node && node.__data__;
-          if (!feature || !feature.geometry) return;
-          feature.geometry = {
-            type: "MultiPolygon",
-            coordinates: [
-              sourceCoordinates.map(
-                (ring) => Array.isArray(ring) ? ring.slice().reverse() : ring
-              )
-            ]
-          };
-          synced += 1;
-        });
-      });
-      return synced;
+      return epochFrameController.displayCoordinateForEquatorial(coord);
     }
     function useNativeGalacticFixedSkyFrame() {
-      return projectionCoordinateTransform() === "galactic";
+      return epochFrameController.useNativeGalacticFixedSkyFrame();
     }
     function prepareDatasetForEpoch(path, data) {
-      if (!data || data.type !== "FeatureCollection" || !Array.isArray(data.features)) return data;
-      if (useNativeGalacticFixedSkyFrame()) {
-        astronomyModelDebug.fixedLayerPrecession = "native galactic fixed-sky frame";
-        astronomyModelDebug.lastPrecessionError = "-";
-        return data;
-      }
-      const date = currentInstantDate();
-      let transformed = 0;
-      data.features.forEach((feature) => {
-        if (applyFeatureGeometryFrame(feature, (coord) => epochEquatorialFromJ2000(coord, date)))
-          transformed += 1;
-      });
-      astronomyModelDebug.fixedLayerPrecession = `${transformed} features prepared`;
-      astronomyModelDebug.lastPrecessionError = "-";
-      return data;
+      return epochFrameController.prepareDatasetForEpoch(path, data);
     }
     function installDatasetEpochHook() {
-      window.__RSO_PREPARE_SKY_DATASET__ = function(path, data) {
-        try {
-          return prepareDatasetForEpoch(path, data);
-        } catch (err) {
-          astronomyModelDebug.lastPrecessionError = debugErrorText(err);
-          console.warn("Epoch data preparation failed", path, err);
-          return data;
-        }
-      };
+      epochFrameController.installDatasetEpochHook();
     }
     function updateAstronomyModelDebug() {
-      try {
-        const date = currentInstantDate();
-        const diag = diagnosticsForDate(date);
-        astronomyModelDebug.sourceEpoch = diag.sourceEpoch;
-        astronomyModelDebug.displayEpoch = diag.displayEpoch;
-        astronomyModelDebug.precessionStatus = astronomyModelEnabled() ? diag.precessionStatus : "disabled";
-        astronomyModelDebug.precessionModel = diag.modelName;
-        astronomyModelDebug.nutation = "off";
-        astronomyModelDebug.properMotion = "off";
-        astronomyModelDebug.refraction = "off";
-        astronomyModelDebug.julianCenturiesT = diag.julianCenturiesT.toFixed(8);
-        astronomyModelDebug.meanObliquity = `${diag.meanObliquityDegrees.toFixed(6)}\xB0`;
-        astronomyModelDebug.eclipticModel = diag.eclipticModel;
-        astronomyModelDebug.sunModel = "Meeus lightweight";
-        astronomyModelDebug.moonModel = "Meeus lunar periodic terms";
-        astronomyModelDebug.moonPhaseModel = "Meeus phase approximation";
-        astronomyModelDebug.planetModel = "simple orbital model";
-        astronomyModelDebug.vsop87 = "off";
-        astronomyModelDebug.precisionBoundary = "visual reference, not precision ephemeris";
-        astronomyModelDebug.planetEpochHandling = "connected to display frame";
-        astronomyModelDebug.storageSchemaVersion = STORAGE_SCHEMA_VERSION;
-        astronomyModelDebug.astronomyModelVersion = ASTRONOMY_MODEL_VERSION;
-      } catch (err) {
-        astronomyModelDebug.lastPrecessionError = debugErrorText(err);
-      }
+      epochFrameController.updateAstronomyModelDebug();
     }
     function updateLoadedCoordinateFrame() {
-      if (!skyReady || !window.Celestial || !Celestial.container) return;
-      updateAstronomyModelDebug();
-      if (useNativeGalacticFixedSkyFrame()) {
-        astronomyModelDebug.fixedLayerPrecession = "native galactic fixed-sky frame";
-        astronomyModelDebug.lastPrecessionError = "-";
-        return;
-      }
-      const mapper = (coord) => displayCoordinateForEquatorial(coord);
-      const selectors = [
-        ".star",
-        ".dso",
-        ".constline",
-        ".constname",
-        ".boundaryline",
-        ".rso-western-dual-line",
-        ".rso-cn-line",
-        ".rso-cn-name",
-        ".rso-traditional-region",
-        ".rso-traditional-label",
-        ".milkyWay",
-        ".mw"
-      ];
-      let transformed = 0;
-      try {
-        selectors.forEach((selector) => {
-          selectionNodes2(selector).forEach((node) => {
-            const d = node && node.__data__;
-            if (applyFeatureGeometryFrame(d, mapper)) transformed += 1;
-          });
-        });
-        const syncedMilkyWayMasks = syncMilkyWayBackgroundMaskGeometry();
-        astronomyModelDebug.fixedLayerPrecession = transformed ? `${transformed} displayed features` : "no loaded feature geometry";
-        if (syncedMilkyWayMasks)
-          astronomyModelDebug.fixedLayerPrecession += `, ${syncedMilkyWayMasks} Milky Way masks synced`;
-        astronomyModelDebug.boundaryPrecession = transformed ? "connected" : astronomyModelDebug.boundaryPrecession;
-        astronomyModelDebug.asterismPrecession = transformed ? "connected" : astronomyModelDebug.asterismPrecession;
-        if (westernDualLineFeatures.length || chineseLineFeatures.length) rebuildSharedCultureSegments();
-        astronomyModelDebug.lastPrecessionError = "-";
-      } catch (err) {
-        astronomyModelDebug.lastPrecessionError = debugErrorText(err);
-        console.warn("Loaded coordinate frame update failed", err);
-      }
+      if (!skyReady) return;
+      epochFrameController.updateLoadedCoordinateFrame();
     }
     function currentPlanetPositions() {
       return calculateCurrentPlanetPositions({
@@ -7118,168 +7740,10 @@
       });
     }
     function objectLabel(type, d) {
-      const p = d.properties || {};
-      if (type === "star") {
-        const n = STAR_NAMES[String(d.id)] || {};
-        if (state.cultureMode === "western")
-          return state.lang === "zh" ? simplifyChinese(n.zh || n.name || n.desig || n.hip || `HIP ${d.id}`) : n.name || n.desig || n.hip || `HIP ${d.id}`;
-        return simplifyChinese(
-          n.zh || n.name || n.desig || n.hip || `HIP ${d.id}`
-        );
-      }
-      if (type === "dso") {
-        const n = DSO_NAMES[String(d.id)] || {};
-        return state.lang === "zh" ? simplifyChinese(n.zh || p.desig || d.id) : n.name || p.desig || d.id;
-      }
-      if (type === "constellation")
-        return state.lang === "zh" ? simplifyChinese(p.zh || p.name || p.desig || d.id) : p.en || p.name || p.desig || d.id;
-      if (type === "asterism")
-        return state.lang === "zh" ? simplifyChinese(p.name || p.en) : p.en || p.name;
-      if (type === "planet")
-        return state.lang === "zh" ? simplifyChinese(d.zh || d.name || d.id) : d.en || d.name || d.id;
-      return p.name || p.en || p.desig || d.id || t("skyPosition");
-    }
-    function objectSearchTypeLabel(type) {
-      return t(
-        type === "star" ? "searchResultStar" : type === "planet" ? "searchResultPlanet" : type === "constellation" ? "searchResultConstellation" : type === "asterism" ? "searchResultAsterism" : "searchResultDso"
-      );
-    }
-    function buildObjectSearchIndex() {
-      if (objectSearchIndex && objectSearchIndexLang === state.lang && objectSearchIndexCultureMode === state.cultureMode)
-        return objectSearchIndex;
-      objectSearchIndex = buildObjectSearchIndexFromSources({
-        stars: ORIGINAL_STARS,
-        starNames: STAR_NAMES,
-        deepSkyFeatures: deepSkyFeatures(),
-        deepSkyNames: DSO_NAMES,
-        constellationNameFeatures: westernConstellationNameFeatures(),
-        asterismNameFeatures: chineseAsterismNameFeatures(),
-        planets: [],
-        simplifyChinese,
-        labelObject: objectLabel
-      });
-      objectSearchIndexLang = state.lang;
-      objectSearchIndexCultureMode = state.cultureMode;
-      return objectSearchIndex;
-    }
-    function currentPlanetSearchEntries() {
-      return buildObjectSearchIndexFromSources({
-        stars: [],
-        starNames: STAR_NAMES,
-        deepSkyFeatures: [],
-        deepSkyNames: DSO_NAMES,
-        constellationNameFeatures: [],
-        asterismNameFeatures: [],
-        planets: currentPlanetPositions(),
-        simplifyChinese,
-        labelObject: objectLabel
-      });
-    }
-    function searchObjects(query) {
-      return searchObjectEntries(
-        query,
-        buildObjectSearchIndex().concat(currentPlanetSearchEntries()),
-        simplifyChinese
-      );
-    }
-    function defaultBrightStarSuggestions() {
-      return brightestStarEntries(buildObjectSearchIndex(), 50);
-    }
-    function objectSearchDisplayTitle(entry) {
-      if (!entry) return "";
-      return state.lang === "zh" ? entry.names[0] : entry.names[1] || entry.names[0];
-    }
-    function objectSearchMetaText(entry) {
-      if (!entry) return "";
-      if (entry.type !== "star") return objectSearchTypeLabel(entry.type);
-      const names = STAR_NAMES[String(entry.d && entry.d.id)] || {}, meta = constellationMeta(names.c), western = state.lang === "zh" ? meta.zh : meta.gen || names.c || "", asterisms = chineseAsterismsForStar(entry.d && entry.d.id).slice(0, 2), parts = [western].concat(asterisms).filter(Boolean);
-      return parts.length ? parts.join(" / ") : objectSearchTypeLabel(entry.type);
-    }
-    let objectSearchResults = [], objectSearchActiveIndex = -1;
-    function setObjectSearchActive(index) {
-      const box = $("object-suggestions"), buttons = box ? Array.from(box.querySelectorAll(".object-option")) : [];
-      objectSearchActiveIndex = buttons.length ? (index + buttons.length) % buttons.length : -1;
-      buttons.forEach((button, i) => {
-        button.classList.toggle("active", i === objectSearchActiveIndex);
-        button.setAttribute("aria-selected", String(i === objectSearchActiveIndex));
-      });
-      if (buttons[objectSearchActiveIndex])
-        buttons[objectSearchActiveIndex].scrollIntoView({ block: "nearest" });
-    }
-    function renderObjectSuggestions(results, empty = false) {
-      const box = $("object-suggestions");
-      objectSearchResults = results.slice();
-      objectSearchActiveIndex = -1;
-      box.innerHTML = "";
-      if (empty) {
-        const div = document.createElement("div");
-        div.className = "object-search-empty";
-        div.textContent = t("noObjectSearchResult");
-        box.appendChild(div);
-        box.classList.add("open");
-        return;
-      }
-      results.forEach((entry, index) => {
-        const button = document.createElement("button");
-        button.className = "object-option";
-        button.type = "button";
-        button.setAttribute("role", "option");
-        const name = document.createElement("span"), type = document.createElement("small");
-        name.textContent = objectSearchDisplayTitle(entry);
-        type.textContent = objectSearchMetaText(entry);
-        button.append(name, type);
-        button.addEventListener("mouseenter", () => setObjectSearchActive(index));
-        button.addEventListener("mousedown", (e) => {
-          e.preventDefault();
-          selectObjectSearchResult(entry);
-        });
-        box.appendChild(button);
-      });
-      box.classList.toggle("open", results.length > 0);
-      setObjectSearchActive(results.length ? 0 : -1);
+      return objectSearchController.objectLabel(type, d);
     }
     function setupObjectSearch() {
-      const input = $("object-search"), box = $("object-suggestions");
-      if (!input || !box) return;
-      let composing = false;
-      input.addEventListener("compositionstart", () => composing = true);
-      input.addEventListener("compositionend", () => composing = false);
-      const showDefaultSuggestions = () => {
-        if (input.value.trim()) return;
-        renderObjectSuggestions(defaultBrightStarSuggestions(), false);
-      };
-      input.addEventListener("focus", showDefaultSuggestions);
-      input.addEventListener("click", showDefaultSuggestions);
-      input.addEventListener("input", () => {
-        const value = input.value.trim();
-        if (!value) {
-          showDefaultSuggestions();
-          return;
-        }
-        const results = searchObjects(value);
-        renderObjectSuggestions(results, results.length === 0);
-      });
-      input.addEventListener("keydown", (e) => {
-        if (composing || e.isComposing) return;
-        if (e.key === "ArrowDown") {
-          e.preventDefault();
-          if (objectSearchResults.length) setObjectSearchActive(objectSearchActiveIndex + 1);
-        } else if (e.key === "ArrowUp") {
-          e.preventDefault();
-          if (objectSearchResults.length) setObjectSearchActive(objectSearchActiveIndex - 1);
-        } else if (e.key === "Enter") {
-          const entry = objectSearchResults[objectSearchActiveIndex] || objectSearchResults[0];
-          if (entry) {
-            e.preventDefault();
-            selectObjectSearchResult(entry);
-            input.blur();
-          }
-        } else if (e.key === "Escape") box.classList.remove("open");
-      });
-      document.addEventListener("click", (event) => {
-        if (!event.target.closest("#object-search-section"))
-          box.classList.remove("open");
-      });
+      objectSearchController.setupObjectSearch();
     }
     function centerOnObject(obj) {
       if (!skyReady || !window.Celestial || !obj || !obj.coord) return;
@@ -7306,27 +7770,7 @@
       redrawAndSyncMapBox("search highlight");
     }
     function selectObjectSearchResult(entry) {
-      floatingObjectInfoDismissed = false;
-      const input = $("object-search");
-      if (input) input.value = objectSearchDisplayTitle(entry);
-      const obj = entry.type === "planet" ? {
-        type: "planet",
-        d: entry.d,
-        coord: entry.coord,
-        epochCoord: entry.epochCoord,
-        displayCoord: entry.displayCoord,
-        planetId: entry.planetId,
-        label: objectLabel("planet", entry.d)
-      } : {
-        type: entry.type,
-        d: entry.d,
-        coord: entry.coord,
-        label: objectLabel(entry.type, entry.d)
-      };
-      showObjectInfo(obj);
-      centerOnObject(obj);
-      highlightObject(obj);
-      $("object-suggestions").classList.remove("open");
+      objectSearchController.selectObjectSearchResult(entry);
     }
     function nearestCatalogObject(x, y) {
       let best = null;
@@ -7516,75 +7960,11 @@
         Celestial.context.stroke();
       }
     }
-    function buildChineseStarAsterismIndex() {
-      if (chineseStarAsterismIndex) return chineseStarAsterismIndex;
-      const index = /* @__PURE__ */ new Map();
-      chineseAsterismLineFeatures().forEach((feature) => {
-        const name = simplifyChinese(
-          CN_ASTERISM_NAMES.get(String(feature.id)) || ""
-        );
-        if (!name) return;
-        eachLineString(
-          feature.geometry,
-          (line) => line.forEach((coord) => {
-            const key = coordinateKey(coord, 3), list = index.get(key) || [];
-            if (!list.includes(name)) list.push(name);
-            index.set(key, list);
-            chineseAsterismCoordinateEntries.push({
-              coord: [Number(coord[0]), Number(coord[1])],
-              name
-            });
-          })
-        );
-      });
-      chineseStarAsterismIndex = index;
-      return index;
-    }
     function chineseAsterismsForStar(starId) {
-      const coord = ORIGINAL_STAR_COORDS.get(String(starId));
-      if (!coord) return [];
-      const index = buildChineseStarAsterismIndex(), exact = (index.get(coordinateKey(coord, 3)) || []).slice();
-      if (exact.length) return exact;
-      const matches = [];
-      chineseAsterismCoordinateEntries.forEach((entry) => {
-        let dLon = Math.abs(
-          normalizedLongitude(entry.coord[0]) - normalizedLongitude(coord[0])
-        );
-        dLon = Math.min(dLon, 360 - dLon);
-        const distance = Math.hypot(
-          dLon,
-          Number(entry.coord[1]) - Number(coord[1])
-        );
-        if (distance <= 0.03 && !matches.includes(entry.name))
-          matches.push(entry.name);
-      });
-      return matches;
+      return objectInfoFormatter.chineseAsterismsForStar(starId);
     }
-    function cultureRowsForImportantStar(obj, p, n) {
-      const threshold = Number(
-        cfg(
-          "objectInfo.cultureNoteMagnitudeLimit",
-          CULTURE_NOTES.importantMagnitudeLimit || 2.1
-        )
-      );
-      if (!Number.isFinite(Number(p.mag)) || Number(p.mag) > threshold) return [];
-      const rows = [], lang = state.lang === "zh" ? "zh" : "en";
-      const western = CULTURE_NOTES.westernConstellations && CULTURE_NOTES.westernConstellations[n.c];
-      if (western && western[lang])
-        rows.push([t("westernCultureMeaning"), western[lang]]);
-      const asterisms = chineseAsterismsForStar(obj.d && obj.d.id);
-      const match = asterisms.find(
-        (name) => CULTURE_NOTES.chineseAsterisms && CULTURE_NOTES.chineseAsterisms[name]
-      );
-      if (match) {
-        const note = CULTURE_NOTES.chineseAsterisms[match][lang];
-        if (note)
-          rows.push([
-            t("chineseCultureMeaning"),
-            `${match}${state.lang === "zh" ? "\uFF1A" : ": "}${note}`
-          ]);
-      }
-      return rows;
+    function constellationMeta(abbr) {
+      return objectInfoFormatter.constellationMeta(abbr);
     }
     function objectEpochCoordinate(obj) {
       if (obj && obj.epochCoord) return obj.epochCoord;
@@ -7592,72 +7972,7 @@
       return epochEquatorialFromJ2000(obj && obj.coord);
     }
     function objectRows(obj) {
-      const sourceCoord = obj.coord, c = objectEpochCoordinate(obj) || sourceCoord, h = horizontalFor(c, { alreadyEpoch: true }), p = obj.d && obj.d.properties || {}, rows = [];
-      rows.push([
-        t("objectType"),
-        t(
-          obj.type === "dso" ? "deepSkyObject" : obj.type === "constellation" ? "westernConstellation" : obj.type === "asterism" ? "chineseAsterism" : obj.type === "star" ? "star" : obj.type === "planet" ? "solarSystemObject" : "skyPosition"
-        )
-      ]);
-      rows.push([t("rightAscension"), formatRA(c[0])]);
-      rows.push([t("declination"), formatDec(c[1])]);
-      rows.push([
-        t("altitude"),
-        Number.isFinite(h.alt) ? `${h.alt.toFixed(2)}\xB0` : "\u2014"
-      ]);
-      rows.push([
-        t("azimuth"),
-        Number.isFinite(h.az) ? `${h.az.toFixed(2)}\xB0` : "\u2014"
-      ]);
-      if (Number.isFinite(Number(p.mag)))
-        rows.splice(1, 0, [t("magnitude"), Number(p.mag).toFixed(2)]);
-      if (obj.type === "star") {
-        const n = STAR_NAMES[String(obj.d.id)] || {};
-        const others = formatStarNameTokens(obj);
-        if (others.length)
-          rows.splice(1, 0, [t("otherNames"), others.join(" / ")]);
-        if (p.bv !== void 0 && p.bv !== "")
-          rows.push([t("spectralInfo"), String(p.bv)]);
-        rows.push([t("catalogId"), formatCatalogTokens(obj, rows)]);
-        rows.push(...cultureRowsForImportantStar(obj, p, n));
-      } else if (obj.type === "dso")
-        rows.push([t("catalogId"), p.desig || String(obj.d.id)]);
-      else if (obj.type === "planet") {
-        const ep = obj.d && obj.d.ephemeris || {};
-        if (!["sol", "lun"].includes(obj.planetId) && Number.isFinite(Number(ep.mag)))
-          rows.splice(1, 0, [t("magnitude"), Number(ep.mag).toFixed(2)]);
-        if (obj.planetId === "lun") {
-          const phaseName = state.lang === "zh" ? ep.phaseNameZh : ep.phaseNameEn;
-          if (phaseName) rows.push([t("moonPhase"), String(phaseName)]);
-          const illum = Number.isFinite(Number(ep.illumination)) ? Number(ep.illumination) : Number(ep.phase);
-          if (Number.isFinite(illum))
-            rows.push([
-              t("illumination"),
-              `${(Math.max(0, Math.min(1, illum)) * 100).toFixed(1)}%`
-            ]);
-          if (Number.isFinite(Number(ep.age)))
-            rows.push([
-              t("moonAge"),
-              `${Number(ep.age).toFixed(1)} ${state.lang === "zh" ? "\u5929" : "days"}`
-            ]);
-        }
-        if (Number.isFinite(Number(ep.rt)))
-          rows.push([
-            t("distance"),
-            obj.planetId === "lun" ? `${Number(ep.rt).toLocaleString(void 0, { maximumFractionDigits: 0 })} km` : `${Number(ep.rt).toFixed(3)} AU`
-          ]);
-        if (obj.planetId === "sol" || obj.planetId === "lun") {
-          if (ep.model) rows.push([t("algorithm"), String(ep.model)]);
-          rows.push([t("precisionBoundary"), t("visualReferencePrecision")]);
-        }
-        rows.push([
-          t("catalogId"),
-          String(obj.planetId || obj.d.id || "").toUpperCase()
-        ]);
-      }
-      rows.push([t("observerPlace"), cityName()]);
-      rows.push([t("observerTime"), formatLocalLong()]);
-      return rows;
+      return objectInfoFormatter.objectRows(obj);
     }
     function showObjectInfo(obj) {
       currentSelected = obj;
@@ -7715,93 +8030,8 @@
       });
       return panel;
     }
-    function normalizeInfoToken(value) {
-      return simplifyChinese(String(value || "")).replace(/[\u200e\u200f\u202a-\u202e]/g, "").replace(/\s+/g, " ").replace(/^\s*\/+|\/+\s*$/g, "").trim();
-    }
-    function cleanNameToken(value, options = {}) {
-      const token = normalizeInfoToken(value);
-      if (!token || /^\/+$/u.test(token)) return "";
-      if (!options.allowSingleGreek && /^[α-ωΑ-Ω]$/u.test(token)) return "";
-      if (!options.allowBareNumber && /^[0-9]+$/u.test(token)) return "";
-      return token;
-    }
-    function uniqueTokens(values) {
-      const seen = /* @__PURE__ */ new Set();
-      return values.map((value) => cleanNameToken(value, { allowSingleGreek: false, allowBareNumber: false })).filter(Boolean).filter((value) => {
-        const key = value.toLowerCase();
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-    }
-    function constellationMeta(abbr) {
-      const feature = westernConstellationNameFeatures().find(
-        (item) => String(item.id || item.properties?.desig || "") === String(abbr || "")
-      );
-      const props = feature && feature.properties || {};
-      return {
-        gen: cleanNameToken(props.gen || props.name || abbr, { allowBareNumber: true }),
-        zh: cleanNameToken(props.zh || abbr, { allowBareNumber: true })
-      };
-    }
-    function formatStarNameTokens(obj) {
-      if (!obj || obj.type !== "star") return [];
-      const n = STAR_NAMES[String(obj.d && obj.d.id)] || {};
-      const meta = constellationMeta(n.c);
-      const bayer = cleanNameToken(n.bayer || n.desig, { allowSingleGreek: true });
-      const flam = cleanNameToken(n.flam, { allowBareNumber: true });
-      const values = [n.zh, n.name];
-      if (bayer && meta.gen && !/^\d+$/u.test(bayer)) {
-        values.push(`${bayer} ${meta.gen}`);
-        if (meta.zh) values.push(`${meta.zh} ${bayer}`);
-      }
-      if (flam && meta.gen && /^\d+[A-Za-z]?$/u.test(flam)) values.push(`${flam} ${meta.gen}`);
-      return uniqueTokens(values);
-    }
-    function formatCatalogTokens(obj, rows) {
-      const p = obj.d && obj.d.properties || {};
-      if (obj.type === "star") {
-        const n = STAR_NAMES[String(obj.d.id)] || {};
-        const values = [];
-        const hip = cleanNameToken(n.hip || (obj.d.id ? `HIP ${obj.d.id}` : ""), { allowBareNumber: true });
-        const hd = cleanNameToken(n.hd || p.hd, { allowBareNumber: true });
-        const hr = cleanNameToken(n.hr || p.hr, { allowBareNumber: true });
-        const gaia = cleanNameToken(n.gaia || p.gaia, { allowBareNumber: true });
-        if (hip) values.push(/^HIP\s/i.test(hip) ? hip : `HIP ${hip}`);
-        if (hd) values.push(/^HD\s/i.test(hd) ? hd : `HD ${hd}`);
-        if (hr) values.push(/^HR\s/i.test(hr) ? hr : `HR ${hr}`);
-        if (gaia) values.push(/^Gaia\s/i.test(gaia) ? gaia : `Gaia ${gaia}`);
-        return uniqueTokens(values).join(" / ") || floatingRowValue(rows, t("catalogId"));
-      }
-      if (obj.type === "dso") return p.desig || String(obj.d.id || "\u2014");
-      if (obj.type === "planet") return String(obj.planetId || obj.d.id || "").toUpperCase();
-      return floatingRowValue(rows, t("catalogId"));
-    }
-    function floatingRowValue(rows, label) {
-      const row = rows.find(([key]) => key === label);
-      return row ? row[1] : "\u2014";
-    }
-    function pairLine(a, b, c, d) {
-      return infoPairLine(a, b, c, d);
-    }
-    function singleLine(a, b) {
-      return infoSingleLine(a, b);
-    }
     function renderFloatingObjectInfo(obj) {
-      const rows = objectRows(obj);
-      const type = floatingRowValue(rows, t("objectType"));
-      const catalog = formatCatalogTokens(obj, rows);
-      const title = cleanNameToken(
-        state.lang === "zh" ? simplifyChinese(obj.label || objectLabel(obj.type, obj.d || { properties: {} })) : obj.label || objectLabel(obj.type, obj.d || { properties: {} }),
-        { allowBareNumber: true }
-      ) || "\u2014";
-      const names = obj.type === "star" ? formatStarNameTokens(obj) : uniqueTokens([floatingRowValue(rows, t("otherNames")), title]);
-      const noteKeys = [t("westernCultureMeaning"), t("chineseCultureMeaning")];
-      const notes = rows.filter(([key, value]) => noteKeys.includes(key) && value).map(([key, value]) => singleLine(key, value)).join("");
-      return {
-        title,
-        html: pairLine(t("objectType"), type, t("catalogId"), catalog) + singleLine(state.lang === "zh" ? "\u540D\u79F0" : "Names", names.join(" / ") || title) + pairLine(t("magnitude"), floatingRowValue(rows, t("magnitude")), t("spectralInfo"), floatingRowValue(rows, t("spectralInfo"))) + pairLine(t("rightAscension"), floatingRowValue(rows, t("rightAscension")), t("declination"), floatingRowValue(rows, t("declination"))) + pairLine(t("altitude"), floatingRowValue(rows, t("altitude")), t("azimuth"), floatingRowValue(rows, t("azimuth"))) + notes
-      };
+      return objectInfoFormatter.renderFloatingObjectInfo(obj);
     }
     function updateFloatingObjectInfo() {
       const panel = ensureFloatingObjectInfo();
@@ -8287,7 +8517,6 @@
       else applyTimer = setTimeout(run, 90);
     }
     function applyCultureMode() {
-      if (state.cultureMode === "both") state.regionBoundaries = false;
       applyI18n();
       updateBoundaryUI();
       save();
@@ -9298,7 +9527,7 @@
       );
       $("region-boundaries").addEventListener("change", (e) => {
         if (state.cultureMode === "both") {
-          e.target.checked = false;
+          e.target.checked = !!state.regionBoundaries;
           return;
         }
         state.regionBoundaries = e.target.checked;
