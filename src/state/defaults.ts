@@ -16,6 +16,12 @@ export function createDefaultState(cfg, storageSchemaVersion, astronomyModelVers
     cultureMode: cfg("defaults.cultureMode", "western"),
     magnitude: Number(cfg("defaults.magnitudeLimit", 5.5)),
     starSize: Number(cfg("defaults.starSize", 7)),
+    starNameMagnitudeLimit: Number(
+      cfg(
+        "defaults.starNameMagnitudeLimit",
+        cfg("sky.stars.properNameMagnitudeLimitMin", 2.1),
+      ),
+    ),
     starNames: !!cfg("defaults.showStarNames", true),
     cultureLines: !!cfg("defaults.showCultureLines", true),
     cultureNames: !!cfg("defaults.showCultureNames", true),

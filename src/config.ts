@@ -1,5 +1,5 @@
 /**
- * 真实星空观测台 5.4.7 —— 用户可配置文件
+ * 真实星空观测台 5.4.8 —— 用户可配置文件
  * ------------------------------------------------------------
  * 修改本文件后，运行 npm run build 并刷新 index.html 即可生效。
  *
@@ -33,6 +33,7 @@ window.RSO_CONFIG = {
 
     magnitudeLimit: 5.5,
     starSize: 7,
+    starNameMagnitudeLimit: 2.1,
     fontScale: 1,
     nightVision: false,
     showStarNames: true,
@@ -230,7 +231,9 @@ window.RSO_CONFIG = {
       exponent: -0.28,
       properNameColor: "#f1e7c9",
       properNameFont: "600 12px Inter, Microsoft YaHei, sans-serif",
-      properNameMagnitudeLimit: 2.1,
+      /** 恒星名字基础阈值滑条端点；D3-Celestial 实际会再乘内部 zoom。 */
+      properNameMagnitudeLimitMin: 2.1,
+      properNameMagnitudeLimitMax: 4.0,
     },
     deepSky: {
       fill: "#9bc6e8",
@@ -386,6 +389,7 @@ window.RSO_CONFIG = {
     planetFont: "600 12px Inter, Microsoft YaHei, sans-serif",
     chineseCombinedColor: "#ffc5a9",
     chineseSecondaryFont: "600 10px Inter, Microsoft YaHei, sans-serif",
+    chineseAsterismNameCollisionPx: 24,
     traditionalMajorColor: "#8fd4f4",
     traditionalBattlefieldColor: "#ff9b78",
     traditionalMansionColor: "#dcc37c",

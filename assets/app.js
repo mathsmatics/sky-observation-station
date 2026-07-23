@@ -22,6 +22,7 @@
       menuCollapsed: ["observer", "time", "viewProjection", "display"],
       magnitudeLimit: 5.5,
       starSize: 7,
+      starNameMagnitudeLimit: 2.1,
       fontScale: 1,
       nightVision: false,
       showStarNames: true,
@@ -218,7 +219,9 @@
         exponent: -0.28,
         properNameColor: "#f1e7c9",
         properNameFont: "600 12px Inter, Microsoft YaHei, sans-serif",
-        properNameMagnitudeLimit: 2.1
+        /** 恒星名字基础阈值滑条端点；D3-Celestial 实际会再乘内部 zoom。 */
+        properNameMagnitudeLimitMin: 2.1,
+        properNameMagnitudeLimitMax: 4
       },
       deepSky: {
         fill: "#9bc6e8",
@@ -367,6 +370,7 @@
       planetFont: "600 12px Inter, Microsoft YaHei, sans-serif",
       chineseCombinedColor: "#ffc5a9",
       chineseSecondaryFont: "600 10px Inter, Microsoft YaHei, sans-serif",
+      chineseAsterismNameCollisionPx: 24,
       traditionalMajorColor: "#8fd4f4",
       traditionalBattlefieldColor: "#ff9b78",
       traditionalMansionColor: "#dcc37c",
@@ -1444,7 +1448,7 @@
             ["\u89C2\u6D4B\u5730\u70B9", "\u8BBE\u7F6E\u7EAC\u5EA6\u3001\u7ECF\u5EA6\u548C\u65F6\u533A", "\u57CE\u5E02\u641C\u7D22\u4F1A\u81EA\u52A8\u586B\u5145\u7ECF\u7EAC\u5EA6\u548C IANA \u65F6\u533A\uFF1B\u624B\u52A8\u7ECF\u7EAC\u5EA6\u4E5F\u4F1A\u5C1D\u8BD5\u91CD\u65B0\u5339\u914D\u65F6\u533A\u3002"],
             ["\u89C2\u6D4B\u65F6\u95F4", "\u8BBE\u7F6E\u5F53\u524D\u6A21\u62DF\u5929\u7A7A\u7684\u65F6\u95F4", "\u5206\u6BB5\u8F93\u5165\u5E74\u3001\u6708\u3001\u65E5\u3001\u65F6\u3001\u5206\uFF1B\u65B9\u5411\u952E\u53EF\u4EE5\u5207\u6362\u5B57\u6BB5\u6216\u5FEB\u901F\u52A0\u51CF\u3002"],
             ["\u89C6\u56FE\u4E0E\u6295\u5F71", "\u9009\u62E9\u5750\u6807\u89C6\u89D2\u548C\u6295\u5F71\u65B9\u5F0F", "\u5730\u5E73\u5750\u6807\u9002\u5408\u6A21\u62DF\u5F53\u5730\u5929\u7A7A\uFF1B\u8D64\u9053/\u9EC4\u9053/\u94F6\u6CB3\u89C6\u89D2\u9002\u5408\u5B66\u4E60\u5750\u6807\u7CFB\u7EDF\u3002"],
-            ["\u663E\u793A\u8BBE\u7F6E", "\u5F00\u5173\u661F\u540D\u3001\u661F\u5EA7\u7EBF\u3001\u661F\u5B98\u7EBF\u3001\u9EC4\u9053\u3001\u8D64\u9053\u3001\u5730\u5E73\u7EBF\u7B49", "\u7528\u4E8E\u51CF\u5C11\u56FE\u5C42\u5E72\u6270\u6216\u6BD4\u8F83\u4E0D\u540C\u6587\u5316\u661F\u7A7A\u4F53\u7CFB\u3002"],
+            ["\u663E\u793A\u8BBE\u7F6E", "\u5F00\u5173\u661F\u540D\u3001\u661F\u5EA7\u7EBF\u3001\u661F\u5B98\u7EBF\u3001\u9EC4\u9053\u3001\u8D64\u9053\u3001\u5730\u5E73\u7EBF\u7B49", "\u6052\u661F\u5927\u5C0F\u63A7\u5236\u661F\u70B9\u5C3A\u5BF8\uFF1B\u661F\u540D\u663E\u793A\u5BC6\u5EA6\u53EA\u63A7\u5236\u6052\u661F\u540D\u5B57\u6570\u91CF\uFF0C\u4E0D\u5F71\u54CD\u661F\u70B9\u6570\u91CF\u3002"],
             ["\u5929\u4F53\u4FE1\u606F", "\u663E\u793A\u88AB\u70B9\u51FB\u5BF9\u8C61\u7684\u540D\u79F0\u3001\u5750\u6807\u548C\u76EE\u5F55\u4FE1\u606F", "\u53EF\u590D\u5236\u5F53\u524D\u5BF9\u8C61\u4FE1\u606F\u3002"],
             ["\u72B6\u6001", "\u663E\u793A\u5730\u70B9\u3001\u65F6\u95F4\u3001\u6295\u5F71\u3001\u5750\u6807\u548C\u8FD0\u884C\u72B6\u6001", "\u7528\u4E8E\u5FEB\u901F\u6838\u5BF9\u5F53\u524D\u661F\u56FE\u5230\u5E95\u6309\u4EC0\u4E48\u6761\u4EF6\u7ED8\u5236\u3002"]
           ] }
@@ -1488,7 +1492,8 @@
             ["\u89C6\u661F\u7B49", "\u4ECE\u5730\u7403\u770B\u4E0A\u53BB\u6709\u591A\u4EAE\uFF1B\u6570\u5B57\u8D8A\u5C0F\u8D8A\u4EAE\uFF0C\u8D1F\u6570\u6BD4 0 \u7B49\u8FD8\u4EAE\u3002"],
             ["HIP / HD / HR / Gaia", "\u4E0D\u540C\u6052\u661F\u661F\u8868\u7684\u76EE\u5F55\u7F16\u53F7\uFF0C\u7528\u6765\u786E\u5B9A\u5177\u4F53\u662F\u54EA\u9897\u661F\u3002"],
             ["Bayer / Flamsteed", "\u897F\u65B9\u4F20\u7EDF\u6052\u661F\u547D\u540D\u4F53\u7CFB\uFF0C\u4F8B\u5982 \u03B1 Lyrae \u6216 3 Lyrae\u3002"],
-            ["\u4E2D\u6587\u661F\u540D", "\u4F20\u7EDF\u4E2D\u6587\u661F\u540D\u6216\u73B0\u4EE3\u4E2D\u6587\u8BD1\u540D\uFF1B\u540C\u4E00\u9897\u661F\u53EF\u80FD\u6709\u591A\u4E2A\u6587\u5316\u540D\u79F0\u3002"]
+            ["\u4E2D\u6587\u661F\u540D", "\u4F20\u7EDF\u4E2D\u6587\u661F\u540D\u6216\u73B0\u4EE3\u4E2D\u6587\u8BD1\u540D\uFF1B\u540C\u4E00\u9897\u661F\u53EF\u80FD\u6709\u591A\u4E2A\u6587\u5316\u540D\u79F0\u3002"],
+            ["\u661F\u540D\u663E\u793A\u5BC6\u5EA6", "\u6052\u661F\u540D\u5B57\u4F7F\u7528\u57FA\u7840\u661F\u7B49\u9608\u503C\u63A7\u5236\uFF1B\u6ED1\u6761\u8D8A\u5927\uFF0C\u5141\u8BB8\u663E\u793A\u540D\u5B57\u7684\u6052\u661F\u8D8A\u6697\uFF0C\u540D\u5B57\u8D8A\u591A\u3002\u5B9E\u9645\u663E\u793A\u9608\u503C\u8FD8\u4F1A\u4E58\u4EE5 D3-Celestial \u7684\u5185\u90E8 zoom\uFF0C\u6240\u4EE5\u653E\u5927\u540E\u661F\u540D\u4F1A\u7EE7\u7EED\u589E\u52A0\u3002"]
           ] }
         ]
       },
@@ -2354,6 +2359,12 @@
       cultureMode: cfg("defaults.cultureMode", "western"),
       magnitude: Number(cfg("defaults.magnitudeLimit", 5.5)),
       starSize: Number(cfg("defaults.starSize", 7)),
+      starNameMagnitudeLimit: Number(
+        cfg(
+          "defaults.starNameMagnitudeLimit",
+          cfg("sky.stars.properNameMagnitudeLimitMin", 2.1)
+        )
+      ),
       starNames: !!cfg("defaults.showStarNames", true),
       cultureLines: !!cfg("defaults.showCultureLines", true),
       cultureNames: !!cfg("defaults.showCultureNames", true),
@@ -2567,6 +2578,1189 @@
       shiftObserverTime,
       readTimeStepValue,
       shiftObserverTimeByControl
+    };
+  }
+
+  // src/sky/projection.ts
+  var PROJECTION_DEFAULTS = {
+    airy: { center: [0, 0, 0], mapScale: 1 },
+    orthographic: { center: [0, 0, 0], mapScale: 1 },
+    stereographic: { center: [0, 0, 0], mapScale: 1 },
+    azimuthalEquidistant: { center: [0, 0, 0], mapScale: 1 },
+    azimuthalEqualArea: { center: [0, 0, 0], mapScale: 1 },
+    aitoff: { center: [0, 0, 0], mapScale: 1 },
+    hammer: { center: [0, 0, 0], mapScale: 1 },
+    mollweide: { center: [0, 0, 0], mapScale: 1 },
+    winkel3: { center: [0, 0, 0], mapScale: 1 },
+    equirectangular: { center: [0, 0, 0], mapScale: 1 },
+    healpix: { center: [0, 0, 0], mapScale: 1 },
+    mercator: { center: [0, 0, 0], mapScale: 1 },
+    robinson: { center: [0, 0, 0], mapScale: 1 },
+    sinusoidal: { center: [0, 0, 0], mapScale: 1 }
+  };
+  function clampMapScale(value, min, max) {
+    const safeMin = Number.isFinite(min) ? min : 1;
+    const safeMax = Math.max(safeMin, Number.isFinite(max) ? max : safeMin);
+    const number = Number(value);
+    return Math.max(safeMin, Math.min(safeMax, Number.isFinite(number) ? number : safeMin));
+  }
+  function viewMapScale(view, fallback, clamp) {
+    if (view && Object.prototype.hasOwnProperty.call(view, "mapScale")) return clamp(view.mapScale);
+    if (view && Object.prototype.hasOwnProperty.call(view, "zoom")) return clamp(view.zoom);
+    return clamp(fallback);
+  }
+  function viewKey(projection, coordinateSystem) {
+    return `${coordinateSystem}:${projection}`;
+  }
+  function coordinateViewDefault(options) {
+    const projectionDefault = options.projectionDefaults[options.projection] || {
+      center: [0, 0, 0],
+      mapScale: 1
+    };
+    const configured = options.configuredResetView || {};
+    return {
+      center: Array.isArray(configured.center) ? configured.center.slice() : projectionDefault.center.slice(),
+      mapScale: options.viewMapScale(configured, projectionDefault.mapScale)
+    };
+  }
+  function desiredView(options) {
+    if (options.isHorizontalView) {
+      return {
+        ...options.fallbackView,
+        mapScale: options.viewMapScale(options.savedView || options.fallbackView, options.fallbackView.mapScale)
+      };
+    }
+    return options.savedView || options.fallbackView;
+  }
+
+  // src/ui/debug-panel.ts
+  function debugSpan(text, className) {
+    const span = document.createElement("span");
+    span.className = className;
+    span.textContent = String(text);
+    return span;
+  }
+  function debugValue(text) {
+    return debugSpan(text, "debug-value");
+  }
+  function debugSep(text) {
+    return debugSpan(text, "debug-sep");
+  }
+  function debugUnit(text) {
+    return debugSpan(text, "debug-unit");
+  }
+  function debugGroup(title) {
+    const el = document.createElement("div");
+    el.className = "debug-group";
+    el.textContent = title;
+    return el;
+  }
+  function debugLine(label, parts = []) {
+    const el = document.createElement("div");
+    el.className = "debug-line";
+    el.append(
+      debugSpan(label, "debug-key"),
+      debugSep(": "),
+      ...Array.isArray(parts) ? parts : [debugValue(parts)]
+    );
+    return el;
+  }
+  function debugBlankLine() {
+    const el = document.createElement("div");
+    el.className = "debug-blank";
+    return el;
+  }
+  function debugSizeParts(width, height) {
+    return [
+      debugValue(Math.round(Number(width) || 0)),
+      debugSep("x"),
+      debugValue(Math.round(Number(height) || 0))
+    ];
+  }
+  function debugRectParts(rect) {
+    if (!rect) return [debugValue("-")];
+    return [
+      ...debugSizeParts(rect.width, rect.height),
+      debugSep(" @ "),
+      debugValue(Math.round(rect.left)),
+      debugSep(","),
+      debugValue(Math.round(rect.top))
+    ];
+  }
+  function debugPointParts(point) {
+    if (!point) return [debugValue("-")];
+    return [
+      debugValue(Math.round(point.x)),
+      debugSep(","),
+      debugValue(Math.round(point.y))
+    ];
+  }
+  function debugCenterDeltaParts(delta, formatSigned2) {
+    if (!delta) return [debugValue("-")];
+    return [
+      debugSep("X="),
+      debugValue(formatSigned2(delta.x)),
+      debugUnit("px"),
+      debugSep(" Y="),
+      debugValue(formatSigned2(delta.y)),
+      debugUnit("px")
+    ];
+  }
+  function debugScaleParts(value) {
+    return [debugValue(Number(value || 0).toFixed(3)), debugUnit("x")];
+  }
+  function debugBoolParts(value) {
+    return [debugValue(value ? "true" : "false")];
+  }
+  function debugMetricStatus(ok, zh) {
+    return debugSpan(
+      ok ? "OK" : zh ? "MISMATCH \u5C3A\u5BF8\u4E0D\u4E00\u81F4" : "MISMATCH",
+      ok ? "debug-ok" : "debug-warn"
+    );
+  }
+  function formatAngle(value) {
+    const number = Number(value);
+    return Number.isFinite(number) ? `${number.toFixed(2)}\xB0` : "-";
+  }
+  function formatAngleOrUnavailable(value) {
+    const number = Number(value);
+    return Number.isFinite(number) ? `${number.toFixed(2)}\xB0` : "unavailable";
+  }
+  function formatSigned(value) {
+    const number = Number(value);
+    if (!Number.isFinite(number)) return "-";
+    return `${number >= 0 ? "+" : ""}${number.toFixed(1)}`;
+  }
+  function debugOffsetNoteValue(note, zh) {
+    if (note === "iana-historical")
+      return zh ? "\u4F7F\u7528 IANA \u5386\u53F2\u504F\u79FB" : "using IANA historical offset";
+    if (note === "zone-rule")
+      return zh ? "\u4F7F\u7528\u5F53\u524D\u65F6\u533A\u89C4\u5219" : "using current zone rule";
+    return "-";
+  }
+  function debugRefreshHealthValue(value, zh) {
+    if (value === "recovered") return zh ? "fallback \u5DF2\u6062\u590D" : "recovered by fallback";
+    if (value === "failed") return zh ? "\u5931\u8D25" : "failed";
+    if (value === "pending") return zh ? "\u5237\u65B0\u4E2D" : "pending";
+    return zh ? "\u6B63\u5E38" : "healthy";
+  }
+  function debugErrorText(err) {
+    if (!err) return "-";
+    if (err && err.message) return String(err.message);
+    return String(err);
+  }
+  function debugStackText(err) {
+    if (!err || !err.stack) return "-";
+    return String(err.stack).split("\n").slice(0, 3).join(" | ");
+  }
+
+  // src/ui/debug-overlay.ts
+  function createDebugOverlayController(services) {
+    const {
+      dom: { $, document: document2, window: window2, navigator: navigator2, screen: screen2, performance: performance2, setTimeout: setTimeout2, clearTimeout: clearTimeout2, requestAnimationFrame: requestAnimationFrame2 },
+      appState,
+      config: { cfg, getMapScale },
+      layout: { elementRect: elementRect2 },
+      view,
+      rotation,
+      time,
+      astronomy,
+      interaction,
+      layers,
+      formatters
+    } = services;
+    const state = appState;
+    const {
+      formatPressedArrowKeys,
+      skyPanKeys,
+      originalStars: ORIGINAL_STARS,
+      runtimeState,
+      initialVisible
+    } = services.state;
+    const {
+      currentCelestialCenter: currentCelestialCenter2,
+      getInternalZoom: getInternalZoom2,
+      projectionCanvasMetrics: projectionCanvasMetrics2,
+      viewKey: viewKey2,
+      poleAxisConstraintEnabled,
+      poleGuardEnterDeg,
+      poleGuardExitDeg,
+      updatePoleAxisDebug
+    } = view;
+    const { rotationController } = rotation;
+    const { timeRenderDebug, timeFieldDebugText: timeFieldDebugText2 } = time;
+    const { astronomyModelDebug } = astronomy;
+    const { poleAxisDebug } = interaction;
+    const {
+      mobileResizeDebug,
+      getLayerSelectionNodes
+    } = layers;
+    let debugVisible = !!initialVisible, lastDebugUpdate = 0, lastDebugPlainText = "", debugCopyStatus = "idle", debugCopyTimer = null, debugLastAction = "none", debugFramePending = false;
+    let debugPointerActive = false, debugPointerSkyCoord = null, playing = false, skyReady = false, rebuildInProgress = false, pointerMoved = false, clickStart = null, paneDrag = null, rotationPointerDrag = null;
+    function refreshRuntimeState() {
+      const runtime = runtimeState ? runtimeState() : {};
+      playing = !!runtime.playing;
+      skyReady = !!runtime.skyReady;
+      rebuildInProgress = !!runtime.rebuildInProgress;
+      pointerMoved = !!runtime.pointerMoved;
+      clickStart = runtime.clickStart || null;
+      paneDrag = runtime.paneDrag || null;
+      rotationPointerDrag = runtime.rotationPointerDrag || null;
+    }
+    function updateDebugToggleTitle() {
+      const button = $("debug-toggle");
+      if (!button) return;
+      const title = state.lang === "en" ? "Show layout debug information" : "\u663E\u793A\u5E03\u5C40\u8C03\u8BD5\u4FE1\u606F";
+      button.title = title;
+      button.setAttribute("aria-label", title);
+    }
+    function debugRefreshIntervalMs() {
+      const configured = Number(cfg("debug.refreshMs", 200));
+      return Math.max(100, Math.min(500, Number.isFinite(configured) ? configured : 200));
+    }
+    function noteDebugLastAction(action) {
+      debugLastAction = action || "none";
+    }
+    function currentViewControlMode() {
+      return poleAxisConstraintEnabled() ? "Euler constrained" : "Quaternion free";
+    }
+    function pressedArrowKeysLabel2() {
+      return formatPressedArrowKeys(skyPanKeys);
+    }
+    function debugResponsiveMode() {
+      const coarse = window2.matchMedia && window2.matchMedia("(pointer: coarse)").matches, hover = window2.matchMedia && window2.matchMedia("(hover: hover)").matches, narrow = window2.innerWidth <= 800, veryNarrow = window2.innerWidth <= 520;
+      if (coarse && !hover && narrow) return "touch-overlay";
+      if (veryNarrow || narrow) return "desktop-compact";
+      return "desktop-docked";
+    }
+    function debugPointerInfo(zh) {
+      const coarse = window2.matchMedia && window2.matchMedia("(pointer: coarse)").matches, fine = window2.matchMedia && window2.matchMedia("(pointer: fine)").matches, hover = window2.matchMedia && window2.matchMedia("(hover: hover)").matches;
+      return {
+        pointer: coarse ? zh ? "coarse \u89E6\u6478" : "coarse" : fine ? zh ? "fine \u9F20\u6807/\u89E6\u63A7\u677F" : "fine" : zh ? "\u672A\u77E5" : "unknown",
+        hover: hover ? zh ? "hover \u652F\u6301" : "hover" : zh ? "\u65E0 hover" : "none"
+      };
+    }
+    function currentStarMagnitudeStats() {
+      const loadedStars = Array.isArray(ORIGINAL_STARS) ? ORIGINAL_STARS.length : 0;
+      const threshold = Number(state.magnitude);
+      const starsWithinMagnitude = Array.isArray(ORIGINAL_STARS) ? ORIGINAL_STARS.filter((feature) => {
+        const mag = Number(feature && feature.properties && feature.properties.mag);
+        return Number.isFinite(mag) && Number.isFinite(threshold) && mag <= threshold;
+      }).length : 0;
+      return {
+        loadedStars,
+        threshold,
+        starsWithinMagnitude
+      };
+    }
+    function debugCopyText(status = "idle") {
+      const zh = state.lang !== "en";
+      if (status === "copied") return zh ? "\u5DF2\u590D\u5236" : "Copied";
+      if (status === "failed") return zh ? "\u590D\u5236\u5931\u8D25" : "Copy failed";
+      return zh ? "\u590D\u5236" : "Copy";
+    }
+    function setDebugCopyButtonStatus(status = "idle") {
+      debugCopyStatus = status;
+      const button = $("debug-copy");
+      if (!button) return;
+      button.textContent = debugCopyText(status);
+    }
+    async function copyDebugPlainText() {
+      const button = $("debug-copy"), text = lastDebugPlainText || "";
+      clearTimeout2(debugCopyTimer);
+      try {
+        if (navigator2.clipboard && navigator2.clipboard.writeText) {
+          await navigator2.clipboard.writeText(text);
+        } else {
+          const textarea = document2.createElement("textarea");
+          textarea.value = text;
+          textarea.setAttribute("readonly", "");
+          textarea.style.position = "fixed";
+          textarea.style.left = "-9999px";
+          textarea.style.top = "0";
+          document2.body.appendChild(textarea);
+          textarea.select();
+          const copied = document2.execCommand("copy");
+          textarea.remove();
+          if (!copied) throw new Error("execCommand copy returned false");
+        }
+        if (button) setDebugCopyButtonStatus("copied");
+      } catch (_) {
+        if (button) setDebugCopyButtonStatus("failed");
+      }
+      debugCopyTimer = setTimeout2(() => setDebugCopyButtonStatus("idle"), 1300);
+    }
+    function ensureDebugOverlayStructure(overlay) {
+      let toolbar = overlay.querySelector(".debug-toolbar"), copy = $("debug-copy"), content = overlay.querySelector(".debug-content");
+      if (!toolbar) {
+        toolbar = document2.createElement("div");
+        toolbar.className = "debug-toolbar";
+        overlay.appendChild(toolbar);
+      }
+      if (!copy) {
+        copy = document2.createElement("button");
+        copy.id = "debug-copy";
+        copy.type = "button";
+        copy.addEventListener("click", copyDebugPlainText);
+      }
+      if (copy.parentElement !== toolbar) toolbar.appendChild(copy);
+      if (!content) {
+        content = document2.createElement("div");
+        content.className = "debug-content";
+        overlay.appendChild(content);
+      }
+      copy.textContent = debugCopyText(debugCopyStatus);
+      return content;
+    }
+    function debugCurrentView() {
+      try {
+        const center = window2.Celestial.rotate();
+        if (Array.isArray(center) && !rotationPointerDrag && !paneDrag)
+          rotationController.syncFromCenter(center, "debug-read");
+        return {
+          center: Array.isArray(center) ? center : null,
+          mapScale: getMapScale(),
+          internalZoom: getInternalZoom2()
+        };
+      } catch (_) {
+        return { center: null, mapScale: getMapScale(), internalZoom: 1 };
+      }
+    }
+    function debugDragMode(zh) {
+      const map = $("celestial-map"), dragging = !!(map && map.classList.contains("dragging"));
+      const constrained = poleAxisConstraintEnabled();
+      if (paneDrag)
+        return constrained ? zh ? "\u661F\u56FE\u7559\u767D\u6B27\u62C9\u89D2\u7EA6\u675F\u62D6\u52A8" : "pane-margin Euler constrained drag" : zh ? "\u661F\u56FE\u7559\u767D\u6293\u70B9\u5F0F\u62D6\u52A8" : "pane-margin grab drag";
+      if (rotationPointerDrag)
+        return constrained ? zh ? "Canvas \u6B27\u62C9\u89D2\u7EA6\u675F\u62D6\u52A8" : "canvas Euler constrained drag" : zh ? "Canvas \u6293\u70B9\u5F0F\u62D6\u52A8" : "canvas grab drag";
+      if (dragging) return zh ? "Canvas \u62D6\u52A8" : "canvas drag";
+      if (clickStart) return zh ? "\u7B49\u5F85\u533A\u5206\u70B9\u51FB/\u62D6\u52A8" : "click-or-drag pending";
+      return zh ? "\u7A7A\u95F2" : "idle";
+    }
+    function debugRenderedViewParts(center) {
+      if (!Array.isArray(center)) return [debugValue("unavailable")];
+      return [
+        debugSep("lon="),
+        debugValue(formatAngle(center[0])),
+        debugSep(" lat="),
+        debugValue(formatAngle(center[1])),
+        debugSep(" roll="),
+        debugValue(formatAngle(center[2] || 0))
+      ];
+    }
+    function debugEulerStateParts(center, active) {
+      if (!active) return [debugValue("inactive")];
+      return [
+        debugSep("longitude="),
+        debugValue(formatAngle(center && center[0])),
+        debugSep(" latitude="),
+        debugValue(formatAngle(center && center[1])),
+        debugSep(" roll="),
+        debugValue(formatAngle(center && center[2]))
+      ];
+    }
+    function debugQuaternionStateParts(rotationStats, active) {
+      if (!active) return [debugValue("inactive")];
+      const q = rotationStats && rotationStats.quaternion ? rotationStats.quaternion : {};
+      return [
+        debugSep("qx="),
+        debugValue(Number(q.x).toFixed(6)),
+        debugSep(" qy="),
+        debugValue(Number(q.y).toFixed(6)),
+        debugSep(" qz="),
+        debugValue(Number(q.z).toFixed(6)),
+        debugSep(" qw="),
+        debugValue(Number(q.w).toFixed(6)),
+        debugSep(" |q|="),
+        debugValue(Number(rotationStats.norm).toFixed(6))
+      ];
+    }
+    function debugPolePointParts(point) {
+      if (!point) return [debugValue("unavailable")];
+      return [
+        debugSep("x="),
+        debugValue(Math.round(point.x)),
+        debugSep(" y="),
+        debugValue(Math.round(point.y)),
+        debugSep(" "),
+        debugValue(point.visible ? "visible" : "unavailable")
+      ];
+    }
+    function debugStatusSummary({ view: view2, poleStats, rotationStats, controlMode, uiMatches }) {
+      const errors = [];
+      const warnings = [];
+      const center = view2 && view2.center;
+      const eulerActive = controlMode === "Euler constrained";
+      const quaternionActive = controlMode === "Quaternion free";
+      if (!uiMatches) errors.push("toggle mismatch");
+      if (!Object.prototype.hasOwnProperty.call(PROJECTION_DEFAULTS, state.projection))
+        errors.push("projection invalid");
+      if (!["horizontal", "equatorial", "ecliptic", "galactic"].includes(state.coordinateSystem))
+        errors.push("coordinate invalid");
+      if (!Array.isArray(center) || center.slice(0, 3).some((value) => !Number.isFinite(Number(value))))
+        errors.push("rendered view non-finite");
+      if (eulerActive && !poleStats.polesDefined) errors.push("poles undefined");
+      if (quaternionActive) {
+        const norm = Number(rotationStats.norm);
+        if (!Number.isFinite(norm) || Math.abs(norm - 1) > 0.05) errors.push("quaternion norm error");
+        else if (Math.abs(norm - 1) > 1e-3) warnings.push("quaternion norm drift");
+      }
+      if (poleStats.guardActive) warnings.push("pole guard active");
+      if (poleStats.polesDefined && (!poleStats.positivePoint || !poleStats.negativePoint))
+        warnings.push("pole projection unavailable");
+      if (eulerActive && Number.isFinite(Number(poleStats.axisAngleDeg)) && Math.abs(Number(poleStats.axisAngleDeg)) > 5)
+        warnings.push("axis not vertical");
+      if (eulerActive && Array.isArray(center) && Math.abs(Number(center[1])) > 85)
+        warnings.push("euler latitude near singularity");
+      const level = errors.length ? "ERROR" : warnings.length ? "WARNING" : "OK";
+      const detail = errors.concat(warnings).join("; ");
+      return detail ? `${level} ${detail}` : level;
+    }
+    function updateDebugOverlay(force = false) {
+      if (!debugVisible && !force) return;
+      refreshRuntimeState();
+      const overlay = $("debug-overlay");
+      if (!overlay) return;
+      const content = ensureDebugOverlayStructure(overlay);
+      const zh = state.lang !== "en", bool = (value) => zh ? value ? "\u5F00" : "\u5173" : value ? "on" : "off";
+      const coordName = {
+        horizontal: zh ? "\u5730\u5E73\u5750\u6807" : "horizontal",
+        equatorial: zh ? "\u8D64\u9053\u5750\u6807" : "equatorial",
+        ecliptic: zh ? "\u9EC4\u9053\u5750\u6807" : "ecliptic",
+        galactic: zh ? "\u94F6\u6CB3\u5750\u6807" : "galactic"
+      }[state.coordinateSystem] || state.coordinateSystem, cultureLabel = {
+        western: zh ? "\u897F\u65B9\u661F\u5EA7" : "western",
+        chinese: zh ? "\u4E2D\u56FD\u661F\u5B98" : "chinese",
+        both: zh ? "\u4E24\u8005\u540C\u65F6\u663E\u793A" : "both"
+      }[state.cultureMode] || state.cultureMode, languageName = state.lang === "zh" ? "\u4E2D\u6587" : "English", view2 = debugCurrentView(), viewCenter = view2.center ? [
+        zh ? "\u7ECF\u5411\u4E2D\u5FC3" : "longitude center",
+        formatAngle(view2.center[0]),
+        zh ? "\u7EAC\u5411\u4E2D\u5FC3" : "latitude center",
+        formatAngle(view2.center[1]),
+        zh ? "\u65CB\u8F6C\u89D2" : "roll",
+        formatAngle(view2.center[2] || 0)
+      ].join(" ") : "-", detailName = {
+        major: zh ? "\u4E3B\u8981\u5929\u533A" : "major",
+        battlefields: zh ? "\u4E3B\u9898\u6218\u573A" : "battlefields",
+        mansions: zh ? "\u4E8C\u5341\u516B\u5BBF" : "mansions"
+      }[state.traditionalDetail] || state.traditionalDetail, label = zh ? {
+        viewportGroup: "\u3010\u6D4F\u89C8\u5668\u89C6\u53E3 / \u661F\u56FE\u533A\u3011",
+        canvasGroup: "\u3010\u661F\u56FE\u753B\u5E03\u5C3A\u5BF8\u6A21\u578B\u3011",
+        viewGroup: "\u3010\u89C6\u89D2\u4E0E\u6295\u5F71\u72B6\u6001\u3011",
+        interactionGroup: "\u3010\u5929\u7403\u4EA4\u4E92\u53C2\u6570\u3011",
+        rotationGroup: "\u3010\u65CB\u8F6C\u63A7\u5236 / Rotation\u3011",
+        layerGroup: "\u3010\u56FE\u5C42\u4E0E\u663E\u793A\u9009\u9879\u3011",
+        viewport: "\u6D4F\u89C8\u5668\u89C6\u53E3 window",
+        layoutMode: "\u5F53\u524D\u54CD\u5E94\u5F0F\u5E03\u5C40\u6A21\u5F0F",
+        pointer: "\u6307\u9488\u7C7B\u578B",
+        hover: "hover \u80FD\u529B",
+        sidebar: "\u5DE6\u4FA7\u83DC\u5355 #sidebar",
+        panelToggle: "\u83DC\u5355\u6309\u94AE #panel-toggle",
+        debugOverlay: "\u8C03\u8BD5\u9762\u677F #debug-overlay",
+        pane: "\u661F\u56FE\u533A\u53EF\u7528\u533A\u57DF #sky-pane",
+        stage: "\u661F\u56FE\u80CC\u666F\u5C42 #sky-stage",
+        frame: "\u661F\u56FE\u5BB9\u5668\u5916\u6846 #celestial-frame",
+        map: "D3-Celestial \u5730\u56FE\u5BB9\u5668 #celestial-map",
+        mapComputedMinWidth: "#celestial-map \u8BA1\u7B97\u540E min-width",
+        canvasCss: "\u771F\u5B9E\u661F\u56FE\u753B\u5E03 CSS \u5C3A\u5BF8",
+        canvasCenter: "Canvas \u4E2D\u5FC3",
+        canvasCenterDelta: "Canvas \u4E2D\u5FC3\u76F8\u5BF9\u80CC\u666F\u4E2D\u5FC3\u504F\u5DEE",
+        canvasAttr: "\u771F\u5B9E\u661F\u56FE\u753B\u5E03\u50CF\u7D20\u5206\u8FA8\u7387",
+        svgCss: "SVG \u56FE\u5C42 CSS \u5C3A\u5BF8",
+        sizeConsistency: "map / canvas / svg \u5C3A\u5BF8\u4E00\u81F4\u6027",
+        dpr: "\u8BBE\u5907\u50CF\u7D20\u6BD4 DPR",
+        paneCenter: "\u80CC\u666F\u4E2D\u5FC3",
+        targetMap: "\u76EE\u6807\u5730\u56FE\u5C3A\u5BF8",
+        baseShortSide: "\u57FA\u51C6\u77ED\u8FB9",
+        projectionRatio: "\u6295\u5F71\u81EA\u7136\u5BBD\u9AD8\u6BD4",
+        mapScale: "\u5E94\u7528\u5C42\u753B\u5E03\u7F29\u653E",
+        internalZoom: "D3 \u5185\u90E8\u7F29\u653E",
+        overflow: "\u53EF\u88AB\u88C1\u526A\u7684\u8D85\u51FA\u8303\u56F4",
+        mapCenter: "\u5730\u56FE\u4E2D\u5FC3",
+        centerDelta: "\u5730\u56FE\u4E2D\u5FC3\u76F8\u5BF9\u80CC\u666F\u4E2D\u5FC3\u504F\u5DEE",
+        celestial: "Celestial \u5185\u90E8\u5C3A\u5BF8",
+        renderMode: "\u6E32\u67D3\u6A21\u5F0F",
+        viewportTriggerRule: "VIEWPORT_CANVAS \u89E6\u53D1\u6761\u4EF6",
+        viewportTriggerResult: "\u89E6\u53D1\u7ED3\u679C",
+        baseSkySize: "\u57FA\u7840\u661F\u56FE\u5C3A\u5BF8",
+        virtualSkySize: "\u865A\u62DF\u661F\u56FE\u5C3A\u5BF8",
+        canvasCssTarget: "Canvas CSS \u76EE\u6807\u5C3A\u5BF8",
+        canvasBitmapTarget: "Canvas bitmap \u76EE\u6807\u5C3A\u5BF8",
+        starStats: "\u6052\u661F\u7EDF\u8BA1",
+        loadedStars: "\u5DF2\u52A0\u8F7D\u6052\u661F\u603B\u6570",
+        starsWithinMagnitude: "\u9608\u503C\u5185\u6052\u661F\u6570",
+        projection: "\u5F53\u524D\u6295\u5F71",
+        coords: "\u5F53\u524D\u5750\u6807\u89C6\u89D2",
+        culture: "\u5F53\u524D\u661F\u7A7A\u4F53\u7CFB",
+        language: "\u8BED\u8A00",
+        viewKey: "\u89C6\u89D2\u4FDD\u5B58\u952E",
+        viewCenter: "\u5F53\u524D\u5B9E\u9645\u89C6\u89D2\u4E2D\u5FC3 lon / lat / roll",
+        interaction: "\u62D6\u52A8/\u70B9\u51FB\u72B6\u6001",
+        dragMoved: "\u5DF2\u8D85\u8FC7\u62D6\u52A8\u9608\u503C",
+        clickPending: "\u70B9\u51FB\u5224\u5B9A\u4E2D",
+        dragThreshold: "\u70B9\u51FB/\u62D6\u52A8\u9608\u503C",
+        dragSensitivity: "\u62D6\u52A8\u7075\u654F\u5EA6",
+        debugStatus: "Status",
+        lastAction: "Last action",
+        viewControlMode: "\u89C6\u89D2\u63A7\u5236\u6A21\u5F0F",
+        poleAxisConstraint: "\u5929\u6781\u4E2D\u8F74\u7EA6\u675F",
+        renderedViewState: "Rendered View State",
+        eulerState: "Euler State",
+        quaternionState: "Quaternion State",
+        keyboardPan: "Keyboard pan",
+        pressedArrowKeys: "Pressed arrow keys",
+        poleGuard: "\u6781\u533A\u4FDD\u62A4",
+        poleGuardReason: "\u6781\u533A\u4FDD\u62A4\u539F\u56E0",
+        poleGuardThreshold: "\u4FDD\u62A4\u9608\u503C",
+        pointerPositivePoleDistance: "\u9F20\u6807\u5230\u6B63\u6781\u89D2\u8DDD\u79BB",
+        pointerNegativePoleDistance: "\u9F20\u6807\u5230\u8D1F\u6781\u89D2\u8DDD\u79BB",
+        currentPoles: "\u5F53\u524D\u5750\u6807\u89C6\u89D2\u6781\u70B9",
+        positivePolePoint: "\u6B63\u6781\u5C4F\u5E55\u5750\u6807",
+        negativePolePoint: "\u8D1F\u6781\u5C4F\u5E55\u5750\u6807",
+        poleCenterline: "\u5C4F\u5E55\u4E2D\u8F74\u7EBF x",
+        poleDx: "\u6B63\u6781 dx / \u8D1F\u6781 dx",
+        poleAxisAngle: "\u6781\u8F74\u5C4F\u5E55\u89D2\u5EA6",
+        poleAxisAngleRule: "\u6781\u8F74\u89D2\u5EA6\u5B9A\u4E49",
+        displayOptions: "\u663E\u793A\u9009\u9879",
+        starLimit: "\u6052\u661F\u6700\u6697\u661F\u7B49",
+        starSize: "\u6052\u661F\u5927\u5C0F",
+        starNameDensity: "\u661F\u540D\u663E\u793A\u5BC6\u5EA6",
+        starNames: "\u91CD\u8981\u6052\u661F\u540D\u79F0",
+        cultureLines: "\u661F\u5EA7/\u661F\u5B98\u8FDE\u7EBF",
+        cultureNames: "\u661F\u5EA7/\u661F\u5B98\u540D\u79F0",
+        planets: "\u592A\u9633\u3001\u6708\u7403\u4E0E\u884C\u661F",
+        milkyWay: "\u94F6\u6CB3\u8F6E\u5ED3",
+        grid: "\u8D64\u9053\u5750\u6807\u7F51",
+        horizontalGrid: "\u5730\u5E73\u5750\u6807\u7F51",
+        ecliptic: "\u9EC4\u9053",
+        equator: "\u5929\u7403\u8D64\u9053",
+        horizon: "\u5730\u5E73\u7EBF",
+        nightVision: "\u591C\u89C6\u7EA2\u5149",
+        deepSky: "\u4EAE\u6DF1\u7A7A\u5929\u4F53",
+        floatingInfo: "\u661F\u4F53\u4FE1\u606F\u6D6E\u7A97",
+        fontScale: "\u5168\u5C40\u5B57\u4F53\u7F29\u653E",
+        regionBoundaries: "\u4E2D\u56FD\u4F20\u7EDF\u5929\u533A\u8FB9\u754C",
+        detail: "\u4F20\u7EDF\u5929\u533A\u5C42\u7EA7",
+        time: "\u65F6\u95F4\u63A8\u8FDB",
+        speed: "\u65F6\u95F4\u6D41\u901F",
+        playing: "\u64AD\u653E\u72B6\u6001",
+        panelOpen: "\u5DE6\u4FA7\u83DC\u5355\u5C55\u5F00",
+        skyReady: "\u661F\u56FE\u5C31\u7EEA",
+        rebuild: "\u91CD\u5EFA\u4E2D"
+      } : {
+        viewportGroup: "\u3010Viewport / Pane\u3011",
+        canvasGroup: "\u3010Canvas Layout Model\u3011",
+        viewGroup: "\u3010View & Projection State\u3011",
+        interactionGroup: "\u3010Celestial Interaction\u3011",
+        rotationGroup: "\u3010Rotation Control\u3011",
+        layerGroup: "\u3010Layers & Display Options\u3011",
+        viewport: "browser viewport window",
+        layoutMode: "responsive layout mode",
+        pointer: "pointer type",
+        hover: "hover capability",
+        sidebar: "sidebar #sidebar",
+        panelToggle: "panel toggle #panel-toggle",
+        debugOverlay: "debug overlay #debug-overlay",
+        pane: "sky pane #sky-pane",
+        stage: "stage #sky-stage",
+        frame: "frame #celestial-frame",
+        map: "D3-Celestial map #celestial-map",
+        mapComputedMinWidth: "#celestial-map computed min-width",
+        canvasCss: "real sky canvas CSS size",
+        canvasCenter: "canvas center",
+        canvasCenterDelta: "canvas center delta from pane",
+        canvasAttr: "real sky canvas pixel size",
+        svgCss: "SVG layer CSS size",
+        sizeConsistency: "map / canvas / svg size consistency",
+        dpr: "device pixel ratio DPR",
+        paneCenter: "pane center",
+        targetMap: "target map size",
+        baseShortSide: "base short side",
+        projectionRatio: "projection natural ratio",
+        mapScale: "app map scale",
+        internalZoom: "D3 internal zoom",
+        overflow: "croppable overflow",
+        mapCenter: "map center",
+        centerDelta: "map center delta from pane",
+        celestial: "celestial metrics",
+        renderMode: "render mode",
+        viewportTriggerRule: "VIEWPORT_CANVAS trigger rule",
+        viewportTriggerResult: "trigger result",
+        baseSkySize: "base sky size",
+        virtualSkySize: "virtual sky size",
+        canvasCssTarget: "Canvas CSS target size",
+        canvasBitmapTarget: "Canvas bitmap target size",
+        starStats: "star statistics",
+        loadedStars: "loaded stars",
+        starsWithinMagnitude: "stars within threshold",
+        projection: "current projection",
+        coords: "current coordinate view",
+        culture: "current sky culture",
+        language: "language",
+        viewKey: "saved view key",
+        viewCenter: "current rendered center lon / lat / roll",
+        interaction: "drag/click mode",
+        dragMoved: "drag threshold crossed",
+        clickPending: "click pending",
+        dragThreshold: "click/drag threshold",
+        dragSensitivity: "drag sensitivity",
+        debugStatus: "Status",
+        lastAction: "Last action",
+        viewControlMode: "view control mode",
+        poleAxisConstraint: "pole-axis constraint",
+        renderedViewState: "Rendered View State",
+        eulerState: "Euler State",
+        quaternionState: "Quaternion State",
+        keyboardPan: "Keyboard pan",
+        pressedArrowKeys: "Pressed arrow keys",
+        poleGuard: "pole guard",
+        poleGuardReason: "pole guard reason",
+        poleGuardThreshold: "guard thresholds",
+        pointerPositivePoleDistance: "pointer to positive pole",
+        pointerNegativePoleDistance: "pointer to negative pole",
+        currentPoles: "current coordinate poles",
+        positivePolePoint: "positive pole screen point",
+        negativePolePoint: "negative pole screen point",
+        poleCenterline: "screen centerline x",
+        poleDx: "positive dx / negative dx",
+        poleAxisAngle: "pole-axis screen angle",
+        poleAxisAngleRule: "axis angle rule",
+        displayOptions: "display options",
+        starLimit: "stellar magnitude limit",
+        starSize: "star size",
+        starNameDensity: "star-name density",
+        starNames: "important star names",
+        cultureLines: "constellation/asterism lines",
+        cultureNames: "constellation/asterism names",
+        planets: "Sun, Moon and planets",
+        milkyWay: "Milky Way outline",
+        grid: "equatorial grid",
+        horizontalGrid: "horizontal grid",
+        ecliptic: "ecliptic",
+        equator: "celestial equator",
+        horizon: "horizon",
+        nightVision: "red night vision",
+        deepSky: "bright deep-sky objects",
+        floatingInfo: "floating object info",
+        fontScale: "global font scale",
+        regionBoundaries: "Chinese traditional region boundaries",
+        detail: "detail",
+        time: "time advance",
+        speed: "speed",
+        playing: "playback",
+        panelOpen: "panelOpen",
+        skyReady: "skyReady",
+        rebuild: "rebuild"
+      };
+      const pane = $("sky-pane"), canvas = document2.querySelector("#celestial-map canvas"), svg = document2.querySelector("#celestial-map svg"), metrics = projectionCanvasMetrics2(), starMagnitudeStats = currentStarMagnitudeStats(), rotationStats = rotationController.debugState(), celestialMetrics = window2.Celestial && typeof window2.Celestial.metrics === "function" ? window2.Celestial.metrics() : null;
+      const paneRect = pane ? pane.getBoundingClientRect() : null, sidebarRect = elementRect2("#sidebar"), panelToggleRect = elementRect2("#panel-toggle"), overlayRect = overlay.getBoundingClientRect(), stageRect = elementRect2("#sky-stage"), frameRect = elementRect2("#celestial-frame"), mapRect = elementRect2("#celestial-map"), canvasRect2 = canvas ? canvas.getBoundingClientRect() : null, svgRect = svg ? svg.getBoundingClientRect() : null, paneCenter = paneRect ? {
+        x: paneRect.left + paneRect.width / 2,
+        y: paneRect.top + paneRect.height / 2
+      } : null, mapCenter = mapRect ? {
+        x: mapRect.left + mapRect.width / 2,
+        y: mapRect.top + mapRect.height / 2
+      } : null, canvasCenter = canvasRect2 ? {
+        x: canvasRect2.left + canvasRect2.width / 2,
+        y: canvasRect2.top + canvasRect2.height / 2
+      } : null, centerDelta = paneCenter && mapCenter ? { x: mapCenter.x - paneCenter.x, y: mapCenter.y - paneCenter.y } : null, canvasCenterDelta = paneCenter && canvasCenter ? {
+        x: canvasCenter.x - paneCenter.x,
+        y: canvasCenter.y - paneCenter.y
+      } : null;
+      const pointerInfo = debugPointerInfo(zh), mapStyle = mapRect ? getComputedStyle($("celestial-map")) : null, sameSize = (a, b) => !a || !b || Math.abs(a.width - b.width) <= 1 && Math.abs(a.height - b.height) <= 1, matchesTarget = (rect) => !rect || Math.abs(rect.width - metrics.width) <= 1 && Math.abs(rect.height - metrics.height) <= 1, sizesOk = matchesTarget(mapRect) && matchesTarget(canvasRect2) && matchesTarget(svgRect) && sameSize(mapRect, canvasRect2) && sameSize(canvasRect2, svgRect);
+      const controlMode = currentViewControlMode(), eulerActive = controlMode === "Euler constrained", quaternionActive = controlMode === "Quaternion free", poleToggle = $("pole-axis-constraint"), poleToggleMatchesState = !poleToggle || !!poleToggle.checked === poleAxisConstraintEnabled(), debugPointerCoord = debugPointerActive ? debugPointerSkyCoord : null;
+      const poleStats = updatePoleAxisDebug(
+        debugPointerCoord,
+        view2.center,
+        poleAxisDebug.guardActive ? "guard-active" : eulerActive ? "euler-constrained" : "quaternion-free"
+      );
+      const debugStatus = debugStatusSummary({
+        view: view2,
+        poleStats,
+        rotationStats,
+        controlMode,
+        uiMatches: poleToggleMatchesState
+      });
+      overlay.style.display = debugVisible ? "block" : "none";
+      content.replaceChildren(
+        debugGroup(label.viewportGroup),
+        debugLine(
+          label.viewport,
+          debugSizeParts(window2.innerWidth, window2.innerHeight)
+        ),
+        debugLine(
+          zh ? "\u6587\u6863\u89C6\u53E3 documentElement" : "documentElement viewport",
+          debugSizeParts(document2.documentElement.clientWidth, document2.documentElement.clientHeight)
+        ),
+        debugLine(
+          zh ? "visualViewport \u5C3A\u5BF8" : "visualViewport size",
+          window2.visualViewport ? debugSizeParts(window2.visualViewport.width, window2.visualViewport.height) : [debugValue("-")]
+        ),
+        debugLine(
+          zh ? "visualViewport scale/offset" : "visualViewport scale/offset",
+          window2.visualViewport ? [
+            debugSep("scale="),
+            debugValue(Number(window2.visualViewport.scale || 1).toFixed(3)),
+            debugSep(" offset="),
+            debugValue(Math.round(window2.visualViewport.offsetLeft || 0)),
+            debugSep(","),
+            debugValue(Math.round(window2.visualViewport.offsetTop || 0))
+          ] : [debugValue("-")]
+        ),
+        debugLine(zh ? "\u5C4F\u5E55 screen" : "screen", debugSizeParts(screen2.width, screen2.height)),
+        debugLine(zh ? "\u5C4F\u5E55\u65B9\u5411" : "orientation", [debugValue(screen2.orientation?.type || String(window2.orientation ?? "-"))]),
+        debugLine(zh ? "\u6700\u540E resize \u6765\u6E90" : "last resize source", [debugValue(mobileResizeDebug.lastSource)]),
+        debugLine(zh ? "\u6700\u540E resize \u72B6\u6001" : "last resize status", [debugValue(mobileResizeDebug.lastStatus)]),
+        debugLine(zh ? "\u6700\u540E resize \u65F6\u95F4" : "last resize time", [debugValue(mobileResizeDebug.lastAt)]),
+        debugLine(zh ? "\u6700\u540E resize \u9519\u8BEF" : "last resize error", [debugValue(mobileResizeDebug.lastError)]),
+        debugLine(label.dpr, [
+          debugValue(Number(window2.devicePixelRatio || 1).toFixed(2))
+        ]),
+        debugLine(label.layoutMode, [debugValue(debugResponsiveMode())]),
+        debugLine(label.pointer, [debugValue(pointerInfo.pointer)]),
+        debugLine(label.hover, [debugValue(pointerInfo.hover)]),
+        debugLine(label.sidebar, debugRectParts(sidebarRect)),
+        debugLine(label.panelToggle, debugRectParts(panelToggleRect)),
+        debugLine(label.debugOverlay, debugRectParts(overlayRect)),
+        debugLine(label.pane, debugRectParts(paneRect)),
+        debugLine(label.stage, debugRectParts(stageRect)),
+        debugLine(label.frame, debugRectParts(frameRect)),
+        debugBlankLine(),
+        debugGroup(label.canvasGroup),
+        debugLine(label.targetMap, debugSizeParts(metrics.width, metrics.height)),
+        debugLine(label.baseShortSide, [
+          debugValue(metrics.baseShortSide),
+          debugUnit("px")
+        ]),
+        debugLine(label.projectionRatio, [
+          debugValue(Number(metrics.ratio || 0).toFixed(3))
+        ]),
+        debugLine(label.mapScale, debugScaleParts(metrics.scale)),
+        debugLine(label.renderMode, [debugValue(metrics.renderMode || "FULL")]),
+        debugLine(label.viewportTriggerRule, [
+          debugValue("virtualSkyWidth > viewportWidth && virtualSkyHeight > viewportHeight")
+        ]),
+        debugLine(label.viewportTriggerResult, debugBoolParts(!!metrics.viewportTrigger)),
+        debugLine(label.baseSkySize, debugSizeParts(metrics.baseWidth, metrics.baseHeight)),
+        debugLine(label.virtualSkySize, debugSizeParts(metrics.virtualWidth, metrics.virtualHeight)),
+        debugLine(label.canvasCssTarget, debugSizeParts(metrics.canvasCssWidth, metrics.canvasCssHeight)),
+        debugLine(label.canvasBitmapTarget, debugSizeParts(metrics.canvasBitmapWidth, metrics.canvasBitmapHeight)),
+        debugLine(label.overflow, [
+          debugSep("X="),
+          debugValue(Math.round(metrics.overflowX)),
+          debugUnit("px"),
+          debugSep(" Y="),
+          debugValue(Math.round(metrics.overflowY)),
+          debugUnit("px")
+        ]),
+        debugLine(label.paneCenter, debugPointParts(paneCenter)),
+        debugLine(label.mapCenter, debugPointParts(mapCenter)),
+        debugLine(label.centerDelta, debugCenterDeltaParts(centerDelta, formatSigned)),
+        debugLine(label.canvasCenter, debugPointParts(canvasCenter)),
+        debugLine(
+          label.canvasCenterDelta,
+          debugCenterDeltaParts(canvasCenterDelta, formatSigned)
+        ),
+        debugLine(label.map, debugRectParts(mapRect)),
+        debugLine(label.mapComputedMinWidth, [
+          debugValue(mapStyle ? mapStyle.minWidth : "-")
+        ]),
+        debugLine(label.canvasCss, debugRectParts(canvasRect2)),
+        debugLine(
+          label.canvasAttr,
+          canvas ? debugSizeParts(canvas.width, canvas.height) : [debugValue("-")]
+        ),
+        debugLine(label.svgCss, debugRectParts(svgRect)),
+        debugLine(label.sizeConsistency, [debugMetricStatus(sizesOk, zh)]),
+        debugLine(
+          label.celestial,
+          celestialMetrics ? [
+            ...debugSizeParts(
+              celestialMetrics.width,
+              celestialMetrics.height
+            ),
+            debugSep(" scale="),
+            debugValue(Number(celestialMetrics.scale || 0).toFixed(2))
+          ] : [debugValue("-")]
+        ),
+        debugBlankLine(),
+        debugGroup(label.viewGroup),
+        debugLine(label.projection, [debugValue(state.projection)]),
+        debugLine(label.coords, [debugValue(coordName)]),
+        debugLine(label.culture, [debugValue(cultureLabel)]),
+        debugLine(label.language, [debugValue(languageName)]),
+        debugLine(label.viewKey, [debugValue(viewKey2())]),
+        debugLine(label.viewCenter, [debugValue(viewCenter)]),
+        debugLine(label.mapScale, debugScaleParts(view2.mapScale)),
+        debugLine(label.internalZoom, debugScaleParts(view2.internalZoom)),
+        debugBlankLine(),
+        debugGroup(zh ? "\u6570\u636E\u4E0E\u65F6\u95F4" : "Data & time"),
+        debugLine(zh ? "\u6570\u636E\u6A21\u5F0F" : "data mode", [
+          debugValue(window2.__RSO_DATA_MODE__ || "unknown")
+        ]),
+        debugLine(zh ? "\u6CE8\u518C\u6570\u636E\u96C6" : "registered datasets", [
+          debugValue(
+            Object.keys(window2.__RSO_LOCAL_DATA__ || {}).filter(
+              (key) => key.includes("/") && key.endsWith(".json") && !key.startsWith("src/data/")
+            ).length
+          )
+        ]),
+        debugLine(label.starStats, [debugValue(zh ? "\u5F53\u524D\u661F\u7B49\u9608\u503C\u5BF9\u5E94\u6570\u91CF" : "current magnitude threshold count")]),
+        debugLine(label.loadedStars, [debugValue(starMagnitudeStats.loadedStars)]),
+        debugLine(label.starLimit, [
+          debugValue(Number(starMagnitudeStats.threshold || 0).toFixed(2))
+        ]),
+        debugLine(label.starsWithinMagnitude, [debugValue(starMagnitudeStats.starsWithinMagnitude)]),
+        debugLine(zh ? "\u5F53\u524D\u65F6\u533A" : "current time zone", [
+          debugValue(timeRenderDebug.timezone || state.zone || "-")
+        ]),
+        debugLine(zh ? "\u672C\u5730 UTC \u504F\u79FB" : "local UTC offset", [
+          debugValue(timeRenderDebug.utcOffset || "-")
+        ]),
+        debugLine(zh ? "\u504F\u79FB\u6765\u6E90" : "offset source", [
+          debugValue(debugOffsetNoteValue(timeRenderDebug.utcOffsetNote, zh))
+        ]),
+        debugLine(zh ? "\u65F6\u95F4\u8F93\u5165\u72B6\u6001" : "time input state", [
+          debugValue(timeRenderDebug.inputStatus || "-"),
+          debugSep(" field="),
+          debugValue(timeRenderDebug.activeField || "-")
+        ]),
+        debugLine(zh ? "\u8F93\u5165\u5B57\u6BB5" : "input fields", [
+          debugValue(timeRenderDebug.fields || timeFieldDebugText2())
+        ]),
+        debugLine(zh ? "\u5F53\u524D\u6709\u6548\u65F6\u95F4" : "active time", [
+          debugValue(timeRenderDebug.activeDisplay || "-")
+        ]),
+        debugLine(zh ? "\u5F53\u524D\u6709\u6548 UTC" : "active UTC", [
+          debugValue(timeRenderDebug.activeUtc || state.instant || "-")
+        ]),
+        debugLine(zh ? "\u5F53\u524D\u6709\u6548 JS \u5E74\u4EFD" : "active JS Date year", [
+          debugValue(timeRenderDebug.activeJsDateYear || "-")
+        ]),
+        debugLine(zh ? "\u5019\u9009\u65F6\u95F4" : "candidate time", [
+          debugValue(timeRenderDebug.candidate || "-")
+        ]),
+        debugLine(zh ? "\u5019\u9009 UTC" : "candidate UTC", [
+          debugValue(timeRenderDebug.candidateUtc || "-")
+        ]),
+        debugLine(zh ? "\u5019\u9009 JS \u5E74\u4EFD" : "candidate JS Date year", [
+          debugValue(timeRenderDebug.candidateJsDateYear || "-")
+        ]),
+        debugLine(zh ? "\u6700\u8FD1\u5931\u8D25\u5019\u9009" : "last failed candidate", [
+          debugValue(timeRenderDebug.lastFailedCandidate || "-")
+        ]),
+        debugLine(zh ? "Julian Date" : "Julian Date", [
+          debugValue(timeRenderDebug.julianDate || "-")
+        ]),
+        debugLine(zh ? "\u66F4\u65B0\u65F6\u95F4\u6765\u6E90" : "time update source", [
+          debugValue(timeRenderDebug.updateSource || "-")
+        ]),
+        debugLine(zh ? "\u65F6\u95F4\u5237\u65B0\u94FE\u8DEF" : "time refresh health", [
+          debugValue(debugRefreshHealthValue(timeRenderDebug.refreshHealth, zh))
+        ]),
+        debugLine(zh ? "skyview \u72B6\u6001" : "skyview status", [
+          debugValue(timeRenderDebug.skyviewStatus || "-")
+        ]),
+        debugLine(zh ? "\u5730\u5E73 fallback" : "horizontal fallback", [
+          debugValue(timeRenderDebug.fallbackStatus || "-")
+        ]),
+        debugLine(zh ? "redraw \u72B6\u6001" : "redraw status", [
+          debugValue(timeRenderDebug.redrawStatus || "-"),
+          debugSep(" reason="),
+          debugValue(timeRenderDebug.redrawReason || "-")
+        ]),
+        debugLine(zh ? "redraw \u65F6\u95F4" : "redraw at", [
+          debugValue(timeRenderDebug.redrawAt || "-")
+        ]),
+        debugLine(zh ? "\u661F\u56FE\u5237\u65B0\u8017\u65F6" : "sky redraw duration", [
+          debugSep("sync="),
+          debugValue(timeRenderDebug.fixedLayerSyncMs || "-"),
+          debugSep(" redraw="),
+          debugValue(timeRenderDebug.celestialRedrawMs || "-"),
+          debugSep(" total="),
+          debugValue(timeRenderDebug.redrawTotalMs || "-")
+        ]),
+        debugLine(zh ? "follow-up \u5237\u65B0\u8017\u65F6" : "follow-up redraw duration", [
+          debugSep("sync="),
+          debugValue(timeRenderDebug.followUpFixedLayerSyncMs || "-"),
+          debugSep(" redraw="),
+          debugValue(timeRenderDebug.followUpCelestialRedrawMs || "-"),
+          debugSep(" total="),
+          debugValue(timeRenderDebug.followUpRedrawTotalMs || "-")
+        ]),
+        debugLine(zh ? "rollback \u72B6\u6001" : "rollback status", [
+          debugValue(timeRenderDebug.rollbackStatus || "-")
+        ]),
+        debugLine(zh ? "\u884C\u661F\u8BA1\u7B97" : "planet calculation", [
+          debugValue(timeRenderDebug.planetStatus || "-"),
+          debugSep(" count="),
+          debugValue(timeRenderDebug.planetCount)
+        ]),
+        debugLine(zh ? "\u8FDC\u65E5\u671F\u7CBE\u5EA6" : "date precision", [
+          debugValue(timeRenderDebug.precision || "-")
+        ]),
+        debugLine(zh ? "\u5DF2\u6062\u590D\u7684 skyview \u539F\u59CB\u9519\u8BEF" : "recovered skyview original error", [
+          debugValue(timeRenderDebug.recoveredOriginalError || "-")
+        ]),
+        debugLine(zh ? "\u5F53\u524D\u81F4\u547D\u9519\u8BEF" : "current fatal error", [
+          debugValue(timeRenderDebug.currentFatalError || "-")
+        ]),
+        debugLine(zh ? "\u9519\u8BEF\u9636\u6BB5" : "error stage", [
+          debugValue(timeRenderDebug.errorStage || "-")
+        ]),
+        debugLine(zh ? "\u9519\u8BEF\u5806\u6808\u6458\u8981" : "error stack summary", [
+          debugValue(timeRenderDebug.errorStack || "-")
+        ]),
+        debugBlankLine(),
+        debugGroup(zh ? "\u5929\u6587\u6A21\u578B / \u5386\u5143\u4E00\u81F4\u6027" : "Astronomy model / epoch consistency"),
+        debugLine(zh ? "\u6E90\u6570\u636E\u5386\u5143" : "source epoch", [
+          debugValue(astronomyModelDebug.sourceEpoch || "-")
+        ]),
+        debugLine(zh ? "\u663E\u793A\u5386\u5143" : "display epoch", [
+          debugValue(astronomyModelDebug.displayEpoch || "-")
+        ]),
+        debugLine(zh ? "\u5C81\u5DEE\u72B6\u6001" : "precession", [
+          debugValue(astronomyModelDebug.precessionStatus || "-")
+        ]),
+        debugLine(zh ? "\u5C81\u5DEE\u6A21\u578B" : "precession model", [
+          debugValue(astronomyModelDebug.precessionModel || "-")
+        ]),
+        debugLine(zh ? "\u7AE0\u52A8 / \u81EA\u884C / \u6298\u5C04" : "nutation / proper motion / refraction", [
+          debugValue(`${astronomyModelDebug.nutation} / ${astronomyModelDebug.properMotion} / ${astronomyModelDebug.refraction}`)
+        ]),
+        debugLine(zh ? "J2000 \u8D77\u7B97\u5112\u7565\u4E16\u7EAA T" : "Julian centuries from J2000", [
+          debugValue(astronomyModelDebug.julianCenturiesT || "-")
+        ]),
+        debugLine(zh ? "\u5E73\u5747\u9EC4\u8D64\u4EA4\u89D2" : "mean obliquity", [
+          debugValue(astronomyModelDebug.meanObliquity || "-")
+        ]),
+        debugLine(zh ? "\u9EC4\u9053\u6A21\u578B" : "ecliptic model", [
+          debugValue(astronomyModelDebug.eclipticModel || "-")
+        ]),
+        debugLine(zh ? "\u592A\u9633\u7B97\u6CD5" : "sun model", [
+          debugValue(astronomyModelDebug.sunModel || "-")
+        ]),
+        debugLine(zh ? "\u6708\u4EAE\u7B97\u6CD5" : "moon model", [
+          debugValue(astronomyModelDebug.moonModel || "-")
+        ]),
+        debugLine(zh ? "\u6708\u76F8\u7B97\u6CD5" : "moon phase model", [
+          debugValue(astronomyModelDebug.moonPhaseModel || "-")
+        ]),
+        debugLine("VSOP87", [debugValue(astronomyModelDebug.vsop87 || "-")]),
+        debugLine(zh ? "\u7CBE\u5EA6\u8FB9\u754C" : "precision", [
+          debugValue(astronomyModelDebug.precisionBoundary || "-")
+        ]),
+        debugLine(zh ? "\u884C\u661F\u7B97\u6CD5" : "planet model", [
+          debugValue(astronomyModelDebug.planetModel || "-")
+        ]),
+        debugLine(zh ? "\u884C\u661F\u5386\u5143\u5904\u7406" : "planet epoch handling", [
+          debugValue(astronomyModelDebug.planetEpochHandling || "-")
+        ]),
+        debugLine(zh ? "\u56FA\u5B9A\u56FE\u5C42\u5C81\u5DEE" : "fixed layer precession", [
+          debugValue(astronomyModelDebug.fixedLayerPrecession || "-")
+        ]),
+        debugLine(zh ? "\u8FB9\u754C / \u661F\u5B98\u5C81\u5DEE" : "boundary / asterism precession", [
+          debugValue(`${astronomyModelDebug.boundaryPrecession || "-"} / ${astronomyModelDebug.asterismPrecession || "-"}`)
+        ]),
+        debugLine(zh ? "\u641C\u7D22/\u62FE\u53D6\u5750\u6807\u6846\u67B6" : "search/pick coordinate frame", [
+          debugValue(astronomyModelDebug.searchPickFrame || "-")
+        ]),
+        debugLine(zh ? "localStorage schema" : "localStorage schema", [
+          debugValue(astronomyModelDebug.storageSchemaVersion || "-")
+        ]),
+        debugLine(zh ? "\u5929\u6587\u6A21\u578B\u7248\u672C" : "astronomy model version", [
+          debugValue(astronomyModelDebug.astronomyModelVersion || "-")
+        ]),
+        debugLine(zh ? "\u7F13\u5B58\u8FC1\u79FB\u72B6\u6001" : "cache migration", [
+          debugValue(astronomyModelDebug.cacheMigration || "-")
+        ]),
+        debugLine(zh ? "\u6700\u540E\u5C81\u5DEE\u8F6C\u6362\u9519\u8BEF" : "last precession error", [
+          debugValue(astronomyModelDebug.lastPrecessionError || "-")
+        ]),
+        debugBlankLine(),
+        debugGroup(label.interactionGroup),
+        debugLine(label.interaction, [debugValue(debugDragMode(zh))]),
+        // 不显示 dragDeltaX / dragDeltaY / appliedDelta 等瞬时值：它们变化太快，
+        // 人工观察和截图反馈都很难使用，还会增加 Debug 刷新时的 DOM 重写负担。
+        debugLine(label.dragMoved, [
+          debugValue(bool(pointerMoved)),
+          debugSep(` ${label.clickPending}=`),
+          debugValue(bool(!!clickStart))
+        ]),
+        debugLine(label.dragThreshold, [
+          debugValue(cfg("interaction.dragThreshold", 5)),
+          debugUnit("px")
+        ]),
+        debugLine(label.dragSensitivity, [
+          debugValue(cfg("interaction.dragSensitivity", 1))
+        ]),
+        debugBlankLine(),
+        debugGroup(label.rotationGroup),
+        debugLine(label.debugStatus, [debugValue(debugStatus)]),
+        debugLine(label.lastAction, [debugValue(debugLastAction || "none")]),
+        debugLine(label.poleAxisConstraint, [
+          debugValue(poleAxisConstraintEnabled() ? "ON" : "OFF"),
+          debugSep(" ui="),
+          debugValue(poleToggle ? poleToggle.checked ? "ON" : "OFF" : "unavailable")
+        ]),
+        debugLine(label.viewControlMode, [
+          debugValue(controlMode),
+          debugSep(" actual-branch")
+        ]),
+        // Debug 里分开最终渲染视角、欧拉状态和四元数状态：渲染视角来自
+        // Celestial.rotate()，欧拉/四元数只在各自控制模式 active 时显示，避免旧缓存误导。
+        debugLine(label.renderedViewState, debugRenderedViewParts(view2.center)),
+        debugLine(label.eulerState, debugEulerStateParts(view2.center, eulerActive)),
+        debugLine(label.quaternionState, debugQuaternionStateParts(rotationStats, quaternionActive)),
+        // 方向键长按只显示 active/idle 和当前按键，不显示每帧移动量；
+        // 每帧 delta 太快且难截图，真正有价值的是动画帧循环是否启动和是否释放。
+        debugLine(label.keyboardPan, [debugValue(skyPanKeys.size ? "active" : "idle")]),
+        debugLine(label.pressedArrowKeys, [debugValue(pressedArrowKeysLabel2())]),
+        debugLine(label.poleGuard, [debugValue(poleStats.guardActive ? "ON" : "OFF")]),
+        debugLine(label.poleGuardReason, [debugValue(poleStats.guardReason || "none")]),
+        debugLine(label.poleGuardThreshold, [
+          debugSep("enter="),
+          debugValue(formatAngle(poleGuardEnterDeg())),
+          debugSep(" exit="),
+          debugValue(formatAngle(poleGuardExitDeg()))
+        ]),
+        debugLine(label.currentPoles, [
+          debugSep("+="),
+          debugValue(poleStats.positiveName || "undefined"),
+          debugSep(" -="),
+          debugValue(poleStats.negativeName || "undefined")
+        ]),
+        debugLine(label.pointerPositivePoleDistance, [
+          debugValue(formatAngleOrUnavailable(poleStats.pointerPositiveDeg))
+        ]),
+        debugLine(label.pointerNegativePoleDistance, [
+          debugValue(formatAngleOrUnavailable(poleStats.pointerNegativeDeg))
+        ]),
+        debugLine(label.positivePolePoint, debugPolePointParts(poleStats.positivePoint)),
+        debugLine(label.negativePolePoint, debugPolePointParts(poleStats.negativePoint)),
+        debugLine(label.poleCenterline, [
+          debugSep("x="),
+          debugValue(Number.isFinite(poleStats.centerlineX) ? Math.round(poleStats.centerlineX) : "-"),
+          debugUnit("px")
+        ]),
+        debugLine(label.poleDx, [
+          debugSep("+="),
+          debugValue(formatSigned(poleStats.positiveDx)),
+          debugUnit("px"),
+          debugSep(" -="),
+          debugValue(formatSigned(poleStats.negativeDx)),
+          debugUnit("px")
+        ]),
+        debugLine(label.poleAxisAngle, [debugValue(formatAngle(poleStats.axisAngleDeg))]),
+        debugLine(label.poleAxisAngleRule, [
+          debugValue("0\xB0 = vertical, 90\xB0 = horizontal")
+        ]),
+        debugBlankLine(),
+        debugGroup(label.layerGroup),
+        debugLine(label.starLimit, [debugValue(state.magnitude)]),
+        debugLine(label.starSize, [debugValue(state.starSize), debugUnit("px")]),
+        debugLine(label.starNameDensity, [
+          debugValue(Number(state.starNameMagnitudeLimit).toFixed(1))
+        ]),
+        debugLine(label.starNames, [debugValue(bool(state.starNames))]),
+        debugLine(label.cultureLines, [debugValue(bool(state.cultureLines))]),
+        debugLine(label.cultureNames, [debugValue(bool(state.cultureNames))]),
+        debugLine(label.planets, [debugValue(bool(state.planets))]),
+        debugLine(label.milkyWay, [debugValue(bool(state.milkyWay))]),
+        debugLine(label.grid, [debugValue(bool(state.grid))]),
+        debugLine(label.horizontalGrid, [debugValue(bool(state.horizontalGrid))]),
+        debugLine(label.ecliptic, [debugValue(bool(state.ecliptic))]),
+        debugLine(label.equator, [debugValue(bool(state.equator))]),
+        debugLine(label.horizon, [debugValue(bool(state.horizon))]),
+        debugLine(label.nightVision, [debugValue(bool(state.nightVision))]),
+        debugLine(label.deepSky, [debugValue(bool(state.deepSky))]),
+        debugLine(label.floatingInfo, [
+          debugValue(bool(state.floatingObjectInfo))
+        ]),
+        debugLine(label.fontScale, [
+          debugValue(Number(state.fontScale).toFixed(3))
+        ]),
+        debugLine(label.regionBoundaries, [
+          debugValue(bool(state.regionBoundaries))
+        ]),
+        debugLine(label.detail, [debugValue(detailName)]),
+        debugLine(label.time, [
+          debugSep(`${label.playing}=`),
+          debugValue(bool(playing)),
+          debugSep(` ${label.speed}=`),
+          debugValue(state.speed),
+          debugUnit("x")
+        ]),
+        debugLine(label.panelOpen, [debugValue(bool(state.panelOpen))]),
+        debugLine(label.skyReady, [debugValue(bool(skyReady))]),
+        debugLine(label.rebuild, [debugValue(bool(rebuildInProgress))])
+      );
+      lastDebugPlainText = Array.from(content.children).map((node) => node.textContent || "").join("\n");
+    }
+    function queueDebugOverlayUpdate() {
+      if (!debugVisible || debugFramePending) return;
+      debugFramePending = true;
+      const delay = Math.max(0, debugRefreshIntervalMs() - (performance2.now() - lastDebugUpdate));
+      setTimeout2(() => {
+        requestAnimationFrame2(() => {
+          debugFramePending = false;
+          lastDebugUpdate = performance2.now();
+          updateDebugOverlay();
+        });
+      }, delay);
+    }
+    function setDebugVisible(open) {
+      debugVisible = !!open;
+      document2.body.classList.toggle("debug-open", debugVisible);
+      const button = $("debug-toggle"), overlay = $("debug-overlay");
+      if (button) button.classList.toggle("active", debugVisible);
+      if (overlay) {
+        overlay.style.display = debugVisible ? "block" : "none";
+        overlay.setAttribute("aria-hidden", String(!debugVisible));
+      }
+      updateDebugOverlay(true);
+    }
+    function initializeDebugTools() {
+      if (!cfg("debug.enabled", false)) return;
+      const pane = $("sky-pane") || document2.body;
+      if (!$("debug-toggle")) {
+        const button = document2.createElement("button");
+        button.id = "debug-toggle";
+        button.className = "top-control-button";
+        button.type = "button";
+        button.textContent = "DBG";
+        button.addEventListener("click", () => setDebugVisible(!debugVisible));
+        document2.body.appendChild(button);
+      } else if ($("debug-toggle").parentElement !== document2.body) {
+        document2.body.appendChild($("debug-toggle"));
+      }
+      updateDebugToggleTitle();
+      if (!$("debug-overlay")) {
+        const overlay = document2.createElement("div");
+        overlay.id = "debug-overlay";
+        overlay.setAttribute("aria-hidden", "true");
+        pane.appendChild(overlay);
+        ensureDebugOverlayStructure(overlay);
+      } else if ($("debug-overlay").parentElement !== pane) {
+        pane.appendChild($("debug-overlay"));
+        ensureDebugOverlayStructure($("debug-overlay"));
+      } else {
+        ensureDebugOverlayStructure($("debug-overlay"));
+      }
+      setDebugVisible(debugVisible);
+    }
+    return {
+      updateDebugToggleTitle,
+      debugRefreshIntervalMs,
+      noteDebugLastAction,
+      updateDebugOverlay,
+      queueDebugOverlayUpdate,
+      setDebugVisible,
+      initializeDebugTools,
+      isVisible: () => debugVisible,
+      setPointer(active, coord) {
+        debugPointerActive = !!active;
+        debugPointerSkyCoord = coord || null;
+      }
     };
   }
 
@@ -2848,6 +4042,7 @@
       displayVisual: "\u89C6\u89C9",
       magnitudeThreshold: "\u6052\u661F\u663E\u793A\u661F\u7B49\u9608\u503C",
       starSize: "\u6052\u661F\u5927\u5C0F",
+      starNameDensity: "\u661F\u540D\u663E\u793A\u5BC6\u5EA6",
       starNames: "\u91CD\u8981\u6052\u661F\u540D\u79F0",
       cultureLines: "\u661F\u5EA7/\u661F\u5B98\u8FDE\u7EBF",
       cultureNames: "\u661F\u5EA7/\u661F\u5B98\u540D\u79F0",
@@ -2961,6 +4156,7 @@
       displayVisual: "Visual",
       magnitudeThreshold: "Stellar magnitude display limit",
       starSize: "Star size",
+      starNameDensity: "Star-name density",
       starNames: "Important star names",
       cultureLines: "Constellation/asterism lines",
       cultureNames: "Constellation/asterism names",
@@ -3439,6 +4635,12 @@
       $("star-size").addEventListener("input", () => {
         state.starSize = Number($("star-size").value);
         $("star-size-value").textContent = `${state.starSize} px`;
+        save();
+        applyVisualConfig();
+      });
+      $("star-name-density").addEventListener("input", () => {
+        state.starNameMagnitudeLimit = Number($("star-name-density").value);
+        $("star-name-density-value").textContent = state.starNameMagnitudeLimit.toFixed(1);
         save();
         applyVisualConfig();
       });
@@ -5120,7 +6322,7 @@
             const pt = Celestial2.mapProjection(c);
             if (!pt || !Number.isFinite(pt[0]) || !Number.isFinite(pt[1])) return;
             const tooClose = occupied.some(
-              (p) => Math.hypot(p[0] - pt[0], p[1] - pt[1]) < 24
+              (p) => Math.hypot(p[0] - pt[0], p[1] - pt[1]) < Number(cfg("labels.chineseAsterismNameCollisionPx", 24))
             );
             if (tooClose) return;
             const prop = d.properties || {};
@@ -6120,58 +7322,6 @@
     return { registerTraditionalRegionsOverlay };
   }
 
-  // src/sky/projection.ts
-  var PROJECTION_DEFAULTS = {
-    airy: { center: [0, 0, 0], mapScale: 1 },
-    orthographic: { center: [0, 0, 0], mapScale: 1 },
-    stereographic: { center: [0, 0, 0], mapScale: 1 },
-    azimuthalEquidistant: { center: [0, 0, 0], mapScale: 1 },
-    azimuthalEqualArea: { center: [0, 0, 0], mapScale: 1 },
-    aitoff: { center: [0, 0, 0], mapScale: 1 },
-    hammer: { center: [0, 0, 0], mapScale: 1 },
-    mollweide: { center: [0, 0, 0], mapScale: 1 },
-    winkel3: { center: [0, 0, 0], mapScale: 1 },
-    equirectangular: { center: [0, 0, 0], mapScale: 1 },
-    healpix: { center: [0, 0, 0], mapScale: 1 },
-    mercator: { center: [0, 0, 0], mapScale: 1 },
-    robinson: { center: [0, 0, 0], mapScale: 1 },
-    sinusoidal: { center: [0, 0, 0], mapScale: 1 }
-  };
-  function clampMapScale(value, min, max) {
-    const safeMin = Number.isFinite(min) ? min : 1;
-    const safeMax = Math.max(safeMin, Number.isFinite(max) ? max : safeMin);
-    const number = Number(value);
-    return Math.max(safeMin, Math.min(safeMax, Number.isFinite(number) ? number : safeMin));
-  }
-  function viewMapScale(view, fallback, clamp) {
-    if (view && Object.prototype.hasOwnProperty.call(view, "mapScale")) return clamp(view.mapScale);
-    if (view && Object.prototype.hasOwnProperty.call(view, "zoom")) return clamp(view.zoom);
-    return clamp(fallback);
-  }
-  function viewKey(projection, coordinateSystem) {
-    return `${coordinateSystem}:${projection}`;
-  }
-  function coordinateViewDefault(options) {
-    const projectionDefault = options.projectionDefaults[options.projection] || {
-      center: [0, 0, 0],
-      mapScale: 1
-    };
-    const configured = options.configuredResetView || {};
-    return {
-      center: Array.isArray(configured.center) ? configured.center.slice() : projectionDefault.center.slice(),
-      mapScale: options.viewMapScale(configured, projectionDefault.mapScale)
-    };
-  }
-  function desiredView(options) {
-    if (options.isHorizontalView) {
-      return {
-        ...options.fallbackView,
-        mapScale: options.viewMapScale(options.savedView || options.fallbackView, options.fallbackView.mapScale)
-      };
-    }
-    return options.savedView || options.fallbackView;
-  }
-
   // src/sky/quaternion.ts
   function identityQuaternion() {
     return { w: 1, x: 0, y: 0, z: 0 };
@@ -6659,127 +7809,6 @@
     return !!target.closest("input,select,textarea,[contenteditable='true'],.modal,#debug-overlay");
   }
 
-  // src/ui/debug-panel.ts
-  function debugSpan(text, className) {
-    const span = document.createElement("span");
-    span.className = className;
-    span.textContent = String(text);
-    return span;
-  }
-  function debugValue(text) {
-    return debugSpan(text, "debug-value");
-  }
-  function debugSep(text) {
-    return debugSpan(text, "debug-sep");
-  }
-  function debugUnit(text) {
-    return debugSpan(text, "debug-unit");
-  }
-  function debugGroup(title) {
-    const el = document.createElement("div");
-    el.className = "debug-group";
-    el.textContent = title;
-    return el;
-  }
-  function debugLine(label, parts = []) {
-    const el = document.createElement("div");
-    el.className = "debug-line";
-    el.append(
-      debugSpan(label, "debug-key"),
-      debugSep(": "),
-      ...Array.isArray(parts) ? parts : [debugValue(parts)]
-    );
-    return el;
-  }
-  function debugBlankLine() {
-    const el = document.createElement("div");
-    el.className = "debug-blank";
-    return el;
-  }
-  function debugSizeParts(width, height) {
-    return [
-      debugValue(Math.round(Number(width) || 0)),
-      debugSep("x"),
-      debugValue(Math.round(Number(height) || 0))
-    ];
-  }
-  function debugRectParts(rect) {
-    if (!rect) return [debugValue("-")];
-    return [
-      ...debugSizeParts(rect.width, rect.height),
-      debugSep(" @ "),
-      debugValue(Math.round(rect.left)),
-      debugSep(","),
-      debugValue(Math.round(rect.top))
-    ];
-  }
-  function debugPointParts(point) {
-    if (!point) return [debugValue("-")];
-    return [
-      debugValue(Math.round(point.x)),
-      debugSep(","),
-      debugValue(Math.round(point.y))
-    ];
-  }
-  function debugCenterDeltaParts(delta, formatSigned2) {
-    if (!delta) return [debugValue("-")];
-    return [
-      debugSep("X="),
-      debugValue(formatSigned2(delta.x)),
-      debugUnit("px"),
-      debugSep(" Y="),
-      debugValue(formatSigned2(delta.y)),
-      debugUnit("px")
-    ];
-  }
-  function debugScaleParts(value) {
-    return [debugValue(Number(value || 0).toFixed(3)), debugUnit("x")];
-  }
-  function debugBoolParts(value) {
-    return [debugValue(value ? "true" : "false")];
-  }
-  function debugMetricStatus(ok, zh) {
-    return debugSpan(
-      ok ? "OK" : zh ? "MISMATCH \u5C3A\u5BF8\u4E0D\u4E00\u81F4" : "MISMATCH",
-      ok ? "debug-ok" : "debug-warn"
-    );
-  }
-  function formatAngle(value) {
-    const number = Number(value);
-    return Number.isFinite(number) ? `${number.toFixed(2)}\xB0` : "-";
-  }
-  function formatAngleOrUnavailable(value) {
-    const number = Number(value);
-    return Number.isFinite(number) ? `${number.toFixed(2)}\xB0` : "unavailable";
-  }
-  function formatSigned(value) {
-    const number = Number(value);
-    if (!Number.isFinite(number)) return "-";
-    return `${number >= 0 ? "+" : ""}${number.toFixed(1)}`;
-  }
-  function debugOffsetNoteValue(note, zh) {
-    if (note === "iana-historical")
-      return zh ? "\u4F7F\u7528 IANA \u5386\u53F2\u504F\u79FB" : "using IANA historical offset";
-    if (note === "zone-rule")
-      return zh ? "\u4F7F\u7528\u5F53\u524D\u65F6\u533A\u89C4\u5219" : "using current zone rule";
-    return "-";
-  }
-  function debugRefreshHealthValue(value, zh) {
-    if (value === "recovered") return zh ? "fallback \u5DF2\u6062\u590D" : "recovered by fallback";
-    if (value === "failed") return zh ? "\u5931\u8D25" : "failed";
-    if (value === "pending") return zh ? "\u5237\u65B0\u4E2D" : "pending";
-    return zh ? "\u6B63\u5E38" : "healthy";
-  }
-  function debugErrorText(err) {
-    if (!err) return "-";
-    if (err && err.message) return String(err.message);
-    return String(err);
-  }
-  function debugStackText(err) {
-    if (!err || !err.stack) return "-";
-    return String(err.stack).split("\n").slice(0, 3).join(" | ");
-  }
-
   // src/ui/controls.ts
   function readIntegerField(element) {
     if (!element) return null;
@@ -6965,7 +7994,7 @@
     let traditionalRegionsReady = false, traditionalLabelsReady = false;
     let rebuildInProgress = false, suppressResizeUntil = 0, rebuildGeneration = 0;
     let resizeObserver = null, clickStart = null, pointerMoved = false, paneDrag = null, rotationPointerDrag = null;
-    let currentSelected = null, customViewRestoreTimer = null, lastRenderedSize = null, debugVisible = !!cfg("debug.enabled", false) && !!cfg("debug.defaultOpen", false), lastDebugUpdate = 0, lastDebugPlainText = "", debugCopyStatus = "idle", debugCopyTimer = null, debugPointerSkyCoord = null, debugPointerActive = false, debugLastAction = "none", debugFramePending = false, mapBoxSyncFramePending = false, pendingMapBoxSyncMetrics = null, canvasResizeFramePending = false, pendingCanvasResizeMetrics = null, pendingCanvasResizeReason = "scheduled resize", layoutResizeGeneration = 0;
+    let currentSelected = null, customViewRestoreTimer = null, lastRenderedSize = null, debugOverlayController = null, animationDebugLastUpdate = 0, mapBoxSyncFramePending = false, pendingMapBoxSyncMetrics = null, canvasResizeFramePending = false, pendingCanvasResizeMetrics = null, pendingCanvasResizeReason = "scheduled resize", layoutResizeGeneration = 0;
     const rotationController = createRotationController();
     const skyPanKeys = /* @__PURE__ */ new Set();
     let keyboardPanDirty = false;
@@ -7173,6 +8202,12 @@
       );
       if (!Number.isFinite(Number(state.fontScale)) || Number(state.fontScale) <= 0)
         state.fontScale = defaults.fontScale;
+      const starNameMin = Number(cfg("sky.stars.properNameMagnitudeLimitMin", 2.1)), starNameMax = Number(cfg("sky.stars.properNameMagnitudeLimitMax", 4)), starNameDefault = Number(defaults.starNameMagnitudeLimit);
+      state.starNameMagnitudeLimit = clampNumber(
+        Number.isFinite(Number(state.starNameMagnitudeLimit)) ? Number(state.starNameMagnitudeLimit) : starNameDefault,
+        Number.isFinite(starNameMin) ? starNameMin : 2.1,
+        Number.isFinite(starNameMax) ? starNameMax : 4
+      );
       delete state.zoom;
       Object.values(state.projectionViews).forEach((view) => {
         if (!view || typeof view !== "object") return;
@@ -7254,7 +8289,7 @@
     }
     function noteTimeRenderDebug(patch = {}) {
       Object.assign(timeRenderDebug, patch);
-      if (debugVisible) updateDebugOverlay(true);
+      if (isDebugVisible()) updateDebugOverlay(true);
     }
     function formatDebugDurationMs(value) {
       const ms = Number(value);
@@ -7585,6 +8620,13 @@
       $("magnitude-value").textContent = Number(state.magnitude).toFixed(1);
       $("star-size").value = state.starSize;
       $("star-size-value").textContent = `${state.starSize} px`;
+      const starNameMin = Number(cfg("sky.stars.properNameMagnitudeLimitMin", 2.1)), starNameMax = Number(cfg("sky.stars.properNameMagnitudeLimitMax", 4));
+      $("star-name-density").min = String(starNameMin);
+      $("star-name-density").max = String(starNameMax);
+      $("star-name-density").value = Number(state.starNameMagnitudeLimit).toFixed(1);
+      $("star-name-density-value").textContent = Number(
+        state.starNameMagnitudeLimit
+      ).toFixed(1);
       const checks = {
         "star-names": "starNames",
         "culture-lines": "cultureLines",
@@ -7677,109 +8719,31 @@
       return elementRect(selector);
     }
     function updateDebugToggleTitle() {
-      const button = $("debug-toggle");
-      if (!button) return;
-      const title = state.lang === "en" ? "Show layout debug information" : "\u663E\u793A\u5E03\u5C40\u8C03\u8BD5\u4FE1\u606F";
-      button.title = title;
-      button.setAttribute("aria-label", title);
+      return debugOverlayController && debugOverlayController.updateDebugToggleTitle();
     }
     function debugRefreshIntervalMs() {
-      const configured = Number(cfg("debug.refreshMs", 200));
-      return Math.max(100, Math.min(500, Number.isFinite(configured) ? configured : 200));
+      return debugOverlayController ? debugOverlayController.debugRefreshIntervalMs() : 200;
     }
     function noteDebugLastAction(action) {
-      debugLastAction = action || "none";
+      if (debugOverlayController) debugOverlayController.noteDebugLastAction(action);
     }
-    function currentViewControlMode() {
-      return poleAxisConstraintEnabled() ? "Euler constrained" : "Quaternion free";
+    function updateDebugOverlay(force = false) {
+      return debugOverlayController && debugOverlayController.updateDebugOverlay(force);
     }
-    function pressedArrowKeysLabel2() {
-      return pressedArrowKeysLabel(skyPanKeys);
+    function queueDebugOverlayUpdate() {
+      if (debugOverlayController) debugOverlayController.queueDebugOverlayUpdate();
     }
-    function debugResponsiveMode() {
-      const coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches, hover = window.matchMedia && window.matchMedia("(hover: hover)").matches, narrow = window.innerWidth <= 800, veryNarrow = window.innerWidth <= 520;
-      if (coarse && !hover && narrow) return "touch-overlay";
-      if (veryNarrow || narrow) return "desktop-compact";
-      return "desktop-docked";
+    function setDebugVisible(open) {
+      if (debugOverlayController) debugOverlayController.setDebugVisible(open);
     }
-    function debugPointerInfo(zh) {
-      const coarse = window.matchMedia && window.matchMedia("(pointer: coarse)").matches, fine = window.matchMedia && window.matchMedia("(pointer: fine)").matches, hover = window.matchMedia && window.matchMedia("(hover: hover)").matches;
-      return {
-        pointer: coarse ? zh ? "coarse \u89E6\u6478" : "coarse" : fine ? zh ? "fine \u9F20\u6807/\u89E6\u63A7\u677F" : "fine" : zh ? "\u672A\u77E5" : "unknown",
-        hover: hover ? zh ? "hover \u652F\u6301" : "hover" : zh ? "\u65E0 hover" : "none"
-      };
+    function initializeDebugTools() {
+      if (debugOverlayController) debugOverlayController.initializeDebugTools();
     }
-    function currentStarMagnitudeStats() {
-      const loadedStars = Array.isArray(ORIGINAL_STARS) ? ORIGINAL_STARS.length : 0;
-      const threshold = Number(state.magnitude);
-      const starsWithinMagnitude = Array.isArray(ORIGINAL_STARS) ? ORIGINAL_STARS.filter((feature) => {
-        const mag = Number(feature && feature.properties && feature.properties.mag);
-        return Number.isFinite(mag) && Number.isFinite(threshold) && mag <= threshold;
-      }).length : 0;
-      return {
-        loadedStars,
-        threshold,
-        starsWithinMagnitude
-      };
+    function isDebugVisible() {
+      return !!(debugOverlayController && debugOverlayController.isVisible());
     }
-    function debugCopyText(status = "idle") {
-      const zh = state.lang !== "en";
-      if (status === "copied") return zh ? "\u5DF2\u590D\u5236" : "Copied";
-      if (status === "failed") return zh ? "\u590D\u5236\u5931\u8D25" : "Copy failed";
-      return zh ? "\u590D\u5236" : "Copy";
-    }
-    function setDebugCopyButtonStatus(status = "idle") {
-      debugCopyStatus = status;
-      const button = $("debug-copy");
-      if (!button) return;
-      button.textContent = debugCopyText(status);
-    }
-    async function copyDebugPlainText() {
-      const button = $("debug-copy"), text = lastDebugPlainText || "";
-      clearTimeout(debugCopyTimer);
-      try {
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          await navigator.clipboard.writeText(text);
-        } else {
-          const textarea = document.createElement("textarea");
-          textarea.value = text;
-          textarea.setAttribute("readonly", "");
-          textarea.style.position = "fixed";
-          textarea.style.left = "-9999px";
-          textarea.style.top = "0";
-          document.body.appendChild(textarea);
-          textarea.select();
-          const copied = document.execCommand("copy");
-          textarea.remove();
-          if (!copied) throw new Error("execCommand copy returned false");
-        }
-        if (button) setDebugCopyButtonStatus("copied");
-      } catch (_) {
-        if (button) setDebugCopyButtonStatus("failed");
-      }
-      debugCopyTimer = setTimeout(() => setDebugCopyButtonStatus("idle"), 1300);
-    }
-    function ensureDebugOverlayStructure(overlay) {
-      let toolbar = overlay.querySelector(".debug-toolbar"), copy = $("debug-copy"), content = overlay.querySelector(".debug-content");
-      if (!toolbar) {
-        toolbar = document.createElement("div");
-        toolbar.className = "debug-toolbar";
-        overlay.appendChild(toolbar);
-      }
-      if (!copy) {
-        copy = document.createElement("button");
-        copy.id = "debug-copy";
-        copy.type = "button";
-        copy.addEventListener("click", copyDebugPlainText);
-      }
-      if (copy.parentElement !== toolbar) toolbar.appendChild(copy);
-      if (!content) {
-        content = document.createElement("div");
-        content.className = "debug-content";
-        overlay.appendChild(content);
-      }
-      copy.textContent = debugCopyText(debugCopyStatus);
-      return content;
+    function setDebugPointer(active, coord = null) {
+      if (debugOverlayController) debugOverlayController.setPointer(active, coord);
     }
     function syncInternalZoomForMetrics2(metrics = projectionCanvasMetrics2()) {
       syncInternalZoomForMetrics(metrics, window.Celestial);
@@ -7907,836 +8871,6 @@
       redrawAndSyncMapBox(reason);
       queueDebugOverlayUpdate();
       return true;
-    }
-    function debugCurrentView() {
-      try {
-        const center = Celestial.rotate();
-        if (Array.isArray(center) && !rotationPointerDrag && !paneDrag)
-          rotationController.syncFromCenter(center, "debug-read");
-        return {
-          center: Array.isArray(center) ? center : null,
-          mapScale: getMapScale(),
-          internalZoom: getInternalZoom2()
-        };
-      } catch (_) {
-        return { center: null, mapScale: getMapScale(), internalZoom: 1 };
-      }
-    }
-    function debugDragMode(zh) {
-      const map = $("celestial-map"), dragging = !!(map && map.classList.contains("dragging"));
-      const constrained = poleAxisConstraintEnabled();
-      if (paneDrag)
-        return constrained ? zh ? "\u661F\u56FE\u7559\u767D\u6B27\u62C9\u89D2\u7EA6\u675F\u62D6\u52A8" : "pane-margin Euler constrained drag" : zh ? "\u661F\u56FE\u7559\u767D\u6293\u70B9\u5F0F\u62D6\u52A8" : "pane-margin grab drag";
-      if (rotationPointerDrag)
-        return constrained ? zh ? "Canvas \u6B27\u62C9\u89D2\u7EA6\u675F\u62D6\u52A8" : "canvas Euler constrained drag" : zh ? "Canvas \u6293\u70B9\u5F0F\u62D6\u52A8" : "canvas grab drag";
-      if (dragging) return zh ? "Canvas \u62D6\u52A8" : "canvas drag";
-      if (clickStart) return zh ? "\u7B49\u5F85\u533A\u5206\u70B9\u51FB/\u62D6\u52A8" : "click-or-drag pending";
-      return zh ? "\u7A7A\u95F2" : "idle";
-    }
-    function debugRenderedViewParts(center) {
-      if (!Array.isArray(center)) return [debugValue("unavailable")];
-      return [
-        debugSep("lon="),
-        debugValue(formatAngle(center[0])),
-        debugSep(" lat="),
-        debugValue(formatAngle(center[1])),
-        debugSep(" roll="),
-        debugValue(formatAngle(center[2] || 0))
-      ];
-    }
-    function debugEulerStateParts(center, active) {
-      if (!active) return [debugValue("inactive")];
-      return [
-        debugSep("longitude="),
-        debugValue(formatAngle(center && center[0])),
-        debugSep(" latitude="),
-        debugValue(formatAngle(center && center[1])),
-        debugSep(" roll="),
-        debugValue(formatAngle(center && center[2]))
-      ];
-    }
-    function debugQuaternionStateParts(rotationStats, active) {
-      if (!active) return [debugValue("inactive")];
-      const q = rotationStats && rotationStats.quaternion ? rotationStats.quaternion : {};
-      return [
-        debugSep("qx="),
-        debugValue(Number(q.x).toFixed(6)),
-        debugSep(" qy="),
-        debugValue(Number(q.y).toFixed(6)),
-        debugSep(" qz="),
-        debugValue(Number(q.z).toFixed(6)),
-        debugSep(" qw="),
-        debugValue(Number(q.w).toFixed(6)),
-        debugSep(" |q|="),
-        debugValue(Number(rotationStats.norm).toFixed(6))
-      ];
-    }
-    function debugPolePointParts(point) {
-      if (!point) return [debugValue("unavailable")];
-      return [
-        debugSep("x="),
-        debugValue(Math.round(point.x)),
-        debugSep(" y="),
-        debugValue(Math.round(point.y)),
-        debugSep(" "),
-        debugValue(point.visible ? "visible" : "unavailable")
-      ];
-    }
-    function debugStatusSummary({ view, poleStats, rotationStats, controlMode, uiMatches }) {
-      const errors = [];
-      const warnings = [];
-      const center = view && view.center;
-      const eulerActive = controlMode === "Euler constrained";
-      const quaternionActive = controlMode === "Quaternion free";
-      if (!uiMatches) errors.push("toggle mismatch");
-      if (!Object.prototype.hasOwnProperty.call(PROJECTION_DEFAULTS, state.projection))
-        errors.push("projection invalid");
-      if (!["horizontal", "equatorial", "ecliptic", "galactic"].includes(state.coordinateSystem))
-        errors.push("coordinate invalid");
-      if (!Array.isArray(center) || center.slice(0, 3).some((value) => !Number.isFinite(Number(value))))
-        errors.push("rendered view non-finite");
-      if (eulerActive && !poleStats.polesDefined) errors.push("poles undefined");
-      if (quaternionActive) {
-        const norm = Number(rotationStats.norm);
-        if (!Number.isFinite(norm) || Math.abs(norm - 1) > 0.05) errors.push("quaternion norm error");
-        else if (Math.abs(norm - 1) > 1e-3) warnings.push("quaternion norm drift");
-      }
-      if (poleStats.guardActive) warnings.push("pole guard active");
-      if (poleStats.polesDefined && (!poleStats.positivePoint || !poleStats.negativePoint))
-        warnings.push("pole projection unavailable");
-      if (eulerActive && Number.isFinite(Number(poleStats.axisAngleDeg)) && Math.abs(Number(poleStats.axisAngleDeg)) > 5)
-        warnings.push("axis not vertical");
-      if (eulerActive && Array.isArray(center) && Math.abs(Number(center[1])) > 85)
-        warnings.push("euler latitude near singularity");
-      const level = errors.length ? "ERROR" : warnings.length ? "WARNING" : "OK";
-      const detail = errors.concat(warnings).join("; ");
-      return detail ? `${level} ${detail}` : level;
-    }
-    function updateDebugOverlay(force = false) {
-      if (!debugVisible && !force) return;
-      const overlay = $("debug-overlay");
-      if (!overlay) return;
-      const content = ensureDebugOverlayStructure(overlay);
-      const zh = state.lang !== "en", bool = (value) => zh ? value ? "\u5F00" : "\u5173" : value ? "on" : "off";
-      const coordName = {
-        horizontal: zh ? "\u5730\u5E73\u5750\u6807" : "horizontal",
-        equatorial: zh ? "\u8D64\u9053\u5750\u6807" : "equatorial",
-        ecliptic: zh ? "\u9EC4\u9053\u5750\u6807" : "ecliptic",
-        galactic: zh ? "\u94F6\u6CB3\u5750\u6807" : "galactic"
-      }[state.coordinateSystem] || state.coordinateSystem, cultureLabel = {
-        western: zh ? "\u897F\u65B9\u661F\u5EA7" : "western",
-        chinese: zh ? "\u4E2D\u56FD\u661F\u5B98" : "chinese",
-        both: zh ? "\u4E24\u8005\u540C\u65F6\u663E\u793A" : "both"
-      }[state.cultureMode] || state.cultureMode, languageName = state.lang === "zh" ? "\u4E2D\u6587" : "English", view = debugCurrentView(), viewCenter = view.center ? [
-        zh ? "\u7ECF\u5411\u4E2D\u5FC3" : "longitude center",
-        formatAngle(view.center[0]),
-        zh ? "\u7EAC\u5411\u4E2D\u5FC3" : "latitude center",
-        formatAngle(view.center[1]),
-        zh ? "\u65CB\u8F6C\u89D2" : "roll",
-        formatAngle(view.center[2] || 0)
-      ].join(" ") : "-", detailName = {
-        major: zh ? "\u4E3B\u8981\u5929\u533A" : "major",
-        battlefields: zh ? "\u4E3B\u9898\u6218\u573A" : "battlefields",
-        mansions: zh ? "\u4E8C\u5341\u516B\u5BBF" : "mansions"
-      }[state.traditionalDetail] || state.traditionalDetail, label = zh ? {
-        viewportGroup: "\u3010\u6D4F\u89C8\u5668\u89C6\u53E3 / \u661F\u56FE\u533A\u3011",
-        canvasGroup: "\u3010\u661F\u56FE\u753B\u5E03\u5C3A\u5BF8\u6A21\u578B\u3011",
-        viewGroup: "\u3010\u89C6\u89D2\u4E0E\u6295\u5F71\u72B6\u6001\u3011",
-        interactionGroup: "\u3010\u5929\u7403\u4EA4\u4E92\u53C2\u6570\u3011",
-        rotationGroup: "\u3010\u65CB\u8F6C\u63A7\u5236 / Rotation\u3011",
-        layerGroup: "\u3010\u56FE\u5C42\u4E0E\u663E\u793A\u9009\u9879\u3011",
-        viewport: "\u6D4F\u89C8\u5668\u89C6\u53E3 window",
-        layoutMode: "\u5F53\u524D\u54CD\u5E94\u5F0F\u5E03\u5C40\u6A21\u5F0F",
-        pointer: "\u6307\u9488\u7C7B\u578B",
-        hover: "hover \u80FD\u529B",
-        sidebar: "\u5DE6\u4FA7\u83DC\u5355 #sidebar",
-        panelToggle: "\u83DC\u5355\u6309\u94AE #panel-toggle",
-        debugOverlay: "\u8C03\u8BD5\u9762\u677F #debug-overlay",
-        pane: "\u661F\u56FE\u533A\u53EF\u7528\u533A\u57DF #sky-pane",
-        stage: "\u661F\u56FE\u80CC\u666F\u5C42 #sky-stage",
-        frame: "\u661F\u56FE\u5BB9\u5668\u5916\u6846 #celestial-frame",
-        map: "D3-Celestial \u5730\u56FE\u5BB9\u5668 #celestial-map",
-        mapComputedMinWidth: "#celestial-map \u8BA1\u7B97\u540E min-width",
-        canvasCss: "\u771F\u5B9E\u661F\u56FE\u753B\u5E03 CSS \u5C3A\u5BF8",
-        canvasCenter: "Canvas \u4E2D\u5FC3",
-        canvasCenterDelta: "Canvas \u4E2D\u5FC3\u76F8\u5BF9\u80CC\u666F\u4E2D\u5FC3\u504F\u5DEE",
-        canvasAttr: "\u771F\u5B9E\u661F\u56FE\u753B\u5E03\u50CF\u7D20\u5206\u8FA8\u7387",
-        svgCss: "SVG \u56FE\u5C42 CSS \u5C3A\u5BF8",
-        sizeConsistency: "map / canvas / svg \u5C3A\u5BF8\u4E00\u81F4\u6027",
-        dpr: "\u8BBE\u5907\u50CF\u7D20\u6BD4 DPR",
-        paneCenter: "\u80CC\u666F\u4E2D\u5FC3",
-        targetMap: "\u76EE\u6807\u5730\u56FE\u5C3A\u5BF8",
-        baseShortSide: "\u57FA\u51C6\u77ED\u8FB9",
-        projectionRatio: "\u6295\u5F71\u81EA\u7136\u5BBD\u9AD8\u6BD4",
-        mapScale: "\u5E94\u7528\u5C42\u753B\u5E03\u7F29\u653E",
-        internalZoom: "D3 \u5185\u90E8\u7F29\u653E",
-        overflow: "\u53EF\u88AB\u88C1\u526A\u7684\u8D85\u51FA\u8303\u56F4",
-        mapCenter: "\u5730\u56FE\u4E2D\u5FC3",
-        centerDelta: "\u5730\u56FE\u4E2D\u5FC3\u76F8\u5BF9\u80CC\u666F\u4E2D\u5FC3\u504F\u5DEE",
-        celestial: "Celestial \u5185\u90E8\u5C3A\u5BF8",
-        renderMode: "\u6E32\u67D3\u6A21\u5F0F",
-        viewportTriggerRule: "VIEWPORT_CANVAS \u89E6\u53D1\u6761\u4EF6",
-        viewportTriggerResult: "\u89E6\u53D1\u7ED3\u679C",
-        baseSkySize: "\u57FA\u7840\u661F\u56FE\u5C3A\u5BF8",
-        virtualSkySize: "\u865A\u62DF\u661F\u56FE\u5C3A\u5BF8",
-        canvasCssTarget: "Canvas CSS \u76EE\u6807\u5C3A\u5BF8",
-        canvasBitmapTarget: "Canvas bitmap \u76EE\u6807\u5C3A\u5BF8",
-        starStats: "\u6052\u661F\u7EDF\u8BA1",
-        loadedStars: "\u5DF2\u52A0\u8F7D\u6052\u661F\u603B\u6570",
-        starsWithinMagnitude: "\u9608\u503C\u5185\u6052\u661F\u6570",
-        projection: "\u5F53\u524D\u6295\u5F71",
-        coords: "\u5F53\u524D\u5750\u6807\u89C6\u89D2",
-        culture: "\u5F53\u524D\u661F\u7A7A\u4F53\u7CFB",
-        language: "\u8BED\u8A00",
-        viewKey: "\u89C6\u89D2\u4FDD\u5B58\u952E",
-        viewCenter: "\u5F53\u524D\u5B9E\u9645\u89C6\u89D2\u4E2D\u5FC3 lon / lat / roll",
-        interaction: "\u62D6\u52A8/\u70B9\u51FB\u72B6\u6001",
-        dragMoved: "\u5DF2\u8D85\u8FC7\u62D6\u52A8\u9608\u503C",
-        clickPending: "\u70B9\u51FB\u5224\u5B9A\u4E2D",
-        dragThreshold: "\u70B9\u51FB/\u62D6\u52A8\u9608\u503C",
-        dragSensitivity: "\u62D6\u52A8\u7075\u654F\u5EA6",
-        debugStatus: "Status",
-        lastAction: "Last action",
-        viewControlMode: "\u89C6\u89D2\u63A7\u5236\u6A21\u5F0F",
-        poleAxisConstraint: "\u5929\u6781\u4E2D\u8F74\u7EA6\u675F",
-        renderedViewState: "Rendered View State",
-        eulerState: "Euler State",
-        quaternionState: "Quaternion State",
-        keyboardPan: "Keyboard pan",
-        pressedArrowKeys: "Pressed arrow keys",
-        poleGuard: "\u6781\u533A\u4FDD\u62A4",
-        poleGuardReason: "\u6781\u533A\u4FDD\u62A4\u539F\u56E0",
-        poleGuardThreshold: "\u4FDD\u62A4\u9608\u503C",
-        pointerPositivePoleDistance: "\u9F20\u6807\u5230\u6B63\u6781\u89D2\u8DDD\u79BB",
-        pointerNegativePoleDistance: "\u9F20\u6807\u5230\u8D1F\u6781\u89D2\u8DDD\u79BB",
-        currentPoles: "\u5F53\u524D\u5750\u6807\u89C6\u89D2\u6781\u70B9",
-        positivePolePoint: "\u6B63\u6781\u5C4F\u5E55\u5750\u6807",
-        negativePolePoint: "\u8D1F\u6781\u5C4F\u5E55\u5750\u6807",
-        poleCenterline: "\u5C4F\u5E55\u4E2D\u8F74\u7EBF x",
-        poleDx: "\u6B63\u6781 dx / \u8D1F\u6781 dx",
-        poleAxisAngle: "\u6781\u8F74\u5C4F\u5E55\u89D2\u5EA6",
-        poleAxisAngleRule: "\u6781\u8F74\u89D2\u5EA6\u5B9A\u4E49",
-        displayOptions: "\u663E\u793A\u9009\u9879",
-        starLimit: "\u6052\u661F\u6700\u6697\u661F\u7B49",
-        starSize: "\u6052\u661F\u5927\u5C0F",
-        starNames: "\u91CD\u8981\u6052\u661F\u540D\u79F0",
-        cultureLines: "\u661F\u5EA7/\u661F\u5B98\u8FDE\u7EBF",
-        cultureNames: "\u661F\u5EA7/\u661F\u5B98\u540D\u79F0",
-        planets: "\u592A\u9633\u3001\u6708\u7403\u4E0E\u884C\u661F",
-        milkyWay: "\u94F6\u6CB3\u8F6E\u5ED3",
-        grid: "\u8D64\u9053\u5750\u6807\u7F51",
-        horizontalGrid: "\u5730\u5E73\u5750\u6807\u7F51",
-        ecliptic: "\u9EC4\u9053",
-        equator: "\u5929\u7403\u8D64\u9053",
-        horizon: "\u5730\u5E73\u7EBF",
-        nightVision: "\u591C\u89C6\u7EA2\u5149",
-        deepSky: "\u4EAE\u6DF1\u7A7A\u5929\u4F53",
-        floatingInfo: "\u661F\u4F53\u4FE1\u606F\u6D6E\u7A97",
-        fontScale: "\u5168\u5C40\u5B57\u4F53\u7F29\u653E",
-        regionBoundaries: "\u4E2D\u56FD\u4F20\u7EDF\u5929\u533A\u8FB9\u754C",
-        detail: "\u4F20\u7EDF\u5929\u533A\u5C42\u7EA7",
-        time: "\u65F6\u95F4\u63A8\u8FDB",
-        speed: "\u65F6\u95F4\u6D41\u901F",
-        playing: "\u64AD\u653E\u72B6\u6001",
-        panelOpen: "\u5DE6\u4FA7\u83DC\u5355\u5C55\u5F00",
-        skyReady: "\u661F\u56FE\u5C31\u7EEA",
-        rebuild: "\u91CD\u5EFA\u4E2D"
-      } : {
-        viewportGroup: "\u3010Viewport / Pane\u3011",
-        canvasGroup: "\u3010Canvas Layout Model\u3011",
-        viewGroup: "\u3010View & Projection State\u3011",
-        interactionGroup: "\u3010Celestial Interaction\u3011",
-        rotationGroup: "\u3010Rotation Control\u3011",
-        layerGroup: "\u3010Layers & Display Options\u3011",
-        viewport: "browser viewport window",
-        layoutMode: "responsive layout mode",
-        pointer: "pointer type",
-        hover: "hover capability",
-        sidebar: "sidebar #sidebar",
-        panelToggle: "panel toggle #panel-toggle",
-        debugOverlay: "debug overlay #debug-overlay",
-        pane: "sky pane #sky-pane",
-        stage: "stage #sky-stage",
-        frame: "frame #celestial-frame",
-        map: "D3-Celestial map #celestial-map",
-        mapComputedMinWidth: "#celestial-map computed min-width",
-        canvasCss: "real sky canvas CSS size",
-        canvasCenter: "canvas center",
-        canvasCenterDelta: "canvas center delta from pane",
-        canvasAttr: "real sky canvas pixel size",
-        svgCss: "SVG layer CSS size",
-        sizeConsistency: "map / canvas / svg size consistency",
-        dpr: "device pixel ratio DPR",
-        paneCenter: "pane center",
-        targetMap: "target map size",
-        baseShortSide: "base short side",
-        projectionRatio: "projection natural ratio",
-        mapScale: "app map scale",
-        internalZoom: "D3 internal zoom",
-        overflow: "croppable overflow",
-        mapCenter: "map center",
-        centerDelta: "map center delta from pane",
-        celestial: "celestial metrics",
-        renderMode: "render mode",
-        viewportTriggerRule: "VIEWPORT_CANVAS trigger rule",
-        viewportTriggerResult: "trigger result",
-        baseSkySize: "base sky size",
-        virtualSkySize: "virtual sky size",
-        canvasCssTarget: "Canvas CSS target size",
-        canvasBitmapTarget: "Canvas bitmap target size",
-        starStats: "star statistics",
-        loadedStars: "loaded stars",
-        starsWithinMagnitude: "stars within threshold",
-        projection: "current projection",
-        coords: "current coordinate view",
-        culture: "current sky culture",
-        language: "language",
-        viewKey: "saved view key",
-        viewCenter: "current rendered center lon / lat / roll",
-        interaction: "drag/click mode",
-        dragMoved: "drag threshold crossed",
-        clickPending: "click pending",
-        dragThreshold: "click/drag threshold",
-        dragSensitivity: "drag sensitivity",
-        debugStatus: "Status",
-        lastAction: "Last action",
-        viewControlMode: "view control mode",
-        poleAxisConstraint: "pole-axis constraint",
-        renderedViewState: "Rendered View State",
-        eulerState: "Euler State",
-        quaternionState: "Quaternion State",
-        keyboardPan: "Keyboard pan",
-        pressedArrowKeys: "Pressed arrow keys",
-        poleGuard: "pole guard",
-        poleGuardReason: "pole guard reason",
-        poleGuardThreshold: "guard thresholds",
-        pointerPositivePoleDistance: "pointer to positive pole",
-        pointerNegativePoleDistance: "pointer to negative pole",
-        currentPoles: "current coordinate poles",
-        positivePolePoint: "positive pole screen point",
-        negativePolePoint: "negative pole screen point",
-        poleCenterline: "screen centerline x",
-        poleDx: "positive dx / negative dx",
-        poleAxisAngle: "pole-axis screen angle",
-        poleAxisAngleRule: "axis angle rule",
-        displayOptions: "display options",
-        starLimit: "stellar magnitude limit",
-        starSize: "star size",
-        starNames: "important star names",
-        cultureLines: "constellation/asterism lines",
-        cultureNames: "constellation/asterism names",
-        planets: "Sun, Moon and planets",
-        milkyWay: "Milky Way outline",
-        grid: "equatorial grid",
-        horizontalGrid: "horizontal grid",
-        ecliptic: "ecliptic",
-        equator: "celestial equator",
-        horizon: "horizon",
-        nightVision: "red night vision",
-        deepSky: "bright deep-sky objects",
-        floatingInfo: "floating object info",
-        fontScale: "global font scale",
-        regionBoundaries: "Chinese traditional region boundaries",
-        detail: "detail",
-        time: "time advance",
-        speed: "speed",
-        playing: "playback",
-        panelOpen: "panelOpen",
-        skyReady: "skyReady",
-        rebuild: "rebuild"
-      };
-      const pane = $("sky-pane"), canvas = document.querySelector("#celestial-map canvas"), svg = document.querySelector("#celestial-map svg"), metrics = projectionCanvasMetrics2(), starMagnitudeStats = currentStarMagnitudeStats(), rotationStats = rotationController.debugState(), celestialMetrics = window.Celestial && typeof Celestial.metrics === "function" ? Celestial.metrics() : null;
-      const paneRect = pane ? pane.getBoundingClientRect() : null, sidebarRect = elementRect2("#sidebar"), panelToggleRect = elementRect2("#panel-toggle"), overlayRect = overlay.getBoundingClientRect(), stageRect = elementRect2("#sky-stage"), frameRect = elementRect2("#celestial-frame"), mapRect = elementRect2("#celestial-map"), canvasRect3 = canvas ? canvas.getBoundingClientRect() : null, svgRect = svg ? svg.getBoundingClientRect() : null, paneCenter = paneRect ? {
-        x: paneRect.left + paneRect.width / 2,
-        y: paneRect.top + paneRect.height / 2
-      } : null, mapCenter = mapRect ? {
-        x: mapRect.left + mapRect.width / 2,
-        y: mapRect.top + mapRect.height / 2
-      } : null, canvasCenter = canvasRect3 ? {
-        x: canvasRect3.left + canvasRect3.width / 2,
-        y: canvasRect3.top + canvasRect3.height / 2
-      } : null, centerDelta = paneCenter && mapCenter ? { x: mapCenter.x - paneCenter.x, y: mapCenter.y - paneCenter.y } : null, canvasCenterDelta = paneCenter && canvasCenter ? {
-        x: canvasCenter.x - paneCenter.x,
-        y: canvasCenter.y - paneCenter.y
-      } : null;
-      const pointerInfo = debugPointerInfo(zh), mapStyle = mapRect ? getComputedStyle($("celestial-map")) : null, sameSize = (a, b) => !a || !b || Math.abs(a.width - b.width) <= 1 && Math.abs(a.height - b.height) <= 1, matchesTarget = (rect) => !rect || Math.abs(rect.width - metrics.width) <= 1 && Math.abs(rect.height - metrics.height) <= 1, sizesOk = matchesTarget(mapRect) && matchesTarget(canvasRect3) && matchesTarget(svgRect) && sameSize(mapRect, canvasRect3) && sameSize(canvasRect3, svgRect);
-      const controlMode = currentViewControlMode(), eulerActive = controlMode === "Euler constrained", quaternionActive = controlMode === "Quaternion free", poleToggle = $("pole-axis-constraint"), poleToggleMatchesState = !poleToggle || !!poleToggle.checked === poleAxisConstraintEnabled(), debugPointerCoord = debugPointerActive ? debugPointerSkyCoord : null;
-      const poleStats = updatePoleAxisDebug(
-        debugPointerCoord,
-        view.center,
-        poleAxisDebug.guardActive ? "guard-active" : eulerActive ? "euler-constrained" : "quaternion-free"
-      );
-      const debugStatus = debugStatusSummary({
-        view,
-        poleStats,
-        rotationStats,
-        controlMode,
-        uiMatches: poleToggleMatchesState
-      });
-      overlay.style.display = debugVisible ? "block" : "none";
-      content.replaceChildren(
-        debugGroup(label.viewportGroup),
-        debugLine(
-          label.viewport,
-          debugSizeParts(window.innerWidth, window.innerHeight)
-        ),
-        debugLine(
-          zh ? "\u6587\u6863\u89C6\u53E3 documentElement" : "documentElement viewport",
-          debugSizeParts(document.documentElement.clientWidth, document.documentElement.clientHeight)
-        ),
-        debugLine(
-          zh ? "visualViewport \u5C3A\u5BF8" : "visualViewport size",
-          window.visualViewport ? debugSizeParts(window.visualViewport.width, window.visualViewport.height) : [debugValue("-")]
-        ),
-        debugLine(
-          zh ? "visualViewport scale/offset" : "visualViewport scale/offset",
-          window.visualViewport ? [
-            debugSep("scale="),
-            debugValue(Number(window.visualViewport.scale || 1).toFixed(3)),
-            debugSep(" offset="),
-            debugValue(Math.round(window.visualViewport.offsetLeft || 0)),
-            debugSep(","),
-            debugValue(Math.round(window.visualViewport.offsetTop || 0))
-          ] : [debugValue("-")]
-        ),
-        debugLine(zh ? "\u5C4F\u5E55 screen" : "screen", debugSizeParts(screen.width, screen.height)),
-        debugLine(zh ? "\u5C4F\u5E55\u65B9\u5411" : "orientation", [debugValue(screen.orientation?.type || String(window.orientation ?? "-"))]),
-        debugLine(zh ? "\u6700\u540E resize \u6765\u6E90" : "last resize source", [debugValue(mobileResizeDebug.lastSource)]),
-        debugLine(zh ? "\u6700\u540E resize \u72B6\u6001" : "last resize status", [debugValue(mobileResizeDebug.lastStatus)]),
-        debugLine(zh ? "\u6700\u540E resize \u65F6\u95F4" : "last resize time", [debugValue(mobileResizeDebug.lastAt)]),
-        debugLine(zh ? "\u6700\u540E resize \u9519\u8BEF" : "last resize error", [debugValue(mobileResizeDebug.lastError)]),
-        debugLine(label.dpr, [
-          debugValue(Number(window.devicePixelRatio || 1).toFixed(2))
-        ]),
-        debugLine(label.layoutMode, [debugValue(debugResponsiveMode())]),
-        debugLine(label.pointer, [debugValue(pointerInfo.pointer)]),
-        debugLine(label.hover, [debugValue(pointerInfo.hover)]),
-        debugLine(label.sidebar, debugRectParts(sidebarRect)),
-        debugLine(label.panelToggle, debugRectParts(panelToggleRect)),
-        debugLine(label.debugOverlay, debugRectParts(overlayRect)),
-        debugLine(label.pane, debugRectParts(paneRect)),
-        debugLine(label.stage, debugRectParts(stageRect)),
-        debugLine(label.frame, debugRectParts(frameRect)),
-        debugBlankLine(),
-        debugGroup(label.canvasGroup),
-        debugLine(label.targetMap, debugSizeParts(metrics.width, metrics.height)),
-        debugLine(label.baseShortSide, [
-          debugValue(metrics.baseShortSide),
-          debugUnit("px")
-        ]),
-        debugLine(label.projectionRatio, [
-          debugValue(Number(metrics.ratio || 0).toFixed(3))
-        ]),
-        debugLine(label.mapScale, debugScaleParts(metrics.scale)),
-        debugLine(label.renderMode, [debugValue(metrics.renderMode || "FULL")]),
-        debugLine(label.viewportTriggerRule, [
-          debugValue("virtualSkyWidth > viewportWidth && virtualSkyHeight > viewportHeight")
-        ]),
-        debugLine(label.viewportTriggerResult, debugBoolParts(!!metrics.viewportTrigger)),
-        debugLine(label.baseSkySize, debugSizeParts(metrics.baseWidth, metrics.baseHeight)),
-        debugLine(label.virtualSkySize, debugSizeParts(metrics.virtualWidth, metrics.virtualHeight)),
-        debugLine(label.canvasCssTarget, debugSizeParts(metrics.canvasCssWidth, metrics.canvasCssHeight)),
-        debugLine(label.canvasBitmapTarget, debugSizeParts(metrics.canvasBitmapWidth, metrics.canvasBitmapHeight)),
-        debugLine(label.overflow, [
-          debugSep("X="),
-          debugValue(Math.round(metrics.overflowX)),
-          debugUnit("px"),
-          debugSep(" Y="),
-          debugValue(Math.round(metrics.overflowY)),
-          debugUnit("px")
-        ]),
-        debugLine(label.paneCenter, debugPointParts(paneCenter)),
-        debugLine(label.mapCenter, debugPointParts(mapCenter)),
-        debugLine(label.centerDelta, debugCenterDeltaParts(centerDelta, formatSigned)),
-        debugLine(label.canvasCenter, debugPointParts(canvasCenter)),
-        debugLine(
-          label.canvasCenterDelta,
-          debugCenterDeltaParts(canvasCenterDelta, formatSigned)
-        ),
-        debugLine(label.map, debugRectParts(mapRect)),
-        debugLine(label.mapComputedMinWidth, [
-          debugValue(mapStyle ? mapStyle.minWidth : "-")
-        ]),
-        debugLine(label.canvasCss, debugRectParts(canvasRect3)),
-        debugLine(
-          label.canvasAttr,
-          canvas ? debugSizeParts(canvas.width, canvas.height) : [debugValue("-")]
-        ),
-        debugLine(label.svgCss, debugRectParts(svgRect)),
-        debugLine(label.sizeConsistency, [debugMetricStatus(sizesOk, zh)]),
-        debugLine(
-          label.celestial,
-          celestialMetrics ? [
-            ...debugSizeParts(
-              celestialMetrics.width,
-              celestialMetrics.height
-            ),
-            debugSep(" scale="),
-            debugValue(Number(celestialMetrics.scale || 0).toFixed(2))
-          ] : [debugValue("-")]
-        ),
-        debugBlankLine(),
-        debugGroup(label.viewGroup),
-        debugLine(label.projection, [debugValue(state.projection)]),
-        debugLine(label.coords, [debugValue(coordName)]),
-        debugLine(label.culture, [debugValue(cultureLabel)]),
-        debugLine(label.language, [debugValue(languageName)]),
-        debugLine(label.viewKey, [debugValue(viewKey2())]),
-        debugLine(label.viewCenter, [debugValue(viewCenter)]),
-        debugLine(label.mapScale, debugScaleParts(view.mapScale)),
-        debugLine(label.internalZoom, debugScaleParts(view.internalZoom)),
-        debugBlankLine(),
-        debugGroup(zh ? "\u6570\u636E\u4E0E\u65F6\u95F4" : "Data & time"),
-        debugLine(zh ? "\u6570\u636E\u6A21\u5F0F" : "data mode", [
-          debugValue(window.__RSO_DATA_MODE__ || "unknown")
-        ]),
-        debugLine(zh ? "\u6CE8\u518C\u6570\u636E\u96C6" : "registered datasets", [
-          debugValue(
-            Object.keys(window.__RSO_LOCAL_DATA__ || {}).filter(
-              (key) => key.includes("/") && key.endsWith(".json") && !key.startsWith("src/data/")
-            ).length
-          )
-        ]),
-        debugLine(label.starStats, [debugValue(zh ? "\u5F53\u524D\u661F\u7B49\u9608\u503C\u5BF9\u5E94\u6570\u91CF" : "current magnitude threshold count")]),
-        debugLine(label.loadedStars, [debugValue(starMagnitudeStats.loadedStars)]),
-        debugLine(label.starLimit, [
-          debugValue(Number(starMagnitudeStats.threshold || 0).toFixed(2))
-        ]),
-        debugLine(label.starsWithinMagnitude, [debugValue(starMagnitudeStats.starsWithinMagnitude)]),
-        debugLine(zh ? "\u5F53\u524D\u65F6\u533A" : "current time zone", [
-          debugValue(timeRenderDebug.timezone || state.zone || "-")
-        ]),
-        debugLine(zh ? "\u672C\u5730 UTC \u504F\u79FB" : "local UTC offset", [
-          debugValue(timeRenderDebug.utcOffset || "-")
-        ]),
-        debugLine(zh ? "\u504F\u79FB\u6765\u6E90" : "offset source", [
-          debugValue(debugOffsetNoteValue(timeRenderDebug.utcOffsetNote, zh))
-        ]),
-        debugLine(zh ? "\u65F6\u95F4\u8F93\u5165\u72B6\u6001" : "time input state", [
-          debugValue(timeRenderDebug.inputStatus || "-"),
-          debugSep(" field="),
-          debugValue(timeRenderDebug.activeField || "-")
-        ]),
-        debugLine(zh ? "\u8F93\u5165\u5B57\u6BB5" : "input fields", [
-          debugValue(timeRenderDebug.fields || timeFieldDebugText2())
-        ]),
-        debugLine(zh ? "\u5F53\u524D\u6709\u6548\u65F6\u95F4" : "active time", [
-          debugValue(timeRenderDebug.activeDisplay || "-")
-        ]),
-        debugLine(zh ? "\u5F53\u524D\u6709\u6548 UTC" : "active UTC", [
-          debugValue(timeRenderDebug.activeUtc || state.instant || "-")
-        ]),
-        debugLine(zh ? "\u5F53\u524D\u6709\u6548 JS \u5E74\u4EFD" : "active JS Date year", [
-          debugValue(timeRenderDebug.activeJsDateYear || "-")
-        ]),
-        debugLine(zh ? "\u5019\u9009\u65F6\u95F4" : "candidate time", [
-          debugValue(timeRenderDebug.candidate || "-")
-        ]),
-        debugLine(zh ? "\u5019\u9009 UTC" : "candidate UTC", [
-          debugValue(timeRenderDebug.candidateUtc || "-")
-        ]),
-        debugLine(zh ? "\u5019\u9009 JS \u5E74\u4EFD" : "candidate JS Date year", [
-          debugValue(timeRenderDebug.candidateJsDateYear || "-")
-        ]),
-        debugLine(zh ? "\u6700\u8FD1\u5931\u8D25\u5019\u9009" : "last failed candidate", [
-          debugValue(timeRenderDebug.lastFailedCandidate || "-")
-        ]),
-        debugLine(zh ? "Julian Date" : "Julian Date", [
-          debugValue(timeRenderDebug.julianDate || "-")
-        ]),
-        debugLine(zh ? "\u66F4\u65B0\u65F6\u95F4\u6765\u6E90" : "time update source", [
-          debugValue(timeRenderDebug.updateSource || "-")
-        ]),
-        debugLine(zh ? "\u65F6\u95F4\u5237\u65B0\u94FE\u8DEF" : "time refresh health", [
-          debugValue(debugRefreshHealthValue(timeRenderDebug.refreshHealth, zh))
-        ]),
-        debugLine(zh ? "skyview \u72B6\u6001" : "skyview status", [
-          debugValue(timeRenderDebug.skyviewStatus || "-")
-        ]),
-        debugLine(zh ? "\u5730\u5E73 fallback" : "horizontal fallback", [
-          debugValue(timeRenderDebug.fallbackStatus || "-")
-        ]),
-        debugLine(zh ? "redraw \u72B6\u6001" : "redraw status", [
-          debugValue(timeRenderDebug.redrawStatus || "-"),
-          debugSep(" reason="),
-          debugValue(timeRenderDebug.redrawReason || "-")
-        ]),
-        debugLine(zh ? "redraw \u65F6\u95F4" : "redraw at", [
-          debugValue(timeRenderDebug.redrawAt || "-")
-        ]),
-        debugLine(zh ? "\u661F\u56FE\u5237\u65B0\u8017\u65F6" : "sky redraw duration", [
-          debugSep("sync="),
-          debugValue(timeRenderDebug.fixedLayerSyncMs || "-"),
-          debugSep(" redraw="),
-          debugValue(timeRenderDebug.celestialRedrawMs || "-"),
-          debugSep(" total="),
-          debugValue(timeRenderDebug.redrawTotalMs || "-")
-        ]),
-        debugLine(zh ? "follow-up \u5237\u65B0\u8017\u65F6" : "follow-up redraw duration", [
-          debugSep("sync="),
-          debugValue(timeRenderDebug.followUpFixedLayerSyncMs || "-"),
-          debugSep(" redraw="),
-          debugValue(timeRenderDebug.followUpCelestialRedrawMs || "-"),
-          debugSep(" total="),
-          debugValue(timeRenderDebug.followUpRedrawTotalMs || "-")
-        ]),
-        debugLine(zh ? "rollback \u72B6\u6001" : "rollback status", [
-          debugValue(timeRenderDebug.rollbackStatus || "-")
-        ]),
-        debugLine(zh ? "\u884C\u661F\u8BA1\u7B97" : "planet calculation", [
-          debugValue(timeRenderDebug.planetStatus || "-"),
-          debugSep(" count="),
-          debugValue(timeRenderDebug.planetCount)
-        ]),
-        debugLine(zh ? "\u8FDC\u65E5\u671F\u7CBE\u5EA6" : "date precision", [
-          debugValue(timeRenderDebug.precision || "-")
-        ]),
-        debugLine(zh ? "\u5DF2\u6062\u590D\u7684 skyview \u539F\u59CB\u9519\u8BEF" : "recovered skyview original error", [
-          debugValue(timeRenderDebug.recoveredOriginalError || "-")
-        ]),
-        debugLine(zh ? "\u5F53\u524D\u81F4\u547D\u9519\u8BEF" : "current fatal error", [
-          debugValue(timeRenderDebug.currentFatalError || "-")
-        ]),
-        debugLine(zh ? "\u9519\u8BEF\u9636\u6BB5" : "error stage", [
-          debugValue(timeRenderDebug.errorStage || "-")
-        ]),
-        debugLine(zh ? "\u9519\u8BEF\u5806\u6808\u6458\u8981" : "error stack summary", [
-          debugValue(timeRenderDebug.errorStack || "-")
-        ]),
-        debugBlankLine(),
-        debugGroup(zh ? "\u5929\u6587\u6A21\u578B / \u5386\u5143\u4E00\u81F4\u6027" : "Astronomy model / epoch consistency"),
-        debugLine(zh ? "\u6E90\u6570\u636E\u5386\u5143" : "source epoch", [
-          debugValue(astronomyModelDebug.sourceEpoch || "-")
-        ]),
-        debugLine(zh ? "\u663E\u793A\u5386\u5143" : "display epoch", [
-          debugValue(astronomyModelDebug.displayEpoch || "-")
-        ]),
-        debugLine(zh ? "\u5C81\u5DEE\u72B6\u6001" : "precession", [
-          debugValue(astronomyModelDebug.precessionStatus || "-")
-        ]),
-        debugLine(zh ? "\u5C81\u5DEE\u6A21\u578B" : "precession model", [
-          debugValue(astronomyModelDebug.precessionModel || "-")
-        ]),
-        debugLine(zh ? "\u7AE0\u52A8 / \u81EA\u884C / \u6298\u5C04" : "nutation / proper motion / refraction", [
-          debugValue(`${astronomyModelDebug.nutation} / ${astronomyModelDebug.properMotion} / ${astronomyModelDebug.refraction}`)
-        ]),
-        debugLine(zh ? "J2000 \u8D77\u7B97\u5112\u7565\u4E16\u7EAA T" : "Julian centuries from J2000", [
-          debugValue(astronomyModelDebug.julianCenturiesT || "-")
-        ]),
-        debugLine(zh ? "\u5E73\u5747\u9EC4\u8D64\u4EA4\u89D2" : "mean obliquity", [
-          debugValue(astronomyModelDebug.meanObliquity || "-")
-        ]),
-        debugLine(zh ? "\u9EC4\u9053\u6A21\u578B" : "ecliptic model", [
-          debugValue(astronomyModelDebug.eclipticModel || "-")
-        ]),
-        debugLine(zh ? "\u592A\u9633\u7B97\u6CD5" : "sun model", [
-          debugValue(astronomyModelDebug.sunModel || "-")
-        ]),
-        debugLine(zh ? "\u6708\u4EAE\u7B97\u6CD5" : "moon model", [
-          debugValue(astronomyModelDebug.moonModel || "-")
-        ]),
-        debugLine(zh ? "\u6708\u76F8\u7B97\u6CD5" : "moon phase model", [
-          debugValue(astronomyModelDebug.moonPhaseModel || "-")
-        ]),
-        debugLine("VSOP87", [debugValue(astronomyModelDebug.vsop87 || "-")]),
-        debugLine(zh ? "\u7CBE\u5EA6\u8FB9\u754C" : "precision", [
-          debugValue(astronomyModelDebug.precisionBoundary || "-")
-        ]),
-        debugLine(zh ? "\u884C\u661F\u7B97\u6CD5" : "planet model", [
-          debugValue(astronomyModelDebug.planetModel || "-")
-        ]),
-        debugLine(zh ? "\u884C\u661F\u5386\u5143\u5904\u7406" : "planet epoch handling", [
-          debugValue(astronomyModelDebug.planetEpochHandling || "-")
-        ]),
-        debugLine(zh ? "\u56FA\u5B9A\u56FE\u5C42\u5C81\u5DEE" : "fixed layer precession", [
-          debugValue(astronomyModelDebug.fixedLayerPrecession || "-")
-        ]),
-        debugLine(zh ? "\u8FB9\u754C / \u661F\u5B98\u5C81\u5DEE" : "boundary / asterism precession", [
-          debugValue(`${astronomyModelDebug.boundaryPrecession || "-"} / ${astronomyModelDebug.asterismPrecession || "-"}`)
-        ]),
-        debugLine(zh ? "\u641C\u7D22/\u62FE\u53D6\u5750\u6807\u6846\u67B6" : "search/pick coordinate frame", [
-          debugValue(astronomyModelDebug.searchPickFrame || "-")
-        ]),
-        debugLine(zh ? "localStorage schema" : "localStorage schema", [
-          debugValue(astronomyModelDebug.storageSchemaVersion || "-")
-        ]),
-        debugLine(zh ? "\u5929\u6587\u6A21\u578B\u7248\u672C" : "astronomy model version", [
-          debugValue(astronomyModelDebug.astronomyModelVersion || "-")
-        ]),
-        debugLine(zh ? "\u7F13\u5B58\u8FC1\u79FB\u72B6\u6001" : "cache migration", [
-          debugValue(astronomyModelDebug.cacheMigration || "-")
-        ]),
-        debugLine(zh ? "\u6700\u540E\u5C81\u5DEE\u8F6C\u6362\u9519\u8BEF" : "last precession error", [
-          debugValue(astronomyModelDebug.lastPrecessionError || "-")
-        ]),
-        debugBlankLine(),
-        debugGroup(label.interactionGroup),
-        debugLine(label.interaction, [debugValue(debugDragMode(zh))]),
-        // 不显示 dragDeltaX / dragDeltaY / appliedDelta 等瞬时值：它们变化太快，
-        // 人工观察和截图反馈都很难使用，还会增加 Debug 刷新时的 DOM 重写负担。
-        debugLine(label.dragMoved, [
-          debugValue(bool(pointerMoved)),
-          debugSep(` ${label.clickPending}=`),
-          debugValue(bool(!!clickStart))
-        ]),
-        debugLine(label.dragThreshold, [
-          debugValue(cfg("interaction.dragThreshold", 5)),
-          debugUnit("px")
-        ]),
-        debugLine(label.dragSensitivity, [
-          debugValue(cfg("interaction.dragSensitivity", 1))
-        ]),
-        debugBlankLine(),
-        debugGroup(label.rotationGroup),
-        debugLine(label.debugStatus, [debugValue(debugStatus)]),
-        debugLine(label.lastAction, [debugValue(debugLastAction || "none")]),
-        debugLine(label.poleAxisConstraint, [
-          debugValue(poleAxisConstraintEnabled() ? "ON" : "OFF"),
-          debugSep(" ui="),
-          debugValue(poleToggle ? poleToggle.checked ? "ON" : "OFF" : "unavailable")
-        ]),
-        debugLine(label.viewControlMode, [
-          debugValue(controlMode),
-          debugSep(" actual-branch")
-        ]),
-        // Debug 里分开最终渲染视角、欧拉状态和四元数状态：渲染视角来自
-        // Celestial.rotate()，欧拉/四元数只在各自控制模式 active 时显示，避免旧缓存误导。
-        debugLine(label.renderedViewState, debugRenderedViewParts(view.center)),
-        debugLine(label.eulerState, debugEulerStateParts(view.center, eulerActive)),
-        debugLine(label.quaternionState, debugQuaternionStateParts(rotationStats, quaternionActive)),
-        // 方向键长按只显示 active/idle 和当前按键，不显示每帧移动量；
-        // 每帧 delta 太快且难截图，真正有价值的是动画帧循环是否启动和是否释放。
-        debugLine(label.keyboardPan, [debugValue(skyPanKeys.size ? "active" : "idle")]),
-        debugLine(label.pressedArrowKeys, [debugValue(pressedArrowKeysLabel2())]),
-        debugLine(label.poleGuard, [debugValue(poleStats.guardActive ? "ON" : "OFF")]),
-        debugLine(label.poleGuardReason, [debugValue(poleStats.guardReason || "none")]),
-        debugLine(label.poleGuardThreshold, [
-          debugSep("enter="),
-          debugValue(formatAngle(poleGuardEnterDeg())),
-          debugSep(" exit="),
-          debugValue(formatAngle(poleGuardExitDeg()))
-        ]),
-        debugLine(label.currentPoles, [
-          debugSep("+="),
-          debugValue(poleStats.positiveName || "undefined"),
-          debugSep(" -="),
-          debugValue(poleStats.negativeName || "undefined")
-        ]),
-        debugLine(label.pointerPositivePoleDistance, [
-          debugValue(formatAngleOrUnavailable(poleStats.pointerPositiveDeg))
-        ]),
-        debugLine(label.pointerNegativePoleDistance, [
-          debugValue(formatAngleOrUnavailable(poleStats.pointerNegativeDeg))
-        ]),
-        debugLine(label.positivePolePoint, debugPolePointParts(poleStats.positivePoint)),
-        debugLine(label.negativePolePoint, debugPolePointParts(poleStats.negativePoint)),
-        debugLine(label.poleCenterline, [
-          debugSep("x="),
-          debugValue(Number.isFinite(poleStats.centerlineX) ? Math.round(poleStats.centerlineX) : "-"),
-          debugUnit("px")
-        ]),
-        debugLine(label.poleDx, [
-          debugSep("+="),
-          debugValue(formatSigned(poleStats.positiveDx)),
-          debugUnit("px"),
-          debugSep(" -="),
-          debugValue(formatSigned(poleStats.negativeDx)),
-          debugUnit("px")
-        ]),
-        debugLine(label.poleAxisAngle, [debugValue(formatAngle(poleStats.axisAngleDeg))]),
-        debugLine(label.poleAxisAngleRule, [
-          debugValue("0\xB0 = vertical, 90\xB0 = horizontal")
-        ]),
-        debugBlankLine(),
-        debugGroup(label.layerGroup),
-        debugLine(label.starLimit, [debugValue(state.magnitude)]),
-        debugLine(label.starSize, [debugValue(state.starSize), debugUnit("px")]),
-        debugLine(label.starNames, [debugValue(bool(state.starNames))]),
-        debugLine(label.cultureLines, [debugValue(bool(state.cultureLines))]),
-        debugLine(label.cultureNames, [debugValue(bool(state.cultureNames))]),
-        debugLine(label.planets, [debugValue(bool(state.planets))]),
-        debugLine(label.milkyWay, [debugValue(bool(state.milkyWay))]),
-        debugLine(label.grid, [debugValue(bool(state.grid))]),
-        debugLine(label.horizontalGrid, [debugValue(bool(state.horizontalGrid))]),
-        debugLine(label.ecliptic, [debugValue(bool(state.ecliptic))]),
-        debugLine(label.equator, [debugValue(bool(state.equator))]),
-        debugLine(label.horizon, [debugValue(bool(state.horizon))]),
-        debugLine(label.nightVision, [debugValue(bool(state.nightVision))]),
-        debugLine(label.deepSky, [debugValue(bool(state.deepSky))]),
-        debugLine(label.floatingInfo, [
-          debugValue(bool(state.floatingObjectInfo))
-        ]),
-        debugLine(label.fontScale, [
-          debugValue(Number(state.fontScale).toFixed(3))
-        ]),
-        debugLine(label.regionBoundaries, [
-          debugValue(bool(state.regionBoundaries))
-        ]),
-        debugLine(label.detail, [debugValue(detailName)]),
-        debugLine(label.time, [
-          debugSep(`${label.playing}=`),
-          debugValue(bool(playing)),
-          debugSep(` ${label.speed}=`),
-          debugValue(state.speed),
-          debugUnit("x")
-        ]),
-        debugLine(label.panelOpen, [debugValue(bool(state.panelOpen))]),
-        debugLine(label.skyReady, [debugValue(bool(skyReady))]),
-        debugLine(label.rebuild, [debugValue(bool(rebuildInProgress))])
-      );
-      lastDebugPlainText = Array.from(content.children).map((node) => node.textContent || "").join("\n");
-    }
-    function queueDebugOverlayUpdate() {
-      if (!debugVisible || debugFramePending) return;
-      debugFramePending = true;
-      const delay = Math.max(0, debugRefreshIntervalMs() - (performance.now() - lastDebugUpdate));
-      setTimeout(() => {
-        requestAnimationFrame(() => {
-          debugFramePending = false;
-          lastDebugUpdate = performance.now();
-          updateDebugOverlay();
-        });
-      }, delay);
-    }
-    function setDebugVisible(open) {
-      debugVisible = !!open;
-      document.body.classList.toggle("debug-open", debugVisible);
-      const button = $("debug-toggle"), overlay = $("debug-overlay");
-      if (button) button.classList.toggle("active", debugVisible);
-      if (overlay) {
-        overlay.style.display = debugVisible ? "block" : "none";
-        overlay.setAttribute("aria-hidden", String(!debugVisible));
-      }
-      updateDebugOverlay(true);
-    }
-    function initializeDebugTools() {
-      if (!cfg("debug.enabled", false)) return;
-      const pane = $("sky-pane") || document.body;
-      if (!$("debug-toggle")) {
-        const button = document.createElement("button");
-        button.id = "debug-toggle";
-        button.className = "top-control-button";
-        button.type = "button";
-        button.textContent = "DBG";
-        button.addEventListener("click", () => setDebugVisible(!debugVisible));
-        document.body.appendChild(button);
-      } else if ($("debug-toggle").parentElement !== document.body) {
-        document.body.appendChild($("debug-toggle"));
-      }
-      updateDebugToggleTitle();
-      if (!$("debug-overlay")) {
-        const overlay = document.createElement("div");
-        overlay.id = "debug-overlay";
-        overlay.setAttribute("aria-hidden", "true");
-        pane.appendChild(overlay);
-        ensureDebugOverlayStructure(overlay);
-      } else if ($("debug-overlay").parentElement !== pane) {
-        pane.appendChild($("debug-overlay"));
-        ensureDebugOverlayStructure($("debug-overlay"));
-      } else {
-        ensureDebugOverlayStructure($("debug-overlay"));
-      }
-      setDebugVisible(debugVisible);
     }
     function skyPaneSize2() {
       return skyPaneSize($("sky-pane"));
@@ -9446,7 +9580,7 @@
             align: "right",
             baseline: "bottom"
           },
-          propernameLimit: Number(cfg("sky.stars.properNameMagnitudeLimit", 2.1)),
+          propernameLimit: Number(state.starNameMagnitudeLimit),
           size: Number(state.starSize),
           exponent: Number(cfg("sky.stars.exponent", -0.28)),
           data: datasetFile("stars")
@@ -9897,8 +10031,7 @@
           map.classList.add("dragging");
           const center = syncRotationFromCurrentView("pointerdown");
           const anchorCoord = invertSkyCoordinateAtClient2(event.clientX, event.clientY, canvas);
-          debugPointerActive = true;
-          debugPointerSkyCoord = anchorCoord;
+          setDebugPointer(true, anchorCoord);
           rotationPointerDrag = center ? {
             id: event.pointerId,
             lastX: event.clientX,
@@ -9933,8 +10066,7 @@
               const dx = event.clientX - rotationPointerDrag.lastX, dy = event.clientY - rotationPointerDrag.lastY;
               const rect = canvas.getBoundingClientRect();
               const currentCoord = invertSkyCoordinateAtClient2(event.clientX, event.clientY, canvas);
-              debugPointerActive = true;
-              debugPointerSkyCoord = currentCoord;
+              setDebugPointer(true, currentCoord);
               if (poleAxisConstraintEnabled()) {
                 applyEulerConstrainedPointerDelta(dx, dy, rect, currentCoord, "euler constrained drag");
               } else {
@@ -9961,8 +10093,7 @@
           ) > Number(cfg("interaction.dragThreshold", 6))) {
             pointerMoved = true;
           }
-          debugPointerActive = true;
-          debugPointerSkyCoord = invertSkyCoordinateAtClient2(event.clientX, event.clientY, canvas);
+          setDebugPointer(true, invertSkyCoordinateAtClient2(event.clientX, event.clientY, canvas));
           queueDebugOverlayUpdate();
         },
         { capture: true }
@@ -9986,8 +10117,7 @@
         clickStart = null;
         pointerMoved = false;
         rotationPointerDrag = null;
-        debugPointerActive = false;
-        debugPointerSkyCoord = null;
+        setDebugPointer(false, null);
         persistViewSoon();
       };
       canvas.addEventListener("pointerup", finish, { capture: true });
@@ -9998,8 +10128,7 @@
           clickStart = null;
           pointerMoved = false;
           rotationPointerDrag = null;
-          debugPointerActive = false;
-          debugPointerSkyCoord = null;
+          setDebugPointer(false, null);
           persistViewSoon();
         },
         { capture: true }
@@ -10011,8 +10140,7 @@
       canvas.addEventListener("touchend", persistViewSoon, { passive: true });
       canvas.addEventListener("mouseleave", () => {
         map.classList.remove("dragging");
-        debugPointerActive = false;
-        debugPointerSkyCoord = null;
+        setDebugPointer(false, null);
       });
     }
     function setPanel(open, persist = true) {
@@ -10131,9 +10259,9 @@
       const center = Celestial.rotate();
       if (!Array.isArray(center)) return;
       rotationController.syncFromCenter(center, "pane margin pointerdown");
-      debugPointerActive = true;
-      debugPointerSkyCoord = invertSkyCoordinateAtClient2(event.clientX, event.clientY);
-      updatePoleAxisDebug(debugPointerSkyCoord, center, poleAxisConstraintEnabled() ? "euler-constrained" : "quaternion-free");
+      const pointerCoord = invertSkyCoordinateAtClient2(event.clientX, event.clientY);
+      setDebugPointer(true, pointerCoord);
+      updatePoleAxisDebug(pointerCoord, center, poleAxisConstraintEnabled() ? "euler-constrained" : "quaternion-free");
       paneDrag = {
         id: event.pointerId,
         x: event.clientX,
@@ -10163,8 +10291,7 @@
         const stepDx = event.clientX - paneDrag.lastX;
         const stepDy = event.clientY - paneDrag.lastY;
         const currentCoord = invertSkyCoordinateAtClient2(event.clientX, event.clientY);
-        debugPointerActive = true;
-        debugPointerSkyCoord = currentCoord;
+        setDebugPointer(true, currentCoord);
         if (poleAxisConstraintEnabled()) {
           applyEulerConstrainedPointerDelta(
             stepDx,
@@ -10199,8 +10326,7 @@
       if (!paneDrag || event.pointerId !== paneDrag.id) return;
       paneDrag = null;
       $("celestial-map").classList.remove("dragging");
-      debugPointerActive = false;
-      debugPointerSkyCoord = null;
+      setDebugPointer(false, null);
       try {
         $("sky-pane").releasePointerCapture(event.pointerId);
       } catch (_) {
@@ -10300,6 +10426,53 @@
       time: { noteTimeRenderDebug, updateActiveTimeDebug },
       ui: { showToast, t }
     });
+    debugOverlayController = createDebugOverlayController({
+      dom: {
+        $,
+        document,
+        window,
+        navigator,
+        screen,
+        performance,
+        setTimeout,
+        clearTimeout,
+        requestAnimationFrame
+      },
+      appState: state,
+      state: {
+        initialVisible: !!cfg("debug.enabled", false) && !!cfg("debug.defaultOpen", false),
+        skyPanKeys,
+        originalStars: ORIGINAL_STARS,
+        formatPressedArrowKeys: pressedArrowKeysLabel,
+        runtimeState: () => ({
+          playing,
+          skyReady,
+          rebuildInProgress,
+          pointerMoved,
+          clickStart,
+          paneDrag,
+          rotationPointerDrag
+        })
+      },
+      config: { cfg, getMapScale },
+      layout: { elementRect: elementRect2 },
+      view: {
+        currentCelestialCenter: currentCelestialCenter2,
+        getInternalZoom: getInternalZoom2,
+        projectionCanvasMetrics: projectionCanvasMetrics2,
+        viewKey: viewKey2,
+        poleAxisConstraintEnabled,
+        poleGuardEnterDeg,
+        poleGuardExitDeg,
+        updatePoleAxisDebug
+      },
+      rotation: { rotationController },
+      time: { timeRenderDebug, timeFieldDebugText: timeFieldDebugText2 },
+      astronomy: { astronomyModelDebug },
+      interaction: { poleAxisDebug },
+      layers: { mobileResizeDebug, getLayerSelectionNodes: selectionNodes },
+      formatters: {}
+    });
     const viewModeController = createViewModeController({
       dom: {
         getCelestial: () => window.Celestial,
@@ -10369,8 +10542,7 @@
           lastKeyboardPanFrame = value;
         },
         setDebugPointer: (active, coord) => {
-          debugPointerActive = active;
-          debugPointerSkyCoord = coord || null;
+          setDebugPointer(active, coord);
         },
         setFloatingObjectInfoDismissed: (dismissed) => {
           floatingObjectInfoDismissed = dismissed;
@@ -10466,10 +10638,10 @@
         setLastKeyboardPanFrame: (value) => {
           lastKeyboardPanFrame = value;
         },
-        getDebugVisible: () => debugVisible,
-        getLastDebugUpdate: () => lastDebugUpdate,
+        getDebugVisible: () => isDebugVisible(),
+        getLastDebugUpdate: () => animationDebugLastUpdate,
         setLastDebugUpdate: (value) => {
-          lastDebugUpdate = value;
+          animationDebugLastUpdate = value;
         }
       },
       time: {

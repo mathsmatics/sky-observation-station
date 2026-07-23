@@ -5,7 +5,7 @@
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <meta content="dark" name="color-scheme" />
-    <title>真实星空观测台 5.4.7 本地版 · Real Sky Observatory</title>
+    <title>真实星空观测台 5.4.8 本地版 · Real Sky Observatory</title>
     <link href="vendor/d3-celestial/celestial.css" rel="stylesheet" />
     <link href="assets/app.css" rel="stylesheet" />
   </head>
@@ -17,7 +17,7 @@
     <header class="topbar">
       <div class="brand glass">
         <div class="brand-main">
-          <i class="signal"></i><span>REAL SKY OBSERVATORY 5.4.7</span>
+          <i class="signal"></i><span>REAL SKY OBSERVATORY 5.4.8</span>
         </div>
         <div class="brand-sub" data-i18n="brandSub">
           真实地点 × 真实时间 × 真实星表 × 双天文文化
@@ -591,6 +591,20 @@
               value="7"
             />
             <span class="range-value" id="star-size-value">7 px</span>
+          </div>
+          <div class="range-row" style="margin-top: 9px">
+            <label data-i18n="starNameDensity" for="star-name-density"
+              >星名显示密度</label
+            >
+            <input
+              id="star-name-density"
+              max="4.0"
+              min="2.1"
+              step="0.1"
+              type="range"
+              value="2.1"
+            />
+            <span class="range-value" id="star-name-density-value">2.1</span>
           </div>
           <div class="toggles" style="margin-top: 9px">
             <label class="toggle">

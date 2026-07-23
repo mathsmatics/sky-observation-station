@@ -325,7 +325,9 @@ export function createCultureOverlayController(services) {
           const pt = Celestial.mapProjection(c);
           if (!pt || !Number.isFinite(pt[0]) || !Number.isFinite(pt[1])) return;
           const tooClose = occupied.some(
-            (p) => Math.hypot(p[0] - pt[0], p[1] - pt[1]) < 24,
+            (p) =>
+              Math.hypot(p[0] - pt[0], p[1] - pt[1]) <
+              Number(cfg("labels.chineseAsterismNameCollisionPx", 24)),
           );
           if (tooClose) return;
           const prop = d.properties || {};

@@ -10,7 +10,7 @@
 - 中文和 English 双语界面。
 - 西方星座、中国星官、两者同时显示三种星空体系。
 - 14 种天球投影和 4 种坐标系统：地平、赤道、黄道、银河。
-- 星图支持应用层缩放，5.3.5 起最大缩放统一为 8x。
+- 星图支持应用层缩放，当前最大缩放为 8x。
 - 可调星等阈值、恒星大小、网格、黄道、天赤道、地平线、银河、深空天体和日光背景。
 - 太阳、月球和主要行星的本地图层、点击拾取和信息框。
 - 轻量岁差显示：J2000 源坐标运行时转换到当前日期显示历元，北天极、天球赤道和赤道网会随年份合理变化。
@@ -23,7 +23,7 @@
 
 左侧菜单用于控制星图。`观测地点` 可通过城市搜索、经纬度输入或“使用我的位置”设置；选择城市后会同步经纬度、IANA 时区和星图。`观测时间` 外观看起来是一个完整时间框，内部可分别编辑年、月、日、时、分；点击字段后可直接输入数字，按 Enter 提交；年份输入负号表示公元前，例如 `-500`。字段聚焦时可用上下键即时调整当前字段并自动进位退位，也可使用 `−1月 / −1天 / −1时 / +1时 / +1天 / +1月` 或任意步长控件。
 
-`视图与投影` 可切换地平、赤道、黄道、银河坐标视角和不同天球投影；时间或地点变化后会按当前坐标视图刷新，不重置当前缩放。`天极中轴约束` 默认开启：开启时使用欧拉角中轴约束拖动，让当前坐标视角的极轴尽量贴近屏幕中央竖线；关闭时保留 5.3.8 的四元数抓点式自由拖动，允许自由 roll。`显示设置` 控制恒星名称、星座/星官、网格、黄道、天赤道、地平线、银河、行星、深空天体和浮窗。点击星体可查看精简浮窗和左侧详细信息；天体搜索可用于快速定位对象。方向键用于平移视野：按 ← 是去看左边的天区，效果等价于鼠标向右拖；按 → 是去看右边的天区，效果等价于鼠标向左拖；长按方向键会按动画帧连续平移，避免浏览器重复 keydown 堆积重绘后卡死。
+`视图与投影` 可切换地平、赤道、黄道、银河坐标视角和不同天球投影；时间或地点变化后会按当前坐标视图刷新，不重置当前缩放。`天极中轴约束` 默认开启：开启时使用欧拉角中轴约束拖动，让当前坐标视角的极轴尽量贴近屏幕中央竖线；关闭时使用四元数抓点式自由拖动，允许自由 roll。`显示设置` 控制恒星名称、星名显示密度、星座/星官、网格、黄道、天赤道、地平线、银河、行星、深空天体和浮窗。点击星体可查看精简浮窗和左侧详细信息；天体搜索可用于快速定位对象。方向键用于平移视野：按 ← 是去看左边的天区，效果等价于鼠标向右拖；按 → 是去看右边的天区，效果等价于鼠标向左拖；长按方向键会按动画帧连续平移，避免浏览器重复 keydown 堆积重绘后卡死。
 
 左上角 `DBG` 是调试面板，用于排查布局、数据加载、时间输入、skyview、fallback、redraw、rollback、时区偏移、行星计算和天文模型状态；普通使用时可以关闭。遇到刷新或布局异常时，可以复制 debug 面板内容给维护者排查。远古或远未来日期允许输入，项目支持轻量岁差近似：北天极、天球赤道和赤道网会随年份变化，恒星、星座和星官相对形状保持不变。当前项目仍不提供章动、恒星自行、大气折射和高精度行星历表，因此远日期仍属于近似天文馆效果，不等同于科研级古天文历表。早期年份的 UTC 换算会遵循 IANA 历史时区规则，可能出现不是现代固定东八区的偏移。
 
@@ -57,7 +57,7 @@ docs/       架构、构建、数据来源和第三方声明文档。
 
 项目使用本地固定版本的 D3 3.5.17、d3-geo-projection、D3-Celestial 0.7.35、Luxon 和 tz-lookup。第三方库保存在 `vendor/`，运行数据以分类 JS 分片形式保存在 `src/data/`，由 `src/data/loader.js` 注册并兼容本地直开。
 
-数据来源说明见 `docs/DATA_SOURCES.md`，第三方和许可证说明见 `docs/THIRD_PARTY_NOTICES.md`，许可证原文保存在 `licenses/`。
+数据来源说明见 `docs/DATA_SOURCES.md`，第三方和许可证说明见 `docs/THIRD_PARTY_NOTICES.md`，简明版本记录见 `docs/VERSION_HISTORY.md`，详细维护沿革见 `docs/VERSION_HISTORY_DETAILED.md`，许可证原文保存在 `licenses/`。
 
 ## 科学限制
 
@@ -70,19 +70,3 @@ docs/       架构、构建、数据来源和第三方声明文档。
 This project is licensed under the PolyForm Noncommercial License 1.0.0.
 
 Commercial use is not permitted without prior permission.
-
-## Source layout note
-
-Version 5.3.5 keeps the 5.3.3 functional source layout and the 5.3.4 Meeus Sun/Moon modules. `src/state/` contains state/storage helpers, `src/ui/` contains controls, help, panels and layout helpers, `src/sky/` contains renderer, projection, layer and interaction helpers, and `src/astronomy/` contains reusable angle, time, sidereal-time, coordinate, precession, Meeus Sun, Meeus Moon and moon-phase utilities. `src/app.ts` remains the application assembly layer that connects state, UI, D3-Celestial and data. Build outputs in `assets/` are generated artifacts and should not be edited by hand.
-
-5.3.5 fixes the keyboard left/right pan direction, unifies the maximum application zoom at 8x, coalesces high-frequency zoom/mapBox/debug refresh work to reduce high-zoom stutter, and expands the in-page help manual with concrete accuracy ranges and planetary error magnitudes. It does not add quaternion camera control, VSOP87 or professional ephemerides.
-
-5.3.6 重点处理高倍缩放时物理 Canvas 过大的问题：当虚拟星图宽高都超过当前星图区视口时，进入 VIEWPORT_CANVAS；该模式下虚拟星图仍记录当前缩放倍率，但物理 Canvas 直接使用当前星图区视口大小。Debug 面板新增星图区尺寸、Canvas CSS/bitmap 尺寸、虚拟星图尺寸、缩放倍率、触发条件和当前星等阈值内恒星数。
-
-5.3.7 新增四元数中间层，用于改善南北极附近拖动时的旋转稳定性。内部拖动增量先累积到 Quaternion，再输出回 D3-Celestial 现有中心/roll 参数；欧拉角继续保留为显示、调试和兼容表达。Debug 面板新增 Quaternion、归一化状态、显示用欧拉角、极区距离和最近拖动增量等旋转诊断信息。
-5.3.8 修正 5.3.7 高倍拖动手感：Canvas 拖动改为抓点式四元数拖动，按下时记录鼠标下的天球点，移动时让该点跟随鼠标，不再用 `dx/dy × 固定角速度` 驱动主拖动。这样 8x 下星点不会比鼠标滑得更快，同时继续用四元数处理极区附近的连续旋转。Debug 面板新增抓取锚点、当前鼠标天球点、抓取角距离和拖动算法字段。
-5.3.9 新增“天极中轴约束”开关：关闭时保留 5.3.8 的四元数自由抓点拖动，开启时改用欧拉角中轴约束拖动，并用 10°/12° 滞回极区保护减少极点附近的经度突跳和 roll 翻转。方向键长按改为动画帧平移，避免重复 keydown 直接触发大量重绘。
-5.4.1 修正天极中轴约束开启时欧拉角垂直拖动方向反向的问题，并对 Debug 面板做有效性审查：区分最终渲染视角、Euler State 和 Quaternion State，只在对应控制模式 active 时显示内部状态；补充 Status、Last action、极区保护原因、极点投影坐标、极轴角度和方向键长按状态，同时节流 Debug 刷新，避免拖动时 Debug 自身增加卡顿。
-5.4.2 继续推进 `src/app.ts` 装配层化拆分：翻译、默认状态、主题变量、时区解析、D3-Celestial 视角包装、天极中轴/极区保护计算、方向键平移向量、搜索索引、文本归一化、Debug DOM 小工具和时间字段工具迁入对应模块，`app.ts` 保留统一状态、生命周期和事件接线。
-5.4.3 修复天体搜索键盘选择后输入框不回填的问题；空搜索框聚焦时显示按亮度排序的前 50 个恒星，结果右侧显示恒星所属星座/星官摘要，并优化搜索索引缓存。银河本体绘制保留 D3-Celestial 原生 `mw/mwbg` 质感，不再做项目侧反色修正实验；地平、赤道、黄道视角下银河会随固定星空同步到当前历元，银河坐标视角保留紫色银河赤道参考线。
-5.4.7 整理全局配置和代码注释：`src/config.ts` 重新按默认状态、天文模型、月相、交互、视角、菜单、Debug、外观样式排序，并补充关键注释；源码注释清理旧版本沿革式表达，优先说明当前职责、输入输出和设计原因。月相功能直接画在原来的月球位置上，点击月球仍显示月相名称、照明比例、月龄、距离和算法边界。中西星官同时显示时，中国传统天区边界只临时禁用并变暗，不再改写用户保存的开关状态。5.4.6 的 `src/app.ts` 装配层拆分、Debug 刷新耗时和相关模块拆分继续保留。

@@ -304,6 +304,13 @@ export function createEventBindings(services) {
       save();
       applyVisualConfig();
     });
+    $("star-name-density").addEventListener("input", () => {
+      state.starNameMagnitudeLimit = Number($("star-name-density").value);
+      $("star-name-density-value").textContent =
+        state.starNameMagnitudeLimit.toFixed(1);
+      save();
+      applyVisualConfig();
+    });
     const checks = {
       "star-names": "starNames",
       "culture-lines": "cultureLines",
