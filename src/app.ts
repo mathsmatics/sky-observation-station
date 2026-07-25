@@ -1,4 +1,5 @@
 // @ts-nocheck
+import { ENABLE_UI_PERFORMANCE_TEST } from "./config";
 import { CATALOG_DATA_PATH, datasetFile } from "./data/catalog-registry";
 import {
   chineseAsterismLineFeatures,
@@ -156,6 +157,44 @@ import {
     }
     return value == null ? fallback : value;
   };
+  const uiPerformanceTestEnabled =
+    ENABLE_UI_PERFORMANCE_TEST === true ||
+    cfg("testing.uiPerformanceTestEnabled", false) === true;
+
+  function recordUiPerformanceStep(name, ms, details = {}) {
+    if (!uiPerformanceTestEnabled) return;
+    const recorder = window.__RSO_UI_PERF_RECORDER__;
+    if (!recorder || typeof recorder.recordStep !== "function") return;
+    try {
+      recorder.recordStep({
+        name,
+        ms: Number.isFinite(Number(ms)) ? Number(ms) : 0,
+        at: performance.now(),
+        ...details,
+      });
+    } catch (_) {}
+  }
+
+  function measureUiPerformanceStep(name, fn, details = {}) {
+    const started = performance.now();
+    try {
+      return fn();
+    } finally {
+      recordUiPerformanceStep(name, performance.now() - started, details);
+    }
+  }
+
+  function waitForAnimationFrames(count = 2) {
+    return new Promise((resolve) => {
+      const step = () => {
+        count -= 1;
+        if (count <= 0) resolve(true);
+        else requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    });
+  }
+
   function applyConfigCss() {
     applyConfigCssVariables(cfg);
   }
@@ -494,7 +533,9 @@ import {
    * 星表数据和第三方引擎内部状态不保存，启动时由 `state` 重新构建。
    */
   function save() {
-    writeJsonToStorage(STORAGE_KEY, state);
+    return measureUiPerformanceStep("state.save", () =>
+      writeJsonToStorage(STORAGE_KEY, state),
+    );
   }
   /**
    * 将内部 UTC 瞬时转换为观测者当前 IANA 时区。
@@ -1091,8 +1132,11 @@ import {
   }
 
   function updateDebugOverlay(force = false) {
-    return (
-      debugOverlayController && debugOverlayController.updateDebugOverlay(force)
+    return measureUiPerformanceStep(
+      "debug.updateOverlay",
+      () =>
+        debugOverlayController && debugOverlayController.updateDebugOverlay(force),
+      { force: !!force },
     );
   }
 
@@ -1391,10 +1435,13 @@ import {
       const syncStarted = performance.now();
       updateLoadedCoordinateFrame();
       const fixedLayerSyncMs = performance.now() - syncStarted;
+      recordUiPerformanceStep("redraw.fixedLayerSync", fixedLayerSyncMs, { reason });
       const redrawStarted = performance.now();
       Celestial.redraw();
       const celestialRedrawMs = performance.now() - redrawStarted;
+      recordUiPerformanceStep("redraw.celestialRedraw", celestialRedrawMs, { reason });
       const redrawTotalMs = performance.now() - totalStarted;
+      recordUiPerformanceStep("redraw.total", redrawTotalMs, { reason });
       noteTimeRenderDebug({
         redrawStatus: "ok",
         redrawReason: reason,
@@ -1426,10 +1473,13 @@ import {
           const syncStarted = performance.now();
           updateLoadedCoordinateFrame();
           const fixedLayerSyncMs = performance.now() - syncStarted;
+          recordUiPerformanceStep("redraw.followUp.fixedLayerSync", fixedLayerSyncMs, { reason });
           const redrawStarted = performance.now();
           Celestial.redraw();
           const celestialRedrawMs = performance.now() - redrawStarted;
+          recordUiPerformanceStep("redraw.followUp.celestialRedraw", celestialRedrawMs, { reason });
           const redrawTotalMs = performance.now() - totalStarted;
+          recordUiPerformanceStep("redraw.followUp.total", redrawTotalMs, { reason });
           noteTimeRenderDebug({
             redrawStatus: "ok",
             redrawReason: `${reason} follow-up`,
@@ -1458,6 +1508,15 @@ import {
     metrics = projectionCanvasMetrics(),
     reason = "resize",
   ) {
+    const resizeStarted = performance.now();
+    try {
+      return _resizeCelestialCanvas(metrics, reason, resizeStarted);
+    } finally {
+      recordUiPerformanceStep("canvas.resize.total", performance.now() - resizeStarted, { reason });
+    }
+  }
+
+  function _resizeCelestialCanvas(metrics, reason, resizeStarted) {
     applyMapBoxMetrics(metrics);
     let redrew = false;
     try {
@@ -2287,6 +2346,18 @@ import {
    * 在早期年份失败，则用地方恒星时 + 纬度设置中心作为稳定 fallback。
    */
   function updateSkyView(force = false, reason = "sky view") {
+    const skyViewStarted = performance.now();
+    try {
+      return _updateSkyView(force, reason);
+    } finally {
+      recordUiPerformanceStep("skyView.update", performance.now() - skyViewStarted, {
+        force: !!force,
+        reason,
+      });
+    }
+  }
+
+  function _updateSkyView(force = false, reason = "sky view") {
     if (!skyReady || !window.Celestial || !DateTime) {
       noteTimeRenderDebug({
         skyviewStatus: "skipped",
@@ -2876,6 +2947,88 @@ import {
     animationController.animationLoop(now);
   }
 
+  function createUiPerformanceTestHarness() {
+    return {
+      version: "5.5.4",
+      config: CONFIG,
+      getStateSnapshot() {
+        return JSON.parse(JSON.stringify(state));
+      },
+      async restoreStateSnapshot(snapshot) {
+        if (!snapshot || typeof snapshot !== "object") return false;
+        measureUiPerformanceStep("test.restoreState", () => {
+          Object.keys(state).forEach((key) => delete state[key]);
+          Object.assign(state, defaults, JSON.parse(JSON.stringify(snapshot)));
+          playing = false;
+          skyPanKeys.clear();
+          keyboardPanDirty = false;
+          currentSelected = null;
+          searchHighlight = null;
+          clearTimeout(searchHighlightTimer);
+          floatingObjectInfoDismissed = false;
+          const search = $("object-search");
+          if (search) search.value = "";
+          const citySearch = $("city-search");
+          if (citySearch) citySearch.value = "";
+          save();
+          applyFontScale();
+          applyI18n();
+          syncControls();
+          applyVisualConfig(true);
+          updateHUD(true);
+          updateSkyView(true, "ui performance test restore");
+          queueDebugOverlayUpdate();
+        });
+        await waitForAnimationFrames(3);
+        return true;
+      },
+      isSkyReady() {
+        return !!skyReady;
+      },
+      async waitForStable(frames = 3) {
+        await waitForAnimationFrames(frames);
+        return true;
+      },
+      getDebugSnapshot() {
+        return {
+          skyReady,
+          playing,
+          timeRenderDebug: { ...timeRenderDebug },
+          coordinateSystem: state.coordinateSystem,
+          projection: state.projection,
+          cultureMode: state.cultureMode,
+          poleAxisConstraintEnabled: state.poleAxisConstraintEnabled !== false,
+        };
+      },
+      recordStep(name, ms, details = {}) {
+        recordUiPerformanceStep(name, ms, details);
+      },
+    };
+  }
+
+  function scheduleUiPerformanceTestRun() {
+    // 性能巡检只在 config 总开关开启时动态加载。正常模式下不 import、不绑定、
+    // 不创建报告页，避免测试模块进入普通交互链路。
+    if (!uiPerformanceTestEnabled || window.__RSO_UI_PERF_AUTORUN_SCHEDULED__)
+      return;
+    window.__RSO_UI_PERF_AUTORUN_SCHEDULED__ = true;
+    const runWhenReady = async () => {
+      for (let i = 0; i < 80; i += 1) {
+        if (skyReady && window.Celestial) break;
+        await waitForAnimationFrames(1);
+      }
+      await waitForAnimationFrames(4);
+      try {
+        const mod = await import("./testing/ui-performance-runner");
+        if (mod && typeof mod.runUiPerformanceSuite === "function")
+          await mod.runUiPerformanceSuite(createUiPerformanceTestHarness());
+      } catch (err) {
+        console.warn("UI performance test failed to start", err);
+      }
+    };
+    requestAnimationFrame(() => void runWhenReady());
+  }
+
   /**
    * 启动流程：建立整合布局、读取状态、绑定控件、注册图层、
    * 显示首帧星图，并启动动画循环。
@@ -2900,6 +3053,7 @@ import {
     if ($("geo-mode-note")) $("geo-mode-note").style.display = "none";
     initialDisplay(desiredView());
     requestAnimationFrame(animationLoop);
+    scheduleUiPerformanceTestRun();
   }
 
   window.addEventListener("error", (event) => {

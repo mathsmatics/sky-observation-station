@@ -704,7 +704,7 @@ export const HELP_MANUAL_ZH: HelpManual = {
       blocks: [
         {
           type: "paragraph",
-          html: "当前说明书对应项目版本：<strong>5.5.3</strong>。",
+          html: "当前说明书对应项目版本：<strong>5.5.4</strong>。",
         },
         {
           type: "paragraph",

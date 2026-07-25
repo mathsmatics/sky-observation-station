@@ -12,6 +12,9 @@ interface Window {
   __RSO_PREPARE_SKY_DATASET__?: (path: string, data: any) => any;
   __RSO_PLANET_OBJECTS__: any[];
   __RSO_PLANET_ORIGIN__: any;
+  __RSO_UI_PERF_RECORDER__?: any;
+  __RSO_UI_PERF_RUNNING__?: boolean;
+  __RSO_UI_PERF_AUTORUN_SCHEDULED__?: boolean;
 }
 
 declare const d3: any;

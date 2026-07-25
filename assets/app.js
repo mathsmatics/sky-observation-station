@@ -1,6 +1,711 @@
 (() => {
+  var __defProp = Object.defineProperty;
+  var __getOwnPropNames = Object.getOwnPropertyNames;
+  var __esm = (fn, res) => function __init() {
+    return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+  };
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, { get: all[name], enumerable: true });
+  };
+
+  // src/testing/ui-performance-runner.ts
+  var ui_performance_runner_exports = {};
+  __export(ui_performance_runner_exports, {
+    runUiPerformanceSuite: () => runUiPerformanceSuite
+  });
+  function now() {
+    return performance.now();
+  }
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+  async function waitFrames(count = 2) {
+    for (let i = 0; i < count; i += 1) {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+    }
+  }
+  async function waitForUiStable(harness, extraMs = 90) {
+    if (harness && typeof harness.waitForStable === "function") {
+      await harness.waitForStable(2);
+    } else {
+      await waitFrames(2);
+    }
+    if (extraMs > 0) await sleep(extraMs);
+    if (harness && typeof harness.waitForStable === "function") {
+      await harness.waitForStable(1);
+    } else {
+      await waitFrames(1);
+    }
+  }
+  function $(id) {
+    return document.getElementById(id);
+  }
+  function optionValues(selectId) {
+    const el = $(selectId);
+    if (!el) return [];
+    return Array.from(el.querySelectorAll("option")).map((option) => option.value).filter(Boolean);
+  }
+  function dispatchInput(el) {
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+  function dispatchChange(el) {
+    el.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+  function clickElement(id) {
+    const el = $(id);
+    if (!el || el.disabled) throw new Error(`DOM element not available: #${id}`);
+    el.click();
+    return { kind: "click", id };
+  }
+  function setSelectValue(id, value) {
+    const el = $(id);
+    if (!el || el.disabled) throw new Error(`select not available: #${id}`);
+    const before = el.value;
+    el.value = value;
+    dispatchChange(el);
+    return { kind: "select", id, before, expected: String(value) };
+  }
+  function toggleCheckbox(id) {
+    const el = $(id);
+    if (!el || el.disabled) throw new Error(`checkbox not available: #${id}`);
+    const before = Boolean(el.checked);
+    const expected = !before;
+    el.checked = expected;
+    dispatchChange(el);
+    return { kind: "checkbox", id, before, expected };
+  }
+  async function typeSearch(inputId, suggestionsId, query) {
+    const input = $(inputId);
+    if (!input) throw new Error(`search input not available: #${inputId}`);
+    input.focus();
+    input.value = query;
+    dispatchInput(input);
+    await waitFrames(2);
+    const first = $(`${suggestionsId}`)?.querySelector("button, [role='option']");
+    if (first) first.click();
+    else {
+      input.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+      );
+    }
+    return {
+      kind: "search",
+      inputId,
+      suggestionsId,
+      query,
+      usedSuggestion: Boolean(first)
+    };
+  }
+  async function keyboardPanSample(key = "ArrowRight") {
+    document.dispatchEvent(new KeyboardEvent("keydown", { key, bubbles: true }));
+    await sleep(260);
+    document.dispatchEvent(new KeyboardEvent("keyup", { key, bubbles: true }));
+    return { kind: "keyboard", key };
+  }
+  function closeTransientUi() {
+    $("tech-modal")?.classList.remove("open");
+    $("guide-page-menu")?.classList.remove("open");
+    $("object-suggestions")?.classList.remove("open");
+    $("city-suggestions")?.classList.remove("open");
+  }
+  function withTimeout(promise, ms, label) {
+    let timer = null;
+    const timeout = new Promise((_, reject) => {
+      timer = setTimeout(() => reject(new Error(`timeout after ${ms}ms: ${label}`)), ms);
+    });
+    return Promise.race([promise, timeout]).finally(() => clearTimeout(timer));
+  }
+  function validateActionOutcome(action, outcome) {
+    if (action && typeof action.verify === "function") {
+      action.verify(outcome);
+      return;
+    }
+    if (!outcome || typeof outcome !== "object") return;
+    if (outcome.kind === "checkbox") {
+      const el = $(outcome.id);
+      if (!el) throw new Error(`post-check failed: checkbox #${outcome.id} disappeared`);
+      if (Boolean(el.checked) !== Boolean(outcome.expected)) {
+        throw new Error(`post-check failed: #${outcome.id} expected checked=${outcome.expected}, got ${el.checked}`);
+      }
+    }
+    if (outcome.kind === "select") {
+      const el = $(outcome.id);
+      if (!el) throw new Error(`post-check failed: select #${outcome.id} disappeared`);
+      if (String(el.value) !== String(outcome.expected)) {
+        throw new Error(`post-check failed: #${outcome.id} expected value=${outcome.expected}, got ${el.value}`);
+      }
+    }
+    if (outcome.kind === "range") {
+      const el = $(outcome.id);
+      if (!el) throw new Error(`post-check failed: range #${outcome.id} disappeared`);
+      if (String(el.value) !== String(outcome.expected)) {
+        throw new Error(`post-check failed: #${outcome.id} expected value=${outcome.expected}, got ${el.value}`);
+      }
+    }
+    if (outcome.kind === "search") {
+      const input = $(outcome.inputId);
+      if (!input) throw new Error(`post-check failed: search input #${outcome.inputId} disappeared`);
+      if (!String(input.value || "").trim() && !outcome.usedSuggestion) {
+        throw new Error(`post-check failed: search query ${outcome.query} was cleared without selecting a suggestion`);
+      }
+    }
+  }
+  function classifyResult(totalMs, failed) {
+    if (failed) return STATUS_FAILED;
+    if (totalMs >= SLOW_ACTION_MS) return STATUS_SLOW;
+    return STATUS_PASS;
+  }
+  function createRecorder() {
+    const actionResults = [];
+    const allSteps = [];
+    let currentAction = null;
+    return {
+      startAction(action) {
+        currentAction = {
+          id: action.id,
+          label: action.label,
+          category: action.category || "other",
+          startedAt: now(),
+          steps: []
+        };
+      },
+      recordStep(step) {
+        const item = {
+          actionId: currentAction ? currentAction.id : "outside-action",
+          actionLabel: currentAction ? currentAction.label : "Outside action",
+          actionCategory: currentAction ? currentAction.category : "outside",
+          name: step.name || "unknown",
+          ms: Number(step.ms) || 0,
+          at: Number(step.at) || now(),
+          reason: step.reason || step.details?.reason || "-",
+          details: step
+        };
+        allSteps.push(item);
+        if (currentAction) currentAction.steps.push(item);
+      },
+      endAction(totalMs, status, error = null) {
+        if (!currentAction) return null;
+        const result = {
+          ...currentAction,
+          totalMs,
+          status,
+          error: error ? String(error.message || error) : "",
+          slow: status === STATUS_SLOW || totalMs >= SLOW_ACTION_MS,
+          passed: status === STATUS_PASS || status === STATUS_SLOW
+        };
+        actionResults.push(result);
+        currentAction = null;
+        return result;
+      },
+      results() {
+        return actionResults.slice();
+      },
+      steps() {
+        return allSteps.slice();
+      }
+    };
+  }
+  function ensureElement(id, label = id) {
+    const el = $(id);
+    if (!el || el.disabled) throw new Error(`DOM element not available for ${label}: #${id}`);
+    return el;
+  }
+  function setCheckboxValue(id, expected) {
+    const el = ensureElement(id, id);
+    if (Boolean(el.checked) === Boolean(expected)) {
+      return { kind: "checkbox", id, before: Boolean(el.checked), expected: Boolean(expected), unchanged: true };
+    }
+    const before = Boolean(el.checked);
+    el.checked = Boolean(expected);
+    dispatchChange(el);
+    return { kind: "checkbox", id, before, expected: Boolean(expected) };
+  }
+  function maybeSetSelectValue(id, value) {
+    const el = $(id);
+    if (!el || el.disabled) return { skipped: true, reason: `select not available: #${id}` };
+    const values = optionValues(id);
+    if (!values.includes(String(value))) return { skipped: true, reason: `option not available: #${id}=${value}` };
+    const before = el.value;
+    if (String(before) === String(value)) return { kind: "select", id, before, expected: String(value), unchanged: true };
+    el.value = String(value);
+    dispatchChange(el);
+    return { kind: "select", id, before, expected: String(value) };
+  }
+  function maybeClick(id) {
+    const el = $(id);
+    if (!el || el.disabled) return { skipped: true, reason: `button not available: #${id}` };
+    el.click();
+    return { kind: "click", id };
+  }
+  async function runComboSteps(harness, steps) {
+    const outcomes = [];
+    for (const step of steps) {
+      const result = await step();
+      if (Array.isArray(result)) outcomes.push(...result);
+      else if (result) outcomes.push(result);
+      await waitForUiStable(harness, 35);
+    }
+    return { kind: "combo", outcomes };
+  }
+  function buildActions(harness = {}) {
+    const actions = [];
+    const add = (category, label, run, id = null, verify = null) => actions.push({ id: id || `${category}-${actions.length + 1}`, category, label, run, verify });
+    const addBaseline = (category, label, run, id = null, verify = null) => add(category, `\u57FA\u7EBF\uFF1A${label}`, run, id, verify);
+    const addCombo = (label, steps, id = null, verify = null) => add("combo", `\u7EC4\u5408\uFF1A${label}`, () => runComboSteps(harness, steps), id, verify);
+    [
+      ["view", "Panel \u5C55\u5F00/\u6536\u8D77", () => clickElement("panel-toggle")],
+      ["view", "\u7F29\u653E +", () => clickElement("zoom-in")],
+      ["view", "\u7F29\u653E -", () => clickElement("zoom-out")],
+      ["view", "\u91CD\u7F6E\u5F53\u524D\u89C6\u56FE", () => clickElement("reset-view")],
+      ["time", "\u56DE\u5230\u73B0\u5728", () => clickElement("observer-now")],
+      ["time", "\u4EFB\u610F\u6B65\u957F +", () => clickElement("time-step-plus")],
+      ["guide", "\u6253\u5F00\u5E2E\u52A9\u6587\u6863", () => clickElement("explain-btn")]
+    ].forEach(([category, label, run]) => addBaseline(category, label, run));
+    ["horizontal", "equatorial", "ecliptic", "galactic"].filter((value) => optionValues("coordinate-select").includes(value)).forEach(
+      (value) => addBaseline("coordinate", `\u5750\u6807\u89C6\u89D2\uFF1A${value}`, () => setSelectValue("coordinate-select", value))
+    );
+    ["orthographic", "hammer", "winkel3", "healpix", "equirectangular"].filter((value) => optionValues("projection-select").includes(value)).forEach(
+      (value) => addBaseline("projection", `\u6295\u5F71\uFF1A${value}`, () => setSelectValue("projection-select", value))
+    );
+    ["pole-axis-constraint", "milky-way", "deep-sky", "star-names", "horizontal-grid", "grid"].forEach((id) => {
+      if ($(id)) addBaseline("toggle", `\u5F00\u5173\uFF1A${id}`, () => toggleCheckbox(id), id);
+    });
+    addBaseline("search", "\u5929\u4F53\u641C\u7D22\uFF1ASirius", () => typeSearch("object-search", "object-suggestions", "Sirius"));
+    addBaseline("search", "\u5929\u4F53\u641C\u7D22\uFF1AM31", () => typeSearch("object-search", "object-suggestions", "M31"));
+    addBaseline("keyboard", "\u65B9\u5411\u952E\u957F\u6309\uFF1AArrowRight", () => keyboardPanSample("ArrowRight"));
+    addCombo("\u672C\u5730\u89C2\u6D4B\uFF1A\u5730\u5E73\u89C6\u89D2 + \u5730\u5E73\u7F51 + \u65F6\u95F4\u8DF3\u8F6C", [
+      () => maybeSetSelectValue("coordinate-select", "horizontal"),
+      () => maybeSetSelectValue("projection-select", "orthographic"),
+      () => setCheckboxValue("horizon", true),
+      () => setCheckboxValue("horizontal-grid", true),
+      () => setCheckboxValue("planets", true),
+      () => maybeClick("observer-now"),
+      () => maybeClick("time-step-plus")
+    ], "combo-local-observing");
+    addCombo("\u56FA\u5B9A\u5750\u6807\u6846\u67B6\uFF1A\u8D64\u9053 \u2192 \u9EC4\u9053 \u2192 \u94F6\u6CB3 + \u5168\u5929\u6295\u5F71", [
+      () => maybeSetSelectValue("coordinate-select", "equatorial"),
+      () => maybeSetSelectValue("projection-select", "hammer"),
+      () => setCheckboxValue("grid", true),
+      () => setCheckboxValue("ecliptic", true),
+      () => maybeSetSelectValue("coordinate-select", "ecliptic"),
+      () => maybeSetSelectValue("projection-select", "winkel3"),
+      () => maybeSetSelectValue("coordinate-select", "galactic")
+    ], "combo-coordinate-frame-sweep");
+    addCombo("\u4E2D\u897F\u6587\u5316\u56FE\u5C42\uFF1A\u4E24\u5957\u4F53\u7CFB + \u661F\u5B98 + \u4F20\u7EDF\u5929\u533A", [
+      () => maybeSetSelectValue("culture-select", "both"),
+      () => setCheckboxValue("culture-lines", true),
+      () => setCheckboxValue("culture-names", true),
+      () => setCheckboxValue("region-boundaries", true),
+      () => maybeSetSelectValue("traditional-detail", "major"),
+      () => maybeSetSelectValue("traditional-detail", "battlefields"),
+      () => maybeSetSelectValue("traditional-detail", "mansions")
+    ], "combo-culture-layers");
+    addCombo("\u94F6\u6CB3\u538B\u529B\u573A\u666F\uFF1A\u94F6\u6CB3 + \u9EC4\u9053/\u8D64\u9053\u53C2\u8003\u7EBF + \u5168\u5929\u6295\u5F71", [
+      () => setCheckboxValue("milky-way", true),
+      () => setCheckboxValue("ecliptic", true),
+      () => setCheckboxValue("equator", true),
+      () => maybeSetSelectValue("projection-select", "hammer"),
+      () => maybeSetSelectValue("coordinate-select", "ecliptic"),
+      () => maybeSetSelectValue("coordinate-select", "galactic")
+    ], "combo-milky-way-stress");
+    addCombo("\u6DF1\u7A7A\u67E5\u627E\uFF1ADSO \u56FE\u5C42 + \u661F\u540D + \u4EE3\u8868\u76EE\u6807\u641C\u7D22", [
+      () => setCheckboxValue("deep-sky", true),
+      () => setCheckboxValue("star-names", true),
+      () => maybeSetSelectValue("projection-select", "stereographic"),
+      () => typeSearch("object-search", "object-suggestions", "M31"),
+      () => typeSearch("object-search", "object-suggestions", "M42"),
+      () => typeSearch("object-search", "object-suggestions", "M13")
+    ], "combo-deep-sky-search");
+    addCombo("\u89C6\u56FE\u6392\u7248\uFF1A\u5B57\u4F53\u7F29\u653E + \u5730\u56FE\u7F29\u653E + \u91CD\u7F6E", [
+      () => maybeClick("font-increase"),
+      () => maybeClick("zoom-in"),
+      () => maybeClick("reset-view"),
+      () => maybeClick("font-decrease"),
+      () => maybeClick("zoom-out")
+    ], "combo-view-layout");
+    addCombo("\u65F6\u95F4\u8FDE\u7EED\u64CD\u4F5C\uFF1A\u56DE\u5230\u73B0\u5728 + \u524D\u540E\u8DF3\u8F6C", [
+      () => maybeSetSelectValue("coordinate-select", "horizontal"),
+      () => maybeClick("observer-now"),
+      () => maybeClick("time-step-plus"),
+      () => maybeClick("time-step-plus"),
+      () => maybeClick("time-step-minus")
+    ], "combo-time-sequence");
+    addCombo("\u952E\u76D8\u5DE1\u822A\uFF1A\u56DB\u65B9\u5411\u8FDE\u7EED\u5E73\u79FB", [
+      () => keyboardPanSample("ArrowLeft"),
+      () => keyboardPanSample("ArrowRight"),
+      () => keyboardPanSample("ArrowUp"),
+      () => keyboardPanSample("ArrowDown")
+    ], "combo-keyboard-cruise");
+    return actions;
+  }
+  function summarizeSteps(steps) {
+    const byName = /* @__PURE__ */ new Map();
+    steps.forEach((step) => {
+      const row = byName.get(step.name) || {
+        name: step.name,
+        count: 0,
+        totalMs: 0,
+        maxMs: 0,
+        samples: []
+      };
+      row.count += 1;
+      row.totalMs += step.ms;
+      row.maxMs = Math.max(row.maxMs, step.ms);
+      row.samples.push(step);
+      byName.set(step.name, row);
+    });
+    return Array.from(byName.values()).map((row) => ({
+      ...row,
+      avgMs: row.count ? row.totalMs / row.count : 0
+    })).sort((a, b) => b.totalMs - a.totalMs);
+  }
+  function percentile(values, p) {
+    if (!values.length) return 0;
+    const sorted = values.slice().sort((a, b) => a - b);
+    const idx = Math.min(sorted.length - 1, Math.max(0, Math.ceil(p / 100 * sorted.length) - 1));
+    return sorted[idx];
+  }
+  function fmt(ms) {
+    if (!Number.isFinite(Number(ms))) return "-";
+    return `${Number(ms).toFixed(1)} ms`;
+  }
+  function esc(value) {
+    return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;");
+  }
+  function rowsHtml(rows, columns) {
+    return `<table><thead><tr>${columns.map((col) => `<th>${esc(col.label)}</th>`).join("")}</tr></thead><tbody>${rows.map(
+      (row) => `<tr>${columns.map((col) => `<td>${esc(typeof col.value === "function" ? col.value(row) : row[col.value])}</td>`).join("")}</tr>`
+    ).join("")}</tbody></table>`;
+  }
+  function suiteStatusFor({ failed, slow, restoreStatus, reportMode }) {
+    if (reportMode === STATUS_INCOMPLETE) return STATUS_INCOMPLETE;
+    if (failed.length > 0) return STATUS_FAILED;
+    if (restoreStatus !== "ok" || slow.length > 0) return STATUS_PASS_WITH_WARNINGS;
+    return STATUS_PASS;
+  }
+  function buildPlainTextReport({
+    actionResults,
+    steps,
+    startedAt,
+    finishedAt,
+    restoreStatus,
+    suiteStatus,
+    topActions,
+    topSteps,
+    categoryRows,
+    staticSyncActions,
+    initialDebug
+  }) {
+    const lines = [];
+    const totals = actionResults.map((item) => item.totalMs);
+    const failed = actionResults.filter((item) => item.status === STATUS_FAILED);
+    const slow = actionResults.filter((item) => item.status === STATUS_SLOW || item.slow);
+    const comboRows = actionResults.filter((item) => item.category === "combo").sort((a, b) => b.totalMs - a.totalMs);
+    lines.push("\u771F\u5B9E\u661F\u7A7A\u89C2\u6D4B\u53F0 UI \u6027\u80FD\u6D4B\u8BD5\u62A5\u544A");
+    lines.push(`\u751F\u6210\u65F6\u95F4: ${(/* @__PURE__ */ new Date()).toLocaleString()}`);
+    lines.push(`Suite status: ${suiteStatus}`);
+    lines.push(`Profile: ${TEST_PROFILE}`);
+    lines.push(`\u6162\u64CD\u4F5C\u9608\u503C: ${SLOW_ACTION_MS} ms`);
+    lines.push(`\u603B\u8017\u65F6: ${fmt(finishedAt - startedAt)}`);
+    lines.push(`\u52A8\u4F5C\u6570: ${actionResults.length}`);
+    lines.push(`\u5931\u8D25\u52A8\u4F5C\u6570: ${failed.length}`);
+    lines.push(`\u6162\u64CD\u4F5C\u6570: ${slow.length}`);
+    lines.push(`\u5E73\u5747\u8017\u65F6: ${fmt(totals.reduce((a, b) => a + b, 0) / (totals.length || 1))}`);
+    lines.push(`P95: ${fmt(percentile(totals, 95))}`);
+    lines.push(`\u6700\u5927\u503C: ${fmt(Math.max(0, ...totals))}`);
+    lines.push(`\u6062\u590D\u72B6\u6001: ${restoreStatus}`);
+    lines.push("");
+    lines.push("== \u8017\u65F6\u6700\u9AD8\u7684\u52A8\u4F5C Top 15 ==");
+    topActions.forEach((r, i) => {
+      lines.push(`${i + 1}. [${r.status}] ${r.label} | ${r.category} | ${fmt(r.totalMs)} | steps=${r.steps.length}${r.error ? ` | error=${r.error}` : ""}`);
+    });
+    lines.push("");
+    lines.push("== \u7EC4\u5408\u6D4B\u8BD5\u573A\u666F ==");
+    if (comboRows.length) {
+      comboRows.forEach((r, i) => {
+        lines.push(`${i + 1}. [${r.status}] ${r.label} | ${fmt(r.totalMs)} | steps=${r.steps.length}${r.error ? ` | error=${r.error}` : ""}`);
+      });
+    } else {
+      lines.push("\u672A\u6267\u884C\u7EC4\u5408\u6D4B\u8BD5\u573A\u666F\u3002");
+    }
+    lines.push("");
+    lines.push("== \u8017\u65F6\u6700\u9AD8\u7684\u5185\u90E8\u5B50\u8FC7\u7A0B Top 15 ==");
+    topSteps.forEach((r, i) => {
+      lines.push(`${i + 1}. ${r.name} | count=${r.count} | total=${fmt(r.totalMs)} | avg=${fmt(r.avgMs)} | max=${fmt(r.maxMs)}`);
+    });
+    lines.push("");
+    lines.push("== \u6309\u7C7B\u522B\u6C47\u603B ==");
+    categoryRows.forEach((r) => {
+      lines.push(`${r.category}: count=${r.count}, total=${fmt(r.totalMs)}, avg=${fmt(r.avgMs)}, max=${fmt(r.maxMs)}`);
+    });
+    lines.push("");
+    lines.push("== \u89E6\u53D1\u56FA\u5B9A\u56FE\u5C42\u540C\u6B65\u7684\u9AD8\u8017\u65F6\u6837\u672C ==");
+    if (staticSyncActions.length) {
+      staticSyncActions.forEach((r, i) => {
+        lines.push(`${i + 1}. ${r.actionLabel} | ${r.name} | ${fmt(r.ms)} | reason=${r.reason}`);
+      });
+    } else {
+      lines.push("\u65E0\u660E\u663E\u56FA\u5B9A\u56FE\u5C42\u540C\u6B65\u9AD8\u8017\u65F6\u6837\u672C\u3002");
+    }
+    lines.push("");
+    lines.push("== \u5931\u8D25\u52A8\u4F5C ==");
+    if (failed.length) {
+      failed.forEach((r) => lines.push(`[FAILED] ${r.label} | ${fmt(r.totalMs)} | ${r.error}`));
+    } else {
+      lines.push("\u65E0\u5931\u8D25\u52A8\u4F5C\u3002");
+    }
+    lines.push("");
+    lines.push("== \u6162\u64CD\u4F5C ==");
+    if (slow.length) {
+      slow.slice().sort((a, b) => b.totalMs - a.totalMs).forEach((r) => lines.push(`[SLOW] ${r.label} | ${fmt(r.totalMs)} | category=${r.category}`));
+    } else {
+      lines.push("\u65E0\u6162\u64CD\u4F5C\u3002");
+    }
+    lines.push("");
+    lines.push("== \u5168\u90E8\u52A8\u4F5C\u660E\u7EC6 ==");
+    actionResults.forEach((r, i) => {
+      lines.push(`${i + 1}. [${r.status}] ${r.label} | ${r.category} | ${fmt(r.totalMs)} | slow=${r.slow ? "yes" : "no"} | steps=${r.steps.length}${r.error ? ` | error=${r.error}` : ""}`);
+      r.steps.forEach((step) => {
+        lines.push(`   - ${step.name}: ${fmt(step.ms)} | reason=${step.reason}`);
+      });
+    });
+    lines.push("");
+    lines.push("== \u539F\u59CB Debug \u5FEB\u7167 ==");
+    lines.push(JSON.stringify(initialDebug, null, 2));
+    return lines.join("\n");
+  }
+  function buildReport({ actionResults, steps, startedAt, finishedAt, restoreStatus, harness, reportMode = "popup" }) {
+    const totals = actionResults.map((item) => item.totalMs);
+    const failed = actionResults.filter((item) => item.status === STATUS_FAILED);
+    const slow = actionResults.filter((item) => item.status === STATUS_SLOW || item.slow).sort((a, b) => b.totalMs - a.totalMs);
+    const topActions = actionResults.slice().sort((a, b) => b.totalMs - a.totalMs).slice(0, 15);
+    const comboRows = actionResults.filter((item) => item.category === "combo").sort((a, b) => b.totalMs - a.totalMs);
+    const stepSummary = summarizeSteps(steps);
+    const topSteps = stepSummary.slice(0, 15);
+    const categories = /* @__PURE__ */ new Map();
+    actionResults.forEach((item) => {
+      const row = categories.get(item.category) || { category: item.category, count: 0, totalMs: 0, maxMs: 0 };
+      row.count += 1;
+      row.totalMs += item.totalMs;
+      row.maxMs = Math.max(row.maxMs, item.totalMs);
+      categories.set(item.category, row);
+    });
+    const categoryRows = Array.from(categories.values()).map((row) => ({ ...row, avgMs: row.count ? row.totalMs / row.count : 0 })).sort((a, b) => b.totalMs - a.totalMs);
+    const staticSyncActions = steps.filter((step) => /fixedLayerSync/i.test(step.name) && step.ms > 1).sort((a, b) => b.ms - a.ms).slice(0, 20);
+    const initialDebug = harness && typeof harness.getDebugSnapshot === "function" ? harness.getDebugSnapshot() : null;
+    const suiteStatus = suiteStatusFor({ failed, slow, restoreStatus, reportMode });
+    const plainText = buildPlainTextReport({
+      actionResults,
+      steps,
+      startedAt,
+      finishedAt,
+      restoreStatus,
+      suiteStatus,
+      topActions,
+      topSteps,
+      categoryRows,
+      staticSyncActions,
+      initialDebug
+    });
+    const plainTextJson = JSON.stringify(plainText).replace(/</g, "\\u003c");
+    const html = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8" />
+<title>UI \u6027\u80FD\u6D4B\u8BD5\u62A5\u544A</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#07101f;color:#eef7ff;margin:0;padding:24px;line-height:1.55}h1,h2{margin:0 0 12px}section{margin:22px 0;padding:18px;border:1px solid rgba(159,211,255,.22);border-radius:14px;background:rgba(255,255,255,.035)}table{border-collapse:collapse;width:100%;font-size:13px;margin-top:10px}th,td{border-bottom:1px solid rgba(159,211,255,.14);padding:7px 8px;text-align:left;vertical-align:top}th{color:#77dcff;background:rgba(119,220,255,.08)}button{appearance:none;border:1px solid rgba(119,220,255,.45);border-radius:10px;background:rgba(119,220,255,.12);color:#eef7ff;padding:9px 12px;cursor:pointer}button:hover{background:rgba(119,220,255,.2)}.bad{color:#ff9d9d}.warn{color:#ffd477}.ok{color:#92f7b5}.muted{color:#9db1c8}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}.card{padding:12px;border-radius:10px;background:rgba(0,0,0,.18)}.toolbar{position:sticky;top:0;z-index:2;display:flex;gap:12px;align-items:center;margin:-24px -24px 18px;padding:14px 24px;background:rgba(7,16,31,.96);border-bottom:1px solid rgba(159,211,255,.18);backdrop-filter:blur(8px)}code,pre{background:rgba(0,0,0,.28);padding:2px 5px;border-radius:4px}pre{white-space:pre-wrap;padding:12px;overflow:auto}</style>
+<script>window.__RSO_UI_PERF_PLAIN_TEXT__=${plainTextJson};
+async function copyPlainReport(){
+  var text=window.__RSO_UI_PERF_PLAIN_TEXT__||"";
+  var status=document.getElementById("copy-status");
+  try{
+    if(navigator.clipboard&&navigator.clipboard.writeText){await navigator.clipboard.writeText(text);}else{
+      var ta=document.createElement("textarea");ta.value=text;ta.setAttribute("readonly","");ta.style.position="fixed";ta.style.left="-9999px";document.body.appendChild(ta);ta.select();document.execCommand("copy");ta.remove();
+    }
+    if(status)status.textContent="\u5DF2\u590D\u5236\u7EAF\u6587\u672C\u62A5\u544A";
+  }catch(err){
+    if(status)status.textContent="\u590D\u5236\u5931\u8D25\uFF0C\u8BF7\u624B\u52A8\u9009\u62E9\u5E95\u90E8\u7EAF\u6587\u672C\u62A5\u544A";
+    console.warn("copy report failed",err);
+  }
+}
+<\/script>
+</head><body>
+<div class="toolbar"><button type="button" onclick="copyPlainReport()">\u590D\u5236\u7EAF\u6587\u672C\u62A5\u544A</button><span id="copy-status" class="muted">\u590D\u5236\u540E\u53EF\u76F4\u63A5\u7C98\u8D34\u7ED9\u7EF4\u62A4\u8005\u5206\u6790</span></div>
+<h1>UI \u6027\u80FD\u6D4B\u8BD5\u62A5\u544A</h1>
+<p class="muted">Profile: ${esc(TEST_PROFILE)} \xB7 \u6162\u64CD\u4F5C\u9608\u503C: ${SLOW_ACTION_MS} ms \xB7 ${esc((/* @__PURE__ */ new Date()).toLocaleString())}</p>
+<section><h2>\u603B\u89C8</h2><div class="grid">
+<div class="card">Suite status<br><b class="${suiteStatus === STATUS_FAILED || suiteStatus === STATUS_INCOMPLETE ? "bad" : suiteStatus === STATUS_PASS_WITH_WARNINGS ? "warn" : "ok"}">${esc(suiteStatus)}</b></div>
+<div class="card">\u52A8\u4F5C\u6570<br><b>${actionResults.length}</b></div>
+<div class="card">\u603B\u8017\u65F6<br><b>${fmt(finishedAt - startedAt)}</b></div>
+<div class="card">\u5E73\u5747\u8017\u65F6<br><b>${fmt(totals.reduce((a, b) => a + b, 0) / (totals.length || 1))}</b></div>
+<div class="card">P95<br><b>${fmt(percentile(totals, 95))}</b></div>
+<div class="card">\u6700\u5927\u503C<br><b>${fmt(Math.max(0, ...totals))}</b></div>
+<div class="card">\u5931\u8D25\u52A8\u4F5C<br><b class="${failed.length ? "bad" : "ok"}">${failed.length}</b></div>
+<div class="card">\u6162\u64CD\u4F5C<br><b class="${slow.length ? "warn" : "ok"}">${slow.length}</b></div>
+<div class="card">\u7EC4\u5408\u573A\u666F<br><b>${comboRows.length}</b></div>
+<div class="card">\u6062\u590D\u72B6\u6001<br><b class="${restoreStatus === "ok" ? "ok" : "warn"}">${esc(restoreStatus)}</b></div>
+</div></section>
+<section><h2>\u6210\u529F/\u5931\u8D25\u5224\u5B9A\u89C4\u5219</h2><p>\u6BCF\u4E2A\u52A8\u4F5C\u4F1A\u5148\u68C0\u67E5\u63A7\u4EF6\u662F\u5426\u5B58\u5728\u3001\u53EF\u89C1\u4E14\u53EF\u7528\uFF1B\u6267\u884C\u8FC7\u7A0B\u4E2D\u6355\u83B7\u5F02\u5E38\u548C\u8D85\u65F6\uFF1B\u6267\u884C\u540E\u5BF9 checkbox\u3001select\u3001range\u3001\u641C\u7D22\u7B49\u63A7\u4EF6\u505A\u6700\u5C0F\u72B6\u6001\u65AD\u8A00\u3002\u72B6\u6001\u6B63\u786E\u4F46\u8D85\u8FC7 ${SLOW_ACTION_MS} ms \u8BB0\u4E3A <b class="warn">SLOW</b>\uFF0C\u4E0D\u7B97\u5931\u8D25\uFF1B\u63A7\u4EF6\u7F3A\u5931\u3001\u8D85\u65F6\u3001\u629B\u9519\u6216\u72B6\u6001\u672A\u53D8\u5316\u8BB0\u4E3A <b class="bad">FAILED</b>\u3002</p></section>
+<section><h2>\u8017\u65F6\u6700\u9AD8\u7684\u52A8\u4F5C Top 15</h2>${rowsHtml(topActions, [
+      { label: "\u52A8\u4F5C", value: "label" },
+      { label: "\u7C7B\u522B", value: "category" },
+      { label: "\u603B\u8017\u65F6", value: (r) => fmt(r.totalMs) },
+      { label: "\u72B6\u6001", value: "status" },
+      { label: "\u9519\u8BEF", value: "error" }
+    ])}</section>
+<section><h2>\u7EC4\u5408\u6D4B\u8BD5\u573A\u666F</h2><p class="muted">\u7EC4\u5408\u6D4B\u8BD5\u4E0D\u518D\u673A\u68B0\u904D\u5386\u6BCF\u4E2A\u6309\u94AE\uFF0C\u800C\u662F\u6A21\u62DF\u771F\u5B9E\u4F7F\u7528\u94FE\u8DEF\uFF1A\u5750\u6807+\u6295\u5F71+\u56FE\u5C42\u3001\u6587\u5316\u4F53\u7CFB\u3001\u65F6\u95F4\u8DF3\u8F6C\u3001\u6DF1\u7A7A\u641C\u7D22\u3001\u952E\u76D8\u5DE1\u822A\u7B49\u3002\u8FD9\u91CC\u7684\u8017\u65F6\u66F4\u63A5\u8FD1\u7528\u6237\u5B9E\u9645\u611F\u53D7\u5230\u7684\u4E00\u6B21\u8FDE\u7EED\u64CD\u4F5C\u3002</p>${comboRows.length ? rowsHtml(comboRows, [
+      { label: "\u7EC4\u5408\u573A\u666F", value: "label" },
+      { label: "\u603B\u8017\u65F6", value: (r) => fmt(r.totalMs) },
+      { label: "\u72B6\u6001", value: "status" },
+      { label: "\u5B50\u8FC7\u7A0B\u6570", value: (r) => r.steps.length },
+      { label: "\u9519\u8BEF", value: "error" }
+    ]) : '<p class="muted">\u672A\u6267\u884C\u7EC4\u5408\u6D4B\u8BD5\u573A\u666F\u3002</p>'}</section>
+<section><h2>\u8017\u65F6\u6700\u9AD8\u7684\u5185\u90E8\u5B50\u8FC7\u7A0B Top 15</h2>${rowsHtml(topSteps, [
+      { label: "\u5B50\u8FC7\u7A0B", value: "name" },
+      { label: "\u6B21\u6570", value: "count" },
+      { label: "\u7D2F\u8BA1\u8017\u65F6", value: (r) => fmt(r.totalMs) },
+      { label: "\u5E73\u5747", value: (r) => fmt(r.avgMs) },
+      { label: "\u6700\u5927", value: (r) => fmt(r.maxMs) }
+    ])}</section>
+<section><h2>\u6309\u7C7B\u522B\u6C47\u603B</h2>${rowsHtml(categoryRows, [
+      { label: "\u7C7B\u522B", value: "category" },
+      { label: "\u52A8\u4F5C\u6570", value: "count" },
+      { label: "\u7D2F\u8BA1\u8017\u65F6", value: (r) => fmt(r.totalMs) },
+      { label: "\u5E73\u5747", value: (r) => fmt(r.avgMs) },
+      { label: "\u6700\u5927", value: (r) => fmt(r.maxMs) }
+    ])}</section>
+<section><h2>\u89E6\u53D1\u56FA\u5B9A\u56FE\u5C42\u540C\u6B65\u7684\u9AD8\u8017\u65F6\u6837\u672C</h2><p class="muted">\u5982\u679C\u65F6\u95F4\u53D8\u5316\u3001\u5F00\u5173\u5207\u6362\u6216\u666E\u901A UI \u64CD\u4F5C\u9891\u7E41\u51FA\u73B0\u5728\u8FD9\u91CC\uFF0C\u901A\u5E38\u8BF4\u660E\u9759\u6001\u56FE\u5C42\u91CD\u6295\u5F71\u8FC7\u591A\u3002</p>${rowsHtml(staticSyncActions, [
+      { label: "\u52A8\u4F5C", value: "actionLabel" },
+      { label: "\u5B50\u8FC7\u7A0B", value: "name" },
+      { label: "\u8017\u65F6", value: (r) => fmt(r.ms) },
+      { label: "reason", value: "reason" }
+    ])}</section>
+<section><h2>\u5168\u90E8\u52A8\u4F5C\u660E\u7EC6</h2>${rowsHtml(actionResults, [
+      { label: "\u52A8\u4F5C", value: "label" },
+      { label: "\u7C7B\u522B", value: "category" },
+      { label: "\u8017\u65F6", value: (r) => fmt(r.totalMs) },
+      { label: "\u6162\u64CD\u4F5C", value: (r) => r.slow ? "\u662F" : "\u5426" },
+      { label: "\u5B50\u8FC7\u7A0B\u6570", value: (r) => r.steps.length },
+      { label: "\u72B6\u6001", value: "status" },
+      { label: "\u9519\u8BEF", value: "error" }
+    ])}</section>
+<section><h2>\u5931\u8D25\u52A8\u4F5C</h2>${failed.length ? rowsHtml(failed, [
+      { label: "\u52A8\u4F5C", value: "label" },
+      { label: "\u7C7B\u522B", value: "category" },
+      { label: "\u8017\u65F6", value: (r) => fmt(r.totalMs) },
+      { label: "\u9519\u8BEF", value: "error" }
+    ]) : '<p class="ok">\u6CA1\u6709\u5931\u8D25\u52A8\u4F5C\u3002</p>'}</section>
+<section><h2>\u539F\u59CB\u8C03\u8BD5\u5FEB\u7167</h2><pre>${esc(JSON.stringify(initialDebug, null, 2))}</pre></section>
+<section><h2>\u7EAF\u6587\u672C\u62A5\u544A\u5907\u4EFD</h2><p class="muted">\u5982\u679C\u590D\u5236\u6309\u94AE\u4E0D\u53EF\u7528\uFF0C\u53EF\u4EE5\u624B\u52A8\u590D\u5236\u4E0B\u9762\u6587\u672C\u3002</p><pre>${esc(plainText)}</pre></section>
+</body></html>`;
+    return { html, plainText, suiteStatus };
+  }
+  function showReport(html, plainText = "") {
+    const popup = window.open("", "_blank");
+    if (popup && popup.document) {
+      popup.document.open();
+      popup.document.write(html);
+      popup.document.close();
+      return "popup";
+    }
+    console.warn("UI performance report popup was blocked. Plain text report follows:\n", plainText);
+    const holder = document.createElement("div");
+    holder.style.position = "fixed";
+    holder.style.inset = "20px";
+    holder.style.zIndex = "999999";
+    holder.style.background = "#07101f";
+    holder.style.border = "1px solid rgba(159,211,255,.35)";
+    holder.style.borderRadius = "14px";
+    holder.style.overflow = "auto";
+    holder.innerHTML = `<button style="position:sticky;top:8px;margin:8px;z-index:1" type="button">\u5173\u95ED\u62A5\u544A</button><iframe style="width:100%;height:calc(100% - 48px);border:0"></iframe>`;
+    document.body.appendChild(holder);
+    holder.querySelector("button").addEventListener("click", () => holder.remove());
+    const iframe = holder.querySelector("iframe");
+    iframe.contentDocument.open();
+    iframe.contentDocument.write(html);
+    iframe.contentDocument.close();
+    return "inline-fallback";
+  }
+  async function runAction(action, recorder, harness) {
+    closeTransientUi();
+    await waitForUiStable(harness, 20);
+    recorder.startAction(action);
+    const started = now();
+    let failed = false;
+    let error = null;
+    try {
+      const outcome = await withTimeout(Promise.resolve(action.run()), ACTION_TIMEOUT_MS, action.label);
+      await waitForUiStable(harness, 90);
+      validateActionOutcome(action, outcome);
+    } catch (err) {
+      failed = true;
+      error = err;
+    }
+    const totalMs = now() - started;
+    return recorder.endAction(totalMs, classifyResult(totalMs, failed), error);
+  }
+  async function runUiPerformanceSuite(harness = {}) {
+    if (window.__RSO_UI_PERF_RUNNING__) return;
+    window.__RSO_UI_PERF_RUNNING__ = true;
+    const recorder = createRecorder();
+    window.__RSO_UI_PERF_RECORDER__ = recorder;
+    const startedAt = now();
+    let restoreStatus = "skipped";
+    let snapshot = null;
+    try {
+      if (typeof harness.getStateSnapshot === "function") snapshot = harness.getStateSnapshot();
+      await waitForUiStable(harness, 160);
+      const actions = buildActions(harness);
+      for (const action of actions) {
+        await runAction(action, recorder, harness);
+      }
+    } finally {
+      if (RESTORE_STATE_AFTER_TEST && snapshot && typeof harness.restoreStateSnapshot === "function") {
+        try {
+          await harness.restoreStateSnapshot(snapshot);
+          restoreStatus = "ok";
+        } catch (err) {
+          restoreStatus = `failed: ${String(err && err.message ? err.message : err)}`;
+        }
+      }
+      const finishedAt = now();
+      const report = buildReport({
+        actionResults: recorder.results(),
+        steps: recorder.steps(),
+        startedAt,
+        finishedAt,
+        restoreStatus,
+        harness
+      });
+      const reportMode = showReport(report.html, report.plainText);
+      if (reportMode !== "popup") {
+        console.warn(`UI performance report used ${reportMode}. Suite status: ${report.suiteStatus}`);
+      }
+      delete window.__RSO_UI_PERF_RECORDER__;
+      window.__RSO_UI_PERF_RUNNING__ = false;
+    }
+  }
+  var TEST_PROFILE, SLOW_ACTION_MS, RESTORE_STATE_AFTER_TEST, ACTION_TIMEOUT_MS, STATUS_PASS, STATUS_SLOW, STATUS_FAILED, STATUS_INCOMPLETE, STATUS_PASS_WITH_WARNINGS;
+  var init_ui_performance_runner = __esm({
+    "src/testing/ui-performance-runner.ts"() {
+      TEST_PROFILE = "standard";
+      SLOW_ACTION_MS = 200;
+      RESTORE_STATE_AFTER_TEST = true;
+      ACTION_TIMEOUT_MS = 6e3;
+      STATUS_PASS = "PASS";
+      STATUS_SLOW = "SLOW";
+      STATUS_FAILED = "FAILED";
+      STATUS_INCOMPLETE = "INCOMPLETE";
+      STATUS_PASS_WITH_WARNINGS = "PASS_WITH_WARNINGS";
+    }
+  });
+
   // src/config.ts
+  var ENABLE_UI_PERFORMANCE_TEST = true;
   window.RSO_CONFIG = {
+    /** 测试模块配置：只保留一个总开关，关闭时测试代码不会进入运行链路。 */
+    testing: {
+      uiPerformanceTestEnabled: ENABLE_UI_PERFORMANCE_TEST
+    },
     /** 首次运行默认状态；用户保存过设置后，以 localStorage 中的状态为准。 */
     defaults: {
       latitude: 39.9042,
@@ -401,7 +1106,7 @@
 
   // src/data/culture-notes.ts
   window.RSO_CULTURE_NOTES = {
-    version: "5.5.3",
+    version: "5.5.4",
     importantMagnitudeLimit: 2.1,
     description: {
       zh: "\u91CD\u8981\u6052\u661F\u7684\u8DE8\u6587\u5316\u7B80\u8FF0\u3002\u6587\u5B57\u4E3A\u4FBF\u4E8E\u5B66\u4E60\u7684\u7B80\u660E\u6982\u62EC\uFF0C\u4E0D\u66FF\u4EE3\u5386\u53F2\u6587\u732E\u539F\u6587\uFF1B\u540C\u4E00\u897F\u65B9\u661F\u5EA7\u53EF\u80FD\u5B58\u5728\u591A\u4E2A\u795E\u8BDD\u7248\u672C\uFF0C\u4E2D\u56FD\u661F\u5B98\u542B\u4E49\u4E5F\u53EF\u80FD\u968F\u65F6\u4EE3\u548C\u6587\u732E\u800C\u53D8\u5316\u3002",
@@ -3059,7 +3764,7 @@
         blocks: [
           {
             type: "paragraph",
-            html: "\u5F53\u524D\u8BF4\u660E\u4E66\u5BF9\u5E94\u9879\u76EE\u7248\u672C\uFF1A<strong>5.5.3</strong>\u3002"
+            html: "\u5F53\u524D\u8BF4\u660E\u4E66\u5BF9\u5E94\u9879\u76EE\u7248\u672C\uFF1A<strong>5.5.4</strong>\u3002"
           },
           {
             type: "paragraph",
@@ -3723,7 +4428,7 @@
       },
       ui: { updateHUD, updateDebugOverlay, debugRefreshIntervalMs }
     } = services;
-    function updateKeyboardPanFrame(now) {
+    function updateKeyboardPanFrame(now2) {
       if (!skyPanKeys.size) {
         setLastKeyboardPanFrame(0);
         return;
@@ -3733,9 +4438,9 @@
         flushKeyboardPanView();
         return;
       }
-      const last = getLastKeyboardPanFrame() || now;
-      setLastKeyboardPanFrame(now);
-      const dt = Math.max(0, Math.min(0.05, (now - last) / 1e3));
+      const last = getLastKeyboardPanFrame() || now2;
+      setLastKeyboardPanFrame(now2);
+      const dt = Math.max(0, Math.min(0.05, (now2 - last) / 1e3));
       if (dt <= 0) return;
       const speed = Number(cfg("interaction.keyboardPanDegreesPerSecond", 72)) || 72;
       const vector = keyboardPanUnitVector(skyPanKeys);
@@ -3746,9 +4451,9 @@
         "keyboard pan frame"
       );
     }
-    function animationLoop(now) {
-      const dt = Math.min(0.25, (now - getLastFrame()) / 1e3);
-      setLastFrame(now);
+    function animationLoop(now2) {
+      const dt = Math.min(0.25, (now2 - getLastFrame()) / 1e3);
+      setLastFrame(now2);
       if (getPlaying()) {
         const current = DateTime.fromISO(String(state.instant || ""), {
           zone: "utc"
@@ -3783,18 +4488,18 @@
             lastError: "playback produced non-renderable time"
           });
         }
-        if (now - getLastSkyUpdate() > 220) {
+        if (now2 - getLastSkyUpdate() > 220) {
           updateSkyView(true, "playback");
-          setLastSkyUpdate(now);
+          setLastSkyUpdate(now2);
         }
-        if (now - getLastHudUpdate() > 240) {
+        if (now2 - getLastHudUpdate() > 240) {
           updateHUD(true);
-          setLastHudUpdate(now);
+          setLastHudUpdate(now2);
         }
       }
-      updateKeyboardPanFrame(now);
-      if (getDebugVisible() && now - getLastDebugUpdate() > debugRefreshIntervalMs()) {
-        setLastDebugUpdate(now);
+      updateKeyboardPanFrame(now2);
+      if (getDebugVisible() && now2 - getLastDebugUpdate() > debugRefreshIntervalMs()) {
+        setLastDebugUpdate(now2);
         updateDebugOverlay();
       }
       requestAnimationFrame2(animationLoop);
@@ -3962,7 +4667,7 @@
   // src/time/time-input-actions.ts
   function createTimeInputActions(services) {
     const {
-      dom: { $ },
+      dom: { $: $2 },
       time: {
         observerDT,
         safeZoneForCoordinates: safeZoneForCoordinates2,
@@ -4021,7 +4726,7 @@
       return applyObserverDateTime(observerDT().plus(delta), true, source);
     }
     function readTimeStepValue() {
-      const input = $("time-step-value");
+      const input = $2("time-step-value");
       const value = Math.floor(Number(input && input.value));
       if (!Number.isFinite(value) || value < 1) {
         if (input) input.value = "1";
@@ -4032,7 +4737,7 @@
       return value;
     }
     function shiftObserverTimeByControl(sign) {
-      const unitSelect = $("time-step-unit");
+      const unitSelect = $2("time-step-unit");
       const unit = unitSelect ? unitSelect.value : "hours";
       if (!["minutes", "hours", "days", "years"].includes(unit)) return;
       shiftObserverTime(unit, readTimeStepValue() * (sign < 0 ? -1 : 1), "step");
@@ -4049,7 +4754,7 @@
   // src/ui/app-shell.ts
   function createAppShellController(options) {
     const {
-      dom: { $, document: document2, window: window2, ResizeObserver },
+      dom: { $: $2, document: document2, window: window2, ResizeObserver },
       createSectionShell: createSectionShell2,
       applyMenuSectionOrder: applyMenuSectionOrder2,
       initializeMenuSections: initializeMenuSections2,
@@ -4057,7 +4762,7 @@
       setResizeObserver
     } = options;
     function initializeIntegratedLayout() {
-      if ($("app-shell")) return;
+      if ($2("app-shell")) return;
       const shell = document2.createElement("div");
       shell.id = "app-shell";
       const sidebar = document2.createElement("aside");
@@ -4068,7 +4773,7 @@
       const brand = document2.querySelector(".brand");
       const selector = document2.querySelector(".selector-card");
       const hud = document2.querySelector(".hud");
-      const panel = $("control-panel");
+      const panel = $2("control-panel");
       const head = document2.createElement("div");
       head.id = "sidebar-head";
       if (brand) head.appendChild(brand);
@@ -4095,8 +4800,8 @@
       sidebar.appendChild(panel);
       applyMenuSectionOrder2(panel);
       initializeMenuSections2(panel);
-      pane.appendChild($("sky-stage"));
-      const skyMeta = $("sky-meta");
+      pane.appendChild($2("sky-stage"));
+      const skyMeta = $2("sky-meta");
       if (skyMeta) pane.appendChild(skyMeta);
       shell.append(sidebar, pane);
       document2.body.insertBefore(shell, document2.body.firstChild);
@@ -4299,7 +5004,7 @@
   function createDebugOverlayController(services) {
     const {
       dom: {
-        $,
+        $: $2,
         document: document2,
         window: window2,
         navigator: navigator2,
@@ -4356,7 +5061,7 @@
       rotationPointerDrag = runtime.rotationPointerDrag || null;
     }
     function updateDebugToggleTitle() {
-      const button = $("debug-toggle");
+      const button = $2("debug-toggle");
       if (!button) return;
       const title = state.lang === "en" ? "Show layout debug information" : "\u663E\u793A\u5E03\u5C40\u8C03\u8BD5\u4FE1\u606F";
       button.title = title;
@@ -4414,12 +5119,12 @@
     }
     function setDebugCopyButtonStatus(status = "idle") {
       debugCopyStatus = status;
-      const button = $("debug-copy");
+      const button = $2("debug-copy");
       if (!button) return;
       button.textContent = debugCopyText(status);
     }
     async function copyDebugPlainText() {
-      const button = $("debug-copy"), text = lastDebugPlainText || "";
+      const button = $2("debug-copy"), text = lastDebugPlainText || "";
       clearTimeout2(debugCopyTimer);
       try {
         if (navigator2.clipboard && navigator2.clipboard.writeText) {
@@ -4444,7 +5149,7 @@
       debugCopyTimer = setTimeout2(() => setDebugCopyButtonStatus("idle"), 1300);
     }
     function ensureDebugOverlayStructure(overlay) {
-      let toolbar = overlay.querySelector(".debug-toolbar"), copy = $("debug-copy"), content = overlay.querySelector(".debug-content");
+      let toolbar = overlay.querySelector(".debug-toolbar"), copy = $2("debug-copy"), content = overlay.querySelector(".debug-content");
       if (!toolbar) {
         toolbar = document2.createElement("div");
         toolbar.className = "debug-toolbar";
@@ -4480,7 +5185,7 @@
       }
     }
     function debugDragMode(zh) {
-      const map = $("celestial-map"), dragging = !!(map && map.classList.contains("dragging"));
+      const map = $2("celestial-map"), dragging = !!(map && map.classList.contains("dragging"));
       const constrained = poleAxisConstraintEnabled();
       if (paneDrag)
         return constrained ? zh ? "\u661F\u56FE\u7559\u767D\u6B27\u62C9\u89D2\u7EA6\u675F\u62D6\u52A8" : "pane-margin Euler constrained drag" : zh ? "\u661F\u56FE\u7559\u767D\u6293\u70B9\u5F0F\u62D6\u52A8" : "pane-margin grab drag";
@@ -4585,7 +5290,7 @@
     function updateDebugOverlay(force = false) {
       if (!debugVisible && !force) return;
       refreshRuntimeState();
-      const overlay = $("debug-overlay");
+      const overlay = $2("debug-overlay");
       if (!overlay) return;
       const content = ensureDebugOverlayStructure(overlay);
       const zh = state.lang !== "en", bool = (value) => zh ? value ? "\u5F00" : "\u5173" : value ? "on" : "off";
@@ -4818,7 +5523,7 @@
         skyReady: "skyReady",
         rebuild: "rebuild"
       };
-      const pane = $("sky-pane"), canvas = document2.querySelector("#celestial-map canvas"), svg = document2.querySelector("#celestial-map svg"), metrics = projectionCanvasMetrics2(), starMagnitudeStats = currentStarMagnitudeStats(), rotationStats = rotationController.debugState(), celestialMetrics = window2.Celestial && typeof window2.Celestial.metrics === "function" ? window2.Celestial.metrics() : null;
+      const pane = $2("sky-pane"), canvas = document2.querySelector("#celestial-map canvas"), svg = document2.querySelector("#celestial-map svg"), metrics = projectionCanvasMetrics2(), starMagnitudeStats = currentStarMagnitudeStats(), rotationStats = rotationController.debugState(), celestialMetrics = window2.Celestial && typeof window2.Celestial.metrics === "function" ? window2.Celestial.metrics() : null;
       const paneRect = pane ? pane.getBoundingClientRect() : null, sidebarRect = elementRect2("#sidebar"), panelToggleRect = elementRect2("#panel-toggle"), overlayRect = overlay.getBoundingClientRect(), stageRect = elementRect2("#sky-stage"), frameRect = elementRect2("#celestial-frame"), mapRect = elementRect2("#celestial-map"), canvasRect2 = canvas ? canvas.getBoundingClientRect() : null, svgRect = svg ? svg.getBoundingClientRect() : null, paneCenter = paneRect ? {
         x: paneRect.left + paneRect.width / 2,
         y: paneRect.top + paneRect.height / 2
@@ -4832,8 +5537,8 @@
         x: canvasCenter.x - paneCenter.x,
         y: canvasCenter.y - paneCenter.y
       } : null;
-      const pointerInfo = debugPointerInfo(zh), mapStyle = mapRect ? getComputedStyle($("celestial-map")) : null, sameSize = (a, b) => !a || !b || Math.abs(a.width - b.width) <= 1 && Math.abs(a.height - b.height) <= 1, matchesTarget = (rect) => !rect || Math.abs(rect.width - metrics.width) <= 1 && Math.abs(rect.height - metrics.height) <= 1, sizesOk = matchesTarget(mapRect) && matchesTarget(canvasRect2) && matchesTarget(svgRect) && sameSize(mapRect, canvasRect2) && sameSize(canvasRect2, svgRect);
-      const controlMode = currentViewControlMode(), eulerActive = controlMode === "Euler constrained", quaternionActive = controlMode === "Quaternion free", poleToggle = $("pole-axis-constraint"), poleToggleMatchesState = !poleToggle || !!poleToggle.checked === poleAxisConstraintEnabled(), debugPointerCoord = debugPointerActive ? debugPointerSkyCoord : null;
+      const pointerInfo = debugPointerInfo(zh), mapStyle = mapRect ? getComputedStyle($2("celestial-map")) : null, sameSize = (a, b) => !a || !b || Math.abs(a.width - b.width) <= 1 && Math.abs(a.height - b.height) <= 1, matchesTarget = (rect) => !rect || Math.abs(rect.width - metrics.width) <= 1 && Math.abs(rect.height - metrics.height) <= 1, sizesOk = matchesTarget(mapRect) && matchesTarget(canvasRect2) && matchesTarget(svgRect) && sameSize(mapRect, canvasRect2) && sameSize(canvasRect2, svgRect);
+      const controlMode = currentViewControlMode(), eulerActive = controlMode === "Euler constrained", quaternionActive = controlMode === "Quaternion free", poleToggle = $2("pole-axis-constraint"), poleToggleMatchesState = !poleToggle || !!poleToggle.checked === poleAxisConstraintEnabled(), debugPointerCoord = debugPointerActive ? debugPointerSkyCoord : null;
       const poleStats = updatePoleAxisDebug(
         debugPointerCoord,
         view2.center,
@@ -5363,7 +6068,7 @@
     function setDebugVisible(open) {
       debugVisible = !!open;
       document2.body.classList.toggle("debug-open", debugVisible);
-      const button = $("debug-toggle"), overlay = $("debug-overlay");
+      const button = $2("debug-toggle"), overlay = $2("debug-overlay");
       if (button) button.classList.toggle("active", debugVisible);
       if (overlay) {
         overlay.style.display = debugVisible ? "block" : "none";
@@ -5373,8 +6078,8 @@
     }
     function initializeDebugTools() {
       if (!cfg("debug.enabled", false)) return;
-      const pane = $("sky-pane") || document2.body;
-      if (!$("debug-toggle")) {
+      const pane = $2("sky-pane") || document2.body;
+      if (!$2("debug-toggle")) {
         const button = document2.createElement("button");
         button.id = "debug-toggle";
         button.className = "top-control-button";
@@ -5382,21 +6087,21 @@
         button.textContent = "DBG";
         button.addEventListener("click", () => setDebugVisible(!debugVisible));
         document2.body.appendChild(button);
-      } else if ($("debug-toggle").parentElement !== document2.body) {
-        document2.body.appendChild($("debug-toggle"));
+      } else if ($2("debug-toggle").parentElement !== document2.body) {
+        document2.body.appendChild($2("debug-toggle"));
       }
       updateDebugToggleTitle();
-      if (!$("debug-overlay")) {
+      if (!$2("debug-overlay")) {
         const overlay = document2.createElement("div");
         overlay.id = "debug-overlay";
         overlay.setAttribute("aria-hidden", "true");
         pane.appendChild(overlay);
         ensureDebugOverlayStructure(overlay);
-      } else if ($("debug-overlay").parentElement !== pane) {
-        pane.appendChild($("debug-overlay"));
-        ensureDebugOverlayStructure($("debug-overlay"));
+      } else if ($2("debug-overlay").parentElement !== pane) {
+        pane.appendChild($2("debug-overlay"));
+        ensureDebugOverlayStructure($2("debug-overlay"));
       } else {
-        ensureDebugOverlayStructure($("debug-overlay"));
+        ensureDebugOverlayStructure($2("debug-overlay"));
       }
       setDebugVisible(debugVisible);
     }
@@ -5419,7 +6124,7 @@
   // src/ui/help.ts
   function createHelpRenderer(deps) {
     const pageByLang = { zh: 0, en: 0 };
-    const $ = deps.$;
+    const $2 = deps.$;
     function guideLang() {
       return deps.getLanguage() === "en" ? "en" : "zh";
     }
@@ -5535,16 +6240,16 @@
       ).trim();
     }
     function closeGuidePageDropdown() {
-      const dropdown = $("guide-page-dropdown");
-      const trigger = $("guide-page-trigger");
+      const dropdown = $2("guide-page-dropdown");
+      const trigger = $2("guide-page-trigger");
       if (!dropdown || !trigger) return;
       dropdown.classList.remove("open");
       trigger.setAttribute("aria-expanded", "false");
     }
     function openGuidePageDropdown() {
-      const dropdown = $("guide-page-dropdown");
-      const trigger = $("guide-page-trigger");
-      const menu = $("guide-page-menu");
+      const dropdown = $2("guide-page-dropdown");
+      const trigger = $2("guide-page-trigger");
+      const menu = $2("guide-page-menu");
       if (!dropdown || !trigger || !menu) return;
       dropdown.classList.add("open");
       trigger.setAttribute("aria-expanded", "true");
@@ -5554,13 +6259,13 @@
       active?.scrollIntoView({ block: "nearest" });
     }
     function toggleGuidePageDropdown() {
-      const dropdown = $("guide-page-dropdown");
+      const dropdown = $2("guide-page-dropdown");
       if (!dropdown) return;
       if (dropdown.classList.contains("open")) closeGuidePageDropdown();
       else openGuidePageDropdown();
     }
     function focusGuidePageOption(offset) {
-      const menu = $("guide-page-menu");
+      const menu = $2("guide-page-menu");
       if (!menu) return;
       const options = Array.from(
         menu.querySelectorAll(".guide-page-option")
@@ -5572,9 +6277,9 @@
       options[next].focus();
     }
     function renderGuidePageDropdown(sections, activeIndex) {
-      const trigger = $("guide-page-trigger");
-      const label = $("guide-page-label");
-      const menu = $("guide-page-menu");
+      const trigger = $2("guide-page-trigger");
+      const label = $2("guide-page-label");
+      const menu = $2("guide-page-menu");
       if (!trigger || !label || !menu) return;
       const ariaLabel = deps.t("guideSelectLabel");
       trigger.setAttribute("aria-label", ariaLabel);
@@ -5619,7 +6324,7 @@
       const index = Math.max(0, Math.min(pageByLang[lang], sections.length - 1));
       pageByLang[lang] = index;
       renderGuidePageDropdown(sections, index);
-      const next = $("guide-next-page");
+      const next = $2("guide-next-page");
       if (next) next.disabled = index >= sections.length - 1;
       if (scrollToTop) sections[index]?.scrollIntoView({ block: "start" });
     }
@@ -5646,7 +6351,7 @@
       updateGuidePaginationUI(true);
     }
     function openTechnicalGuide() {
-      $(deps.modalId || "tech-modal")?.classList.add("open");
+      $2(deps.modalId || "tech-modal")?.classList.add("open");
       updateGuidePaginationUI(true);
     }
     return {
@@ -6036,7 +6741,7 @@
   // src/ui/event-bindings.ts
   function createEventBindings(services) {
     const {
-      dom: { $, document: document2, window: window2, navigator: navigator2, location: location2, performance: performance2 },
+      dom: { $: $2, document: document2, window: window2, navigator: navigator2, location: location2, performance: performance2 },
       state: {
         state,
         skyPanKeys,
@@ -6111,23 +6816,23 @@
       }
     } = services;
     function bind() {
-      $("language-select").addEventListener("change", (e) => {
+      $2("language-select").addEventListener("change", (e) => {
         state.lang = e.target.value === "en" ? "en" : "zh";
         save();
         applyI18n();
         applyVisualConfig(true);
       });
-      $("culture-select").addEventListener("change", (e) => {
+      $2("culture-select").addEventListener("change", (e) => {
         state.cultureMode = ["western", "chinese", "both"].includes(
           e.target.value
         ) ? e.target.value : "western";
         applyCultureMode();
       });
-      $("projection-select").addEventListener(
+      $2("projection-select").addEventListener(
         "change",
         (e) => switchProjection(e.target.value)
       );
-      const coordinateSelect = $("coordinate-select");
+      const coordinateSelect = $2("coordinate-select");
       let coordinateSelectOpenedValue = coordinateSelect.value;
       coordinateSelect.addEventListener("pointerdown", () => {
         coordinateSelectOpenedValue = coordinateSelect.value;
@@ -6140,11 +6845,11 @@
         if (coordinateSelect.value === coordinateSelectOpenedValue && coordinateSelect.value === state.coordinateSystem)
           resetCurrentCoordinateView();
       });
-      $("pole-axis-constraint")?.addEventListener(
+      $2("pole-axis-constraint")?.addEventListener(
         "change",
         (e) => switchPoleAxisConstraint(!!e.target.checked)
       );
-      $("traditional-detail").addEventListener("change", (e) => {
+      $2("traditional-detail").addEventListener("change", (e) => {
         state.traditionalDetail = ["major", "battlefields", "mansions"].includes(
           e.target.value
         ) ? e.target.value : "battlefields";
@@ -6152,8 +6857,8 @@
         updateRegionLegend();
         redrawAndSyncMapBox("traditional detail");
       });
-      $("apply-location").addEventListener("click", () => {
-        const lat = Number($("observer-lat").value), lon = Number($("observer-lon").value), zone = resolveZone(lat, lon, null);
+      $2("apply-location").addEventListener("click", () => {
+        const lat = Number($2("observer-lat").value), lon = Number($2("observer-lon").value), zone = resolveZone(lat, lon, null);
         setObserver(lat, lon, zone, "", "", true);
         showToast(`${t("autoZone")} \xB7 ${zone} \xB7 ${t("timezoneEstimated")}`);
       });
@@ -6170,7 +6875,7 @@
           )
         )
       );
-      $("geolocate").addEventListener("click", () => {
+      $2("geolocate").addEventListener("click", () => {
         if (location2.protocol === "file:") {
           showToast(t("localServerHint"), true);
           return;
@@ -6202,7 +6907,7 @@
         );
       });
       TIME_FIELD_IDS2.forEach((id) => {
-        const field = $(id);
+        const field = $2(id);
         if (!field) return;
         field.dataset.replaceOnType = "1";
         field.addEventListener("focus", () => markTimeFieldSelected(field));
@@ -6228,7 +6933,7 @@
         field.addEventListener("blur", (event) => {
           field.classList.remove("time-part-active");
           field.dataset.replaceOnType = "1";
-          const shell = $("observer-time-fields");
+          const shell = $2("observer-time-fields");
           if (shell && event.relatedTarget && shell.contains(event.relatedTarget))
             return;
           syncTimeInputs();
@@ -6285,22 +6990,22 @@
           }
         });
       });
-      $("time-step-minus").addEventListener(
+      $2("time-step-minus").addEventListener(
         "click",
         () => shiftObserverTimeByControl(-1)
       );
-      $("time-step-plus").addEventListener(
+      $2("time-step-plus").addEventListener(
         "click",
         () => shiftObserverTimeByControl(1)
       );
-      $("time-step-value").addEventListener("keydown", (e) => {
+      $2("time-step-value").addEventListener("keydown", (e) => {
         if (e.key === "Enter" && !e.isComposing) {
           e.preventDefault();
           readTimeStepValue();
-          $("time-step-value").blur();
+          $2("time-step-value").blur();
         }
       });
-      $("observer-now").addEventListener("click", () => {
+      $2("observer-now").addEventListener("click", () => {
         applyObserverDateTime(DateTime.utc(), true, "now");
         showToast(t("nowApplied"));
       });
@@ -6314,31 +7019,31 @@
           )
         )
       );
-      $("play").addEventListener("click", () => {
+      $2("play").addEventListener("click", () => {
         setPlaying(!getPlaying());
         setLastFrame(performance2.now());
         updateHUD(false);
       });
-      $("speed").addEventListener("change", () => {
-        state.speed = Number($("speed").value);
+      $2("speed").addEventListener("change", () => {
+        state.speed = Number($2("speed").value);
         save();
         updateHUD(false);
       });
-      $("magnitude").addEventListener("input", () => {
-        state.magnitude = Number($("magnitude").value);
-        $("magnitude-value").textContent = state.magnitude.toFixed(1);
+      $2("magnitude").addEventListener("input", () => {
+        state.magnitude = Number($2("magnitude").value);
+        $2("magnitude-value").textContent = state.magnitude.toFixed(1);
         save();
         applyVisualConfig();
       });
-      $("star-size").addEventListener("input", () => {
-        state.starSize = Number($("star-size").value);
-        $("star-size-value").textContent = `${state.starSize} px`;
+      $2("star-size").addEventListener("input", () => {
+        state.starSize = Number($2("star-size").value);
+        $2("star-size-value").textContent = `${state.starSize} px`;
         save();
         applyVisualConfig();
       });
-      $("star-name-density").addEventListener("input", () => {
-        state.starNameMagnitudeLimit = Number($("star-name-density").value);
-        $("star-name-density-value").textContent = state.starNameMagnitudeLimit.toFixed(1);
+      $2("star-name-density").addEventListener("input", () => {
+        state.starNameMagnitudeLimit = Number($2("star-name-density").value);
+        $2("star-name-density-value").textContent = state.starNameMagnitudeLimit.toFixed(1);
         save();
         applyVisualConfig();
       });
@@ -6357,7 +7062,7 @@
         "floating-object-info": "floatingObjectInfo"
       };
       Object.entries(checks).forEach(
-        ([id, key]) => $(id).addEventListener("change", (e) => {
+        ([id, key]) => $2(id).addEventListener("change", (e) => {
           state[key] = e.target.checked;
           save();
           if (key === "floatingObjectInfo") {
@@ -6366,7 +7071,7 @@
           } else applyVisualConfig(true);
         })
       );
-      $("region-boundaries").addEventListener("change", (e) => {
+      $2("region-boundaries").addEventListener("change", (e) => {
         if (state.cultureMode === "both") {
           e.target.checked = !!state.regionBoundaries;
           return;
@@ -6377,44 +7082,44 @@
         applyVisualConfig(true);
         redrawAndSyncMapBox("region boundaries");
       });
-      $("night-vision").addEventListener("change", (e) => {
+      $2("night-vision").addEventListener("change", (e) => {
         state.nightVision = e.target.checked;
-        $("sky-stage").classList.toggle("night-vision", state.nightVision);
+        $2("sky-stage").classList.toggle("night-vision", state.nightVision);
         save();
         showToast(state.nightVision ? t("nightOn") : t("nightOff"));
       });
-      $("panel-toggle").addEventListener(
+      $2("panel-toggle").addEventListener(
         "click",
         () => setPanel(!state.panelOpen)
       );
-      $("zoom-in").addEventListener("click", () => {
+      $2("zoom-in").addEventListener("click", () => {
         try {
           scaleMapByFactor(mapScaleButtonFactor());
           updateDebugOverlay();
         } catch (_) {
         }
       });
-      $("zoom-out").addEventListener("click", () => {
+      $2("zoom-out").addEventListener("click", () => {
         try {
           scaleMapByFactor(1 / mapScaleButtonFactor());
           updateDebugOverlay();
         } catch (_) {
         }
       });
-      $("font-decrease").addEventListener("click", () => {
+      $2("font-decrease").addEventListener("click", () => {
         state.fontScale = (Number(state.fontScale) || 1) / 1.08;
         applyFontScale();
         save();
         applyVisualConfig(true);
       });
-      $("font-increase").addEventListener("click", () => {
+      $2("font-increase").addEventListener("click", () => {
         state.fontScale = (Number(state.fontScale) || 1) * 1.08;
         applyFontScale();
         save();
         applyVisualConfig(true);
       });
-      $("reset-view").addEventListener("click", resetCurrentCoordinateView);
-      $("fullscreen").addEventListener("click", async () => {
+      $2("reset-view").addEventListener("click", resetCurrentCoordinateView);
+      $2("fullscreen").addEventListener("click", async () => {
         try {
           if (!document2.fullscreenElement)
             await document2.documentElement.requestFullscreen();
@@ -6422,44 +7127,44 @@
         } catch (_) {
         }
       });
-      $("explain-btn").addEventListener("click", openTechnicalGuide);
-      $("guide-page-trigger").addEventListener("click", (e) => {
+      $2("explain-btn").addEventListener("click", openTechnicalGuide);
+      $2("guide-page-trigger").addEventListener("click", (e) => {
         e.stopPropagation();
         toggleGuidePageDropdown();
       });
-      $("guide-page-trigger").addEventListener("keydown", (e) => {
+      $2("guide-page-trigger").addEventListener("keydown", (e) => {
         if (e.key === "ArrowDown" || e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           openGuidePageDropdown();
-          const first = $("guide-page-menu").querySelector(".guide-page-option");
+          const first = $2("guide-page-menu").querySelector(".guide-page-option");
           first?.focus();
         } else if (e.key === "Escape") {
           closeGuidePageDropdown();
         }
       });
-      $("guide-page-menu").addEventListener("click", (e) => e.stopPropagation());
+      $2("guide-page-menu").addEventListener("click", (e) => e.stopPropagation());
       document2.addEventListener("click", (e) => {
-        if (!$("guide-page-dropdown")?.contains(e.target))
+        if (!$2("guide-page-dropdown")?.contains(e.target))
           closeGuidePageDropdown();
       });
-      $("guide-next-page").addEventListener("click", () => setGuidePage(1));
-      $("reset-defaults-btn").addEventListener("click", resetAllDefaults);
-      $("close-modal").addEventListener(
+      $2("guide-next-page").addEventListener("click", () => setGuidePage(1));
+      $2("reset-defaults-btn").addEventListener("click", resetAllDefaults);
+      $2("close-modal").addEventListener(
         "click",
-        () => $("tech-modal").classList.remove("open")
+        () => $2("tech-modal").classList.remove("open")
       );
-      $("tech-modal").addEventListener("click", (e) => {
-        if (e.target === $("tech-modal"))
-          $("tech-modal").classList.remove("open");
+      $2("tech-modal").addEventListener("click", (e) => {
+        if (e.target === $2("tech-modal"))
+          $2("tech-modal").classList.remove("open");
       });
       document2.addEventListener("keydown", (e) => {
         if (e.key === "Escape") {
           closeGuidePageDropdown();
-          $("tech-modal").classList.remove("open");
-          $("city-suggestions").classList.remove("open");
+          $2("tech-modal").classList.remove("open");
+          $2("city-suggestions").classList.remove("open");
         }
       });
-      $("copy-guide").addEventListener("click", async () => {
+      $2("copy-guide").addEventListener("click", async () => {
         const active = document2.querySelector(
           state.lang === "zh" ? '[data-doc-lang="zh"]' : '[data-doc-lang="en"]'
         );
@@ -6472,11 +7177,11 @@
           showToast(t("copyFail"), true);
         }
       });
-      $("close-object").addEventListener("click", clearObjectInfo);
-      $("copy-object").addEventListener("click", async () => {
+      $2("close-object").addEventListener("click", clearObjectInfo);
+      $2("copy-object").addEventListener("click", async () => {
         const currentSelected = getCurrentSelected();
         if (!currentSelected) return;
-        const text = $("object-info-title").textContent + "\n" + Array.from($("object-info-grid").children).map((el) => el.textContent).join("\n");
+        const text = $2("object-info-title").textContent + "\n" + Array.from($2("object-info-grid").children).map((el) => el.textContent).join("\n");
         try {
           await navigator2.clipboard.writeText(text);
           showToast(t("copiedObject"));
@@ -6484,7 +7189,7 @@
           showToast(t("copyFail"), true);
         }
       });
-      $("sky-pane").addEventListener(
+      $2("sky-pane").addEventListener(
         "wheel",
         (e) => {
           if (!document2.querySelector("#celestial-map canvas")) return;
@@ -6492,12 +7197,12 @@
         },
         { passive: false }
       );
-      $("sky-pane").addEventListener("pointerdown", beginPaneMarginDrag);
-      $("sky-pane").addEventListener("pointermove", movePaneMarginDrag);
-      $("sky-pane").addEventListener("pointerup", endPaneMarginDrag);
-      $("sky-pane").addEventListener("pointercancel", endPaneMarginDrag);
-      $("sky-pane").setAttribute("tabindex", "0");
-      $("sky-pane").setAttribute(
+      $2("sky-pane").addEventListener("pointerdown", beginPaneMarginDrag);
+      $2("sky-pane").addEventListener("pointermove", movePaneMarginDrag);
+      $2("sky-pane").addEventListener("pointerup", endPaneMarginDrag);
+      $2("sky-pane").addEventListener("pointercancel", endPaneMarginDrag);
+      $2("sky-pane").setAttribute("tabindex", "0");
+      $2("sky-pane").setAttribute(
         "aria-label",
         state.lang === "zh" ? "\u661F\u56FE\u533A\u57DF\uFF0C\u53EF\u7528\u65B9\u5411\u952E\u5E73\u79FB" : "Sky map, use arrow keys to pan"
       );
@@ -6529,7 +7234,7 @@
         queueDebugOverlayUpdate();
       });
       window2.addEventListener("pointerup", () => {
-        const m = $("celestial-map");
+        const m = $2("celestial-map");
         if (m) m.classList.remove("dragging");
         setDebugPointer(false, null);
         if (getSkyReady()) {
@@ -7187,7 +7892,7 @@
   // src/ui/object-search.ts
   function createObjectSearchController(options) {
     const {
-      $,
+      $: $2,
       state,
       t,
       simplifyChinese: simplifyChinese2,
@@ -7284,7 +7989,7 @@
       return parts.length ? parts.join(" / ") : objectSearchTypeLabel(entry.type);
     }
     function setObjectSearchActive(index) {
-      const box = $("object-suggestions"), buttons = box ? Array.from(box.querySelectorAll(".object-option")) : [];
+      const box = $2("object-suggestions"), buttons = box ? Array.from(box.querySelectorAll(".object-option")) : [];
       objectSearchActiveIndex = buttons.length ? (index + buttons.length) % buttons.length : -1;
       buttons.forEach((button, i) => {
         button.classList.toggle("active", i === objectSearchActiveIndex);
@@ -7297,7 +8002,7 @@
         buttons[objectSearchActiveIndex].scrollIntoView({ block: "nearest" });
     }
     function renderObjectSuggestions(results, empty = false) {
-      const box = $("object-suggestions");
+      const box = $2("object-suggestions");
       objectSearchResults = results.slice();
       objectSearchActiveIndex = -1;
       box.innerHTML = "";
@@ -7329,7 +8034,7 @@
       setObjectSearchActive(results.length ? 0 : -1);
     }
     function setupObjectSearch() {
-      const input = $("object-search"), box = $("object-suggestions");
+      const input = $2("object-search"), box = $2("object-suggestions");
       if (!input || !box) return;
       let composing = false;
       input.addEventListener("compositionstart", () => composing = true);
@@ -7375,7 +8080,7 @@
     }
     function selectObjectSearchResult(entry) {
       beforeSelect();
-      const input = $("object-search");
+      const input = $2("object-search");
       if (input) input.value = objectSearchDisplayTitle(entry);
       const obj = entry.type === "planet" ? {
         type: "planet",
@@ -7394,7 +8099,7 @@
       showObjectInfo(obj);
       centerOnObject(obj);
       highlightObject(obj);
-      $("object-suggestions").classList.remove("open");
+      $2("object-suggestions").classList.remove("open");
     }
     return {
       objectLabel,
@@ -7659,13 +8364,13 @@
     Object.entries(TIME_FIELD_TO_ID).map(([key, id]) => [id, key])
   );
   var TIME_FIELD_IDS = Object.values(TIME_FIELD_TO_ID);
-  function timeFieldByKey($, key) {
+  function timeFieldByKey($2, key) {
     const id = TIME_FIELD_TO_ID[key];
-    return id ? $(id) : null;
+    return id ? $2(id) : null;
   }
-  function timeFieldDebugText($) {
+  function timeFieldDebugText($2) {
     return TIME_FIELD_KEYS.map(
-      (key) => `${key}=${timeFieldByKey($, key)?.value || ""}`
+      (key) => `${key}=${timeFieldByKey($2, key)?.value || ""}`
     ).join(" ");
   }
   function displayTimeParts(dt) {
@@ -7677,9 +8382,9 @@
       minute: String(dt.minute).padStart(2, "0")
     };
   }
-  function setTimeFieldWidths($) {
+  function setTimeFieldWidths($2) {
     TIME_FIELD_IDS.forEach((id) => {
-      const el = $(id);
+      const el = $2(id);
       if (!el) return;
       const raw = String(el.value || "");
       if (id === "time-year") {
@@ -8015,7 +8720,7 @@
   // src/sky/celestial-display.ts
   function createCelestialDisplayController(options) {
     const {
-      dom: { $, document: document2, window: window2, performance: performance2, setTimeout: setTimeout2, clearTimeout: clearTimeout2 },
+      dom: { $: $2, document: document2, window: window2, performance: performance2, setTimeout: setTimeout2, clearTimeout: clearTimeout2 },
       state: appState,
       config,
       layout,
@@ -8307,7 +9012,7 @@
             appState.setSuppressResizeUntil(performance2.now() + 500);
             appState.setLastRenderedSize(layout.skyPaneSize());
             ui.setLoading(false);
-            const snap = $("sky-snapshot");
+            const snap = $2("sky-snapshot");
             if (snap) {
               snap.style.opacity = "0";
               setTimeout2(() => snap.remove(), 180);
@@ -8340,7 +9045,7 @@
           viewState || view.desiredView(),
           current.mapScale
         );
-        $("celestial-map").innerHTML = "";
+        $2("celestial-map").innerHTML = "";
         appState.setSkyReady(false);
         overlays.registerChineseOverlay();
         Celestial2.display(buildSkyConfig());
@@ -8421,13 +9126,13 @@
       try {
         const canvas = document2.querySelector("#celestial-map canvas");
         if (canvas) {
-          const old = $("sky-snapshot");
+          const old = $2("sky-snapshot");
           if (old) old.remove();
           const img = document2.createElement("img");
           img.className = "sky-snapshot";
           img.id = "sky-snapshot";
           img.src = canvas.toDataURL("image/png");
-          $("sky-stage").appendChild(img);
+          $2("sky-stage").appendChild(img);
         }
       } catch (_) {
       }
@@ -9235,7 +9940,7 @@
     interaction,
     debug
   }) {
-    const { $, document: document2, window: window2, setTimeout: setTimeout2 } = dom;
+    const { $: $2, document: document2, window: window2, setTimeout: setTimeout2 } = dom;
     const { cfg, mapScaleButtonFactor } = config;
     function skyEventPoint2(canvas, event) {
       return picking.skyEventPoint(canvas, event);
@@ -9246,7 +9951,7 @@
     function attachCanvasInfo(canvas) {
       if (canvas.dataset.rsoBound) return;
       canvas.dataset.rsoBound = "1";
-      const map = $("celestial-map");
+      const map = $2("celestial-map");
       canvas.addEventListener(
         "pointerdown",
         (event) => {
@@ -9459,9 +10164,9 @@
         center: center.slice(),
         moved: false
       });
-      $("celestial-map").classList.add("dragging");
+      $2("celestial-map").classList.add("dragging");
       try {
-        $("sky-pane").setPointerCapture(event.pointerId);
+        $2("sky-pane").setPointerCapture(event.pointerId);
       } catch (_) {
       }
       event.preventDefault();
@@ -9517,17 +10222,17 @@
       const paneDrag = state.getPaneDrag();
       if (!paneDrag || event.pointerId !== paneDrag.id) return;
       state.setPaneDrag(null);
-      $("celestial-map").classList.remove("dragging");
+      $2("celestial-map").classList.remove("dragging");
       debug.setDebugPointer(false, null);
       try {
-        $("sky-pane").releasePointerCapture(event.pointerId);
+        $2("sky-pane").releasePointerCapture(event.pointerId);
       } catch (_) {
       }
       view.saveCurrentProjectionView();
       view.save();
     }
     function releaseMenuFocusForSkyInteraction() {
-      const pane = $("sky-pane"), active = document2.activeElement;
+      const pane = $2("sky-pane"), active = document2.activeElement;
       if (active && active !== document2.body && active !== pane) {
         try {
           if (!active.closest || !active.closest("#debug-overlay")) active.blur();
@@ -10614,7 +11319,7 @@
   }
   function createControlSyncController(options) {
     const {
-      dom: { $ },
+      dom: { $: $2 },
       getState,
       defaults,
       cfg,
@@ -10627,22 +11332,22 @@
     } = options;
     function syncControls() {
       const state = getState();
-      $("observer-lat").value = Number(state.lat).toFixed(4);
-      $("observer-lon").value = Number(state.lon).toFixed(4);
-      $("observer-timezone").value = state.zone;
+      $2("observer-lat").value = Number(state.lat).toFixed(4);
+      $2("observer-lon").value = Number(state.lon).toFixed(4);
+      $2("observer-timezone").value = state.zone;
       syncTimeInputs();
-      $("speed").value = String(state.speed);
-      $("language-select").value = state.lang;
-      $("culture-select").value = state.cultureMode;
-      $("projection-select").value = state.projection;
-      $("coordinate-select").value = state.coordinateSystem;
-      if ($("pole-axis-constraint"))
-        $("pole-axis-constraint").checked = state.poleAxisConstraintEnabled !== false;
-      $("traditional-detail").value = state.traditionalDetail;
-      $("magnitude").value = state.magnitude;
-      $("magnitude-value").textContent = Number(state.magnitude).toFixed(1);
-      $("star-size").value = state.starSize;
-      $("star-size-value").textContent = `${state.starSize} px`;
+      $2("speed").value = String(state.speed);
+      $2("language-select").value = state.lang;
+      $2("culture-select").value = state.cultureMode;
+      $2("projection-select").value = state.projection;
+      $2("coordinate-select").value = state.coordinateSystem;
+      if ($2("pole-axis-constraint"))
+        $2("pole-axis-constraint").checked = state.poleAxisConstraintEnabled !== false;
+      $2("traditional-detail").value = state.traditionalDetail;
+      $2("magnitude").value = state.magnitude;
+      $2("magnitude-value").textContent = Number(state.magnitude).toFixed(1);
+      $2("star-size").value = state.starSize;
+      $2("star-size-value").textContent = `${state.starSize} px`;
       const starNameMin = Number(
         cfg("sky.stars.properNameMagnitudeLimitMin", 2.1)
       );
@@ -10652,10 +11357,10 @@
       const starNameValue = Number(
         state.starNameMagnitudeLimit ?? defaults.starNameMagnitudeLimit
       ).toFixed(1);
-      $("star-name-density").min = String(starNameMin);
-      $("star-name-density").max = String(starNameMax);
-      $("star-name-density").value = starNameValue;
-      $("star-name-density-value").textContent = starNameValue;
+      $2("star-name-density").min = String(starNameMin);
+      $2("star-name-density").max = String(starNameMax);
+      $2("star-name-density").value = starNameValue;
+      $2("star-name-density-value").textContent = starNameValue;
       const checks = {
         "star-names": "starNames",
         "culture-lines": "cultureLines",
@@ -10673,9 +11378,9 @@
         "floating-object-info": "floatingObjectInfo"
       };
       Object.entries(checks).forEach(
-        ([id, key]) => $(id).checked = !!state[key]
+        ([id, key]) => $2(id).checked = !!state[key]
       );
-      $("sky-stage").classList.toggle("night-vision", state.nightVision);
+      $2("sky-stage").classList.toggle("night-vision", state.nightVision);
       applyFontScale();
       updateFloatingObjectInfo();
       setPanel(state.panelOpen, false);
@@ -10686,13 +11391,13 @@
   }
   function createRegionUiController(options) {
     const {
-      dom: { $ },
+      dom: { $: $2 },
       getState,
       t
     } = options;
     function updateRegionLegend() {
       const state = getState();
-      const el = $("region-legend");
+      const el = $2("region-legend");
       if (!el) return;
       const show = state.cultureMode === "chinese" && state.regionBoundaries;
       el.classList.toggle("show", show);
@@ -10704,7 +11409,7 @@
     }
     function updateBoundaryUI() {
       const state = getState();
-      const box = $("region-boundaries");
+      const box = $2("region-boundaries");
       if (!box) return;
       const disabled = state.cultureMode === "both";
       box.disabled = disabled;
@@ -10852,7 +11557,7 @@
   // src/app.ts
   (() => {
     "use strict";
-    const $ = (id) => document.getElementById(id);
+    const $2 = (id) => document.getElementById(id);
     const CONFIG = window.RSO_CONFIG || {};
     const CULTURE_NOTES = window.RSO_CULTURE_NOTES || {};
     const cfg = (path, fallback) => {
@@ -10865,6 +11570,39 @@
       }
       return value == null ? fallback : value;
     };
+    const uiPerformanceTestEnabled = ENABLE_UI_PERFORMANCE_TEST === true || cfg("testing.uiPerformanceTestEnabled", false) === true;
+    function recordUiPerformanceStep(name, ms, details = {}) {
+      if (!uiPerformanceTestEnabled) return;
+      const recorder = window.__RSO_UI_PERF_RECORDER__;
+      if (!recorder || typeof recorder.recordStep !== "function") return;
+      try {
+        recorder.recordStep({
+          name,
+          ms: Number.isFinite(Number(ms)) ? Number(ms) : 0,
+          at: performance.now(),
+          ...details
+        });
+      } catch (_) {
+      }
+    }
+    function measureUiPerformanceStep(name, fn, details = {}) {
+      const started = performance.now();
+      try {
+        return fn();
+      } finally {
+        recordUiPerformanceStep(name, performance.now() - started, details);
+      }
+    }
+    function waitForAnimationFrames(count = 2) {
+      return new Promise((resolve) => {
+        const step = () => {
+          count -= 1;
+          if (count <= 0) resolve(true);
+          else requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      });
+    }
     function applyConfigCss() {
       applyConfigCssVariables(cfg);
     }
@@ -11135,7 +11873,10 @@
       state.zone = safeZoneForCoordinates2(state.lat, state.lon, state.zone);
     }
     function save() {
-      writeJsonToStorage(STORAGE_KEY, state);
+      return measureUiPerformanceStep(
+        "state.save",
+        () => writeJsonToStorage(STORAGE_KEY, state)
+      );
     }
     function observerDT() {
       const zone = safeZoneForCoordinates2();
@@ -11219,7 +11960,7 @@
       return `${ms < 10 ? ms.toFixed(2) : ms.toFixed(1)} ms`;
     }
     function timeFieldByKey2(key) {
-      return timeFieldByKey($, key);
+      return timeFieldByKey($2, key);
     }
     function markTimeFieldSelected(field) {
       if (!field) return;
@@ -11251,23 +11992,23 @@
       focusTimeField(next);
     }
     function timeFieldDebugText2() {
-      return timeFieldDebugText($);
+      return timeFieldDebugText($2);
     }
     function displayTimeParts2(dt = observerDT()) {
       return displayTimeParts(dt);
     }
     function setTimeFieldWidths2() {
-      setTimeFieldWidths($);
+      setTimeFieldWidths($2);
     }
     function syncTimeInputs(dt = observerDT()) {
       const parts = displayTimeParts2(dt);
-      if ($("time-year")) $("time-year").value = parts.year;
-      if ($("time-month")) $("time-month").value = parts.month;
-      if ($("time-day")) $("time-day").value = parts.day;
-      if ($("time-hour")) $("time-hour").value = parts.hour;
-      if ($("time-minute")) $("time-minute").value = parts.minute;
+      if ($2("time-year")) $2("time-year").value = parts.year;
+      if ($2("time-month")) $2("time-month").value = parts.month;
+      if ($2("time-day")) $2("time-day").value = parts.day;
+      if ($2("time-hour")) $2("time-hour").value = parts.hour;
+      if ($2("time-minute")) $2("time-minute").value = parts.minute;
       TIME_FIELD_IDS.forEach((id) => {
-        const field = $(id);
+        const field = $2(id);
         if (field) field.dataset.replaceOnType = "1";
       });
       setTimeFieldWidths2();
@@ -11281,7 +12022,7 @@
     }
     function reportInvalidTimeInput() {
       showToast(t("invalidDateTime"), true);
-      const title = $("status-title");
+      const title = $2("status-title");
       if (title) {
         title.textContent = t("invalidDateTime");
         title.classList.add("status-error");
@@ -11293,7 +12034,7 @@
       }
     }
     function readIntegerField2(id) {
-      const value = String($(id)?.value || "").trim();
+      const value = String($2(id)?.value || "").trim();
       if (!/^[+-]?\d+$/.test(value)) return null;
       return readIntegerField({ value });
     }
@@ -11472,19 +12213,19 @@
     }
     function showToast(message, error = false) {
       clearTimeout(toastTimer);
-      const el = $("toast");
+      const el = $2("toast");
       el.textContent = message;
       el.classList.toggle("error", error);
       el.classList.add("show");
       toastTimer = setTimeout(() => el.classList.remove("show"), 3200);
     }
     function setLoading(on, message) {
-      const el = $("loading");
-      if (message) $("loading-text").textContent = message;
+      const el = $2("loading");
+      if (message) $2("loading-text").textContent = message;
       el.classList.toggle("hidden", !on);
     }
     const helpRenderer = createHelpRenderer({
-      $,
+      $: $2,
       t,
       getLanguage: () => state.lang === "en" ? "en" : "zh",
       helpManualForLanguage
@@ -11498,7 +12239,7 @@
       openTechnicalGuide
     } = helpRenderer;
     const regionUiController = createRegionUiController({
-      dom: { $ },
+      dom: { $: $2 },
       getState: () => state,
       t
     });
@@ -11510,22 +12251,22 @@
         const key = el.dataset.i18n;
         if (I18N[state.lang][key]) el.textContent = I18N[state.lang][key];
       });
-      $("language-select").value = state.lang;
-      $("culture-select").value = state.cultureMode;
-      $("explain-btn").innerHTML = "<b>?</b>";
-      $("explain-btn").title = t("technicalGuide");
-      $("explain-btn").setAttribute("aria-label", t("technicalGuide"));
-      $("reset-defaults-btn").title = t("resetDefaults");
-      $("reset-defaults-btn").setAttribute("aria-label", t("resetDefaults"));
+      $2("language-select").value = state.lang;
+      $2("culture-select").value = state.cultureMode;
+      $2("explain-btn").innerHTML = "<b>?</b>";
+      $2("explain-btn").title = t("technicalGuide");
+      $2("explain-btn").setAttribute("aria-label", t("technicalGuide"));
+      $2("reset-defaults-btn").title = t("resetDefaults");
+      $2("reset-defaults-btn").setAttribute("aria-label", t("resetDefaults"));
       document.querySelectorAll("[data-i18n-placeholder]").forEach((el) => {
         const key = el.dataset.i18nPlaceholder;
         if (I18N[state.lang][key]) el.placeholder = I18N[state.lang][key];
       });
-      $("culture-note").textContent = state.lang === "zh" ? "\u8BED\u8A00\u53EA\u63A7\u5236\u754C\u9762\u548C\u53EF\u7528\u540D\u79F0\u5B57\u6BB5\uFF1B\u5929\u7A7A\u4F53\u7CFB\u63A7\u5236\u897F\u65B9\u661F\u5EA7\u3001\u4E2D\u56FD\u661F\u5B98\u6216\u4E24\u8005\u540C\u65F6\u663E\u793A\u3002\u5207\u6362\u53EA\u6539\u53D8\u56FE\u5C42\u53EF\u89C1\u6027\uFF0C\u4E0D\u4F1A\u91CD\u8F7D\u661F\u8868\u3001\u65CB\u8F6C\u5929\u7A7A\u6216\u91CD\u7F6E\u7F29\u653E\u3002" : "Language controls the UI and available name fields. Sky system shows Western constellations, Chinese asterisms, or both. Switching changes layer visibility only; it does not reload catalogs, rotate the sky, or reset zoom.";
+      $2("culture-note").textContent = state.lang === "zh" ? "\u8BED\u8A00\u53EA\u63A7\u5236\u754C\u9762\u548C\u53EF\u7528\u540D\u79F0\u5B57\u6BB5\uFF1B\u5929\u7A7A\u4F53\u7CFB\u63A7\u5236\u897F\u65B9\u661F\u5EA7\u3001\u4E2D\u56FD\u661F\u5B98\u6216\u4E24\u8005\u540C\u65F6\u663E\u793A\u3002\u5207\u6362\u53EA\u6539\u53D8\u56FE\u5C42\u53EF\u89C1\u6027\uFF0C\u4E0D\u4F1A\u91CD\u8F7D\u661F\u8868\u3001\u65CB\u8F6C\u5929\u7A7A\u6216\u91CD\u7F6E\u7F29\u653E\u3002" : "Language controls the UI and available name fields. Sky system shows Western constellations, Chinese asterisms, or both. Switching changes layer visibility only; it does not reload catalogs, rotate the sky, or reset zoom.";
       document.querySelectorAll("[data-city-zh]").forEach(
         (btn) => btn.textContent = state.lang === "zh" ? btn.dataset.cityZh : btn.dataset.cityEn
       );
-      $("play").textContent = playing ? t("pause") : t("play");
+      $2("play").textContent = playing ? t("pause") : t("play");
       updateProjectionHelp();
       updateBoundaryUI();
       updateHUD(true);
@@ -11535,7 +12276,7 @@
       updateGuidePaginationUI(false);
     }
     const controlSyncController = createControlSyncController({
-      dom: { $ },
+      dom: { $: $2 },
       getState: () => state,
       defaults,
       cfg,
@@ -11553,10 +12294,10 @@
     function initializeIntegratedLayout() {
       appShellController.initializeIntegratedLayout();
     }
-    function applyMenuSectionOrder2(panel = $("control-panel")) {
+    function applyMenuSectionOrder2(panel = $2("control-panel")) {
       applyMenuSectionOrder(panel, cfg("menu.order", []));
     }
-    function initializeMenuSections2(panel = $("control-panel")) {
+    function initializeMenuSections2(panel = $2("control-panel")) {
       initializeMenuSections({
         panel,
         collapsible: cfg("menu.collapsible", []),
@@ -11568,7 +12309,7 @@
     }
     const appShellController = createAppShellController({
       dom: {
-        $,
+        $: $2,
         document,
         window,
         ResizeObserver: window.ResizeObserver
@@ -11601,7 +12342,11 @@
         debugOverlayController.noteDebugLastAction(action);
     }
     function updateDebugOverlay(force = false) {
-      return debugOverlayController && debugOverlayController.updateDebugOverlay(force);
+      return measureUiPerformanceStep(
+        "debug.updateOverlay",
+        () => debugOverlayController && debugOverlayController.updateDebugOverlay(force),
+        { force: !!force }
+      );
     }
     function queueDebugOverlayUpdate() {
       if (debugOverlayController)
@@ -11771,14 +12516,14 @@
       return true;
     }
     function skyPaneSize2() {
-      return skyPaneSize($("sky-pane"));
+      return skyPaneSize($2("sky-pane"));
     }
     function projectionNaturalRatio2(name = state.projection) {
       return projectionNaturalRatio(window.Celestial, name);
     }
     function projectionCanvasMetrics2(name = state.projection, scale = getMapScale()) {
       return projectionCanvasMetrics({
-        pane: $("sky-pane"),
+        pane: $2("sky-pane"),
         celestial: window.Celestial,
         projection: name,
         mapScale: scale,
@@ -11786,7 +12531,7 @@
       });
     }
     function applyMapBoxMetrics2(metrics = projectionCanvasMetrics2()) {
-      return applyMapBoxMetrics($("celestial-map"), metrics);
+      return applyMapBoxMetrics($2("celestial-map"), metrics);
     }
     function syncRenderedMapBox(fallback = projectionCanvasMetrics2()) {
       const metrics = applyMapBoxMetrics2(fallback);
@@ -11819,10 +12564,13 @@
         const syncStarted = performance.now();
         updateLoadedCoordinateFrame();
         const fixedLayerSyncMs = performance.now() - syncStarted;
+        recordUiPerformanceStep("redraw.fixedLayerSync", fixedLayerSyncMs, { reason });
         const redrawStarted = performance.now();
         Celestial.redraw();
         const celestialRedrawMs = performance.now() - redrawStarted;
+        recordUiPerformanceStep("redraw.celestialRedraw", celestialRedrawMs, { reason });
         const redrawTotalMs = performance.now() - totalStarted;
+        recordUiPerformanceStep("redraw.total", redrawTotalMs, { reason });
         noteTimeRenderDebug({
           redrawStatus: "ok",
           redrawReason: reason,
@@ -11854,10 +12602,13 @@
             const syncStarted = performance.now();
             updateLoadedCoordinateFrame();
             const fixedLayerSyncMs = performance.now() - syncStarted;
+            recordUiPerformanceStep("redraw.followUp.fixedLayerSync", fixedLayerSyncMs, { reason });
             const redrawStarted = performance.now();
             Celestial.redraw();
             const celestialRedrawMs = performance.now() - redrawStarted;
+            recordUiPerformanceStep("redraw.followUp.celestialRedraw", celestialRedrawMs, { reason });
             const redrawTotalMs = performance.now() - totalStarted;
+            recordUiPerformanceStep("redraw.followUp.total", redrawTotalMs, { reason });
             noteTimeRenderDebug({
               redrawStatus: "ok",
               redrawReason: `${reason} follow-up`,
@@ -11882,6 +12633,14 @@
       return ok;
     }
     function resizeCelestialCanvas(metrics = projectionCanvasMetrics2(), reason = "resize") {
+      const resizeStarted = performance.now();
+      try {
+        return _resizeCelestialCanvas(metrics, reason, resizeStarted);
+      } finally {
+        recordUiPerformanceStep("canvas.resize.total", performance.now() - resizeStarted, { reason });
+      }
+    }
+    function _resizeCelestialCanvas(metrics, reason, resizeStarted) {
       applyMapBoxMetrics2(metrics);
       let redrew = false;
       try {
@@ -12006,10 +12765,10 @@
       );
     }
     function updateProjectionHelp() {
-      const select = $("projection-select");
+      const select = $2("projection-select");
       if (!select) return;
       const opt = select.options[select.selectedIndex];
-      $("projection-help").textContent = state.lang === "zh" ? opt.dataset.descZh || "" : opt.dataset.descEn || "";
+      $2("projection-help").textContent = state.lang === "zh" ? opt.dataset.descZh || "" : opt.dataset.descEn || "";
     }
     function scheduleSkyResize(source = "unknown") {
       mobileResizeDebug.lastSource = source;
@@ -12051,8 +12810,8 @@
     }
     function setupCitySearch2() {
       setupCitySearch({
-        input: $("city-search"),
-        box: $("city-suggestions"),
+        input: $2("city-search"),
+        box: $2("city-suggestions"),
         cities: CITIES,
         citySearchText,
         getLanguage: () => state.lang,
@@ -12141,7 +12900,7 @@
       brightStarRanks: BRIGHT_STAR_RANKS
     });
     const objectSearchController = createObjectSearchController({
-      $,
+      $: $2,
       state,
       t,
       simplifyChinese,
@@ -12351,10 +13110,10 @@
     }
     function showObjectInfo(obj) {
       currentSelected = obj;
-      const card = $("object-info"), empty = $("object-info-empty"), grid = $("object-info-grid");
+      const card = $2("object-info"), empty = $2("object-info-empty"), grid = $2("object-info-grid");
       card.classList.add("open");
       empty.style.display = "none";
-      $("object-info-title").textContent = state.lang === "zh" ? simplifyChinese(
+      $2("object-info-title").textContent = state.lang === "zh" ? simplifyChinese(
         obj.label || objectLabel(obj.type, obj.d || { properties: {} })
       ) : obj.label || objectLabel(obj.type, obj.d || { properties: {} });
       const rows = objectRows(obj);
@@ -12364,8 +13123,8 @@
     function clearObjectInfo() {
       currentSelected = null;
       floatingObjectInfoDismissed = false;
-      $("object-info").classList.remove("open");
-      $("object-info-empty").style.display = "";
+      $2("object-info").classList.remove("open");
+      $2("object-info-empty").style.display = "";
       updateFloatingObjectInfo();
     }
     function updateSelectedObject() {
@@ -12387,7 +13146,7 @@
         redrawAndSyncMapBox("selected object refresh");
     }
     function ensureFloatingObjectInfo() {
-      let panel = $("floating-object-info-card");
+      let panel = $2("floating-object-info-card");
       if (panel) return panel;
       panel = document.createElement("div");
       panel.id = "floating-object-info-card";
@@ -12399,8 +13158,8 @@
       </div>
       <div id="floating-object-grid" class="floating-info-lines"></div>
     `;
-      $("sky-pane").appendChild(panel);
-      $("floating-object-close").addEventListener("click", () => {
+      $2("sky-pane").appendChild(panel);
+      $2("floating-object-close").addEventListener("click", () => {
         floatingObjectInfoDismissed = true;
         updateFloatingObjectInfo();
       });
@@ -12415,8 +13174,8 @@
       panel.classList.toggle("open", visible);
       if (!visible) return;
       const data = renderFloatingObjectInfo(currentSelected);
-      $("floating-object-title").textContent = data.title;
-      $("floating-object-grid").innerHTML = data.html;
+      $2("floating-object-title").textContent = data.title;
+      $2("floating-object-grid").innerHTML = data.html;
     }
     function skyEventPoint2(canvas, event) {
       return pointerInteractionController.skyEventPoint(canvas, event);
@@ -12446,7 +13205,7 @@
       return celestialDisplayController.applyVisualConfig(immediate);
     }
     celestialDisplayController = createCelestialDisplayController({
-      dom: { $, document, window, performance, setTimeout, clearTimeout },
+      dom: { $: $2, document, window, performance, setTimeout, clearTimeout },
       state: {
         getState: () => state,
         getSkyReady: () => skyReady,
@@ -12502,7 +13261,7 @@
       }
     });
     pointerInteractionController = createPointerInteractionController({
-      dom: { $, document, window, setTimeout },
+      dom: { $: $2, document, window, setTimeout },
       state: {
         getSkyReady: () => skyReady,
         getClickStart: () => clickStart,
@@ -12583,6 +13342,17 @@
       }
     }
     function updateSkyView(force = false, reason = "sky view") {
+      const skyViewStarted = performance.now();
+      try {
+        return _updateSkyView(force, reason);
+      } finally {
+        recordUiPerformanceStep("skyView.update", performance.now() - skyViewStarted, {
+          force: !!force,
+          reason
+        });
+      }
+    }
+    function _updateSkyView(force = false, reason = "sky view") {
       if (!skyReady || !window.Celestial || !DateTime) {
         noteTimeRenderDebug({
           skyviewStatus: "skipped",
@@ -12672,26 +13442,26 @@
       if (!DateTime) return;
       const dt = observerDT();
       const local = dt.setLocale(state.lang === "zh" ? "zh-CN" : "en-US");
-      $("hud-time").textContent = formatCivilDateTime(local, true);
-      $("hud-location").textContent = `${cityName()} \xB7 ${Number(state.lat).toFixed(4)}\xB0 ${state.lat >= 0 ? "N" : "S"} / ${Math.abs(Number(state.lon)).toFixed(4)}\xB0 ${state.lon >= 0 ? "E" : "W"} \xB7 ${state.zone}`;
-      $("speed-label").textContent = playing ? `${t("running")} \xD7${Number(state.speed).toLocaleString()}` : t("paused");
-      $("play").textContent = playing ? t("pause") : t("play");
-      $("play").classList.toggle("active", playing);
-      $("status-title").textContent = `${cityName()} \xB7 ${cultureName()}`;
-      $("status-local").textContent = formatLocalLong();
+      $2("hud-time").textContent = formatCivilDateTime(local, true);
+      $2("hud-location").textContent = `${cityName()} \xB7 ${Number(state.lat).toFixed(4)}\xB0 ${state.lat >= 0 ? "N" : "S"} / ${Math.abs(Number(state.lon)).toFixed(4)}\xB0 ${state.lon >= 0 ? "E" : "W"} \xB7 ${state.zone}`;
+      $2("speed-label").textContent = playing ? `${t("running")} \xD7${Number(state.speed).toLocaleString()}` : t("paused");
+      $2("play").textContent = playing ? t("pause") : t("play");
+      $2("play").classList.toggle("active", playing);
+      $2("status-title").textContent = `${cityName()} \xB7 ${cultureName()}`;
+      $2("status-local").textContent = formatLocalLong();
       const utcForStatus = DateTime.fromISO(state.instant, { zone: "utc" });
-      $("status-utc").textContent = utcForStatus.isValid ? `${formatCivilDateTime(utcForStatus, true)} UTC` : "\u2014";
-      $("status-offset").textContent = `${formatOffset(dt.offset)} \xB7 ${state.zone}`;
-      $("status-culture").textContent = cultureName();
-      const projectionOption = $("projection-select")?.options[$("projection-select").selectedIndex];
-      if ($("status-projection"))
-        $("status-projection").textContent = projectionOption ? projectionOption.textContent.trim() : state.projection;
-      const coordinateOption = $("coordinate-select")?.options[$("coordinate-select").selectedIndex];
-      if ($("status-coordinate"))
-        $("status-coordinate").textContent = coordinateOption ? coordinateOption.textContent.trim() : state.coordinateSystem;
-      if ($("sky-meta"))
-        $("sky-meta").textContent = `${cityName()} \xB7 ${formatCivilDateTime(local, false)}`;
-      $("observer-timezone").value = state.zone;
+      $2("status-utc").textContent = utcForStatus.isValid ? `${formatCivilDateTime(utcForStatus, true)} UTC` : "\u2014";
+      $2("status-offset").textContent = `${formatOffset(dt.offset)} \xB7 ${state.zone}`;
+      $2("status-culture").textContent = cultureName();
+      const projectionOption = $2("projection-select")?.options[$2("projection-select").selectedIndex];
+      if ($2("status-projection"))
+        $2("status-projection").textContent = projectionOption ? projectionOption.textContent.trim() : state.projection;
+      const coordinateOption = $2("coordinate-select")?.options[$2("coordinate-select").selectedIndex];
+      if ($2("status-coordinate"))
+        $2("status-coordinate").textContent = coordinateOption ? coordinateOption.textContent.trim() : state.coordinateSystem;
+      if ($2("sky-meta"))
+        $2("sky-meta").textContent = `${cityName()} \xB7 ${formatCivilDateTime(local, false)}`;
+      $2("observer-timezone").value = state.zone;
       if (syncInput) syncTimeInputs(local);
     }
     function commitObserverDateTimeInput(source = "Enter") {
@@ -12816,12 +13586,12 @@
         console.warn("Default reset could not remove stored state", err);
       }
       currentSelected = null;
-      const search = $("object-search");
+      const search = $2("object-search");
       if (search) search.value = "";
       window.location.reload();
     }
     const timeInputActions = createTimeInputActions({
-      dom: { $ },
+      dom: { $: $2 },
       time: {
         observerDT,
         safeZoneForCoordinates: safeZoneForCoordinates2,
@@ -12850,7 +13620,7 @@
     });
     debugOverlayController = createDebugOverlayController({
       dom: {
-        $,
+        $: $2,
         document,
         window,
         navigator,
@@ -12947,7 +13717,7 @@
       debug: { noteDebugLastAction, updateDebugOverlay }
     });
     const eventBindings = createEventBindings({
-      dom: { $, document, window, navigator, location, performance },
+      dom: { $: $2, document, window, navigator, location, performance },
       state: {
         state,
         skyPanKeys,
@@ -13085,8 +13855,86 @@
     function bind() {
       eventBindings.bind();
     }
-    function animationLoop(now) {
-      animationController.animationLoop(now);
+    function animationLoop(now2) {
+      animationController.animationLoop(now2);
+    }
+    function createUiPerformanceTestHarness() {
+      return {
+        version: "5.5.4",
+        config: CONFIG,
+        getStateSnapshot() {
+          return JSON.parse(JSON.stringify(state));
+        },
+        async restoreStateSnapshot(snapshot) {
+          if (!snapshot || typeof snapshot !== "object") return false;
+          measureUiPerformanceStep("test.restoreState", () => {
+            Object.keys(state).forEach((key) => delete state[key]);
+            Object.assign(state, defaults, JSON.parse(JSON.stringify(snapshot)));
+            playing = false;
+            skyPanKeys.clear();
+            keyboardPanDirty = false;
+            currentSelected = null;
+            searchHighlight = null;
+            clearTimeout(searchHighlightTimer);
+            floatingObjectInfoDismissed = false;
+            const search = $2("object-search");
+            if (search) search.value = "";
+            const citySearch = $2("city-search");
+            if (citySearch) citySearch.value = "";
+            save();
+            applyFontScale();
+            applyI18n();
+            syncControls();
+            applyVisualConfig(true);
+            updateHUD(true);
+            updateSkyView(true, "ui performance test restore");
+            queueDebugOverlayUpdate();
+          });
+          await waitForAnimationFrames(3);
+          return true;
+        },
+        isSkyReady() {
+          return !!skyReady;
+        },
+        async waitForStable(frames = 3) {
+          await waitForAnimationFrames(frames);
+          return true;
+        },
+        getDebugSnapshot() {
+          return {
+            skyReady,
+            playing,
+            timeRenderDebug: { ...timeRenderDebug },
+            coordinateSystem: state.coordinateSystem,
+            projection: state.projection,
+            cultureMode: state.cultureMode,
+            poleAxisConstraintEnabled: state.poleAxisConstraintEnabled !== false
+          };
+        },
+        recordStep(name, ms, details = {}) {
+          recordUiPerformanceStep(name, ms, details);
+        }
+      };
+    }
+    function scheduleUiPerformanceTestRun() {
+      if (!uiPerformanceTestEnabled || window.__RSO_UI_PERF_AUTORUN_SCHEDULED__)
+        return;
+      window.__RSO_UI_PERF_AUTORUN_SCHEDULED__ = true;
+      const runWhenReady = async () => {
+        for (let i = 0; i < 80; i += 1) {
+          if (skyReady && window.Celestial) break;
+          await waitForAnimationFrames(1);
+        }
+        await waitForAnimationFrames(4);
+        try {
+          const mod = await Promise.resolve().then(() => (init_ui_performance_runner(), ui_performance_runner_exports));
+          if (mod && typeof mod.runUiPerformanceSuite === "function")
+            await mod.runUiPerformanceSuite(createUiPerformanceTestHarness());
+        } catch (err) {
+          console.warn("UI performance test failed to start", err);
+        }
+      };
+      requestAnimationFrame(() => void runWhenReady());
     }
     function init() {
       initializeIntegratedLayout();
@@ -13105,9 +13953,10 @@
       bind();
       installDatasetEpochHook();
       updateAstronomyModelDebug();
-      if ($("geo-mode-note")) $("geo-mode-note").style.display = "none";
+      if ($2("geo-mode-note")) $2("geo-mode-note").style.display = "none";
       initialDisplay(desiredView2());
       requestAnimationFrame(animationLoop);
+      scheduleUiPerformanceTestRun();
     }
     window.addEventListener("error", (event) => {
       if (/celestial|d3|luxon|tz\.js/i.test(event.filename || "")) {
