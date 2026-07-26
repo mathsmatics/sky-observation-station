@@ -2,10 +2,10 @@
 // false：正常使用，不加载测试模块，不创建测试页面，不影响性能。
 // true：刷新页面并等待首帧星图稳定后，自动执行交互性能测试，并在新页面输出报告。
 // 发布或日常使用时保持 false；排查卡顿时临时改为 true。
-export const ENABLE_UI_PERFORMANCE_TEST = true;
+export const ENABLE_UI_PERFORMANCE_TEST = false;
 
 /**
- * 真实星空观测台 5.5.4 —— 用户可配置文件
+ * 真实星空观测台 5.5.5 —— 用户可配置文件
  * ------------------------------------------------------------
  * 修改本文件后，运行 npm run build 并刷新 index.html 即可生效。
  *

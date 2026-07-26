@@ -23,6 +23,9 @@ import {
 import { buildBrightStarRankMap } from "./data/bright-star-ranking";
 import {
   CHINESE_ASTERISM_CULTURE,
+  CULTURE_SOURCES,
+  SOLAR_SYSTEM_CULTURE,
+  STAR_PROPER_NAME_CULTURE,
   WESTERN_CONSTELLATION_CULTURE,
 } from "./data/culture-notes";
 import {
@@ -1824,6 +1827,9 @@ import {
     extendedCulture: {
       westernConstellations: WESTERN_CONSTELLATION_CULTURE,
       chineseAsterisms: CHINESE_ASTERISM_CULTURE,
+      solarSystem: SOLAR_SYSTEM_CULTURE,
+      starProperNames: STAR_PROPER_NAME_CULTURE,
+      sources: CULTURE_SOURCES,
     },
     brightStarRanks: BRIGHT_STAR_RANKS,
   });
@@ -1863,8 +1869,8 @@ import {
     },
     objectLabel,
     showObjectInfo,
+    clearObjectInfo,
     redrawAndSyncMapBox,
-    t,
   });
   const PLANET_STYLE = cfg("planets", {});
   const planetOverlayController = createPlanetOverlayController({
@@ -2119,6 +2125,10 @@ import {
       <div id="floating-object-grid" class="floating-info-lines"></div>
     `;
     $("sky-pane").appendChild(panel);
+    // 信息卡允许选择文字、滚动和打开来源链接；事件不得穿透到星图拖动/拾取。
+    ["pointerdown", "mousedown", "click", "dblclick", "wheel"].forEach((type) => {
+      panel.addEventListener(type, (event) => event.stopPropagation());
+    });
     $("floating-object-close").addEventListener("click", () => {
       floatingObjectInfoDismissed = true;
       updateFloatingObjectInfo();
@@ -2949,7 +2959,7 @@ import {
 
   function createUiPerformanceTestHarness() {
     return {
-      version: "5.5.4",
+      version: "5.5.5",
       config: CONFIG,
       getStateSnapshot() {
         return JSON.parse(JSON.stringify(state));

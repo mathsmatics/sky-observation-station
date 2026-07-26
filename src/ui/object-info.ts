@@ -13,6 +13,19 @@ function infoSingleLine(a: string, b: string): string {
   return `<div class="floating-info-single"><b>${a}：</b><em>${b || "—"}</em></div>`;
 }
 
+function escapeHtml(value: unknown): string {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function escapeAttr(value: unknown): string {
+  return escapeHtml(value).replace(/`/g, "&#96;");
+}
+
 export function createObjectInfoFormatter(options) {
   const {
     state,
@@ -195,68 +208,134 @@ export function createObjectInfoFormatter(options) {
     return floatingRowValue(rows, t("catalogId"));
   }
 
-  function cultureRowsForImportantStar(obj, p, n) {
-    const threshold = Number(
-      cfg(
-        "objectInfo.cultureNoteMagnitudeLimit",
-        cultureNotes.importantMagnitudeLimit || 2.1,
-      ),
-    );
-    if (!Number.isFinite(Number(p.mag)) || Number(p.mag) > threshold) return [];
-    const rows = [],
-      lang = state.lang === "zh" ? "zh" : "en";
+  function sourceLinks(sourceIds) {
+    const sources = extendedCulture?.sources || {};
+    const ids = Array.from(new Set((sourceIds || []).filter(Boolean)));
+    return ids
+      .map((id) => {
+        const source = sources[id];
+        if (!source) return escapeHtml(String(id));
+        return `<a class="culture-source-link" href="${escapeAttr(source.url)}" target="_blank" rel="noopener noreferrer" title="${escapeAttr(source.noteZh || source.labelZh)}">${escapeHtml(source.labelZh || id)}</a>`;
+      })
+      .join("；");
+  }
+
+  function viewingText(viewing) {
+    if (!viewing?.monthsNorth?.length) return "";
+    const hemisphere = Number(state.lat) < 0 ? "南半球" : "北半球";
+    const months = Number(state.lat) < 0 ? viewing.monthsSouth : viewing.monthsNorth;
+    return `${hemisphere}中纬度约${viewing.referenceLocalTime || "21:00"}：${months.join(" / ")}月。${viewing.noteZh || ""}`;
+  }
+
+  function westernCultureRows(note) {
+    if (!note) return [];
+    const rows = [];
+    if (note.originZh) rows.push([t("culturalOrigin"), note.originZh]);
+    if (note.mythologyZh || note.symbolismZh)
+      rows.push([
+        t("westernCultureMeaning"),
+        [note.mythologyZh, note.symbolismZh].filter(Boolean).join(" "),
+      ]);
+    if (note.relationshipZh)
+      rows.push([t("cultureRelationship"), note.relationshipZh]);
+    const view = viewingText(note.viewing);
+    if (view) rows.push([t("bestViewingTime"), view]);
+    const source = sourceLinks(note.sourceIds || note.sourceTags);
+    if (source) rows.push([t("cultureSources"), source]);
+    return rows;
+  }
+
+  function chineseCultureRows(name, note) {
+    if (!note) return [];
+    const rows = [];
+    const heading = [name, note.officialEnglish ? `（${note.officialEnglish}）` : ""].join("");
+    if (note.meaningZh)
+      rows.push([t("chineseCultureMeaning"), `${heading}：${note.meaningZh}`]);
+    if (note.roleZh) rows.push([t("culturalRole"), note.roleZh]);
+    if (note.relationshipZh)
+      rows.push([t("cultureRelationship"), note.relationshipZh]);
+    const hierarchy = [
+      note.fourSymbol ? `${t("fourSymbol")}：${note.fourSymbol}` : "",
+      note.mansion ? `${t("mansion")}：${note.mansion}` : "",
+      note.enclosure ? `${t("enclosure")}：${note.enclosure}` : "",
+    ]
+      .filter(Boolean)
+      .join("；");
+    if (hierarchy) rows.push([t("cultureHierarchy"), hierarchy]);
+    if (note.classicalQuoteZh)
+      rows.push([t("classicalQuotation"), `“${note.classicalQuoteZh}”`]);
+    if (note.fenye?.sourceId) {
+      rows.push([
+        t("fenye"),
+        `${note.fenye.traditionZh}：${note.fenye.allocationZh}${
+          note.fenye.sourceDetailZh ? `。${note.fenye.sourceDetailZh}` : ""
+        }`,
+      ]);
+    }
+    const view = viewingText(note.viewing);
+    if (view) rows.push([t("bestViewingTime"), view]);
+    const sourceIds = [
+      ...(note.sourceIds || note.sourceTags || []),
+      note.classicalQuoteSourceId,
+      note.fenye?.sourceId,
+    ].filter(Boolean);
+    const source = sourceLinks(sourceIds);
+    if (source) rows.push([t("cultureSources"), source]);
+    return rows;
+  }
+
+  function solarCultureRows(note) {
+    if (!note) return [];
+    const rows = [];
+    if (note.westernZh) rows.push([t("westernCultureMeaning"), note.westernZh]);
+    if (note.chineseZh) rows.push([t("chineseCultureMeaning"), note.chineseZh]);
+    if (note.relationshipZh)
+      rows.push([t("cultureRelationship"), note.relationshipZh]);
+    const source = sourceLinks(note.sourceIds);
+    if (source) rows.push([t("cultureSources"), source]);
+    return rows;
+  }
+
+  function cultureRowsForStar(obj, _p, n) {
+    const rows = [];
     const western =
       extendedCulture?.westernConstellations?.[n.c] ||
       cultureNotes.westernConstellations?.[n.c];
     if (western) {
-      if (western.mythologyZh || western.symbolismZh) {
-        const months = western.bestViewingMonthsNorth?.length
-          ? `${t("bestViewingMonths")}${western.bestViewingMonthsNorth.join(" / ")}`
-          : "";
-        rows.push([
-          t("westernCultureMeaning"),
-          [
-            western.mythologyZh,
-            western.symbolismZh,
-            western.relatedConstellations?.length
-              ? `${t("relatedConstellations")}：${western.relatedConstellations.join(" / ")}`
-              : "",
-            months,
-          ]
-            .filter(Boolean)
-            .join(" "),
-        ]);
-      } else if (western[lang])
-        rows.push([t("westernCultureMeaning"), western[lang]]);
+      rows.push([
+        t("westernCultureMeaning"),
+        [western.mythologyZh, western.relationshipZh].filter(Boolean).join(" "),
+      ]);
+      const view = viewingText(western.viewing);
+      if (view) rows.push([t("bestViewingTime"), view]);
+      const source = sourceLinks(western.sourceIds || western.sourceTags);
+      if (source) rows.push([t("cultureSources"), source]);
     }
-    const asterisms = chineseAsterismsForStar(obj.d && obj.d.id);
-    const match = asterisms.find(
-      (name) =>
+    const properNameCulture = extendedCulture?.starProperNames?.[String(n.name || "")];
+    if (properNameCulture) {
+      rows.push([t("starNameCulture"), properNameCulture.meaningZh]);
+      if (properNameCulture.relationshipZh)
+        rows.push([t("cultureRelationship"), properNameCulture.relationshipZh]);
+      const properSources = sourceLinks(properNameCulture.sourceIds);
+      if (properSources) rows.push([t("cultureSources"), properSources]);
+    } else if (n.name) {
+      const nameSource = sourceLinks(["iau-star-names"]);
+      if (nameSource) rows.push([t("cultureSources"), nameSource]);
+    }
+    const matches = chineseAsterismsForStar(obj.d && obj.d.id)
+      .filter((name) =>
+        Boolean(
+          extendedCulture?.chineseAsterisms?.[name] ||
+            cultureNotes.chineseAsterisms?.[name],
+        ),
+      )
+      .slice(0, 4);
+    matches.forEach((name) => {
+      const note =
         extendedCulture?.chineseAsterisms?.[name] ||
-        cultureNotes.chineseAsterisms?.[name],
-    );
-    if (match) {
-      const extended = extendedCulture?.chineseAsterisms?.[match];
-      const note = extended
-        ? [
-            extended.meaningZh,
-            extended.fourSymbol
-              ? `${t("fourSymbol")}：${extended.fourSymbol}`
-              : "",
-            extended.buTianGeNote,
-            extended.fenye
-              ? `${t("fenye")}：${extended.fenye.ancientRegion}；${extended.fenye.modernApproximation}。${extended.fenye.caution}`
-              : "",
-          ]
-            .filter(Boolean)
-            .join(" ")
-        : cultureNotes.chineseAsterisms[match][lang];
-      if (note)
-        rows.push([
-          t("chineseCultureMeaning"),
-          `${match}${state.lang === "zh" ? "：" : ": "}${note}`,
-        ]);
-    }
+        cultureNotes.chineseAsterisms?.[name];
+      rows.push(...chineseCultureRows(name, note));
+    });
     return rows;
   }
 
@@ -311,52 +390,23 @@ export function createObjectInfoFormatter(options) {
       if (p.bv !== undefined && p.bv !== "")
         rows.push([t("spectralInfo"), String(p.bv)]);
       rows.push([t("catalogId"), formatCatalogTokens(obj, rows)]);
-      rows.push(...cultureRowsForImportantStar(obj, p, n));
+      rows.push(...cultureRowsForStar(obj, p, n));
     } else if (obj.type === "dso")
       rows.push([t("catalogId"), p.desig || String(obj.d.id)]);
     else if (obj.type === "constellation") {
+      const id = String(obj.d.id || p.desig || "");
       const note =
-        extendedCulture?.westernConstellations?.[
-          String(obj.d.id || p.desig || "")
-        ];
-      if (note) {
-        rows.push([t("catalogId"), p.desig || String(obj.d.id)]);
-        rows.push([
-          t("westernCultureMeaning"),
-          [
-            note.mythologyZh,
-            note.symbolismZh,
-            note.relatedConstellations?.length
-              ? `${t("relatedConstellations")}：${note.relatedConstellations.join(" / ")}`
-              : "",
-            note.bestViewingMonthsNorth?.length
-              ? `${t("bestViewingMonths")}${note.bestViewingMonthsNorth.join(" / ")}`
-              : "",
-          ]
-            .filter(Boolean)
-            .join(" "),
-        ]);
-      }
+        extendedCulture?.westernConstellations?.[id] ||
+        cultureNotes.westernConstellations?.[id];
+      rows.push([t("catalogId"), p.desig || id]);
+      rows.push(...westernCultureRows(note));
     } else if (obj.type === "asterism") {
       const name = simplifyChinese(p.name || p.desig || String(obj.d.id));
-      const note = extendedCulture?.chineseAsterisms?.[name];
-      if (note) {
-        rows.push([t("catalogId"), p.desig || String(obj.d.id)]);
-        rows.push([
-          t("chineseCultureMeaning"),
-          [
-            note.meaningZh,
-            note.fourSymbol ? `${t("fourSymbol")}：${note.fourSymbol}` : "",
-            note.enclosure ? `${t("enclosure")}：${note.enclosure}` : "",
-            note.buTianGeNote,
-            note.fenye
-              ? `${t("fenye")}：${note.fenye.ancientRegion}；${note.fenye.modernApproximation}。${note.fenye.caution}`
-              : "",
-          ]
-            .filter(Boolean)
-            .join(" "),
-        ]);
-      }
+      const note =
+        extendedCulture?.chineseAsterisms?.[name] ||
+        cultureNotes.chineseAsterisms?.[name];
+      rows.push([t("catalogId"), p.desig || String(obj.d.id)]);
+      rows.push(...chineseCultureRows(name, note));
     } else if (obj.type === "planet") {
       const ep = (obj.d && obj.d.ephemeris) || {};
       if (
@@ -396,6 +446,8 @@ export function createObjectInfoFormatter(options) {
         t("catalogId"),
         String(obj.planetId || obj.d.id || "").toUpperCase(),
       ]);
+      const culture = extendedCulture?.solarSystem?.[String(obj.planetId || obj.d.id || "")];
+      rows.push(...solarCultureRows(culture));
     }
     rows.push([t("observerPlace"), cityName()]);
     rows.push([t("observerTime"), formatLocalLong()]);
@@ -419,7 +471,19 @@ export function createObjectInfoFormatter(options) {
       obj.type === "star"
         ? formatStarNameTokens(obj)
         : uniqueTokens([floatingRowValue(rows, t("otherNames")), title]);
-    const noteKeys = [t("westernCultureMeaning"), t("chineseCultureMeaning")];
+    const noteKeys = [
+      t("culturalOrigin"),
+      t("starNameCulture"),
+      t("westernCultureMeaning"),
+      t("chineseCultureMeaning"),
+      t("culturalRole"),
+      t("cultureRelationship"),
+      t("cultureHierarchy"),
+      t("classicalQuotation"),
+      t("fenye"),
+      t("bestViewingTime"),
+      t("cultureSources"),
+    ];
     const notes = rows
       .filter(([key, value]) => noteKeys.includes(key) && value)
       .map(([key, value]) => infoSingleLine(key, value))

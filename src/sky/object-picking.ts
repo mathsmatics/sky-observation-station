@@ -14,8 +14,8 @@ export function createObjectPickingController(options) {
     setFloatingObjectInfoDismissed,
     objectLabel,
     showObjectInfo,
+    clearObjectInfo,
     redrawAndSyncMapBox,
-    t,
   } = options;
 
   /**
@@ -97,18 +97,10 @@ export function createObjectPickingController(options) {
         redrawAndSyncMapBox("object selection");
         return;
       }
-      const p = Celestial.mapProjection.invert([x, y]);
-      if (!p || !Number.isFinite(p[0])) return;
+      // 空白天区不是可选对象。清除旧选择后不创建浮窗，也不绘制十字标记。
       setFloatingObjectInfoDismissed(false);
-      showObjectInfo({
-        type: "skyPosition",
-        d: { properties: {} },
-        coord: p,
-        epochCoord: p,
-        displayCoord: p,
-        label: t("skyPosition"),
-      });
-      redrawAndSyncMapBox("sky position selection");
+      clearObjectInfo();
+      redrawAndSyncMapBox("empty sky selection");
     } catch (err) {
       console.warn("Object picking failed", err);
     }
