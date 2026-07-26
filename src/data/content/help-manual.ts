@@ -726,11 +726,11 @@ export const HELP_MANUAL_ZH: HelpManual = {
       blocks: [
         {
           type: "paragraph",
-          html: "当前说明书对应项目版本：<strong>5.5.5</strong>。",
+          html: "当前说明书对应项目版本：<strong>5.5.6</strong>。",
         },
         {
           type: "paragraph",
-          html: "本版本重构并扩充星空文化百科：覆盖工程中的西方星座和中国星官，加入文化关系、具体观测时段、古籍原文和可点击来源；太阳系天体补充中西命名文化。空白天区不再生成浮窗或十字标记，星体浮窗支持选择文字。更完整的版本记录见 <code>docs/VERSION_HISTORY.md</code>。",
+          html: "5.5.6 保留并发布 5.5.5 的星空文化百科内容，同时把浏览器运行依赖合并为单一 JavaScript/CSS 发布包：覆盖工程中的西方星座和中国星官，加入文化关系、具体观测时段、古籍原文和可点击来源；太阳系天体补充中西命名文化。空白天区不再生成浮窗或十字标记，星体浮窗支持选择文字。更完整的版本记录见 <code>docs/VERSION_HISTORY.md</code>。",
         },
       ],
     },
