@@ -1,5 +1,5 @@
 /**
- * 真实星空观测台 5.5.6 —— 星空文化百科数据入口
+ * 真实星空观测台 5.5.7 —— 星空文化百科数据入口
  *
  * 文化说明与坐标、星等、连线和投影数据分离；缺少文化条目不会影响天体显示。
  * 每条资料保留来源 ID，界面只显示有明确来源的分野和古籍原文。
@@ -482,5 +482,5 @@ export const SOLAR_SYSTEM_CULTURE: Record<string,SolarSystemCultureNote> = {
   pal: { id:"pal", nameZh:"智神星", westernZh:"Pallas来自雅典娜的别名 Pallas，象征智慧和战争策略。", chineseZh:"中文“智神星”突出智慧女神属性。", relationshipZh:"它与婚神星、灶神星等早期发现小行星共同沿用古典女神命名。", sourceIds:["nasa-solar-system"] },
 };
 
-export const CULTURE_NOTES = { version:"5.5.6", importantMagnitudeLimit:6.5, sources:CULTURE_SOURCES, westernConstellations:WESTERN_CONSTELLATION_CULTURE, starProperNames:STAR_PROPER_NAME_CULTURE, chineseAsterisms:CHINESE_ASTERISM_CULTURE, solarSystem:SOLAR_SYSTEM_CULTURE };
+export const CULTURE_NOTES = { version:"5.5.7", importantMagnitudeLimit:6.5, sources:CULTURE_SOURCES, westernConstellations:WESTERN_CONSTELLATION_CULTURE, starProperNames:STAR_PROPER_NAME_CULTURE, chineseAsterisms:CHINESE_ASTERISM_CULTURE, solarSystem:SOLAR_SYSTEM_CULTURE };
 if (typeof window !== "undefined") window.RSO_CULTURE_NOTES = CULTURE_NOTES;

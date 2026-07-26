@@ -222,9 +222,8 @@ export function createObjectInfoFormatter(options) {
 
   function viewingText(viewing) {
     if (!viewing?.monthsNorth?.length) return "";
-    const hemisphere = Number(state.lat) < 0 ? "南半球" : "北半球";
     const months = Number(state.lat) < 0 ? viewing.monthsSouth : viewing.monthsNorth;
-    return `${hemisphere}中纬度约${viewing.referenceLocalTime || "21:00"}：${months.join(" / ")}月。${viewing.noteZh || ""}`;
+    return `${months.join(" / ")}月（${viewing.referenceLocalTime || "21:00"}）`;
   }
 
   function westernCultureRows(note) {
@@ -484,8 +483,15 @@ export function createObjectInfoFormatter(options) {
       t("bestViewingTime"),
       t("cultureSources"),
     ];
+    let bestViewingShown = false;
     const notes = rows
-      .filter(([key, value]) => noteKeys.includes(key) && value)
+      .filter(([key, value]) => {
+        if (!noteKeys.includes(key) || !value) return false;
+        if (key !== t("bestViewingTime")) return true;
+        if (bestViewingShown) return false;
+        bestViewingShown = true;
+        return true;
+      })
       .map(([key, value]) => infoSingleLine(key, value))
       .join("");
     return {

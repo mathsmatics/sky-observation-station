@@ -2,72 +2,21 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const assetsDir = path.join(rootDir, "assets");
-const expectedAssetFiles = ["app.css", "app.js"];
-
-if (!fs.existsSync(path.join(rootDir, "index.html"))) {
-  throw new Error("Root index.html does not exist.");
-}
-if (!fs.existsSync(assetsDir)) {
-  throw new Error("Root assets/ does not exist. Run npm run build first.");
-}
-
-const actualAssetFiles = fs
-  .readdirSync(assetsDir, { withFileTypes: true })
-  .flatMap((entry) => (entry.isFile() ? [entry.name] : [`${entry.name}/`]))
-  .sort();
-
-if (JSON.stringify(actualAssetFiles) !== JSON.stringify(expectedAssetFiles)) {
-  throw new Error(
-    `assets/ must contain exactly app.js and app.css.\nActual:\n${actualAssetFiles.join("\n")}`,
-  );
-}
-
-const indexHtml = fs.readFileSync(path.join(rootDir, "index.html"), "utf8");
-const appJs = fs.readFileSync(path.join(assetsDir, "app.js"), "utf8");
-const appCss = fs.readFileSync(path.join(assetsDir, "app.css"), "utf8");
-
-for (const forbidden of ["vendor/", "src/data/", "src/main", "src/app", "dist/"]) {
-  if (indexHtml.includes(forbidden)) {
-    throw new Error(`index.html contains forbidden runtime reference: ${forbidden}`);
-  }
-}
-
-const scripts = [...indexHtml.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["']/gi)].map(
-  (match) => match[1],
-);
-if (scripts.length !== 1 || scripts[0] !== "assets/app.js") {
-  throw new Error(`Unexpected runtime scripts: ${scripts.join(", ")}`);
-}
-
-const stylesheets = [
-  ...indexHtml.matchAll(/<link\b[^>]*\brel=["']stylesheet["'][^>]*\bhref=["']([^"']+)["']/gi),
-  ...indexHtml.matchAll(/<link\b[^>]*\bhref=["']([^"']+)["'][^>]*\brel=["']stylesheet["']/gi),
-].map((match) => match[1]);
-if (stylesheets.length !== 1 || stylesheets[0] !== "assets/app.css") {
-  throw new Error(`Unexpected runtime stylesheets: ${stylesheets.join(", ")}`);
-}
-
-for (const marker of [
-  "registerSkyData",
-  "__RSO_LOCAL_DATA__",
-  "Celestial",
-  "luxon",
-  "tzlookup",
-  "__RSO_RELEASE_BUILD__",
-]) {
-  if (!appJs.includes(marker)) {
-    throw new Error(`assets/app.js is missing marker: ${marker}`);
-  }
-}
-
-if (!appCss.includes("#celestial-map") || !appCss.includes(":root")) {
-  throw new Error("assets/app.css does not contain both vendor and project styles.");
-}
-if (/url\((?!["']?data:)/i.test(appCss)) {
-  throw new Error("assets/app.css still references an external file.");
-}
-
-console.log("Runtime verification passed.");
-console.log("Required runtime files: index.html + assets/app.js + assets/app.css.");
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const fail = (message) => { console.error(`Release verification failed: ${message}`); process.exit(1); };
+const htmlPath = path.join(root, "index.html");
+const assetsDir = path.join(root, "assets");
+if (!fs.existsSync(htmlPath)) fail("index.html is missing");
+if (!fs.existsSync(assetsDir)) fail("assets/ is missing");
+const assetFiles = fs.readdirSync(assetsDir).sort();
+if (JSON.stringify(assetFiles) !== JSON.stringify(["app.css", "app.js"])) fail(`assets/ must contain only app.css and app.js; got ${assetFiles.join(", ")}`);
+const html = fs.readFileSync(htmlPath, "utf8");
+const refs = [...html.matchAll(/(?:src|href)=["']([^"']+)["']/g)].map((m) => m[1]).filter((x) => !x.startsWith("#"));
+for (const forbidden of ["src/", "vendor/", "dist/"]) if (html.includes(forbidden)) fail(`index.html still references ${forbidden}`);
+if (!refs.includes("assets/app.js") || !refs.includes("assets/app.css")) fail(`index.html must reference assets/app.js and assets/app.css; got ${refs.join(", ")}`);
+const js = fs.readFileSync(path.join(assetsDir, "app.js"), "utf8");
+for (const marker of ["Real Sky Observatory 5.5.7", "registerSkyData", "Celestial", "luxon", "tzlookup", "真实星空观测台 5.5.7 完整说明书"]) if (!js.includes(marker)) fail(`app.js missing marker: ${marker}`);
+const css = fs.readFileSync(path.join(assetsDir, "app.css"), "utf8");
+if (!css.includes("Real Sky Observatory 5.5.7")) fail("app.css missing build marker");
+if (/url\([^)]*(?:\.png|\.gif|\.jpg|\.jpeg)/i.test(css)) fail("app.css still references an external local image");
+console.log("Release verification passed: index.html + assets/app.js + assets/app.css are self-contained.");

@@ -1,22 +1,88 @@
 import fs from "node:fs";
 import path from "node:path";
+import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { build } from "esbuild";
 
-const scriptDir = path.dirname(fileURLToPath(import.meta.url));
-const rootDir = path.resolve(scriptDir, "..");
-const assetsDir = path.join(rootDir, "assets");
-const tempDir = path.join(rootDir, ".build");
-const mainBundlePath = path.join(tempDir, "app-main.js");
+const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const buildDir = path.join(root, ".build");
+const tsOut = path.join(buildDir, "ts");
+const assets = path.join(root, "assets");
+const VERSION = "5.5.7";
 
-const packageJson = JSON.parse(
-  fs.readFileSync(path.join(rootDir, "package.json"), "utf8"),
+function read(rel) {
+  return fs.readFileSync(path.join(root, rel), "utf8");
+}
+function ensureFile(rel) {
+  const full = path.join(root, rel);
+  if (!fs.existsSync(full)) throw new Error(`Missing build input: ${rel}`);
+  return full;
+}
+function listFiles(dir, suffix) {
+  const out = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) out.push(...listFiles(full, suffix));
+    else if (entry.isFile() && entry.name.endsWith(suffix)) out.push(full);
+  }
+  return out.sort();
+}
+
+fs.rmSync(buildDir, { recursive: true, force: true });
+fs.mkdirSync(tsOut, { recursive: true });
+fs.mkdirSync(assets, { recursive: true });
+
+const localTsc = path.join(root, "node_modules", ".bin", process.platform === "win32" ? "tsc.cmd" : "tsc");
+const tsc = fs.existsSync(localTsc) ? localTsc : "tsc";
+const compile = spawnSync(tsc, ["-p", path.join(root, "tsconfig.json")], {
+  cwd: root,
+  stdio: "inherit",
+  shell: process.platform === "win32",
+});
+if (compile.status !== 0) process.exit(compile.status ?? 1);
+
+const moduleFiles = listFiles(path.join(tsOut, "src"), ".js");
+const moduleRecords = moduleFiles.map((file) => ({
+  id: path.relative(tsOut, file).replaceAll(path.sep, "/").replace(/\.js$/, ""),
+  code: fs.readFileSync(file, "utf8"),
+}));
+const moduleIds = new Set(moduleRecords.map((record) => record.id));
+
+function normalizeModuleId(id) {
+  return id.replace(/\.js$/, "");
+}
+function resolveBuildModuleId(from, request) {
+  const requested = request.startsWith(".")
+    ? path.posix.normalize(path.posix.join(path.posix.dirname(from), request))
+    : request;
+  const normalized = normalizeModuleId(requested);
+  if (moduleIds.has(normalized)) return normalized;
+  const indexId = `${normalized}/index`;
+  if (moduleIds.has(indexId)) return indexId;
+  return null;
+}
+
+let requireCount = 0;
+let directoryIndexFallbackCount = 0;
+for (const record of moduleRecords) {
+  const requirePattern = /\brequire\(\s*["']([^"']+)["']\s*\)/g;
+  for (const match of record.code.matchAll(requirePattern)) {
+    requireCount += 1;
+    const request = match[1];
+    const resolved = resolveBuildModuleId(record.id, request);
+    if (!resolved) {
+      throw new Error(`Unresolved bundled import: ${record.id} -> ${request}`);
+    }
+    if (resolved.endsWith("/index") && !normalizeModuleId(request).endsWith("/index")) {
+      directoryIndexFallbackCount += 1;
+    }
+  }
+}
+
+const moduleEntries = moduleRecords.map(({ id, code }) =>
+  `${JSON.stringify(id)}: function(module, exports, require) {\n${code}\n}`
 );
-const version = String(packageJson.version || "unknown");
 
-const runtimeScripts = [
-  "vendor/d3/d3.min.js",
-  "vendor/d3/d3.geo.projection.min.js",
+const dataScripts = [
   "src/data/loader.js",
   "src/data/stars/stars-6.js",
   "src/data/stars/star-names.js",
@@ -31,150 +97,30 @@ const runtimeScripts = [
   "src/data/deep-sky/deep-sky-names.js",
   "src/data/milky-way/milky-way.js",
   "src/data/solar-system/planets.js",
+];
+const jsInputs = [
+  "vendor/d3/d3.min.js",
+  "vendor/d3/d3.geo.projection.min.js",
+  ...dataScripts,
   "vendor/d3-celestial/celestial.min.js",
   "vendor/luxon/luxon.min.js",
   "vendor/tz-lookup/tz.js",
 ];
+jsInputs.forEach(ensureFile);
 
-const cssSources = [
-  "vendor/d3-celestial/celestial.css",
-  "src/styles.css",
-];
+const runtime = `\n;(() => {\n  const modules = {\n${moduleEntries.join(",\n")}\n  };\n  const cache = Object.create(null);\n  function normalize(parts) {\n    const out = [];\n    for (const part of parts) {\n      if (!part || part === ".") continue;\n      if (part === "..") out.pop(); else out.push(part);\n    }\n    return out.join("/");\n  }\n  function resolve(from, request) {\n    if (!request.startsWith(".")) return request.replace(/\\.js$/, "");\n    const base = from.split("/");\n    base.pop();\n    return normalize(base.concat(request.split("/"))).replace(/\\.js$/, "");\n  }\n  function findModuleId(id) {\n    const normalized = id.replace(/\\.js$/, "");\n    if (Object.prototype.hasOwnProperty.call(modules, normalized)) return normalized;\n    const indexId = normalized + "/index";\n    if (Object.prototype.hasOwnProperty.call(modules, indexId)) return indexId;\n    return null;\n  }\n  function load(id) {\n    const resolvedId = findModuleId(id);\n    if (!resolvedId) {\n      const normalized = id.replace(/\\.js$/, "");\n      throw new Error("Bundled module not found: " + id + " (tried " + normalized + " and " + normalized + "/index)");\n    }\n    if (cache[resolvedId]) return cache[resolvedId].exports;\n    const factory = modules[resolvedId];\n    const module = { exports: {} };\n    cache[resolvedId] = module;\n    factory(module, module.exports, (request) => load(resolve(resolvedId, request)));\n    return module.exports;\n  }\n  window.__RSO_BUILD_VERSION__ = ${JSON.stringify(VERSION)};\n  load("src/main");\n})();\n`;
 
-function absolute(relativePath) {
-  return path.join(rootDir, relativePath);
-}
+const banner = `/*! Real Sky Observatory ${VERSION} | generated assets/app.js | edit src/, not this file */\n`;
+const mergedJs = banner + jsInputs.map((rel) => `\n/* ---- ${rel} ---- */\n${read(rel)}\n`).join("") + runtime;
+fs.writeFileSync(path.join(assets, "app.js"), mergedJs, "utf8");
 
-function requireFiles(relativePaths) {
-  const missing = relativePaths.filter((item) => !fs.existsSync(absolute(item)));
-  if (missing.length > 0) {
-    throw new Error(`Build inputs are missing:\n${missing.join("\n")}`);
-  }
-}
+const celestialCss = read("vendor/d3-celestial/celestial.css")
+  .replace(/url\([^)]*(?:\.png|\.gif|\.jpg|\.jpeg)[^)]*\)/gi, "none");
+const projectCss = read("src/styles.css");
+const mergedCss = `/*! Real Sky Observatory ${VERSION} | generated assets/app.css */\n/* ---- vendor/d3-celestial/celestial.css ---- */\n${celestialCss}\n/* ---- src/styles.css ---- */\n${projectCss}\n`;
+fs.writeFileSync(path.join(assets, "app.css"), mergedCss, "utf8");
 
-function read(relativePath) {
-  return fs.readFileSync(absolute(relativePath), "utf8");
-}
-
-function cleanDirectory(directory) {
-  fs.rmSync(directory, { recursive: true, force: true });
-  fs.mkdirSync(directory, { recursive: true });
-}
-
-function buildRuntimeBundle(mainBundle) {
-  const banner = [
-    `/*! Real Sky Observatory ${version} single-bundle runtime */`,
-    `window.__RSO_RELEASE_BUILD__ = Object.freeze({ version: ${JSON.stringify(version)}, mode: "root-index-plus-assets", bundledAt: ${JSON.stringify(new Date().toISOString())} });`,
-  ].join("\n");
-
-  const parts = runtimeScripts.map((relativePath) => {
-    return `\n/* ===== BEGIN ${relativePath} ===== */\n${read(relativePath)}\n/* ===== END ${relativePath} ===== */\n`;
-  });
-
-  parts.push(
-    `\n/* ===== BEGIN compiled src/main.ts ===== */\n${mainBundle}\n/* ===== END compiled src/main.ts ===== */\n`,
-  );
-
-  return `${banner}\n${parts.join("\n;\n")}`;
-}
-
-function buildCssBundle() {
-  return cssSources
-    .map((relativePath) => {
-      const content = read(relativePath).replace(
-        /url\((['"]?)images\/dtpick\.png\1\)/g,
-        "none",
-      );
-      return `/* ===== BEGIN ${relativePath} ===== */\n${content}\n/* ===== END ${relativePath} ===== */`;
-    })
-    .join("\n\n");
-}
-
-function verifyIndex(indexHtml) {
-  const forbidden = ["vendor/", "src/data/", "src/main", "src/app"];
-  for (const token of forbidden) {
-    if (indexHtml.includes(token)) {
-      throw new Error(`index.html still references development path: ${token}`);
-    }
-  }
-
-  const scriptSources = [...indexHtml.matchAll(/<script\b[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi)].map(
-    (match) => match[1],
-  );
-  const stylesheetSources = [
-    ...indexHtml.matchAll(/<link\b[^>]*\brel=["']stylesheet["'][^>]*\bhref=["']([^"']+)["'][^>]*>/gi),
-    ...indexHtml.matchAll(/<link\b[^>]*\bhref=["']([^"']+)["'][^>]*\brel=["']stylesheet["'][^>]*>/gi),
-  ].map((match) => match[1]);
-
-  if (scriptSources.length !== 1 || scriptSources[0] !== "assets/app.js") {
-    throw new Error(`index.html must load only assets/app.js; found: ${scriptSources.join(", ")}`);
-  }
-  if (
-    stylesheetSources.length !== 1 ||
-    stylesheetSources[0] !== "assets/app.css"
-  ) {
-    throw new Error(
-      `index.html must load only assets/app.css; found: ${stylesheetSources.join(", ")}`,
-    );
-  }
-}
-
-function verifyRuntimeBundle(bundle) {
-  const requiredMarkers = [
-    "registerSkyData",
-    "__RSO_LOCAL_DATA__",
-    "Celestial",
-    "luxon",
-    "tzlookup",
-    "__RSO_RELEASE_BUILD__",
-  ];
-  for (const marker of requiredMarkers) {
-    if (!bundle.includes(marker)) {
-      throw new Error(`assets/app.js is missing runtime marker: ${marker}`);
-    }
-  }
-}
-
-requireFiles([
-  "index.html",
-  "src/main.ts",
-  "src/styles.css",
-  ...runtimeScripts,
-  ...cssSources,
-]);
-
-cleanDirectory(tempDir);
-
-await build({
-  absWorkingDir: rootDir,
-  entryPoints: ["src/main.ts"],
-  bundle: true,
-  format: "iife",
-  target: "es2020",
-  outfile: mainBundlePath,
-  minify: true,
-  legalComments: "none",
-  logLevel: "info",
-});
-
-const mainBundle = fs.readFileSync(mainBundlePath, "utf8");
-const runtimeBundle = buildRuntimeBundle(mainBundle);
-const cssBundle = buildCssBundle();
-const indexHtml = read("index.html");
-
-verifyIndex(indexHtml);
-verifyRuntimeBundle(runtimeBundle);
-
-cleanDirectory(assetsDir);
-fs.writeFileSync(path.join(assetsDir, "app.js"), runtimeBundle, "utf8");
-fs.writeFileSync(path.join(assetsDir, "app.css"), cssBundle, "utf8");
-
-fs.rmSync(tempDir, { recursive: true, force: true });
-
-const outputFiles = ["index.html", "assets/app.js", "assets/app.css"];
-console.log(`\nReal Sky Observatory ${version} build complete.`);
-for (const relativePath of outputFiles) {
-  const stat = fs.statSync(absolute(relativePath));
-  console.log(`- ${relativePath}: ${stat.size.toLocaleString("en-US")} bytes`);
-}
-console.log("Runtime requirement: keep root index.html and the complete root assets/ directory.");
+fs.rmSync(buildDir, { recursive: true, force: true });
+console.log(`Validated ${requireCount} bundled imports (${directoryIndexFallbackCount} directory index fallbacks)`);
+console.log(`Built assets/app.js (${(mergedJs.length / 1024 / 1024).toFixed(2)} MiB)`);
+console.log(`Built assets/app.css (${(mergedCss.length / 1024).toFixed(1)} KiB)`);

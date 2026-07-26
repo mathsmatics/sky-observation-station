@@ -1,4 +1,5 @@
-/* ===== BEGIN vendor/d3-celestial/celestial.css ===== */
+/*! Real Sky Observatory 5.5.7 | generated assets/app.css */
+/* ---- vendor/d3-celestial/celestial.css ---- */
 /* Copyright 2015-16 Olaf Frohn https://github.com/ofrohn, see LICENSE */
 
 #celestial-map { width: 100%; height: auto; margin: 0; padding: 0; display: inline-block; position: relative; min-width:720px; overflow: visible; }
@@ -110,9 +111,7 @@ svg .constname {
   fill: "#ffff99";  fill-opacity:0.7; font: bold 14px 'Lucida Sans Unicode', Trebuchet, Helvetica, Arial, sans-serif; text-anchor: middle
 }
  */
-/* ===== END vendor/d3-celestial/celestial.css ===== */
-
-/* ===== BEGIN src/styles.css ===== */
+/* ---- src/styles.css ---- */
 :root {
   --bg: #02050d;
   --panel: rgba(5, 10, 23, 0.88);
@@ -2155,4 +2154,3 @@ select optgroup {
   }
 }
 
-/* ===== END src/styles.css ===== */

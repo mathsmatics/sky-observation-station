@@ -2959,7 +2959,7 @@ import {
 
   function createUiPerformanceTestHarness() {
     return {
-      version: "5.5.6",
+      version: "5.5.7",
       config: CONFIG,
       getStateSnapshot() {
         return JSON.parse(JSON.stringify(state));
